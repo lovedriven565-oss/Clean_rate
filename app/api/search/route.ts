@@ -1,0 +1,155 @@
+import { NextResponse } from "next/server";
+import { classifyIntent, type IntentClassification } from "@/lib/search/intent-router";
+import { getAllBrands, getAllCompanies, getAllSolutions, getIntentKeywords } from "@/lib/db/queries";
+import { getMarket, isCountryCode } from "@/lib/markets";
+import type { Brand, Company, Solution } from "@/lib/types";
+
+const REGION_COOKIE = "ch_region";
+const RESULT_LIMIT = 6;
+
+export interface SearchResultSolution {
+  slug: string;
+  title: string;
+  problemType: Solution["problemType"];
+  audience: Solution["audience"];
+}
+
+export interface SearchResultCompany {
+  slug: string;
+  name: string;
+  city: string;
+  priceFrom?: number;
+  priceUnit?: string;
+}
+
+export interface SearchResultBrand {
+  slug: string;
+  name: string;
+  tagline: string;
+  focus: Brand["focus"];
+}
+
+export interface SearchResponse {
+  query: string;
+  intent: IntentClassification["intent"];
+  target: IntentClassification["target"];
+  confidence: number;
+  solutions: SearchResultSolution[];
+  companies: SearchResultCompany[];
+  brands: SearchResultBrand[];
+}
+
+function readCookieValue(cookieHeader: string | null, name: string): string | undefined {
+  if (!cookieHeader) return undefined;
+  const match = cookieHeader.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+function countryFromRegionCookie(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const [countryCode] = raw.split(":");
+  return countryCode && isCountryCode(countryCode) ? countryCode : undefined;
+}
+
+function matchesQuery(haystacks: Array<string | undefined>, needle: string): boolean {
+  return haystacks.some((value) => value?.toLowerCase().includes(needle));
+}
+
+function rankSolutions(solutions: Solution[], normalizedQuery: string, target: IntentClassification["target"]): Solution[] {
+  const bySlug = target?.kind === "solution" ? solutions.find((s) => s.slug === target.slug) : undefined;
+  const matched = solutions.filter(
+    (s) =>
+      s.slug !== bySlug?.slug &&
+      matchesQuery([s.title, ...s.searchKeywords], normalizedQuery)
+  );
+  return [...(bySlug ? [bySlug] : []), ...matched];
+}
+
+function rankBrands(brands: Brand[], normalizedQuery: string, target: IntentClassification["target"]): Brand[] {
+  const bySlug = target?.kind === "brand" ? brands.find((b) => b.slug === target.slug) : undefined;
+  const matched = brands.filter(
+    (b) => b.slug !== bySlug?.slug && matchesQuery([b.name, b.tagline, b.slug], normalizedQuery)
+  );
+  return [...(bySlug ? [bySlug] : []), ...matched];
+}
+
+function rankCompanies(companies: Company[], normalizedQuery: string, cityNames: string[]): Company[] {
+  const inMarket = companies.filter((c) => cityNames.includes(c.city));
+  const matched = inMarket.filter((c) =>
+    matchesQuery([c.name, c.city, ...c.tags], normalizedQuery)
+  );
+  // Если явных совпадений нет — не показываем случайные компании рынка,
+  // чтобы не подменять «умный» поиск шумом.
+  return matched.length > 0 ? matched : [];
+}
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const query = (url.searchParams.get("q") ?? "").trim();
+
+  const countryCode = countryFromRegionCookie(
+    readCookieValue(request.headers.get("cookie"), REGION_COOKIE)
+  );
+  const market = getMarket(countryCode);
+  const cityNames = market.cities.map((c) => c.name);
+
+  if (!query) {
+    const empty: SearchResponse = {
+      query: "",
+      intent: "b2c",
+      target: null,
+      confidence: 0,
+      solutions: [],
+      companies: [],
+      brands: [],
+    };
+    return NextResponse.json(empty, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } });
+  }
+
+  const [keywords, solutions, brands, companies] = await Promise.all([
+    getIntentKeywords(),
+    getAllSolutions(),
+    getAllBrands(),
+    getAllCompanies(),
+  ]);
+
+  const classification = classifyIntent(query, keywords);
+  const normalizedQuery = query.trim().toLowerCase();
+
+  const solutionResults = rankSolutions(solutions, normalizedQuery, classification.target).slice(0, RESULT_LIMIT);
+  const brandResults = rankBrands(brands, normalizedQuery, classification.target).slice(0, RESULT_LIMIT);
+  const companyResults =
+    classification.intent === "pro"
+      ? []
+      : rankCompanies(companies, normalizedQuery, cityNames).slice(0, RESULT_LIMIT);
+
+  const response: SearchResponse = {
+    query,
+    intent: classification.intent,
+    target: classification.target,
+    confidence: classification.confidence,
+    solutions: solutionResults.map((s) => ({
+      slug: s.slug,
+      title: s.title,
+      problemType: s.problemType,
+      audience: s.audience,
+    })),
+    companies: companyResults.map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      city: c.city,
+      priceFrom: c.priceFrom,
+      priceUnit: c.priceUnit,
+    })),
+    brands: brandResults.map((b) => ({
+      slug: b.slug,
+      name: b.name,
+      tagline: b.tagline,
+      focus: b.focus,
+    })),
+  };
+
+  return NextResponse.json(response, {
+    headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
+  });
+}
