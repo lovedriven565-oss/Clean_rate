@@ -14,13 +14,12 @@
       "binding": "DB",
       "database_name": "cleaning-rating-db",
       "database_id": "871b3c22-b53c-46b8-95a9-b3da96a2c31f",
-      "migrations_dir": "migrations",
-      "remote": false
+      "migrations_dir": "migrations"
     }
   ],
   "vars": {
-    // Ошибки чтения D1 не маскируются seed-данными (lib/db/queries.ts → reportDbError)
-    "STRICT_DB": "1"
+    // 0: мягкий откат на seed-данные если D1 ещё не засеяна или пуста
+    "STRICT_DB": "0"
   },
   // Семантический поиск (lib/search/semantic.ts). AI-биндинг активен; Vectorize
   // подключается позже: wrangler vectorize create cleanhub-solutions --dimensions=1024 --metric=cosine
