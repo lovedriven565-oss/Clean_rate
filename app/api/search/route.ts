@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
-import { classifyIntent, type IntentClassification } from "@/lib/search/intent-router";
-import { getAllBrands, getAllCompanies, getAllSolutions, getIntentKeywords } from "@/lib/db/queries";
+import {
+  KeywordProvider,
+  type IntentClassification,
+  type SearchProvider,
+} from "@/lib/search/intent-router";
+import { getSearchBindings, SemanticProvider } from "@/lib/search/semantic";
+import {
+  getAllBrands,
+  getAllCompanies,
+  getAllSolutions,
+  getIntentKeywords,
+  recordAnalyticsEvent,
+} from "@/lib/db/queries";
 import { getMarket, isCountryCode } from "@/lib/markets";
 import { checkRateLimit, tooManyRequests } from "@/lib/security/guard";
 import type { Brand, Company, Solution } from "@/lib/types";
@@ -109,14 +120,20 @@ export async function GET(request: Request) {
 
   if (!(await checkRateLimit(request, "SEARCH_LIMITER", "search"))) return tooManyRequests();
 
-  const [keywords, solutions, brands, companies] = await Promise.all([
+  const [keywords, solutions, brands, companies, searchEnv] = await Promise.all([
     getIntentKeywords(),
     getAllSolutions(),
     getAllBrands(),
     getAllCompanies(),
+    getSearchBindings(),
   ]);
 
-  const classification = classifyIntent(query, keywords);
+  // Семантический провайдер (Workers AI + Vectorize) при наличии биндингов,
+  // иначе — ключевые слова. Интерфейс SearchProvider скрывает разницу.
+  const provider: SearchProvider = searchEnv
+    ? new SemanticProvider(searchEnv, new KeywordProvider(keywords))
+    : new KeywordProvider(keywords);
+  const classification = await provider.classify(query);
   const normalizedQuery = query.trim().toLowerCase();
 
   const solutionResults = rankSolutions(solutions, normalizedQuery, classification.target).slice(0, RESULT_LIMIT);
@@ -151,6 +168,19 @@ export async function GET(request: Request) {
       focus: b.focus,
     })),
   };
+
+  // Пропуски поиска — будущий «индекс спроса»: какие проблемы ищут и не находят.
+  // Записываются в analytics_events (entity_id="search") и видны в /admin-отчётах.
+  if (classification.confidence < 0.5) {
+    await recordAnalyticsEvent({
+      entityType: "page",
+      entityId: "search",
+      eventType: "view",
+      path: "/api/search",
+      countryCode,
+      metadata: { query, confidence: classification.confidence, intent: classification.intent },
+    });
+  }
 
   // Компании зависят от cookie региона: общий CDN-кеш отдал бы чужой рынок, поэтому только private.
   return NextResponse.json(response, {
