@@ -1,9 +1,11 @@
 import { ExternalLink, Ticket } from "lucide-react";
 import type { Brand } from "@/lib/types";
-import { focusLabels } from "@/lib/brand-utils";
-import { SponsoredBadge } from "@/components/ui/SponsoredBadge";
+import { focusLabels, isLightColor } from "@/lib/brand-utils";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { cn } from "@/lib/utils";
 
 export function BrandHero({ brand }: { brand: Brand }) {
+  const light = isLightColor(brand.accent);
   return (
     <section className="bg-fresh relative overflow-hidden border-b border-border">
       <div className="bg-grid-fade absolute inset-0" aria-hidden />
@@ -14,9 +16,12 @@ export function BrandHero({ brand }: { brand: Brand }) {
       />
 
       <div className="container relative flex flex-col items-center gap-6 py-16 text-center sm:py-24">
-        {brand.isSponsor && <SponsoredBadge label="Партнёрский материал" />}
+        {brand.isSponsor && <StatusBadge variant="sponsor" size="md" />}
         <span
-          className="flex h-20 w-20 items-center justify-center rounded-3xl text-3xl font-bold text-white shadow-xl"
+          className={cn(
+            "flex h-20 w-20 items-center justify-center rounded-3xl text-3xl font-bold shadow-xl",
+            light ? "text-slate-900" : "text-white"
+          )}
           style={{ backgroundColor: brand.accent }}
         >
           {brand.name.charAt(0)}
@@ -42,7 +47,10 @@ export function BrandHero({ brand }: { brand: Brand }) {
             href={brand.affiliateUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-90"
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg transition hover:opacity-90",
+              light ? "text-slate-900" : "text-white"
+            )}
             style={{ backgroundColor: brand.accent }}
           >
             Открыть сайт бренда

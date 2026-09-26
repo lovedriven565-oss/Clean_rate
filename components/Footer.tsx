@@ -30,7 +30,7 @@ const columns = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-foreground text-background">
+    <footer className="border-t border-border bg-contrast text-contrast-foreground">
       <div className="container grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)] lg:py-18">
         <div className="flex flex-col items-start gap-5">
           <Link href="/" className="flex items-center gap-3 font-display font-bold tracking-tight">
@@ -39,7 +39,7 @@ export function Footer() {
             </span>
             Клининг Рейтинг
           </Link>
-          <p className="max-w-sm text-sm leading-6 text-background/60">
+          <p className="max-w-sm text-sm leading-6 text-contrast-foreground/70">
             Профессиональная платформа индустрии чистоты: компании, бренды, поставщики и знания в единой структуре рынка.
           </p>
           <Link href="/for-partners" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
@@ -50,8 +50,8 @@ export function Footer() {
 
         {columns.map((column) => (
           <div key={column.title} className="flex flex-col gap-4">
-            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-background/45">{column.title}</h3>
-            <ul className="flex flex-col gap-3 text-sm text-background/65">
+            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-contrast-foreground/50">{column.title}</h3>
+            <ul className="flex flex-col gap-3 text-sm text-contrast-foreground/75">
               {column.links.map((link) => (
                 <li key={`${link.href}-${link.label}`}>
                   <Link href={link.href} className="transition-colors hover:text-primary">
@@ -64,8 +64,8 @@ export function Footer() {
         ))}
       </div>
 
-      <div className="border-t border-background/10">
-        <div className="container flex flex-col gap-2 py-6 text-xs text-background/45 md:flex-row md:items-center md:justify-between">
+      <div className="border-t border-contrast-foreground/15">
+        <div className="container flex flex-col gap-2 py-6 text-xs text-contrast-foreground/50 md:flex-row md:items-center md:justify-between">
           <p>© 2026 Клининг Рейтинг. Платформа находится в стадии формирования.</p>
           <p>Оценка и рекламное размещение разделены</p>
         </div>

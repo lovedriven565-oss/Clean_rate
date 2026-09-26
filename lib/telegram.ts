@@ -20,3 +20,12 @@ export async function forwardToTelegram(text: string): Promise<boolean> {
 export function isValidPhone(phone: string): boolean {
   return phone.replace(/\D/g, "").length >= 9;
 }
+
+/** Экранирование пользовательского текста перед вставкой в HTML-сообщение Telegram. */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}

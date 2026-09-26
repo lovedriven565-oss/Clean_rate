@@ -32,6 +32,28 @@ export interface Brand {
 /** @deprecated use Brand */
 export type Sponsor = Brand;
 
+/** Слагаемые «Индекса доверия профи» — публичная метрика, по которой строится лидерборд брендов */
+export interface BrandScore {
+  brandId: string;
+  /** Компании со связью company_brands.evidenceStatus = verified */
+  verifiedCompanyCount: number;
+  /** Протоколы, где бренд в роли recommended */
+  recommendedCount: number;
+  /** Протоколы, где бренд в роли alternative */
+  alternativeCount: number;
+  /** Переходы на бренд из analytics_events */
+  clickCount: number;
+  score: number;
+  /** Доля реального использования: верифицированные компании + протоколы */
+  adoptionScore?: number;
+  /** Интерес пользователей: клики/переходы */
+  interestScore?: number;
+}
+
+export interface RankedBrand extends Brand {
+  metrics: BrandScore;
+}
+
 export interface RecentReview {
   author: string;
   text: string;
@@ -193,4 +215,121 @@ export interface PriceEstimate {
   priceMax: number;
   unit?: string;
   note?: string;
+}
+
+export interface BrandLead {
+  id: string;
+  brandName: string;
+  website?: string | null;
+  contactName: string;
+  contact: string;
+  role: "brand" | "dealer" | "service" | "other";
+  goal?: string | null;
+  status: "new" | "contacted" | "qualified" | "closed";
+  consentAcceptedAt?: Date | null;
+  consentVersion?: string | null;
+  createdAt: Date;
+}
+
+export interface PartnerLead {
+  id: string;
+  companyName: string;
+  contactName?: string | null;
+  phone: string;
+  city?: string | null;
+  categoryIds?: string[] | null;
+  message?: string | null;
+  status: "new" | "contacted" | "closed";
+  consentAcceptedAt?: Date | null;
+  consentVersion?: string | null;
+  createdAt: Date;
+}
+
+// --- Рекламный бэкенд и логика допусков (CLEANHUB Ad Engine) ---
+
+export type AdPlacement =
+  | "solution.sponsored_product"
+  | "rating.category_partner"
+  | "home.editorial_partner"
+  | "search.sponsored_result"
+  | "products.sponsored_slot"
+  | "brand.profile_campaign"
+  | "dealer.local_partner";
+
+export type AdCtaType = "where_to_buy" | "request_quote" | "training" | "demo" | "website";
+
+export type CampaignStatus = "draft" | "active" | "paused" | "completed";
+
+export interface Campaign {
+  id: string;
+  brandId: string;
+  productId?: string | null;
+  name: string;
+  placement: AdPlacement;
+  status: CampaignStatus;
+  startsAt?: Date | null;
+  endsAt?: Date | null;
+  targetCountries?: string[] | null;
+  targetCategories?: string[] | null;
+  targetSurfaces?: string[] | null;
+  targetSolutions?: string[] | null;
+  maxImpressions?: number | null;
+  maxClicks?: number | null;
+  currentImpressions: number;
+  currentClicks: number;
+  title?: string | null;
+  description?: string | null;
+  ctaText?: string | null;
+  ctaUrl?: string | null;
+  ctaType?: AdCtaType | null;
+  badgeText?: string | null;
+  priority: number;
+  createdAt: Date;
+  updatedAt?: Date | null;
+}
+
+export interface AdTargetContext {
+  countryCode?: string;
+  categoryId?: string;
+  surface?: string;
+  solutionSlug?: string;
+  brandSlug?: string;
+}
+
+export interface ProductSafetyProfile {
+  id: string;
+  slug?: string;
+  name: string;
+  brandId?: string;
+  ph?: number;
+  compatibleSurfaces?: string[];
+  prohibitedSurfaces?: string[];
+  hazards?: string[];
+}
+
+export interface EligibleAd {
+  campaignId: string;
+  brandId: string;
+  brandName: string;
+  brandSlug: string;
+  brandLogo?: string;
+  productId?: string;
+  productName?: string;
+  productSlug?: string;
+  /** pH состава — показывается в блоке «Почему подходит» как проверяемый факт */
+  productPh?: number;
+  /** Поверхности, для которых состав допущен производителем */
+  productCompatibleSurfaces?: string[];
+  /** Цвет бренда для деликатного акцента креатива (не имитирует органические плашки) */
+  brandAccent?: string;
+  placement: AdPlacement;
+  title: string;
+  description: string;
+  ctaText: string;
+  ctaUrl: string;
+  ctaType: AdCtaType;
+  badgeText: string;
+  reasonText?: string;
+  /** Страны кампании — клиентский гейт для SSG-страниц, где страна известна только из cookie */
+  targetCountries?: string[] | null;
 }

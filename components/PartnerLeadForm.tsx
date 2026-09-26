@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { Building2, CheckCircle2, Loader2, MapPin, Send } from "lucide-react";
 import { Button, Input } from "@/components/ui/primitives";
 import { Select } from "@/components/ui/Select";
-import { categories, companies } from "@/lib/mock-data";
+import { useRegion } from "@/components/providers/RegionProvider";
+import { MARKET_LIST } from "@/lib/markets";
+import { categories } from "@/lib/mock-data";
 import type { CategoryId } from "@/lib/types";
 import { parseApiResult } from "@/lib/api-result";
 import { cn } from "@/lib/utils";
@@ -13,20 +15,22 @@ import { cn } from "@/lib/utils";
 type Status = "idle" | "submitting" | "success" | "error";
 
 export function PartnerLeadForm() {
+  const { city: userCity } = useRegion();
+  const formId = useId();
   const [companyName, setCompanyName] = useState("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
-  const [city, setCity] = useState("Минск");
+  const [city, setCity] = useState(userCity.name);
   const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
   const [message, setMessage] = useState("");
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
 
-  const cities = useMemo(
-    () => Array.from(new Set(companies.map((c) => c.city))).sort(),
-    []
-  );
+  const cities = useMemo(() => {
+    const list = MARKET_LIST.flatMap((m) => m.cities.map((c) => c.name));
+    return Array.from(new Set(list)).sort();
+  }, []);
 
   function toggleCategory(id: CategoryId) {
     setSelectedCategories((prev) =>
@@ -94,14 +98,15 @@ export function PartnerLeadForm() {
       <div>
         <h3 className="font-display text-xl font-bold text-foreground">Заявка на размещение</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Расскажите о компании — мы свяжемся, поможем с карточкой и обсудим условия.
+          Расскажите о компании: мы свяжемся, поможем с карточкой и ответим на вопросы.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Название компании *</label>
+          <label htmlFor={`${formId}-company`} className="text-xs font-medium text-muted-foreground">Название компании *</label>
           <Input
+            id={`${formId}-company`}
             required
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
@@ -109,25 +114,27 @@ export function PartnerLeadForm() {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Контактное лицо</label>
+          <label htmlFor={`${formId}-contact`} className="text-xs font-medium text-muted-foreground">Контактное лицо</label>
           <Input
+            id={`${formId}-contact`}
             value={contactName}
             onChange={(e) => setContactName(e.target.value)}
             placeholder="Как к вам обращаться"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Телефон *</label>
+          <label htmlFor={`${formId}-phone`} className="text-xs font-medium text-muted-foreground">Телефон *</label>
           <Input
+            id={`${formId}-phone`}
             required
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="+375 29 ..."
+            placeholder="+375 29 ... / +7 999 ..."
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Город</label>
+          <label htmlFor={`${formId}-city`} className="text-xs font-medium text-muted-foreground">Город</label>
           <Select
             value={city}
             onChange={setCity}
@@ -138,7 +145,7 @@ export function PartnerLeadForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-muted-foreground">Какие услуги оказываете</label>
+        <span className="text-xs font-medium text-muted-foreground">Какие услуги оказываете</span>
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
@@ -159,17 +166,22 @@ export function PartnerLeadForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-muted-foreground">Комментарий</label>
+        <label htmlFor={`${formId}-message`} className="text-xs font-medium text-muted-foreground">Комментарий</label>
         <textarea
+          id={`${formId}-message`}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Ссылка на сайт или Instagram, вопросы по размещению..."
+          placeholder="Ссылка на сайт или профиль, вопросы по размещению..."
           rows={3}
           className="rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs font-medium text-danger">
+          {error}
+        </p>
+      )}
 
       <label className="flex cursor-pointer items-start gap-2.5 text-xs text-muted-foreground">
         <input
@@ -203,7 +215,7 @@ export function PartnerLeadForm() {
       </Button>
       <p className="flex items-center justify-center gap-1.5 text-center text-[11px] text-muted-foreground">
         <Building2 className="h-3.5 w-3.5" />
-        Базовое размещение в каталоге — бесплатно. Платные опции обсуждаются после заявки.
+        Базовое размещение в каталоге бесплатно. Платные опции обсуждаются после заявки.
       </p>
     </form>
   );

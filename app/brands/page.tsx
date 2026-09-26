@@ -1,29 +1,15 @@
-"use client";
-
-import { useMemo, useState } from "react";
-import { Boxes } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Boxes } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { BrandCard } from "@/components/brands/BrandCard";
-import { cn } from "@/lib/utils";
-import { brands } from "@/lib/mock-data";
-import { focusLabels } from "@/lib/brand-utils";
-import type { BrandFocus } from "@/lib/types";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { BrandLeaderboard } from "@/components/brands/BrandLeaderboard";
+import { getBrandsByScore } from "@/lib/db/queries";
 
-const filters: Array<{ key: BrandFocus | "all"; label: string }> = [
-  { key: "all", label: "Все бренды" },
-  { key: "technika", label: focusLabels.technika },
-  { key: "himiya", label: focusLabels.himiya },
-  { key: "inventory", label: focusLabels.inventory },
-];
-
-export default function BrandsPage() {
-  const [active, setActive] = useState<BrandFocus | "all">("all");
-
-  const filtered = useMemo(
-    () => (active === "all" ? brands : brands.filter((b) => b.focus === active)),
-    [active]
-  );
+export default async function BrandsPage() {
+  const brands = await getBrandsByScore();
+  const verifiedLinks = brands.reduce((acc, b) => acc + b.metrics.verifiedCompanyCount, 0);
+  const protocolLinks = brands.reduce((acc, b) => acc + b.metrics.recommendedCount + b.metrics.alternativeCount, 0);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -31,64 +17,68 @@ export default function BrandsPage() {
 
       <main className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-primary/15 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-24 top-10 h-96 w-96 rounded-full bg-accent/15 blur-3xl"
-          />
-          <div aria-hidden className="bubble left-[12%] top-16 h-12 w-12" />
-          <div aria-hidden className="bubble right-[15%] bottom-12 h-9 w-9 [animation-delay:2.5s]" />
-
-          <div className="container relative flex flex-col items-center gap-4 py-16 text-center sm:py-24">
-            <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground">
-              <Boxes className="h-4 w-4 text-primary" />
-              Техника, химия и инвентарь для клининга
+          <div className="bg-grid-fade absolute inset-0" aria-hidden />
+          <div className="container relative py-12 sm:py-18">
+            <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Бренды" }]} />
+            <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <Boxes className="h-3.5 w-3.5" />
+              Индекс доверия профи
             </span>
-            <h1 className="max-w-2xl font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-              Бренды, которым доверяют{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                профессионалы
-              </span>
-            </h1>
-            <p className="max-w-xl text-muted-foreground">
-              Оборудование и химия, которыми реально пользуются лучшие клининговые компании из рейтинга.
-              Промокоды и ссылки на официальных дилеров в Беларуси.
-            </p>
+            <div className="mt-3 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h1 className="max-w-3xl font-display text-3xl font-extrabold tracking-[-0.04em] text-foreground sm:text-5xl">
+                  Бренды, которыми реально работают профессионалы
+                </h1>
+                <p className="mt-4 max-w-2xl text-muted-foreground">
+                  Не реклама, а данные: сколько верифицированных компаний используют бренд и в скольких протоколах он
+                  рекомендован. Индекс нельзя купить — спонсорство помечается отдельно.
+                </p>
+              </div>
+              <dl className="grid shrink-0 grid-cols-3 gap-6 text-sm">
+                <Stat value={brands.length} label="брендов в индексе" />
+                <Stat value={verifiedLinks} label="подтверждённых связей" />
+                <Stat value={protocolLinks} label="упоминаний в протоколах" />
+              </dl>
+            </div>
           </div>
         </section>
 
-        <section className="border-b border-border bg-card/60">
-          <div className="container flex flex-wrap items-center justify-center gap-2 py-5">
-            {filters.map((f) => (
-              <button
-                key={f.key}
-                onClick={() => setActive(f.key)}
-                className={cn(
-                  "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
-                  active === f.key
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
+        <section className="container py-10 sm:py-14">
+          <BrandLeaderboard brands={brands} />
         </section>
 
-        <section className="container py-16">
-          <div className="grid grid-cols-1 gap-5 sm:auto-rows-[1fr] sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((brand, i) => (
-              <BrandCard key={brand.id} brand={brand} size={i === 0 ? "lg" : "sm"} />
-            ))}
+        <section className="container pb-16 sm:pb-24">
+          <div className="grid gap-6 rounded-[2rem] bg-contrast p-8 text-contrast-foreground sm:p-12 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="max-w-2xl">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Брендам</span>
+              <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] sm:text-4xl">
+                Место в индексе не продаётся. Его зарабатывают компании, которые на вас работают.
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-contrast-foreground/75">
+                Подтвердите связи с компаниями, добавьте продукты в протоколы и поднимайтесь в лидерборде открыто.
+              </p>
+            </div>
+            <Link
+              href="/for-brands"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
+            >
+              Как попасть в индекс
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </section>
       </main>
 
       <Footer />
+    </div>
+  );
+}
+
+function Stat({ value, label }: { value: number; label: string }) {
+  return (
+    <div>
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="mt-1 font-display text-3xl font-extrabold tabular-nums tracking-[-0.03em] text-foreground">{value}</dd>
     </div>
   );
 }

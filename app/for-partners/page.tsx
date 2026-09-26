@@ -1,47 +1,49 @@
 "use client";
 
-import { motion } from "motion/react";
-import { BadgeCheck, Building2, Check, List, Phone, Search, Users } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import { BadgeCheck, Building2, Check, Phone, ShieldCheck, Users } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { PartnerLeadForm } from "@/components/PartnerLeadForm";
 import { StatCounter } from "@/components/StatCounter";
 import { Button } from "@/components/ui/primitives";
-import { trustStats } from "@/lib/mock-data";
-
+import { categories, companies } from "@/lib/mock-data";
 
 const steps = [
   {
-    icon: List,
+    order: "01",
     title: "Оставьте заявку",
-    description: "Расскажите о компании, услугах и городе — мы перезвоним в тот же день.",
+    description: "Расскажите о компании, услугах и городе: мы свяжемся и уточним детали.",
   },
   {
-    icon: BadgeCheck,
+    order: "02",
     title: "Получите карточку",
-    description: "Создадим профиль с реальными контактами и ценами. Базовое размещение бесплатно.",
+    description: "Создадим профиль с реальными контактами, перечнем услуг и ценами. Базовое размещение бесплатно.",
   },
   {
-    icon: Users,
-    title: "Получайте клиентов",
-    description: "Вашу компанию найдут через поиск и фильтры. Клиенты связываются напрямую по указанным контактам.",
+    order: "03",
+    title: "Получайте клиентов напрямую",
+    description: "Вашу компанию находят через поиск и фильтры. Звонки и сообщения приходят напрямую без комиссии сервиса.",
   },
 ];
 
 const features = [
-  "Карточка с контактами и ценами",
-  "Честный рейтинг на основе отзывов",
-  "Прямые контакты клиентов — без посредника",
+  "Карточка с прямыми контактами и ценами",
+  "Органический рейтинг на основе реальных отзывов",
+  "Прямой контакт клиентов без комиссии платформы",
+  "Участие в рекомендациях каталога и протоколах",
 ];
 
 const partnerFeatures = [
-  "Бейдж «Партнёр платформы»",
-  "Приоритет в топе категории",
-  "Повышенная видимость в каталоге",
-  "Помощь в оформлении карточки",
+  "Бейдж «Спонсор» с открытой маркировкой",
+  "Приоритетная видимость в каталоге и категориях",
+  "Спецразмещение в протоколах решений",
+  "Помощь редакции в наполнении профиля",
 ];
 
 export default function ForPartnersPage() {
+  const reduce = useReducedMotion();
+
   function scrollToForm() {
     document.getElementById("partner-form")?.scrollIntoView({ behavior: "smooth" });
   }
@@ -51,170 +53,185 @@ export default function ForPartnersPage() {
       <Navbar />
 
       <main className="flex-1">
+        {/* Split Hero */}
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-20 -top-20 h-80 w-80 rounded-full bg-primary/15 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-20 top-20 h-96 w-96 rounded-full bg-accent/15 blur-3xl"
-          />
-          <div className="container relative flex flex-col items-center gap-6 py-20 text-center sm:py-28">
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
+          <div className="bg-grid-fade absolute inset-0" aria-hidden />
+          <div className="container relative grid gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
+            <motion.div
+              initial={reduce ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground shadow-sm"
+              className="flex flex-col items-start"
             >
-              <Building2 className="h-4 w-4 text-primary" />
-              Для клининговых компаний
-            </motion.span>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="max-w-3xl font-display text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl"
-            >
-              Получайте клиентов через{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                честный рейтинг Минска
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-primary shadow-sm backdrop-blur">
+                <Building2 className="h-3.5 w-3.5" />
+                Клининговым компаниям
               </span>
-            </motion.h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="max-w-xl text-lg text-muted-foreground"
-            >
-              Разместите компанию в каталоге бесплатно или подключите пакет «Партнёр платформы» для
-              приоритетной видимости — без накрутки рейтинга.
-            </motion.p>
+              <h1 className="mt-5 max-w-2xl font-display text-4xl font-extrabold tracking-[-0.04em] text-foreground sm:text-5xl lg:text-6xl">
+                Получайте клиентов через независимый рейтинг
+              </h1>
 
+              <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+                Разместите компанию в каталоге бесплатно или подключите пакет приоритетной видимости:
+                без накруток, с прямыми звонками и прозрачной аналитикой.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button size="lg" onClick={scrollToForm}>
+                  <Phone className="h-4 w-4" />
+                  Отправить заявку
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* Right: real model highlight */}
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={reduce ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col gap-3 sm:flex-row"
+              transition={{ duration: 0.55, delay: 0.1 }}
+              className="data-surface rounded-[2rem] border border-border p-7 sm:p-9"
             >
-              <Button size="lg" onClick={scrollToForm}>
-                <Phone className="h-4 w-4" />
-                Отправить заявку
-              </Button>
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
+                <ShieldCheck className="h-4 w-4" />
+                Принципы размещения
+              </span>
+              <h2 className="mt-4 font-display text-2xl font-bold tracking-tight text-foreground">
+                Честные условия для каждого подрядчика
+              </h2>
+              <ul className="mt-6 space-y-4 text-sm leading-6 text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Check className="h-3.5 w-3.5" />
+                  </span>
+                  <span><strong>Базовый профиль бесплатен:</strong> мы не требуем обязательных платежей за нахождение в каталоге.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Check className="h-3.5 w-3.5" />
+                  </span>
+                  <span><strong>Прямой контакт:</strong> телефон и Telegram ведут напрямую к вам, без скрытых комиссий с каждого заказа.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Check className="h-3.5 w-3.5" />
+                  </span>
+                  <span><strong>Рейтинг не продаётся:</strong> органическая оценка рассчитывается по открытым отзывам, платное продвижение маркируется отдельно.</span>
+                </li>
+              </ul>
             </motion.div>
           </div>
         </section>
 
+        {/* Honest Stats */}
         <section className="border-b border-border bg-muted/30">
-          <div className="container grid grid-cols-1 gap-8 py-12 sm:grid-cols-3">
-            {trustStats.map((stat) => (
-              <StatCounter
-                key={stat.label}
-                value={stat.value}
-                suffix={stat.suffix}
-                decimals={stat.decimals}
-                label={stat.label}
-              />
-            ))}
+          <div className="container grid grid-cols-1 gap-8 py-10 sm:grid-cols-3">
+            <StatCounter value={companies.length} label="компаний в каталоге" />
+            <StatCounter value={categories.length} label="категорий услуг" />
+            <StatCounter value={3} suffix=" страны" label="Беларусь, Россия, Казахстан" />
           </div>
         </section>
 
-        <section className="container py-16 sm:py-20">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="flex flex-col gap-4 rounded-[var(--radius)] border border-border bg-card p-6 text-center"
-              >
-                <span className="mx-flex mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <step.icon className="h-6 w-6" />
-                </span>
-                <h3 className="font-display text-lg font-bold text-foreground">{step.title}</h3>
-                <p className="text-sm text-muted-foreground">{step.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        <section className="container pb-16 sm:pb-20">
-          <div className="mb-10 text-center">
-            <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
-              Два честных варианта размещения
+        {/* Steps: Editorial Numbered Flow */}
+        <section className="container py-16 sm:py-24">
+          <div className="mb-12 max-w-2xl">
+            <h2 className="font-display text-3xl font-bold tracking-[-0.035em] text-foreground sm:text-4xl">
+              Как подключиться к платформе
             </h2>
-            <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
-              Органический рейтинг нельзя купить. Платное размещение всегда помечено и не влияет на
-              итоговую оценку.
+            <p className="mt-3 text-muted-foreground">
+              Простой и прозрачный процесс от заявки до первых звонков.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="rounded-[var(--radius)] border border-border bg-card p-8"
-            >
-              <h3 className="font-display text-xl font-bold text-foreground">Базовое размещение</h3>
-              <p className="mt-1 text-muted-foreground">Бесплатно и навсегда</p>
-              <ul className="mt-6 flex flex-col gap-3">
-                {features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-foreground">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="rounded-[var(--radius)] border-2 border-primary bg-card p-8"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="font-display text-xl font-bold text-foreground">Партнёр платформы</h3>
-                  <p className="mt-1 text-muted-foreground">Расчёт в заявке</p>
-                </div>
-                <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
-                  Рекомендуем
+          <ol className="grid gap-8 md:grid-cols-3">
+            {steps.map((step) => (
+              <li key={step.order} className="relative border-t border-border pt-6">
+                <span className="font-display text-5xl font-extrabold leading-none tracking-[-0.05em] text-muted sm:text-6xl">
+                  {step.order}
                 </span>
-              </div>
-              <ul className="mt-6 flex flex-col gap-3">
-                {partnerFeatures.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-foreground">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-6 text-xs text-muted-foreground">
-                Стоимость обсуждается индивидуально. Никакой влияния на органический рейтинг — только
-                видимость и приоритет в каталоге.
+                <h3 className="mt-4 font-display text-xl font-bold tracking-[-0.02em] text-foreground">{step.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.description}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Two Plans */}
+        <section className="border-y border-border bg-muted/20 py-16 sm:py-24">
+          <div className="container">
+            <div className="mb-12 text-center">
+              <h2 className="font-display text-3xl font-bold tracking-[-0.035em] text-foreground sm:text-4xl">
+                Два варианта размещения
+              </h2>
+              <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+                Органический рейтинг нельзя купить: платное размещение всегда маркируется и не влияет на расчёт баллов.
               </p>
-            </motion.div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="rounded-[2rem] border border-border bg-card p-8 sm:p-10">
+                <h3 className="font-display text-2xl font-bold text-foreground">Базовое размещение</h3>
+                <p className="mt-1 font-semibold text-primary">Бесплатно навсегда</p>
+                <ul className="mt-7 flex flex-col gap-3.5">
+                  {features.map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm text-foreground">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-[2rem] border-2 border-primary bg-card p-8 sm:p-10 shadow-lg shadow-primary/5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-display text-2xl font-bold text-foreground">Партнёр платформы</h3>
+                    <p className="mt-1 font-semibold text-muted-foreground">Индивидуальный расчёт</p>
+                  </div>
+                  <span className="rounded-full bg-primary px-3.5 py-1 text-xs font-bold text-primary-foreground">
+                    Максимум охвата
+                  </span>
+                </div>
+                <ul className="mt-7 flex flex-col gap-3.5">
+                  {partnerFeatures.map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm text-foreground">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-7 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
+                  Стоимость зависит от города и категорий. Не влияет на органический рейтинг: только охват и позиция в спонсорском блоке.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section id="partner-form" className="border-t border-border bg-muted/30">
-          <div className="container grid grid-cols-1 gap-10 py-16 lg:grid-cols-2">
+        {/* Form section */}
+        <section id="partner-form" className="container py-16 sm:py-24">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
             <div>
-              <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
+              <h2 className="font-display text-3xl font-bold tracking-[-0.035em] text-foreground sm:text-4xl">
                 Оставьте заявку
               </h2>
-              <p className="mt-2 max-w-md text-muted-foreground">
-                Мы перезвоним, расскажем, как устроен каталог, и обсудим, какой вариант размещения вам
-                подходит.
+              <p className="mt-3 max-w-md text-base leading-7 text-muted-foreground">
+                Мы перезвоним, поможем оформить карточку и ответим на все вопросы о платформе.
               </p>
+              <div className="mt-8 space-y-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Users className="h-4 w-4" />
+                  </span>
+                  <span>Без скрытых комиссий с заказов</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <BadgeCheck className="h-4 w-4" />
+                  </span>
+                  <span>Официальная верификация данных</span>
+                </div>
+              </div>
             </div>
             <PartnerLeadForm />
           </div>

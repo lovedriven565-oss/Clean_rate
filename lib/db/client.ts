@@ -1,22 +1,37 @@
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+
+type CfEnv = { DB?: D1Database };
+
 /**
- * D1-клиент для Cloudflare Workers.
+ * Возвращает D1-биндинг из Cloudflare-контекста или null вне Workers
+ * (next dev без инициализированного контекста, unit-тесты, сборка без D1).
  *
- * В production (Cloudflare) — получает binding через getRequestContext().
- * В next dev — binding недоступен, возвращаем null (fallback на seed-data).
+ * Async-режим — единственный, который документированно работает и в
+ * request-scope, и в SSG-поруте: при NEXT_RUNTIME=nodejs / nextExport
+ * контекст поднимается через wrangler getPlatformProxy, в Workers берётся
+ * из globalThis. Никакого глобального кеширования контекста — он
+ * request-scoped, кеширование привело бы к утечке env между запросами.
  */
+let testDbOverride: D1Database | null | undefined;
 
-// D1Database объявлен глобально в cloudflare-env.d.ts
-let cachedDb: D1Database | null | undefined;
-
-export function getDb(): D1Database | null {
-  if (cachedDb !== undefined) return cachedDb;
+export async function getDb(): Promise<D1Database | null> {
+  if (testDbOverride !== undefined) return testDbOverride;
   try {
-    // Динамический импорт — в next dev этого модуля нет
-    const { getRequestContext } = require("@opennextjs/cloudflare");
-    const ctx = getRequestContext();
-    cachedDb = (ctx.env as { DB?: D1Database }).DB ?? null;
+    const ctx = await getCloudflareContext({ async: true });
+    return (ctx.env as CfEnv).DB ?? null;
   } catch {
-    cachedDb = null;
+    return null;
   }
-  return cachedDb;
+}
+
+/**
+ * Тестовая точка входа: подменяет D1 для unit-тестов без Cloudflare runtime.
+ * `null` имитирует отсутствие биндинга, объект — фейковый D1.
+ */
+export function __setDbForTesting(db: D1Database | null): void {
+  testDbOverride = db;
+}
+
+export function __resetDbForTesting(): void {
+  testDbOverride = undefined;
 }

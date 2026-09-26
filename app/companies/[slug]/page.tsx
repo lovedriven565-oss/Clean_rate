@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BadgeCheck, BriefcaseBusiness, Check, ExternalLink, MapPin, ShieldCheck, Star } from "lucide-react";
+import { ArrowLeft, BriefcaseBusiness, Check, ExternalLink, MapPin, Navigation, ShieldCheck, Star } from "lucide-react";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { CompanyContactActions } from "@/components/CompanyContactActions";
 import { CompanyEquipmentTags } from "@/components/CompanyEquipmentTags";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { StickyCallBar } from "@/components/StickyCallBar";
 import { Badge } from "@/components/ui/primitives";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getAllBrands, getAllCategories, getCompanyBySlug, getCompanySlugs } from "@/lib/db/queries";
 import { calculateOrganicScore, hasPublishedRating, ratingSourceLabel } from "@/lib/rating";
 import { formatNumber, formatPriceFrom, formatRating } from "@/lib/format";
+import { pageAlternates } from "@/lib/site";
 
 export async function generateStaticParams() {
   const slugs = await getCompanySlugs();
@@ -22,8 +26,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const company = await getCompanyBySlug(slug);
   if (!company) return {};
   return {
-    title: `${company.name} — услуги, контакты и рейтинг | Клининг Рейтинг`,
+    title: `${company.name} — услуги, контакты и рейтинг`,
     description: company.description,
+    alternates: pageAlternates(`/companies/${company.slug}`),
   };
 }
 
@@ -66,7 +71,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative py-12 sm:py-18">
-            <Link href="/rating" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+            <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Рейтинг компаний", href: "/rating" }, { label: company.name }]} />
+            <Link href="/rating" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
               <ArrowLeft className="h-4 w-4" />
               Все компании
             </Link>
@@ -76,24 +82,26 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                   <CompanyAvatar id={company.id} name={company.name} size="xl" className="h-28 w-28 rounded-[1.75rem]" />
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {company.verified && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                          <BadgeCheck className="h-3.5 w-3.5" />
-                          Профиль проверен
-                        </span>
-                      )}
-                      {company.promoted && (
-                        <span className="rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent-foreground">
-                          Рекламное размещение
-                        </span>
-                      )}
+                      {company.verified && <StatusBadge variant="verified" size="md" label="Профиль проверен" />}
+                      {company.promoted && <StatusBadge variant="sponsor" size="md" />}
                     </div>
                     <h1 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-foreground sm:text-6xl">
                       {company.name}
                     </h1>
-                    <span className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="h-4 w-4 text-primary" />
                       {company.address ? `${company.city}, ${company.address}` : company.city}
+                      <a
+                        href={`https://yandex.by/maps/?text=${encodeURIComponent(
+                          company.address ? `${company.city}, ${company.address}` : company.city
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                      >
+                        <Navigation className="h-3.5 w-3.5" />
+                        Маршрут
+                      </a>
                     </span>
                   </div>
                 </div>
@@ -200,10 +208,10 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               </dl>
             </div>
 
-            <div className="rounded-[1.5rem] bg-foreground p-6 text-background">
+            <div className="rounded-[1.5rem] bg-contrast p-6 text-contrast-foreground">
               <ShieldCheck className="h-6 w-6 text-primary" />
               <h2 className="mt-5 font-display text-xl font-bold">Вы представитель компании?</h2>
-              <p className="mt-3 text-sm leading-6 text-background/60">Подтвердите профиль, исправьте данные и добавьте доказательства компетенций.</p>
+              <p className="mt-3 text-sm leading-6 text-contrast-foreground/70">Подтвердите профиль, исправьте данные и добавьте доказательства компетенций.</p>
               <Link href={`/for-partners?company=${company.slug}`} className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground">
                 Подтвердить профиль
               </Link>
@@ -212,6 +220,14 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         </section>
       </main>
       <Footer />
+      <StickyCallBar
+        label={company.name}
+        phone={company.phone}
+        telegramUrl={company.telegramUrl}
+        companyId={company.id}
+        categoryId={company.categories[0]}
+        showAfter={320}
+      />
     </div>
   );
 }

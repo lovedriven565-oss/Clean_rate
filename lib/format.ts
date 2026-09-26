@@ -48,6 +48,15 @@ export function formatRating(value: number): string {
   return value.toFixed(1);
 }
 
+/** Русское склонение: pluralize(3, ["шаг", "шага", "шагов"]) → "3 шага" */
+export function pluralize(count: number, forms: [string, string, string]): string {
+  const abs = Math.abs(count) % 100;
+  const last = abs % 10;
+  const form =
+    abs > 10 && abs < 20 ? forms[2] : last > 1 && last < 5 ? forms[1] : last === 1 ? forms[0] : forms[2];
+  return `${count} ${form}`;
+}
+
 export function formatSignedNumber(value: number): string {
   const rounded = Math.round(value);
   const sign = rounded > 0 ? "+" : "";

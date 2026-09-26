@@ -3,33 +3,33 @@
 import { Globe, Mail, MessageCircle, Phone } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { trackClick } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
 
-export function CompanyContactActions({ company }: { company: Company }) {
-  const actionClass =
-    "inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary/35 hover:text-primary";
+/**
+ * Контакты компании. Один главный CTA (телефон, иначе Telegram) — заполненная кнопка,
+ * остальные каналы вторичны. `compact` — для карточек: короче кнопка, вторичные каналы только иконками.
+ */
+export function CompanyContactActions({ company, compact = false, className }: { company: Company; compact?: boolean; className?: string }) {
+  const categoryId = company.categories[0];
+  const track = (clickType: "phone" | "website" | "telegram") => () => trackClick({ companyId: company.id, categoryId, clickType });
+
+  const primaryClass = cn(
+    "inline-flex items-center justify-center gap-2 rounded-full bg-primary font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-transform hover:-translate-y-0.5",
+    compact ? "h-10 flex-1 px-4 text-xs sm:flex-none" : "h-11 px-5 text-sm"
+  );
+  const secondaryClass = cn(
+    "inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card font-semibold text-foreground transition-colors hover:border-primary/35 hover:text-primary",
+    compact ? "h-10 w-10" : "h-11 px-4 text-sm"
+  );
+  const iconClass = compact ? "h-3.5 w-3.5" : "h-4 w-4";
+  const phoneIsPrimary = Boolean(company.phone);
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={cn("flex flex-wrap items-center gap-2", className)}>
       {company.phone && (
-        <a
-          href={`tel:${company.phone.replace(/[^\d+]/g, "")}`}
-          onClick={() => trackClick({ companyId: company.id, categoryId: company.categories[0], clickType: "phone" })}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20"
-        >
-          <Phone className="h-4 w-4" />
-          {company.phone}
-        </a>
-      )}
-      {company.websiteUrl && (
-        <a
-          href={company.websiteUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackClick({ companyId: company.id, categoryId: company.categories[0], clickType: "website" })}
-          className={actionClass}
-        >
-          <Globe className="h-4 w-4" />
-          Сайт
+        <a href={`tel:${company.phone.replace(/[^\d+]/g, "")}`} onClick={track("phone")} className={primaryClass}>
+          <Phone className={iconClass} />
+          {compact ? "Позвонить" : company.phone}
         </a>
       )}
       {company.telegramUrl && (
@@ -37,16 +37,30 @@ export function CompanyContactActions({ company }: { company: Company }) {
           href={company.telegramUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => trackClick({ companyId: company.id, categoryId: company.categories[0], clickType: "telegram" })}
-          className={actionClass}
+          aria-label={`Telegram ${company.name}`}
+          onClick={track("telegram")}
+          className={phoneIsPrimary ? secondaryClass : primaryClass}
         >
-          <MessageCircle className="h-4 w-4" />
-          Telegram
+          <MessageCircle className={iconClass} />
+          {(!compact || !phoneIsPrimary) && "Telegram"}
         </a>
       )}
-      {company.email && (
-        <a href={`mailto:${company.email}`} className={actionClass}>
-          <Mail className="h-4 w-4" />
+      {company.websiteUrl && (
+        <a
+          href={company.websiteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Сайт ${company.name}`}
+          onClick={track("website")}
+          className={secondaryClass}
+        >
+          <Globe className={iconClass} />
+          {!compact && "Сайт"}
+        </a>
+      )}
+      {company.email && !compact && (
+        <a href={`mailto:${company.email}`} className={secondaryClass}>
+          <Mail className={iconClass} />
           Email
         </a>
       )}

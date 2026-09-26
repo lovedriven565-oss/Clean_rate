@@ -7,11 +7,14 @@
  * Компании без проверяемого источника — ratingSource "unverified",
  * платформа честно не публикует балл.
  *
- * Партнёры платформы (promoted: true) — это открыто оплаченное размещение,
- * которое НЕ влияет на органический рейтинг.
+ * Спонсоры платформы (promoted: true) — это открыто оплаченное размещение
+ * с золотой плашкой «Спонсор», которое НЕ влияет на органический рейтинг.
  */
 
 import type {
+  AdCtaType,
+  AdPlacement,
+  CampaignStatus,
   CategoryId,
   DiyStep,
   IntentTargetKind,
@@ -215,7 +218,8 @@ export const seedCompanies: SeedCompany[] = [
     tags: ["Работает по договору", "7+ лет на рынке", "350+ клиентов"],
     guarantees: ["Фиксированная цена по договору"],
     verified: true,
-    promoted: false,
+    // Демо-спонсор: показывает золотую плашку «Спонсор» в каталоге. На оценку не влияет.
+    promoted: true,
     categories: ["offices", "post-renovation", "deep-cleaning", "windows", "upholstery", "apartments"],
     equipment: ["karcher"],
     ratingSource: "google",
@@ -1065,4 +1069,169 @@ export const seedPriceEstimates: SeedPriceEstimate[] = [
   { id: "pe-cat-17", categoryId: "deep-cleaning", countryCode: "RU", city: "Москва", currency: "RUB", priceMin: 250, priceMax: 500, unit: "м²", note: "Генеральная уборка" },
   { id: "pe-cat-18", categoryId: "deep-cleaning", countryCode: "KZ", city: "Алматы", currency: "KZT", priceMin: 1200, priceMax: 2500, unit: "м²", note: "Генеральная уборка" },
 ];
+
+export interface SeedProduct {
+  id: string;
+  brandId: string;
+  slug: string;
+  name: string;
+  category: string;
+  description: string;
+  ph?: number;
+  compatibleSurfaces?: string[];
+  prohibitedSurfaces?: string[];
+  status: "draft" | "published" | "archived";
+}
+
+export const seedProducts: SeedProduct[] = [
+  {
+    id: "prod-kiehl-arenas",
+    brandId: "kiehl",
+    slug: "kiehl-arenas-exet-3",
+    name: "Kiehl Arenas-exet 3",
+    category: "chemistry",
+    description: "Профессиональный пятновыводитель для удаления таниновых и растительных пятен (вино, кофе, чай) с текстиля",
+    ph: 7.0,
+    compatibleSurfaces: ["upholstery", "carpet", "mattress"],
+    prohibitedSurfaces: ["leather"],
+    status: "published",
+  },
+  {
+    id: "prod-prochem-stainpro",
+    brandId: "prochem",
+    slug: "prochem-stain-pro",
+    name: "Prochem Stain Pro",
+    category: "chemistry",
+    description: "Энзимный нейтрализатор и пятновыводитель для белковых и пищевых пятен (кровь, молоко, еда)",
+    ph: 8.5,
+    compatibleSurfaces: ["upholstery", "carpet", "mattress"],
+    prohibitedSurfaces: ["silk"],
+    status: "published",
+  },
+  {
+    id: "prod-grass-cement",
+    brandId: "grass",
+    slug: "grass-cement-cleaner",
+    name: "Grass Cement Cleaner",
+    category: "chemistry",
+    description: "Кислотный концентрат для удаления остатков цемента, строительной затирки и солевых высолов",
+    ph: 1.5,
+    compatibleSurfaces: ["floor", "bathroom"],
+    prohibitedSurfaces: ["upholstery", "carpet", "mattress", "marble"],
+    status: "published",
+  },
+  {
+    id: "prod-grass-azelit",
+    brandId: "grass",
+    slug: "grass-azelit-pro",
+    name: "Grass Azelit Professional",
+    category: "chemistry",
+    description: "Концентрированное щелочное средство для удаления застарелого нагара и жира",
+    ph: 11.5,
+    compatibleSurfaces: ["kitchen"],
+    prohibitedSurfaces: ["upholstery", "carpet", "mattress", "aluminum", "natural_wood"],
+    status: "published",
+  },
+  {
+    id: "prod-karcher-puzzi",
+    brandId: "karcher",
+    slug: "karcher-puzzi-10-1",
+    name: "Kärcher Puzzi 10/1",
+    category: "extractors",
+    description: "Профессиональный моющий пылесос-экстрактор для химчистки мягкой мебели и ковровых покрытий",
+    compatibleSurfaces: ["upholstery", "carpet", "mattress", "floor"],
+    status: "published",
+  },
+];
+
+export interface SeedCampaign {
+  id: string;
+  brandId: string;
+  productId?: string;
+  name: string;
+  placement: AdPlacement;
+  status: CampaignStatus;
+  startsAt?: number;
+  endsAt?: number;
+  targetCountries?: string[];
+  targetCategories?: string[];
+  targetSurfaces?: string[];
+  targetSolutions?: string[];
+  maxImpressions?: number;
+  maxClicks?: number;
+  currentImpressions: number;
+  currentClicks: number;
+  title: string;
+  description: string;
+  ctaText: string;
+  ctaUrl: string;
+  ctaType: AdCtaType;
+  badgeText?: string;
+  priority: number;
+}
+
+export const seedCampaigns: SeedCampaign[] = [
+  {
+    id: "camp-kiehl-upholstery",
+    brandId: "kiehl",
+    productId: "prod-kiehl-arenas",
+    name: "Kiehl Arenas-exet 3 (Решения / Текстиль)",
+    placement: "solution.sponsored_product",
+    status: "active",
+    startsAt: 1767225600000, // 2026-01-01
+    endsAt: 1798761599000,   // 2026-12-31
+    targetCountries: ["BY", "RU", "KZ"],
+    targetSurfaces: ["upholstery", "carpet"],
+    targetSolutions: ["vino-na-divane", "kofe-na-tekstile"],
+    currentImpressions: 120,
+    currentClicks: 14,
+    title: "Kiehl Arenas-exet 3 — доказанная формула удаления танинов",
+    description: "Нейтральный состав pH 7.0 для велюра, шенилла и рогожки. Безопасен для волокон и цвета обивки.",
+    ctaText: "Купить у официального дилера",
+    ctaUrl: "https://kiehl.ru",
+    ctaType: "where_to_buy",
+    badgeText: "Спонсорский проверенный вариант",
+    priority: 10,
+  },
+  {
+    id: "camp-grass-offices",
+    brandId: "grass",
+    name: "GRASS Professional — генеральный партнёр категории офисов",
+    placement: "rating.category_partner",
+    status: "active",
+    startsAt: 1767225600000, // 2026-01-01
+    endsAt: 1798761599000,   // 2026-12-31
+    targetCategories: ["offices"],
+    targetCountries: ["BY", "RU", "KZ"],
+    currentImpressions: 340,
+    currentClicks: 28,
+    title: "GRASS Professional — комплексная химия и диспенсерные системы для офисов",
+    description: "Специальные условия и контрактные цены для клининговых компаний и корпоративных клиентов.",
+    ctaText: "Запросить оптовый прайс",
+    ctaUrl: "https://grass.su",
+    ctaType: "request_quote",
+    badgeText: "Партнёр категории",
+    priority: 10,
+  },
+  {
+    id: "camp-karcher-home",
+    brandId: "karcher",
+    name: "Kärcher — партнёр сезона чистоты CLEANHUB",
+    placement: "home.editorial_partner",
+    status: "active",
+    startsAt: 1767225600000, // 2026-01-01
+    endsAt: 1798761599000,   // 2026-12-31
+    targetCountries: ["BY", "RU", "KZ"],
+    currentImpressions: 890,
+    currentClicks: 72,
+    title: "Kärcher — эталон немецких технологий чистоты",
+    description: "Профессиональные экстракторы и пароочистители с сервисной поддержкой в Беларуси, России и Казахстане.",
+    ctaText: "Найти авторизованный центр",
+    ctaUrl: "https://karcher.by",
+    ctaType: "where_to_buy",
+    badgeText: "Партнёр сезона",
+    priority: 10,
+  },
+];
+
 

@@ -10,6 +10,7 @@ import {
   MapPin,
   Search,
   SlidersHorizontal,
+  Wallet,
   X,
 } from "lucide-react";
 import { Input } from "@/components/ui/primitives";
@@ -47,6 +48,9 @@ interface RatingToolbarProps {
   onVerifiedChange: (value: boolean) => void;
   viewMode: ViewMode;
   onViewModeChange: (value: ViewMode) => void;
+  priceMax: number | "all";
+  onPriceMaxChange: (value: number | "all") => void;
+  priceOptions: { value: number; label: string }[];
   hasActiveFilters: boolean;
   onReset: () => void;
   count: number;
@@ -66,6 +70,9 @@ export function RatingToolbar({
   onVerifiedChange,
   viewMode,
   onViewModeChange,
+  priceMax,
+  onPriceMaxChange,
+  priceOptions,
   hasActiveFilters,
   onReset,
   count,
@@ -152,6 +159,19 @@ export function RatingToolbar({
             }))}
             className="sm:w-48"
           />
+
+          {priceOptions.length > 0 && (
+            <Select
+              value={priceMax === "all" ? "all" : String(priceMax)}
+              onChange={(v) => onPriceMaxChange(v === "all" ? "all" : Number(v))}
+              icon={<Wallet className="h-4 w-4" />}
+              options={[
+                { value: "all", label: "Любая цена" },
+                ...priceOptions.map((opt) => ({ value: String(opt.value), label: opt.label })),
+              ]}
+              className="sm:w-44"
+            />
+          )}
         </div>
 
         {/* Row 2: category pills */}

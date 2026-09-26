@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { categories } from "@/lib/mock-data";
 import { forwardToTelegram, isValidPhone } from "@/lib/telegram";
+import { recordAnalyticsEvent, savePartnerLead } from "@/lib/db/queries";
+import { PRIVACY_CONSENT_VERSION } from "@/lib/site";
 
 interface PartnerLeadPayload {
   companyName?: string;
@@ -28,6 +30,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Укажите корректный номер телефона" }, { status: 400 });
   }
 
+  // 1. Сохранение в базу D1
+  const lead = await savePartnerLead({
+    companyName: companyName.trim(),
+    contactName: contactName?.trim() || undefined,
+    phone: phone.trim(),
+    city: city?.trim() || undefined,
+    categoryIds,
+    message: message?.trim() || undefined,
+    consentAcceptedAt: new Date(),
+    consentVersion: PRIVACY_CONSENT_VERSION,
+  });
+
+  // 2. Аналитическое событие
+  await recordAnalyticsEvent({
+    entityType: "company",
+    entityId: lead.id,
+    eventType: "lead",
+    path: "/for-partners",
+    metadata: { companyName: companyName.trim(), city },
+  });
+
   const categoryNames = (categoryIds ?? [])
     .map((id) => categories.find((c) => c.id === id)?.name)
     .filter(Boolean)
@@ -41,17 +64,16 @@ export async function POST(request: Request) {
     city ? `Город: ${city}` : null,
     categoryNames ? `Услуги: ${categoryNames}` : null,
     message ? `Комментарий: ${message}` : null,
+    `ID заявки: <code>${lead.id}</code>`,
   ]
     .filter(Boolean)
     .join("\n");
 
   const delivered = await forwardToTelegram(text);
 
-  // В режиме без настроенных TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID заявка логируется на сервере,
-  // чтобы форма оставалась рабочей в деве/демо. Для продакшена нужно задать эти переменные окружения.
   if (!delivered) {
     console.log("[partner-lead] Новая заявка компании (Telegram не настроен):", text);
   }
 
-  return NextResponse.json({ ok: true, delivered });
+  return NextResponse.json({ ok: true, delivered, leadId: lead.id });
 }

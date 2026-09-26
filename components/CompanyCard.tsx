@@ -1,58 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { BadgeCheck, Crown, Globe, MapPin, MessageCircle, Phone, Star, TrendingUp } from "lucide-react";
+import { BadgeCheck, MapPin } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { Badge } from "@/components/ui/primitives";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
+import { RankBadge, RatingBadge } from "@/components/CompanyBadges";
+import { CompanyContactActions } from "@/components/CompanyContactActions";
 import { CompanyEquipmentTags } from "@/components/CompanyEquipmentTags";
-import { formatNumber, formatPriceFrom, formatRating } from "@/lib/format";
+import { formatPriceFrom } from "@/lib/format";
 import { categories } from "@/lib/mock-data";
-import { cn } from "@/lib/utils";
-import { trackClick } from "@/lib/analytics";
-
-const rankClass: Record<number, string> = {
-  1: "bg-amber-100 text-amber-700",
-  2: "bg-slate-100 text-slate-600",
-  3: "bg-orange-100 text-orange-700",
-};
-
-function RankBadge({ rank }: { rank?: number }) {
-  if (!rank || rank > 3) return null;
-  return (
-    <span
-      className={cn(
-        "absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold shadow-sm",
-        rankClass[rank]
-      )}
-    >
-      {rank === 1 ? <Crown className="h-4 w-4" /> : rank}
-    </span>
-  );
-}
-
-function RatingBadge({ company }: { company: Company }) {
-  const hasVerified =
-    company.reviewCount > 0 &&
-    (company.ratingSource === "google" || company.ratingSource === "yandex");
-
-  if (hasVerified) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">
-        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-        {formatRating(company.baseRating)}
-        <span className="text-amber-600/70">({formatNumber(company.reviewCount)})</span>
-      </span>
-    );
-  }
-
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] font-medium text-muted-foreground">
-      <TrendingUp className="h-3 w-3" />
-      {company.ratingSource === "new" ? "Новый партнёр" : "Пока нет отзывов"}
-    </span>
-  );
-}
 
 export function CompanyCard({
   company,
@@ -68,15 +26,11 @@ export function CompanyCard({
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl">
-      <RankBadge rank={rank} />
+      <RankBadge rank={rank} onlyTop className="absolute left-3 top-3 z-10 h-8 w-8 rounded-full text-sm shadow-sm" />
 
       <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-muted/50">
         <CompanyAvatar id={company.id} name={company.name} size="xl" />
-        {company.promoted && (
-          <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-accent/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground">
-            Партнёр
-          </span>
-        )}
+        {company.promoted && <StatusBadge variant="sponsor" className="absolute bottom-3 left-3" />}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
@@ -88,7 +42,7 @@ export function CompanyCard({
                   {company.name}
                 </Link>
               </h3>
-              {company.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-primary" />}
+              {company.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-primary" aria-label="Проверено" />}
             </div>
             <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3 w-3" />
@@ -120,50 +74,8 @@ export function CompanyCard({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
-          {company.phone && (
-            <a
-              href={`tel:${company.phone.replace(/[^\d+]/g, "")}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                trackClick({ companyId: company.id, categoryId: company.categories[0], clickType: "phone" });
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
-            >
-              <Phone className="h-3.5 w-3.5" />
-              {company.phone}
-            </a>
-          )}
-          {company.websiteUrl && (
-            <a
-              href={company.websiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                e.stopPropagation();
-                trackClick({ companyId: company.id, categoryId: company.categories[0], clickType: "website" });
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
-            >
-              <Globe className="h-3.5 w-3.5" />
-              Сайт
-            </a>
-          )}
-          {company.telegramUrl && (
-            <a
-              href={company.telegramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                e.stopPropagation();
-                trackClick({ companyId: company.id, categoryId: company.categories[0], clickType: "telegram" });
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
-            >
-              <MessageCircle className="h-3.5 w-3.5" />
-              Telegram
-            </a>
-          )}
+        <div className="border-t border-border/60 pt-3">
+          <CompanyContactActions company={company} compact />
         </div>
       </div>
     </article>

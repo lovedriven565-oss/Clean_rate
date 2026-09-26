@@ -105,6 +105,11 @@ export const products = sqliteTable(
     description: text("description"),
     imageKey: text("image_key"),
     externalUrl: text("external_url"),
+    ph: real("ph"),
+    /** JSON-массив допустимых поверхностей: string[] */
+    compatibleSurfaces: text("compatible_surfaces"),
+    /** JSON-массив запрещённых поверхностей: string[] */
+    prohibitedSurfaces: text("prohibited_surfaces"),
     status: text("status", { enum: ["draft", "published", "archived"] }).notNull().default("draft"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
@@ -177,30 +182,113 @@ export const campaigns = sqliteTable(
   {
     id: text("id").primaryKey(),
     brandId: text("brand_id").notNull().references(() => brands.id, { onDelete: "cascade" }),
+    productId: text("product_id").references(() => products.id, { onDelete: "set null" }),
     name: text("name").notNull(),
-    placement: text("placement").notNull(),
+    placement: text("placement", {
+      enum: [
+        "solution.sponsored_product",
+        "rating.category_partner",
+        "home.editorial_partner",
+        "search.sponsored_result",
+        "products.sponsored_slot",
+        "brand.profile_campaign",
+        "dealer.local_partner",
+      ],
+    }).notNull(),
     status: text("status", { enum: ["draft", "active", "paused", "completed"] }).notNull().default("draft"),
     startsAt: integer("starts_at", { mode: "timestamp_ms" }),
     endsAt: integer("ends_at", { mode: "timestamp_ms" }),
+    /** JSON-массив кодов стран таргетинга: string[] (например ["BY", "RU"]) или null (все) */
+    targetCountries: text("target_countries"),
+    /** JSON-массив категорий: string[] (например ["upholstery", "offices"]) или null (все) */
+    targetCategories: text("target_categories"),
+    /** JSON-массив поверхностей: string[] (например ["upholstery", "carpet"]) или null (все) */
+    targetSurfaces: text("target_surfaces"),
+    /** JSON-массив slug решений: string[] (например ["vino-na-divane"]) или null (любое) */
+    targetSolutions: text("target_solutions"),
+    maxImpressions: integer("max_impressions"),
+    maxClicks: integer("max_clicks"),
+    currentImpressions: integer("current_impressions").notNull().default(0),
+    currentClicks: integer("current_clicks").notNull().default(0),
+    title: text("title"),
+    description: text("description"),
+    ctaText: text("cta_text"),
+    ctaUrl: text("cta_url"),
+    ctaType: text("cta_type", {
+      enum: ["where_to_buy", "request_quote", "training", "demo", "website"],
+    }),
+    badgeText: text("badge_text"),
+    priority: integer("priority").notNull().default(0),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }),
   },
-  (table) => [index("campaigns_brand_status_idx").on(table.brandId, table.status)]
+  (table) => [
+    index("campaigns_brand_status_idx").on(table.brandId, table.status),
+    index("campaigns_placement_status_idx").on(table.placement, table.status),
+  ]
 );
 
 export const analyticsEvents = sqliteTable(
   "analytics_events",
   {
+    /** Клиентский eventId — PK, дедупликация доставки через INSERT OR IGNORE */
     id: text("id").primaryKey(),
     campaignId: text("campaign_id").references(() => campaigns.id, { onDelete: "set null" }),
-    entityType: text("entity_type", { enum: ["company", "brand", "supplier", "product"] }).notNull(),
+    entityType: text("entity_type", { enum: ["company", "brand", "supplier", "product", "page"] }).notNull(),
     entityId: text("entity_id").notNull(),
     eventType: text("event_type", { enum: ["impression", "view", "phone", "website", "telegram", "lead", "download"] }).notNull(),
     path: text("path"),
+    countryCode: text("country_code"),
+    metadata: text("metadata"),
+    /** ID отображения страницы: группирует действия одного просмотра, не visitor-ID */
+    pageViewId: text("page_view_id"),
     occurredAt: integer("occurred_at", { mode: "timestamp_ms" }).notNull(),
   },
   (table) => [
     index("analytics_events_campaign_time_idx").on(table.campaignId, table.occurredAt),
     index("analytics_events_entity_time_idx").on(table.entityType, table.entityId, table.occurredAt),
+  ]
+);
+
+export const brandLeads = sqliteTable(
+  "brand_leads",
+  {
+    id: text("id").primaryKey(),
+    brandName: text("brand_name").notNull(),
+    website: text("website"),
+    contactName: text("contact_name").notNull(),
+    contact: text("contact").notNull(),
+    role: text("role", { enum: ["brand", "dealer", "service", "other"] }).notNull(),
+    goal: text("goal"),
+    status: text("status", { enum: ["new", "contacted", "qualified", "closed"] }).notNull().default("new"),
+    consentAcceptedAt: integer("consent_accepted_at", { mode: "timestamp_ms" }),
+    consentVersion: text("consent_version"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("brand_leads_status_idx").on(table.status),
+    index("brand_leads_created_idx").on(table.createdAt),
+  ]
+);
+
+export const partnerLeads = sqliteTable(
+  "partner_leads",
+  {
+    id: text("id").primaryKey(),
+    companyName: text("company_name").notNull(),
+    contactName: text("contact_name"),
+    phone: text("phone").notNull(),
+    city: text("city"),
+    categoryIds: text("category_ids"),
+    message: text("message"),
+    status: text("status", { enum: ["new", "contacted", "closed"] }).notNull().default("new"),
+    consentAcceptedAt: integer("consent_accepted_at", { mode: "timestamp_ms" }),
+    consentVersion: text("consent_version"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("partner_leads_status_idx").on(table.status),
+    index("partner_leads_created_idx").on(table.createdAt),
   ]
 );
 

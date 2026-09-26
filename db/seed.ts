@@ -13,7 +13,14 @@ import { sql } from "drizzle-orm";
 import { writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { seedBrands, seedCategories, seedCompanies, seedTimestamp } from "./seed-data";
+import {
+  seedBrands,
+  seedCampaigns,
+  seedCategories,
+  seedCompanies,
+  seedProducts,
+  seedTimestamp,
+} from "./seed-data";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const migrationsDir = join(__dirname, "..", "migrations");
@@ -86,12 +93,30 @@ for (const company of seedCompanies) {
 }
 
 // --- Связи компаний с брендами (техника) ---
+// Связь считается подтверждённой (и попадает в «Индекс доверия профи»), только если
+// сама компания верифицирована; у остальных остаётся pending до проверки.
 for (const company of seedCompanies) {
   for (const brandId of company.equipment) {
+    const status = company.verified ? "verified" : "pending";
+    const verifiedAt = company.verified ? num(seedTimestamp) : "NULL";
     statements.push(
-      `INSERT INTO \`company_brands\` (\`company_id\`, \`brand_id\`, \`evidence_status\`) VALUES (${esc(company.id)}, ${esc(brandId)}, 'pending');`
+      `INSERT INTO \`company_brands\` (\`company_id\`, \`brand_id\`, \`evidence_status\`, \`verified_at\`) VALUES (${esc(company.id)}, ${esc(brandId)}, '${status}', ${verifiedAt});`
     );
   }
+}
+
+// --- Продукты (с профилями безопасности для eligibility gate) ---
+for (const product of seedProducts) {
+  statements.push(
+    `INSERT INTO \`products\` (\`id\`, \`brand_id\`, \`slug\`, \`name\`, \`category\`, \`description\`, \`ph\`, \`compatible_surfaces\`, \`prohibited_surfaces\`, \`status\`, \`created_at\`, \`updated_at\`) VALUES (${esc(product.id)}, ${esc(product.brandId)}, ${esc(product.slug)}, ${esc(product.name)}, ${esc(product.category)}, ${esc(product.description)}, ${num(product.ph)}, ${jsonArray(product.compatibleSurfaces)}, ${jsonArray(product.prohibitedSurfaces)}, '${product.status}', ${num(seedTimestamp)}, ${num(seedTimestamp)});`
+  );
+}
+
+// --- Рекламные кампании (Ad Engine) ---
+for (const camp of seedCampaigns) {
+  statements.push(
+    `INSERT INTO \`campaigns\` (\`id\`, \`brand_id\`, \`product_id\`, \`name\`, \`placement\`, \`status\`, \`starts_at\`, \`ends_at\`, \`target_countries\`, \`target_categories\`, \`target_surfaces\`, \`target_solutions\`, \`max_impressions\`, \`max_clicks\`, \`current_impressions\`, \`current_clicks\`, \`title\`, \`description\`, \`cta_text\`, \`cta_url\`, \`cta_type\`, \`badge_text\`, \`priority\`, \`created_at\`, \`updated_at\`) VALUES (${esc(camp.id)}, ${esc(camp.brandId)}, ${esc(camp.productId)}, ${esc(camp.name)}, '${camp.placement}', '${camp.status}', ${num(camp.startsAt)}, ${num(camp.endsAt)}, ${jsonArray(camp.targetCountries)}, ${jsonArray(camp.targetCategories)}, ${jsonArray(camp.targetSurfaces)}, ${jsonArray(camp.targetSolutions)}, ${num(camp.maxImpressions)}, ${num(camp.maxClicks)}, ${num(camp.currentImpressions)}, ${num(camp.currentClicks)}, ${esc(camp.title)}, ${esc(camp.description)}, ${esc(camp.ctaText)}, ${esc(camp.ctaUrl)}, ${esc(camp.ctaType)}, ${esc(camp.badgeText)}, ${num(camp.priority)}, ${num(seedTimestamp)}, ${num(seedTimestamp)});`
+  );
 }
 
 const sqlContent = statements.join("\n");
@@ -101,6 +126,7 @@ writeFileSync(sqlPath, sqlContent, "utf-8");
 console.log(`✓ Seed SQL generated: ${sqlPath}`);
 console.log(`  ${statements.length} statements`);
 console.log(`  ${seedBrands.length} brands, ${seedCompanies.length} companies`);
+console.log(`  ${seedProducts.length} products, ${seedCampaigns.length} campaigns`);
 console.log(`  ${seedCompanies.reduce((acc, c) => acc + c.categories.length, 0)} category links`);
 console.log(`  ${seedCompanies.filter((c) => c.rating).length} rating sources`);
 console.log(`  ${seedCompanies.reduce((acc, c) => acc + c.equipment.length, 0)} brand links`);

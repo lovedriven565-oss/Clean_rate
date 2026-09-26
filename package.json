@@ -16,7 +16,7 @@
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf:typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "db:generate": "drizzle-kit generate",
-    "test": "node --import tsx --test tests/rating.test.ts tests/solutions.test.ts tests/intent-router.test.ts"
+    "test": "node --import tsx --test tests/rating.test.ts tests/solutions.test.ts tests/intent-router.test.ts tests/structured-data.test.ts tests/brand-score.test.ts tests/ads.test.ts tests/ads-ui.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

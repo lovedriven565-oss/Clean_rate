@@ -85,6 +85,28 @@ export const brands: Brand[] = [
       "Роботы-пылесосы с влажной уборкой для дома — рекомендация клинеров для поддержания чистоты между генеральными уборками.",
     affiliateUrl: "https://www.onliner.by/catalog/dreame",
   },
+  {
+    id: "kiehl",
+    slug: "kiehl",
+    name: "Kiehl",
+    tagline: "Немецкая профессиональная химия для клининга",
+    accent: "#0284C7",
+    focus: "himiya",
+    description:
+      "Концентрированные средства для удаления застарелых пятен, затирок, полимерных покрытий и генеральной уборки.",
+    affiliateUrl: "https://www.kiehl-group.com/",
+  },
+  {
+    id: "prochem",
+    slug: "prochem",
+    name: "Prochem",
+    tagline: "Мировой эталон химии для химчистки мягкой мебели",
+    accent: "#D97706",
+    focus: "himiya",
+    description:
+      "Профессиональные пятновыводители, нейтрализаторы запахов и экстракционные шампуни для клинеров и химчисток.",
+    affiliateUrl: "https://www.prochem.co.uk/",
+  },
 ];
 
 export const categories: Category[] = [
