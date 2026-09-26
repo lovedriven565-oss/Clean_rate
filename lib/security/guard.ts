@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 /** Биндинги Workers Rate Limiting из wrangler.jsonc (`ratelimits`). */
-export type LimiterName = "LEAD_LIMITER" | "EVENT_LIMITER" | "SEARCH_LIMITER";
+export type LimiterName = "LEAD_LIMITER" | "EVENT_LIMITER" | "SEARCH_LIMITER" | "ASSISTANT_LIMITER";
 
 /**
  * IP клиента. Для анонимных форм и событий другого стабильного идентификатора нет,

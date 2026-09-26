@@ -12,6 +12,7 @@ import {
   getIntentKeywords,
   recordAnalyticsEvent,
 } from "@/lib/db/queries";
+import { matchesQuery, mergeRanked, rankSolutions, rankSolutionsByTokens } from "@/lib/search/rank";
 import { getMarket, isCountryCode } from "@/lib/markets";
 import { checkRateLimit, tooManyRequests } from "@/lib/security/guard";
 import type { Brand, Company, Solution } from "@/lib/types";
@@ -61,20 +62,6 @@ function countryFromRegionCookie(raw: string | undefined): string | undefined {
   if (!raw) return undefined;
   const [countryCode] = raw.split(":");
   return countryCode && isCountryCode(countryCode) ? countryCode : undefined;
-}
-
-function matchesQuery(haystacks: Array<string | undefined>, needle: string): boolean {
-  return haystacks.some((value) => value?.toLowerCase().includes(needle));
-}
-
-function rankSolutions(solutions: Solution[], normalizedQuery: string, target: IntentClassification["target"]): Solution[] {
-  const bySlug = target?.kind === "solution" ? solutions.find((s) => s.slug === target.slug) : undefined;
-  const matched = solutions.filter(
-    (s) =>
-      s.slug !== bySlug?.slug &&
-      matchesQuery([s.title, ...s.searchKeywords], normalizedQuery)
-  );
-  return [...(bySlug ? [bySlug] : []), ...matched];
 }
 
 function rankBrands(brands: Brand[], normalizedQuery: string, target: IntentClassification["target"]): Brand[] {
@@ -136,7 +123,10 @@ export async function GET(request: Request) {
   const classification = await provider.classify(query);
   const normalizedQuery = query.trim().toLowerCase();
 
-  const solutionResults = rankSolutions(solutions, normalizedQuery, classification.target).slice(0, RESULT_LIMIT);
+  const solutionResults = mergeRanked(
+    rankSolutions(solutions, normalizedQuery, classification.target),
+    rankSolutionsByTokens(solutions, normalizedQuery)
+  ).slice(0, RESULT_LIMIT);
   const brandResults = rankBrands(brands, normalizedQuery, classification.target).slice(0, RESULT_LIMIT);
   const companyResults =
     classification.intent === "pro"

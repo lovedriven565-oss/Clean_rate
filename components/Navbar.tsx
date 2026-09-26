@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
+  { href: "/assistant", label: "Консультант" },
   { href: "/solutions", label: "Решения" },
   { href: "/rating", label: "Рейтинг" },
   { href: "/brands", label: "Бренды" },

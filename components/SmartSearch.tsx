@@ -238,9 +238,17 @@ export function SearchSuggestions({ search, className }: { search: ReturnType<ty
       )}
     >
       {!hasResults && !loading && (
-        <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-          Ничего не нашли. Нажмите «Enter», чтобы посмотреть все результаты.
-        </p>
+        <div className="px-4 py-5 text-center text-sm text-muted-foreground">
+          <p>Ничего не нашли. Нажмите «Enter», чтобы посмотреть все результаты.</p>
+          <button
+            type="button"
+            onClick={() => navigate(`/assistant?q=${encodeURIComponent(search.query.trim())}`)}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Спросить консультанта
+          </button>
+        </div>
       )}
 
       {showSolutions && (
