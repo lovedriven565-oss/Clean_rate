@@ -22,12 +22,12 @@
     // Ошибки чтения D1 не маскируются seed-данными (lib/db/queries.ts → reportDbError)
     "STRICT_DB": "1"
   },
-  // Семантический поиск (lib/search/semantic.ts). Индекс создаётся один раз:
-  // wrangler vectorize create cleanhub-solutions --dimensions=1024 --metric=cosine
+  // Семантический поиск (lib/search/semantic.ts). AI-биндинг активен; Vectorize
+  // подключается позже: wrangler vectorize create cleanhub-solutions --dimensions=1024 --metric=cosine
   "ai": { "binding": "AI" },
-  "vectorize": [
-    { "binding": "VECTORIZE", "index_name": "cleanhub-solutions" }
-  ],
+  // "vectorize": [
+  //   { "binding": "VECTORIZE", "index_name": "cleanhub-solutions" }
+  // ],
   // Лимиты на локацию Cloudflare, ключ = маршрут + IP (lib/security/guard.ts). period: только 10 или 60.
   "ratelimits": [
     { "name": "LEAD_LIMITER", "namespace_id": "2101", "simple": { "limit": 5, "period": 60 } },
