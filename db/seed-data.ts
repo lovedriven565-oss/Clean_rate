@@ -40,7 +40,7 @@ export interface SeedCompany {
   priceFrom?: number;
   priceUnit?: string;
   experienceYears?: number;
-  coverImage: string;
+  coverImage?: string;
   tags: string[];
   guarantees?: string[];
   verified: boolean;
@@ -196,7 +196,6 @@ export const seedCategories: Array<{ id: CategoryId; name: string; icon: string;
 ];
 
 const now = Date.now();
-const cover = (seed: string) => `https://picsum.photos/seed/${seed}/800/600`;
 
 export const seedCompanies: SeedCompany[] = [
 
@@ -214,7 +213,6 @@ export const seedCompanies: SeedCompany[] = [
     priceFrom: 6,
     priceUnit: "м²",
     experienceYears: 7,
-    coverImage: cover("spectrclean"),
     tags: ["Работает по договору", "7+ лет на рынке", "350+ клиентов"],
     guarantees: ["Фиксированная цена по договору"],
     verified: true,
@@ -238,7 +236,6 @@ export const seedCompanies: SeedCompany[] = [
     priceFrom: 3,
     priceUnit: "м²",
     experienceYears: 5,
-    coverImage: cover("freshclean"),
     tags: ["Работает по всей Беларуси", "Индивидуальный расчёт стоимости"],
     verified: true,
     promoted: false,
@@ -256,7 +253,6 @@ export const seedCompanies: SeedCompany[] = [
       "Уборка квартир, мойка окон, химчистка и уборка после ремонта в Минске. Работает по системе онлайн-бронирования с выбором клинера; регулярная уборка обходится дешевле разовой.",
     websiteUrl: "https://kitt.by",
     priceFrom: 94.99,
-    coverImage: cover("kitt"),
     tags: ["Онлайн-бронирование", "Скидки при регулярной уборке"],
     verified: false,
     promoted: false,
@@ -273,7 +269,6 @@ export const seedCompanies: SeedCompany[] = [
       "Уборка квартир, домов и офисов в Минске: от поддерживающей до генеральной уборки и уборки после стройки.",
     websiteUrl: "https://clean-clean.by",
     priceFrom: 100,
-    coverImage: cover("cleanclean"),
     tags: ["Прозрачные тарифы", "Расчёт стоимости онлайн"],
     verified: false,
     promoted: false,
@@ -293,7 +288,6 @@ export const seedCompanies: SeedCompany[] = [
     phone: "+375 44 749-88-99",
     email: "info@freshroom.by",
     priceFrom: 85,
-    coverImage: cover("freshroom"),
     tags: ["Регулярная уборка", "Выезд день в день"],
     verified: false,
     promoted: false,
@@ -313,7 +307,6 @@ export const seedCompanies: SeedCompany[] = [
     email: "info@skyclean.by",
     priceFrom: 100,
     experienceYears: 10,
-    coverImage: cover("skyclean"),
     tags: ["Минск и область", "Опыт более 10 лет", "Застрахованная ответственность"],
     verified: false,
     promoted: false,
@@ -334,7 +327,6 @@ export const seedCompanies: SeedCompany[] = [
     priceFrom: 18,
     priceUnit: "окно",
     experienceYears: 6,
-    coverImage: cover("sauber"),
     tags: ["9300+ уборок с 2019 года", "Калькулятор цены на сайте"],
     verified: false,
     promoted: false,
@@ -355,7 +347,6 @@ export const seedCompanies: SeedCompany[] = [
     phone: "+375 33 682-11-00",
     priceFrom: 64,
     experienceYears: 4,
-    coverImage: cover("ladyclean"),
     tags: ["ISO 9001:2015", "50+ клинеров", "Выезд за 2 часа", "Круглосуточно"],
     guarantees: ["Гарантия 100%", "Сертификат ISO 9001:2015"],
     verified: false,
@@ -377,7 +368,6 @@ export const seedCompanies: SeedCompany[] = [
     phone: "+375 29 125-09-09",
     priceFrom: 120.9,
     priceUnit: "BYN/мес",
-    coverImage: cover("cleanoff"),
     tags: ["200+ клиентов", "Безналичный расчёт", "Договор и акт выполненных работ"],
     verified: false,
     promoted: false,
@@ -399,7 +389,6 @@ export const seedCompanies: SeedCompany[] = [
     email: "info@purifi.by",
     priceFrom: 5,
     priceUnit: "м²",
-    coverImage: cover("purifi"),
     tags: ["Минск и область", "Экологичные средства", "Персональный подход"],
     verified: false,
     promoted: false,
@@ -419,7 +408,6 @@ export const seedCompanies: SeedCompany[] = [
     phone: "+375 29 980-33-68",
     priceFrom: 2,
     priceUnit: "м²",
-    coverImage: cover("gryazi-net"),
     tags: ["Минск и область", "Химчистка с выездом", "Дисконтные карты"],
     verified: false,
     promoted: false,
@@ -441,7 +429,6 @@ export const seedCompanies: SeedCompany[] = [
     priceFrom: 20,
     priceUnit: "м²",
     experienceYears: 5,
-    coverImage: cover("nesoda"),
     tags: ["1000+ клиентов", "Крупные объекты до 2000 м²", "Тестовая уборка бесплатно"],
     verified: false,
     promoted: false,
@@ -462,7 +449,6 @@ export const seedCompanies: SeedCompany[] = [
     priceFrom: 2,
     priceUnit: "м²",
     experienceYears: 10,
-    coverImage: cover("cleanup"),
     tags: ["С 2014 года", "500+ офисов", "Материальная ответственность", "Сертификаты клинеров"],
     guarantees: ["Договор и акт выполненных работ", "Полная материальная ответственность"],
     verified: false,

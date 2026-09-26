@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
 import { Button, Input } from "@/components/ui/primitives";
 import { Select } from "@/components/ui/Select";
+import { TurnstileWidget, turnstileEnabled } from "@/components/TurnstileWidget";
 import { parseApiResult } from "@/lib/api-result";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -26,6 +27,7 @@ export function BrandLeadForm() {
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,13 +37,27 @@ export function BrandLeadForm() {
       setError("Необходимо согласие с политикой конфиденциальности.");
       return;
     }
+    if (turnstileEnabled && !turnstileToken) {
+      setStatus("error");
+      setError("Подождите завершения проверки «я не робот».");
+      return;
+    }
 
     setStatus("submitting");
     try {
       const response = await fetch("/api/brand-lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ brandName, website, contactName, contact, role, goal }),
+        body: JSON.stringify({
+          brandName,
+          website,
+          contactName,
+          contact,
+          role,
+          goal,
+          consent,
+          turnstileToken: turnstileToken ?? undefined,
+        }),
       });
       const result = parseApiResult(await response.json());
       if (!response.ok || !result.ok) {
@@ -110,7 +126,15 @@ export function BrandLeadForm() {
         />
       </label>
 
-      {error && <p className="mt-4 text-sm text-danger">{error}</p>}
+      <div className="mt-4">
+        <TurnstileWidget onToken={setTurnstileToken} />
+      </div>
+
+      {error && (
+        <p role="alert" className="mt-4 text-sm text-danger">
+          {error}
+        </p>
+      )}
 
       <label className="mt-5 flex cursor-pointer items-start gap-3 text-xs leading-5 text-muted-foreground">
         <input type="checkbox" required checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" />

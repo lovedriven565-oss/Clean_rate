@@ -20,6 +20,13 @@ export interface Market {
   currency: CurrencyCode;
   /** Телефонный код страны, для будущих форм/масок ввода */
   phoneCode: string;
+  /** Домен Яндекс Карт для ссылок «Маршрут» */
+  mapsHost: string;
+  /**
+   * Рынок открыт для пользователей: есть в селекторе региона, hreflang и копирайте.
+   * Выключенный рынок остаётся в конфиге (данные, сметы), но не показывается, пока в нём нет компаний.
+   */
+  enabled: boolean;
   cities: City[];
 }
 
@@ -30,6 +37,8 @@ export const MARKETS: Record<CountryCode, Market> = {
     locale: "ru-BY",
     currency: "BYN",
     phoneCode: "+375",
+    mapsHost: "yandex.by",
+    enabled: true,
     cities: [
       { slug: "minsk", name: "Минск" },
       { slug: "brest", name: "Брест" },
@@ -41,6 +50,8 @@ export const MARKETS: Record<CountryCode, Market> = {
     locale: "ru-RU",
     currency: "RUB",
     phoneCode: "+7",
+    mapsHost: "yandex.ru",
+    enabled: false,
     cities: [
       { slug: "moscow", name: "Москва" },
       { slug: "spb", name: "Санкт-Петербург" },
@@ -52,6 +63,8 @@ export const MARKETS: Record<CountryCode, Market> = {
     locale: "ru-KZ",
     currency: "KZT",
     phoneCode: "+7",
+    mapsHost: "yandex.kz",
+    enabled: false,
     cities: [
       { slug: "almaty", name: "Алматы" },
       { slug: "astana", name: "Астана" },
@@ -61,16 +74,31 @@ export const MARKETS: Record<CountryCode, Market> = {
 
 export const MARKET_LIST: Market[] = Object.values(MARKETS);
 
+/** Рынки, открытые пользователям (селектор региона, hreflang, формы). */
+export const ENABLED_MARKETS: Market[] = MARKET_LIST.filter((market) => market.enabled);
+
 export const DEFAULT_COUNTRY_CODE: CountryCode = "BY";
 
 export function isCountryCode(value: string): value is CountryCode {
   return value in MARKETS;
 }
 
-/** Всегда возвращает валидный рынок — при незнакомом коде откатывается на дефолтный (BY). */
+export function isEnabledCountry(value: string): value is CountryCode {
+  return isCountryCode(value) && MARKETS[value].enabled;
+}
+
+/**
+ * Всегда возвращает валидный открытый рынок: незнакомый или выключенный код (например, старая
+ * cookie RU) откатывается на дефолтный (BY).
+ */
 export function getMarket(countryCode?: string | null): Market {
-  if (countryCode && isCountryCode(countryCode)) return MARKETS[countryCode];
+  if (countryCode && isEnabledCountry(countryCode)) return MARKETS[countryCode];
   return MARKETS[DEFAULT_COUNTRY_CODE];
+}
+
+/** Рынок по названию города компании; неизвестный город — дефолтный рынок. */
+export function getMarketByCity(cityName: string): Market {
+  return MARKET_LIST.find((market) => market.cities.some((city) => city.name === cityName)) ?? MARKETS[DEFAULT_COUNTRY_CODE];
 }
 
 export function getDefaultCity(countryCode: CountryCode = DEFAULT_COUNTRY_CODE): City {

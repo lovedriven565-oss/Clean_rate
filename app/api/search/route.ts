@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { classifyIntent, type IntentClassification } from "@/lib/search/intent-router";
 import { getAllBrands, getAllCompanies, getAllSolutions, getIntentKeywords } from "@/lib/db/queries";
 import { getMarket, isCountryCode } from "@/lib/markets";
+import { checkRateLimit, tooManyRequests } from "@/lib/security/guard";
 import type { Brand, Company, Solution } from "@/lib/types";
 
 const REGION_COOKIE = "ch_region";
@@ -106,6 +107,8 @@ export async function GET(request: Request) {
     return NextResponse.json(empty, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } });
   }
 
+  if (!(await checkRateLimit(request, "SEARCH_LIMITER", "search"))) return tooManyRequests();
+
   const [keywords, solutions, brands, companies] = await Promise.all([
     getIntentKeywords(),
     getAllSolutions(),
@@ -149,7 +152,8 @@ export async function GET(request: Request) {
     })),
   };
 
+  // Компании зависят от cookie региона: общий CDN-кеш отдал бы чужой рынок, поэтому только private.
   return NextResponse.json(response, {
-    headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
+    headers: { "Cache-Control": "private, max-age=60", Vary: "Cookie" },
   });
 }

@@ -9,7 +9,7 @@ import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { RankBadge, RatingBadge } from "@/components/CompanyBadges";
 import { CompanyContactActions } from "@/components/CompanyContactActions";
 import { CompanyEquipmentTags } from "@/components/CompanyEquipmentTags";
-import { formatPriceFrom } from "@/lib/format";
+import { formatCompanyPriceFrom } from "@/lib/format";
 import { categories } from "@/lib/mock-data";
 
 export function CompanyCard({
@@ -67,7 +67,7 @@ export function CompanyCard({
         <div className="mt-auto flex items-center justify-between gap-2 pt-2 text-sm text-muted-foreground">
           {company.priceFrom !== undefined ? (
             <>
-              от <span className="font-semibold text-foreground">{formatPriceFrom(company.priceFrom, company.priceUnit)}</span>
+              от <span className="font-semibold text-foreground">{formatCompanyPriceFrom(company.priceFrom, company)}</span>
             </>
           ) : (
             <span className="text-foreground">Цена по запросу</span>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAllCampaigns, getProductsSafetyMap } from "@/lib/ads/queries";
 import { getAllBrands, getAllCompanies, recordAnalyticsEvent, supplierExists } from "@/lib/db/queries";
 import { parseClickEvent, type ValidatedAnalyticsEvent } from "@/lib/analytics/validation";
+import { checkRateLimit, tooManyRequests } from "@/lib/security/guard";
 
 const MAX_BODY_BYTES = 8 * 1024;
 
@@ -40,6 +41,8 @@ async function campaignMatches(event: ValidatedAnalyticsEvent): Promise<boolean>
 }
 
 export async function POST(request: Request) {
+  if (!(await checkRateLimit(request, "EVENT_LIMITER", "click"))) return tooManyRequests();
+
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   if (contentLength > MAX_BODY_BYTES) {
     return NextResponse.json({ ok: false, error: "Слишком большое событие" }, { status: 413 });

@@ -16,9 +16,13 @@ export async function forwardToTelegram(text: string): Promise<boolean> {
   }
 }
 
-/** Минимальная проверка телефона: минимум 9 цифр (белорусский номер без учёта форматирования) */
+/**
+ * Минимальная проверка телефона для любого рынка: 9–15 цифр без учёта форматирования
+ * (9 — местный номер BY без кода, 15 — максимум E.164).
+ */
 export function isValidPhone(phone: string): boolean {
-  return phone.replace(/\D/g, "").length >= 9;
+  const digits = phone.replace(/\D/g, "").length;
+  return digits >= 9 && digits <= 15;
 }
 
 /** Экранирование пользовательского текста перед вставкой в HTML-сообщение Telegram. */

@@ -85,7 +85,7 @@ export interface Company {
   priceFrom?: number;
   /** Единица измерения цены, если это не цена "за услугу целиком" (например "м²", "окно", "шт") */
   priceUnit?: string;
-  coverImage: string;
+  coverImage?: string;
   description: string;
   tags: string[];
   recentReview?: RecentReview;
@@ -105,7 +105,7 @@ export interface AffiliateProduct {
   slug: string;
   brandId: string;
   name: string;
-  image: string;
+  image?: string;
   category: ProductCategory;
   price?: number;
   rating: number;

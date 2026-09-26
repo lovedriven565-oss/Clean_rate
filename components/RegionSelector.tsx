@@ -3,12 +3,12 @@
 import { Select as BaseSelect } from "@base-ui/react/select";
 import { Check, ChevronDown, MapPin } from "lucide-react";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { MARKET_LIST, isCountryCode, type CountryCode } from "@/lib/markets";
+import { ENABLED_MARKETS, isEnabledCountry, type CountryCode } from "@/lib/markets";
 import { cn } from "@/lib/utils";
 
 type RegionValue = `${CountryCode}:${string}`;
 
-const items = MARKET_LIST.flatMap((market) =>
+const items = ENABLED_MARKETS.flatMap((market) =>
   market.cities.map((city) => ({ value: `${market.countryCode}:${city.slug}` as RegionValue, label: city.name }))
 );
 
@@ -23,7 +23,7 @@ export function RegionSelector({ className, variant = "pill" }: { className?: st
   function handleChange(next: string | null) {
     if (!next) return;
     const [country, slug] = next.split(":");
-    if (isCountryCode(country)) setRegion(country, slug);
+    if (isEnabledCountry(country)) setRegion(country, slug);
   }
 
   return (
@@ -50,7 +50,7 @@ export function RegionSelector({ className, variant = "pill" }: { className?: st
         <BaseSelect.Positioner sideOffset={8} align="end" alignItemWithTrigger={false} className="z-50 outline-none">
           <BaseSelect.Popup className="min-w-56 origin-[var(--transform-origin)] rounded-2xl border border-border bg-card p-1.5 text-foreground shadow-2xl shadow-foreground/10 outline-none transition-[transform,opacity] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
             <BaseSelect.List className="max-h-80 overflow-y-auto outline-none">
-              {MARKET_LIST.map((m) => (
+              {ENABLED_MARKETS.map((m) => (
                 <BaseSelect.Group key={m.countryCode} className="mb-1 last:mb-0">
                   <BaseSelect.GroupLabel className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/80">
                     {m.name} · {m.currency}

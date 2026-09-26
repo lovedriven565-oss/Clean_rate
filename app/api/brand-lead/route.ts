@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { escapeHtml, forwardToTelegram } from "@/lib/telegram";
 import { recordAnalyticsEvent, saveBrandLead } from "@/lib/db/queries";
+import { checkRateLimit, tooManyRequests, verifyTurnstile } from "@/lib/security/guard";
 import { PRIVACY_CONSENT_VERSION } from "@/lib/site";
 
 const payloadSchema = z.object({
@@ -13,6 +14,7 @@ const payloadSchema = z.object({
   goal: z.string().trim().max(1200),
   /** Сервер требует явное согласие — клиентский чекбокс не доказательство. */
   consent: z.literal(true),
+  turnstileToken: z.string().max(4096).optional(),
 });
 
 const roleLabels = {
@@ -23,6 +25,8 @@ const roleLabels = {
 } as const;
 
 export async function POST(request: Request) {
+  if (!(await checkRateLimit(request, "LEAD_LIMITER", "brand-lead"))) return tooManyRequests();
+
   const parsed = payloadSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json(
@@ -32,6 +36,10 @@ export async function POST(request: Request) {
   }
 
   const payload = parsed.data;
+
+  if (!(await verifyTurnstile(payload.turnstileToken, request))) {
+    return NextResponse.json({ ok: false, error: "Не удалось подтвердить, что вы не робот." }, { status: 403 });
+  }
 
   // 1. Сохранение заявки в базу D1 — до уведомления: Telegram не источник истины.
   const lead = await saveBrandLead({

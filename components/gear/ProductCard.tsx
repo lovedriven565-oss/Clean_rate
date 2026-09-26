@@ -11,13 +11,19 @@ export function ProductCard({ product }: { product: AffiliateProduct; index?: nu
       className="group flex flex-col overflow-hidden rounded-[var(--radius)] border border-border bg-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/25 hover:shadow-xl"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          sizes="(max-width: 768px) 100vw, 25vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 100vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <span aria-hidden className="absolute inset-0 flex items-center justify-center font-display text-5xl font-bold text-muted-foreground/40">
+            {product.name.charAt(0)}
+          </span>
+        )}
         <span className="absolute right-3 top-3 rounded-full border border-border/70 bg-card/90 px-2.5 py-1 text-[10px] font-semibold text-muted-foreground backdrop-blur">
           Внешний ресурс
         </span>

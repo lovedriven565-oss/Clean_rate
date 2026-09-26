@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MARKET_LIST } from "@/lib/markets";
+import { ENABLED_MARKETS } from "@/lib/markets";
 
 /**
  * Публичный адрес сайта для canonical/sitemap/OpenGraph.
@@ -21,7 +21,7 @@ export function absoluteUrl(path = "/"): string {
 
 /**
  * canonical + hreflang-заготовка для страницы. Регион живёт в cookie, поэтому все локали
- * (ru-BY / ru-RU / ru-KZ) указывают на один URL. При переезде на /{country}/{city}/ —
+ * открытых рынков (ENABLED_MARKETS) указывают на один URL. При переезде на /{country}/{city}/ —
  * подставить региональные адреса здесь, вызывающий код менять не придётся.
  *
  * Next.js не мерджит вложенный `alternates` из layout и page — поэтому хелпер обязателен
@@ -32,7 +32,7 @@ export function pageAlternates(path = "/"): NonNullable<Metadata["alternates"]> 
   return {
     canonical: url,
     languages: Object.fromEntries([
-      ...MARKET_LIST.map((market) => [market.locale, url]),
+      ...ENABLED_MARKETS.map((market) => [market.locale, url]),
       ["ru", url],
       ["x-default", url],
     ]),

@@ -13,7 +13,8 @@ import { Badge } from "@/components/ui/primitives";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getAllBrands, getAllCategories, getCompanyBySlug, getCompanySlugs } from "@/lib/db/queries";
 import { calculateOrganicScore, hasPublishedRating, ratingSourceLabel } from "@/lib/rating";
-import { formatNumber, formatPriceFrom, formatRating } from "@/lib/format";
+import { formatCompanyPriceFrom, formatNumber, formatRating } from "@/lib/format";
+import { getMarketByCity } from "@/lib/markets";
 import { pageAlternates } from "@/lib/site";
 
 export async function generateStaticParams() {
@@ -39,6 +40,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
   const [allBrands, allCategories] = await Promise.all([getAllBrands(), getAllCategories()]);
 
+  const fullAddress = company.address ? `${company.city}, ${company.address}` : company.city;
   const organicScore = calculateOrganicScore(company);
   const publishedRating = hasPublishedRating(company);
   const companyCategories = company.categories
@@ -47,6 +49,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
   const companyBrands = (company.equipment ?? [])
     .map((id) => allBrands.find((brand) => brand.id === id))
     .filter((brand): brand is (typeof allBrands)[number] => Boolean(brand));
+  // aggregateRating намеренно не размечается: оценка взята из Google/Яндекса, а правила Google
+  // запрещают разметку отзывов, собранных на сторонних сайтах. Вернуть — когда появятся свои отзывы.
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -55,9 +59,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
     address: company.address ? { "@type": "PostalAddress", addressLocality: company.city, streetAddress: company.address } : undefined,
     telephone: company.phone,
     url: company.websiteUrl,
-    aggregateRating: publishedRating
-      ? { "@type": "AggregateRating", ratingValue: company.baseRating, reviewCount: company.reviewCount, bestRating: 5 }
-      : undefined,
   };
 
   return (
@@ -90,11 +91,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                     </h1>
                     <span className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="h-4 w-4 text-primary" />
-                      {company.address ? `${company.city}, ${company.address}` : company.city}
+                      {fullAddress}
                       <a
-                        href={`https://yandex.by/maps/?text=${encodeURIComponent(
-                          company.address ? `${company.city}, ${company.address}` : company.city
-                        )}`}
+                        href={`https://${getMarketByCity(company.city).mapsHost}/maps/?text=${encodeURIComponent(fullAddress)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
@@ -194,7 +193,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
                   <dt className="text-muted-foreground">Стоимость</dt>
                   <dd className="font-semibold text-foreground">
-                    {company.priceFrom !== undefined ? `от ${formatPriceFrom(company.priceFrom, company.priceUnit)}` : "По запросу"}
+                    {company.priceFrom !== undefined ? `от ${formatCompanyPriceFrom(company.priceFrom, company)}` : "По запросу"}
                   </dd>
                 </div>
                 <div className="flex items-center justify-between gap-4 border-b border-border pb-4">

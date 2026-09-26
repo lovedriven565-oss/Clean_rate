@@ -10,7 +10,7 @@ import {
   MARKETS,
   getCity,
   getMarket,
-  isCountryCode,
+  isEnabledCountry,
 } from "@/lib/markets";
 
 const COOKIE_NAME = "ch_region";
@@ -50,7 +50,8 @@ function writeCookie(name: string, value: string) {
 function parseRegionCookie(raw: string | undefined): RegionState | null {
   if (!raw) return null;
   const [countryCode, citySlug] = raw.split(":");
-  if (!countryCode || !isCountryCode(countryCode)) return null;
+  // Cookie выключенного рынка (например, RU до запуска) игнорируется → регион по умолчанию.
+  if (!countryCode || !isEnabledCountry(countryCode)) return null;
   return { countryCode, citySlug: getCity(countryCode, citySlug).slug };
 }
 

@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" }
 const manrope = Manrope({ subsets: ["latin", "cyrillic"], variable: "--font-manrope" });
 
 const description =
-  "Решения задач чистоты, честный рейтинг клининговых компаний и бренды для профи. Беларусь, Россия, Казахстан. Открытые источники оценки, прямые контакты.";
+  "Решения задач чистоты, честный рейтинг клининговых компаний и бренды для профи в Беларуси. Открытые источники оценки, прямые контакты.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -18,12 +18,11 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description,
-  keywords: ["клининг", "уборка", "химчистка", "рейтинг клининговых компаний", "клининг Минск", "клининг Москва", "клининг Алматы"],
+  keywords: ["клининг", "уборка", "химчистка", "рейтинг клининговых компаний", "клининг Минск", "клининг Брест", "химчистка мебели Минск"],
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    locale: "ru_RU",
-    alternateLocale: ["ru_BY", "ru_KZ"],
+    locale: "ru_BY",
     url: SITE_URL,
     title: `${SITE_NAME} — найдите решение любой задачи чистоты`,
     description,

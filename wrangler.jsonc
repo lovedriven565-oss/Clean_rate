@@ -17,6 +17,16 @@
       "remote": false
     }
   ],
+  "vars": {
+    // Ошибки чтения D1 не маскируются seed-данными (lib/db/queries.ts → reportDbError)
+    "STRICT_DB": "1"
+  },
+  // Лимиты на локацию Cloudflare, ключ = маршрут + IP (lib/security/guard.ts). period: только 10 или 60.
+  "ratelimits": [
+    { "name": "LEAD_LIMITER", "namespace_id": "2101", "simple": { "limit": 5, "period": 60 } },
+    { "name": "EVENT_LIMITER", "namespace_id": "2102", "simple": { "limit": 120, "period": 60 } },
+    { "name": "SEARCH_LIMITER", "namespace_id": "2103", "simple": { "limit": 60, "period": 60 } }
+  ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1

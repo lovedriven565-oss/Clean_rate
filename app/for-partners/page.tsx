@@ -8,6 +8,10 @@ import { PartnerLeadForm } from "@/components/PartnerLeadForm";
 import { StatCounter } from "@/components/StatCounter";
 import { Button } from "@/components/ui/primitives";
 import { categories, companies } from "@/lib/mock-data";
+import { ENABLED_MARKETS } from "@/lib/markets";
+import { pluralize } from "@/lib/format";
+
+const enabledCities = ENABLED_MARKETS.flatMap((market) => market.cities.map((city) => city.name));
 
 const steps = [
   {
@@ -128,7 +132,11 @@ export default function ForPartnersPage() {
           <div className="container grid grid-cols-1 gap-8 py-10 sm:grid-cols-3">
             <StatCounter value={companies.length} label="компаний в каталоге" />
             <StatCounter value={categories.length} label="категорий услуг" />
-            <StatCounter value={3} suffix=" страны" label="Беларусь, Россия, Казахстан" />
+            <StatCounter
+              value={enabledCities.length}
+              suffix={` ${pluralize(enabledCities.length, ["город", "города", "городов"]).split(" ")[1]}`}
+              label={enabledCities.join(" и ")}
+            />
           </div>
         </section>
 

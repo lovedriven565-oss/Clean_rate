@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import { getAllCampaigns } from "@/lib/ads/queries";
 import { recordAnalyticsEvent } from "@/lib/db/queries";
 import { parseImpressionEvent } from "@/lib/analytics/validation";
+import { checkRateLimit, tooManyRequests } from "@/lib/security/guard";
 
 const MAX_BODY_BYTES = 8 * 1024;
 
 export async function POST(request: Request) {
+  if (!(await checkRateLimit(request, "EVENT_LIMITER", "impression"))) return tooManyRequests();
+
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   if (contentLength > MAX_BODY_BYTES) {
     return NextResponse.json({ ok: false, error: "Слишком большое событие" }, { status: 413 });

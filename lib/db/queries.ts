@@ -52,6 +52,16 @@ import {
   seedSolutions,
 } from "@/db/seed-data";
 
+/**
+ * Ошибка чтения D1. Локально (частично засеянная D1, next start) — лог и откат на seed.
+ * В проде (`STRICT_DB=1` в wrangler vars) ошибка всплывает: устаревший seed не должен
+ * молча подменять реальные данные.
+ */
+function reportDbError(label: string, err: unknown): void {
+  console.error(label, err);
+  if (process.env.STRICT_DB === "1") throw err;
+}
+
 // --- Fallback: маппинг seed-data в типы UI ---
 
 function seedCompanyToCompany(seed: (typeof seedCompanies)[number]): Company {
@@ -283,7 +293,7 @@ function mapCompanyRow(
     ratingSource: hasRating ? mapRatingSource(primaryRating.source) : "unverified",
     priceFrom: row.price_from ?? undefined,
     priceUnit: row.price_unit ?? undefined,
-    coverImage: row.cover_image ?? `https://picsum.photos/seed/${row.id}/800/600`,
+    coverImage: row.cover_image ?? undefined,
     description: row.description,
     tags: parseJsonArray(row.tags),
     guarantees: parseJsonArray(row.guarantees),
@@ -341,7 +351,7 @@ export async function getAllCompanies(): Promise<Company[]> {
       return mapCompanyRow(row as unknown as CompanyRow, cats, ratings, equip);
     });
   } catch (err) {
-    console.error("[db:companies_error]", err);
+    reportDbError("[db:companies_error]", err);
     return getFallbackCompanies();
   }
 }
@@ -370,7 +380,7 @@ export async function getCompanyBySlug(slug: string): Promise<Company | null> {
       equip.map((e) => ({ brand_id: e.brandId }))
     );
   } catch (err) {
-    console.error("[db:company_by_slug_error]", err);
+    reportDbError("[db:company_by_slug_error]", err);
     const fallback = getFallbackCompanies();
     return fallback.find((c) => c.slug === slug) ?? null;
   }
@@ -399,7 +409,7 @@ export async function getAllBrands(): Promise<Brand[]> {
       })
     );
   } catch (err) {
-    console.error("[db:brands_error]", err);
+    reportDbError("[db:brands_error]", err);
     return getFallbackBrands();
   }
 }
@@ -493,7 +503,7 @@ export async function getBrandsByScore(): Promise<RankedBrand[]> {
 
     return rankBrands(allBrands, new Map([...inputs].map(([id, input]) => [id, computeBrandScore(input)])));
   } catch (err) {
-    console.error("[db:brand_scores_error]", err);
+    reportDbError("[db:brand_scores_error]", err);
     return rankBrands(allBrands, getFallbackBrandScores(brandIds));
   }
 }
@@ -511,7 +521,7 @@ export async function getCompanySlugs(): Promise<string[]> {
     const rows = await drizzleDb.select({ slug: cleaningCompanies.slug }).from(cleaningCompanies);
     return rows.map((r) => r.slug);
   } catch (err) {
-    console.error("[db:company_slugs_error]", err);
+    reportDbError("[db:company_slugs_error]", err);
     return getFallbackCompanies().map((c) => c.slug);
   }
 }
@@ -563,7 +573,7 @@ export async function getAllSolutions(): Promise<Solution[]> {
       };
     });
   } catch (err) {
-    console.error("[db:solutions_error]", err);
+    reportDbError("[db:solutions_error]", err);
     return getFallbackSolutions();
   }
 }
@@ -618,7 +628,7 @@ export async function getSolutionBySlug(slug: string): Promise<Solution | null> 
       recommendedProducts: products,
     };
   } catch (err) {
-    console.error("[db:solution_by_slug_error]", err);
+    reportDbError("[db:solution_by_slug_error]", err);
     const fallback = getFallbackSolutions();
     return fallback.find((s) => s.slug === slug) ?? null;
   }
@@ -637,7 +647,7 @@ export async function getSolutionSlugs(): Promise<string[]> {
     if (rows.length === 0) return getFallbackSolutions().map((s) => s.slug);
     return rows.map((r) => r.slug);
   } catch (err) {
-    console.error("[db:solution_slugs_error]", err);
+    reportDbError("[db:solution_slugs_error]", err);
     return getFallbackSolutions().map((s) => s.slug);
   }
 }
@@ -663,7 +673,7 @@ export async function supplierExists(id: string): Promise<boolean> {
       .limit(1);
     return rows.length > 0;
   } catch (err) {
-    console.error("[db:supplier_exists_error]", err);
+    reportDbError("[db:supplier_exists_error]", err);
     return true;
   }
 }
@@ -701,7 +711,7 @@ export async function getPriceEstimates(filter?: {
         note: row.note ?? undefined,
       }));
   } catch (err) {
-    console.error("[db:price_estimates_error]", err);
+    reportDbError("[db:price_estimates_error]", err);
     return getFallbackPriceEstimates(filter);
   }
 }
@@ -724,7 +734,7 @@ export async function getIntentKeywords(): Promise<IntentKeyword[]> {
       targetSlug: row.targetSlug,
     }));
   } catch (err) {
-    console.error("[db:intent_keywords_error]", err);
+    reportDbError("[db:intent_keywords_error]", err);
     return getFallbackIntentKeywords();
   }
 }
@@ -922,7 +932,7 @@ export async function getBrandLeads(): Promise<BrandLead[]> {
       createdAt: r.createdAt,
     }));
   } catch (err) {
-    console.error("[db:brand_leads_error]", err);
+    reportDbError("[db:brand_leads_error]", err);
     return [];
   }
 }
@@ -948,7 +958,7 @@ export async function getPartnerLeads(): Promise<PartnerLead[]> {
       createdAt: r.createdAt,
     }));
   } catch (err) {
-    console.error("[db:partner_leads_error]", err);
+    reportDbError("[db:partner_leads_error]", err);
     return [];
   }
 }

@@ -5,8 +5,9 @@ import Link from "next/link";
 import { Building2, CheckCircle2, Loader2, MapPin, Send } from "lucide-react";
 import { Button, Input } from "@/components/ui/primitives";
 import { Select } from "@/components/ui/Select";
+import { TurnstileWidget, turnstileEnabled } from "@/components/TurnstileWidget";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { MARKET_LIST } from "@/lib/markets";
+import { ENABLED_MARKETS } from "@/lib/markets";
 import { categories } from "@/lib/mock-data";
 import type { CategoryId } from "@/lib/types";
 import { parseApiResult } from "@/lib/api-result";
@@ -26,9 +27,10 @@ export function PartnerLeadForm() {
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const cities = useMemo(() => {
-    const list = MARKET_LIST.flatMap((m) => m.cities.map((c) => c.name));
+    const list = ENABLED_MARKETS.flatMap((m) => m.cities.map((c) => c.name));
     return Array.from(new Set(list)).sort();
   }, []);
 
@@ -47,6 +49,11 @@ export function PartnerLeadForm() {
       setStatus("error");
       return;
     }
+    if (turnstileEnabled && !turnstileToken) {
+      setError("Подождите завершения проверки «я не робот».");
+      setStatus("error");
+      return;
+    }
 
     setStatus("submitting");
 
@@ -61,6 +68,8 @@ export function PartnerLeadForm() {
           city,
           categoryIds: selectedCategories,
           message: message || undefined,
+          consent,
+          turnstileToken: turnstileToken ?? undefined,
         }),
       });
       const data = parseApiResult(await res.json());
@@ -176,6 +185,8 @@ export function PartnerLeadForm() {
           className="rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
       </div>
+
+      <TurnstileWidget onToken={setTurnstileToken} />
 
       {error && (
         <p role="alert" className="text-xs font-medium text-danger">

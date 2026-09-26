@@ -1,46 +1,56 @@
 import { NextResponse } from "next/server";
-import { categories } from "@/lib/mock-data";
-import { forwardToTelegram, isValidPhone } from "@/lib/telegram";
-import { recordAnalyticsEvent, savePartnerLead } from "@/lib/db/queries";
+import { z } from "zod";
+import { escapeHtml, forwardToTelegram, isValidPhone } from "@/lib/telegram";
+import { getAllCategories, recordAnalyticsEvent, savePartnerLead } from "@/lib/db/queries";
+import { checkRateLimit, tooManyRequests, verifyTurnstile } from "@/lib/security/guard";
 import { PRIVACY_CONSENT_VERSION } from "@/lib/site";
 
-interface PartnerLeadPayload {
-  companyName?: string;
-  contactName?: string;
-  phone?: string;
-  city?: string;
-  categoryIds?: string[];
-  message?: string;
-}
+const payloadSchema = z.object({
+  companyName: z.string().trim().min(2).max(120),
+  contactName: z.string().trim().max(120).optional(),
+  phone: z.string().trim().max(40).refine(isValidPhone),
+  city: z.string().trim().max(80).optional(),
+  categoryIds: z.array(z.string().max(40)).max(20).optional(),
+  message: z.string().trim().max(1200).optional(),
+  /** Сервер требует явное согласие — клиентский чекбокс не доказательство. */
+  consent: z.literal(true),
+  turnstileToken: z.string().max(4096).optional(),
+});
 
 export async function POST(request: Request) {
-  let payload: PartnerLeadPayload;
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ ok: false, error: "Некорректный формат запроса" }, { status: 400 });
+  if (!(await checkRateLimit(request, "LEAD_LIMITER", "partner-lead"))) return tooManyRequests();
+
+  const parsed = payloadSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json(
+      { ok: false, error: "Проверьте название компании, телефон и согласие с политикой." },
+      { status: 400 }
+    );
+  }
+  const payload = parsed.data;
+
+  if (!(await verifyTurnstile(payload.turnstileToken, request))) {
+    return NextResponse.json({ ok: false, error: "Не удалось подтвердить, что вы не робот." }, { status: 403 });
   }
 
-  const { companyName, contactName, phone, city, categoryIds, message } = payload;
+  const categories = await getAllCategories();
+  const categoryIds = (payload.categoryIds ?? []).filter((id) => categories.some((c) => c.id === id));
 
-  if (!companyName || !companyName.trim()) {
-    return NextResponse.json({ ok: false, error: "Укажите название компании" }, { status: 400 });
-  }
-  if (!phone || !isValidPhone(phone)) {
-    return NextResponse.json({ ok: false, error: "Укажите корректный номер телефона" }, { status: 400 });
-  }
-
-  // 1. Сохранение в базу D1
+  // 1. Сохранение в D1 — до уведомления: Telegram не источник истины.
   const lead = await savePartnerLead({
-    companyName: companyName.trim(),
-    contactName: contactName?.trim() || undefined,
-    phone: phone.trim(),
-    city: city?.trim() || undefined,
+    companyName: payload.companyName,
+    contactName: payload.contactName || undefined,
+    phone: payload.phone,
+    city: payload.city || undefined,
     categoryIds,
-    message: message?.trim() || undefined,
+    message: payload.message || undefined,
     consentAcceptedAt: new Date(),
     consentVersion: PRIVACY_CONSENT_VERSION,
   });
+
+  if (lead.status === "error") {
+    return NextResponse.json({ ok: false, error: "Не удалось сохранить заявку. Попробуйте ещё раз." }, { status: 503 });
+  }
 
   // 2. Аналитическое событие
   await recordAnalyticsEvent({
@@ -48,32 +58,29 @@ export async function POST(request: Request) {
     entityId: lead.id,
     eventType: "lead",
     path: "/for-partners",
-    metadata: { companyName: companyName.trim(), city },
+    metadata: { city: payload.city },
   });
 
-  const categoryNames = (categoryIds ?? [])
+  const categoryNames = categoryIds
     .map((id) => categories.find((c) => c.id === id)?.name)
     .filter(Boolean)
     .join(", ");
 
+  // 3. Всё пользовательское экранируется: сообщение уходит с parse_mode HTML.
   const text = [
-    "🏢 <b>Новая заявка от компании (партнёрство)</b>",
-    `Компания: ${companyName.trim()}`,
-    contactName ? `Контакт: ${contactName}` : null,
-    `Телефон: ${phone}`,
-    city ? `Город: ${city}` : null,
-    categoryNames ? `Услуги: ${categoryNames}` : null,
-    message ? `Комментарий: ${message}` : null,
+    "<b>Новая заявка от компании (партнёрство)</b>",
+    `Компания: ${escapeHtml(payload.companyName)}`,
+    payload.contactName ? `Контакт: ${escapeHtml(payload.contactName)}` : null,
+    `Телефон: ${escapeHtml(payload.phone)}`,
+    payload.city ? `Город: ${escapeHtml(payload.city)}` : null,
+    categoryNames ? `Услуги: ${escapeHtml(categoryNames)}` : null,
+    payload.message ? `Комментарий: ${escapeHtml(payload.message)}` : null,
     `ID заявки: <code>${lead.id}</code>`,
   ]
     .filter(Boolean)
     .join("\n");
 
   const delivered = await forwardToTelegram(text);
-
-  if (!delivered) {
-    console.log("[partner-lead] Новая заявка компании (Telegram не настроен):", text);
-  }
-
+  if (!delivered) console.log("[partner-lead] Telegram не настроен");
   return NextResponse.json({ ok: true, delivered, leadId: lead.id });
 }
