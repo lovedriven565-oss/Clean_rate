@@ -13,6 +13,7 @@
     {
       "binding": "DB",
       "database_name": "cleaning-rating-db",
+      "database_id": "871b3c22-b53c-46b8-95a9-b3da96a2c31f",
       "migrations_dir": "migrations",
       "remote": false
     }
