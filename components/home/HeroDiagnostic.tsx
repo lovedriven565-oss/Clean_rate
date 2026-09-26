@@ -36,16 +36,12 @@ export function HeroDiagnostic({ solutions, estimates }: { solutions: Solution[]
   const solutionEstimates = solution ? estimates.filter((e) => e.solutionId === solution.id) : [];
 
   return (
-    <div className="relative rounded-[2rem] border border-border bg-card p-5 shadow-[0_32px_80px_hsl(var(--foreground)/0.08)] sm:p-7">
+    <div className="data-surface relative rounded-panel border border-border p-5 sm:p-7">
       <div className="flex items-center justify-between gap-3">
         <span className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-          </span>
           Быстрый подбор решения
         </span>
-        <span className="text-xs text-muted-foreground">{solutions.length} протоколов</span>
+        <span className="font-data text-xs text-muted-foreground">{solutions.length} протоколов</span>
       </div>
 
       <StepLabel index={1} label="Где проблема?" className="mt-6" />
@@ -85,7 +81,7 @@ export function HeroDiagnostic({ solutions, estimates }: { solutions: Solution[]
               <ol className="mt-4 space-y-2.5">
                 {solution.diySteps.slice(0, 2).map((step) => (
                   <li key={step.order} className="grid grid-cols-[1.75rem_1fr] gap-3 text-sm leading-6 text-muted-foreground">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground font-display text-xs font-bold text-background">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground font-data text-xs font-medium text-background">
                       {step.order}
                     </span>
                     <span className="line-clamp-2 pt-0.5">{step.instruction}</span>
@@ -98,7 +94,7 @@ export function HeroDiagnostic({ solutions, estimates }: { solutions: Solution[]
                 )}
               </ol>
 
-              <div className="mt-4 flex items-start gap-2 rounded-2xl bg-muted/60 p-3 text-xs leading-5 text-muted-foreground">
+              <div className="mt-4 flex items-start gap-2 rounded-control bg-muted/60 p-3 text-xs leading-5 text-muted-foreground">
                 <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-star" />
                 <span className="line-clamp-2">{solution.whenToCallPro}</span>
               </div>

@@ -53,7 +53,7 @@ export function NavSearch({ className }: { className?: string }) {
       </button>
 
       {panelOpen && (
-        <div className="glass absolute right-0 top-[calc(100%+0.75rem)] z-40 w-[min(92vw,26rem)] rounded-[1.1rem] p-3 shadow-xl">
+        <div className="glass absolute right-0 top-[calc(100%+0.75rem)] z-40 w-[min(92vw,26rem)] rounded-panel p-3 shadow-xl">
           <form
             onSubmit={(event) => {
               handleSubmit(event);

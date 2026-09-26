@@ -59,7 +59,7 @@ export function AdCta({
         "group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-[background-color,border-color,color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         size === "lg" ? "h-12 px-6 text-[15px]" : "h-11 px-5 text-sm",
         variant === "primary" &&
-          "bg-foreground text-background shadow-[0_10px_30px_-12px_hsl(var(--foreground)/0.6)] hover:shadow-[0_14px_34px_-12px_hsl(var(--foreground)/0.7)]",
+          "bg-foreground text-background shadow-[0_10px_30px_-12px_hsl(var(--shadow-tint)/0.6)] hover:shadow-[0_14px_34px_-12px_hsl(var(--shadow-tint)/0.7)]",
         variant === "secondary" &&
           "border border-border bg-card text-foreground hover:border-foreground/30 hover:bg-muted/60",
         variant === "onDark" && "bg-background text-foreground hover:bg-background/90",

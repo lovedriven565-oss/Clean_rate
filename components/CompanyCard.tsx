@@ -25,7 +25,7 @@ export function CompanyCard({
     .slice(0, 3);
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-control border border-border bg-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl">
       <RankBadge rank={rank} onlyTop className="absolute left-3 top-3 z-10 h-8 w-8 rounded-full text-sm shadow-sm" />
 
       <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-muted/50">

@@ -52,11 +52,11 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
 
         {/* Индекс доверия профи */}
         <section className="container -mt-8 relative z-10">
-          <div className="data-surface grid gap-6 rounded-[1.75rem] border border-border p-6 sm:grid-cols-[auto_1fr] sm:items-center sm:p-8">
+          <div className="data-surface grid gap-6 rounded-panel border border-border p-6 sm:grid-cols-[auto_1fr] sm:items-center sm:p-8">
             <div>
               <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Индекс доверия профи</span>
               <div className="mt-2 flex items-end gap-3">
-                <strong className="font-display text-5xl font-extrabold tabular-nums tracking-[-0.04em] text-foreground">{score}</strong>
+                <strong className="font-data text-5xl font-medium text-foreground">{score}</strong>
                 <span className="pb-2 text-sm text-muted-foreground">#{position + 1} из {ranked.length}</span>
               </div>
               {prosChoice && <StatusBadge variant="prosChoice" size="md" className="mt-3" />}
@@ -89,7 +89,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
                   <li key={solution.id}>
                     <Link
                       href={`/solutions/${solution.slug}`}
-                      className="group flex h-full flex-col gap-2 rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
+                      className="group flex h-full flex-col gap-2 rounded-control border border-border bg-card p-5 transition-colors hover:border-primary/30"
                     >
                       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                         {link?.role === "recommended" ? "Рекомендуем" : "Альтернатива"}
@@ -160,7 +160,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
 function Metric({ value, label }: { value: number; label: string }) {
   return (
     <div>
-      <dd className="font-display text-2xl font-extrabold tabular-nums tracking-[-0.03em] text-foreground">{value}</dd>
+      <dd className="font-data text-2xl font-medium text-foreground">{value}</dd>
       <dt className="mt-1 text-xs leading-4 text-muted-foreground">{label}</dt>
     </div>
   );

@@ -23,6 +23,11 @@ export interface SafetyCheckResult {
  * Поверхности, чувствительные к кислотам (pH < 6).
  * На этих поверхностях кислотная химия может вызвать необратимое химическое травление.
  */
+/** Ниже этого pH состав считается кислотным для чувствительных поверхностей. */
+export const ACID_RISK_PH = 6;
+/** Выше этого pH состав считается агрессивной щёлочью для чувствительных поверхностей. */
+export const ALKALI_RISK_PH = 9.5;
+
 export const ACID_SENSITIVE_SURFACES: ReadonlySet<string> = new Set([
   "marble",
   "limestone",
@@ -73,7 +78,7 @@ export function checkProductSafety(params: {
   }
 
   // 2. Проверка кислотной чувствительности (pH < 6)
-  if (product.ph !== undefined && product.ph < 6) {
+  if (product.ph !== undefined && product.ph < ACID_RISK_PH) {
     if (targetSurface && ACID_SENSITIVE_SURFACES.has(targetSurface.toLowerCase())) {
       return {
         safe: false,
@@ -92,7 +97,7 @@ export function checkProductSafety(params: {
   }
 
   // 3. Проверка щелочной чувствительности (pH > 9.5)
-  if (product.ph !== undefined && product.ph > 9.5) {
+  if (product.ph !== undefined && product.ph > ALKALI_RISK_PH) {
     if (targetSurface && ALKALI_SENSITIVE_SURFACES.has(targetSurface.toLowerCase())) {
       return {
         safe: false,

@@ -8,7 +8,7 @@ export function ProductCard({ product }: { product: AffiliateProduct; index?: nu
       href={product.affiliateUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col overflow-hidden rounded-[var(--radius)] border border-border bg-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/25 hover:shadow-xl"
+      className="group flex flex-col overflow-hidden rounded-panel border border-border bg-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/25 hover:shadow-xl"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         {product.image ? (

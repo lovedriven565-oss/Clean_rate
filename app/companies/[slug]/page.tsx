@@ -70,7 +70,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
         />
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative py-12 sm:py-18">
             <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Рейтинг компаний", href: "/rating" }, { label: company.name }]} />
             <Link href="/rating" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
@@ -80,13 +79,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             <div className="mt-9 grid gap-8 lg:grid-cols-[1fr_300px] lg:items-end">
               <div>
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                  <CompanyAvatar id={company.id} name={company.name} size="xl" className="h-28 w-28 rounded-[1.75rem]" />
+                  <CompanyAvatar id={company.id} name={company.name} size="xl" className="h-28 w-28 rounded-panel" />
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       {company.verified && <StatusBadge variant="verified" size="md" label="Профиль проверен" />}
                       {company.promoted && <StatusBadge variant="sponsor" size="md" />}
                     </div>
-                    <h1 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-foreground sm:text-6xl">
+                    <h1 className="mt-3 font-display text-4xl font-bold tracking-[-0.04em] text-foreground sm:text-6xl">
                       {company.name}
                     </h1>
                     <span className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -110,10 +109,10 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 </div>
               </div>
 
-              <aside className="data-surface rounded-[1.75rem] border border-border p-6">
+              <aside className="data-surface rounded-panel border border-border p-6">
                 <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Органический балл</span>
                 <div className="mt-3 flex items-end gap-2">
-                  <strong className="font-display text-5xl font-extrabold text-foreground">{organicScore ?? "—"}</strong>
+                  <strong className="font-data text-5xl font-medium text-foreground">{organicScore ?? "—"}</strong>
                   {organicScore !== null && <span className="pb-1.5 text-sm text-muted-foreground">из 100</span>}
                 </div>
                 {publishedRating ? (
@@ -139,9 +138,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
         <section className="container grid gap-6 py-14 lg:grid-cols-[1fr_340px] lg:py-20">
           <div className="space-y-6">
-            <article className="rounded-[1.75rem] border border-border bg-card p-7 sm:p-9">
+            <article className="rounded-panel border border-border bg-card p-7 sm:p-9">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><BriefcaseBusiness className="h-5 w-5" /></span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-control bg-primary/10 text-primary"><BriefcaseBusiness className="h-5 w-5" /></span>
                 <h2 className="font-display text-2xl font-bold text-foreground">Услуги и специализация</h2>
               </div>
               <div className="mt-6 flex flex-wrap gap-2">
@@ -163,7 +162,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               )}
             </article>
 
-            <article className="rounded-[1.75rem] border border-border bg-card p-7 sm:p-9">
+            <article className="rounded-panel border border-border bg-card p-7 sm:p-9">
               <h2 className="font-display text-2xl font-bold text-foreground">Техника и профессиональные решения</h2>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
                 Связи публикуются только как данные профиля и требуют подтверждения представителем компании.
@@ -178,7 +177,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             </article>
 
             {company.recentReview && publishedRating && (
-              <article className="data-surface rounded-[1.75rem] border border-border p-7 sm:p-9">
+              <article className="data-surface rounded-panel border border-border p-7 sm:p-9">
                 <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Отзыв в профиле</span>
                 <blockquote className="mt-4 font-display text-xl leading-8 text-foreground">“{company.recentReview.text}”</blockquote>
                 <p className="mt-5 text-sm font-semibold text-muted-foreground">{company.recentReview.author}</p>
@@ -187,7 +186,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
           </div>
 
           <aside className="space-y-5">
-            <div className="rounded-[1.5rem] border border-border bg-card p-6">
+            <div className="rounded-panel border border-border bg-card p-6">
               <h2 className="font-display text-lg font-bold text-foreground">Основные условия</h2>
               <dl className="mt-5 space-y-4 text-sm">
                 <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
@@ -207,7 +206,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               </dl>
             </div>
 
-            <div className="rounded-[1.5rem] bg-contrast p-6 text-contrast-foreground">
+            <div className="rounded-panel bg-contrast p-6 text-contrast-foreground">
               <ShieldCheck className="h-6 w-6 text-primary" />
               <h2 className="mt-5 font-display text-xl font-bold">Вы представитель компании?</h2>
               <p className="mt-3 text-sm leading-6 text-contrast-foreground/70">Подтвердите профиль, исправьте данные и добавьте доказательства компетенций.</p>

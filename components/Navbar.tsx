@@ -39,11 +39,11 @@ export function Navbar() {
     <header className="glass sticky top-0 z-40 border-x-0 border-t-0">
       <div className="container flex h-17 items-center justify-between gap-3">
         <Link href="/" className="group flex min-w-0 items-center gap-3" onClick={() => setOpen(false)}>
-          <span className="clean-node flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground text-background transition-transform group-hover:scale-105">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-foreground text-background transition-transform group-hover:scale-105">
             <Network className="h-4 w-4" />
           </span>
           <span className="min-w-0">
-            <span className="block truncate font-display text-sm font-extrabold tracking-[-0.02em] text-foreground sm:text-base">
+            <span className="block truncate font-display text-sm font-bold tracking-[-0.02em] text-foreground sm:text-base">
               Клининг Рейтинг
             </span>
             <span className="hidden text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground sm:block">
@@ -108,7 +108,7 @@ export function Navbar() {
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "rounded-2xl px-4 py-3.5 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                  "rounded-control px-4 py-3.5 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
                   isActive(link.href) && "bg-primary/10 font-semibold text-primary"
                 )}
               >
@@ -118,7 +118,7 @@ export function Navbar() {
             <Link
               href="/for-partners"
               onClick={() => setOpen(false)}
-              className="mt-3 inline-flex h-13 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-base font-semibold text-primary-foreground"
+              className="mt-3 inline-flex h-13 items-center justify-center gap-2 rounded-full bg-primary px-4 text-base font-semibold text-primary-foreground"
             >
               Разместить бизнес
               <ArrowUpRight className="h-4 w-4" />

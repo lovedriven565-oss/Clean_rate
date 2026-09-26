@@ -1,11 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
 import { RegionProvider } from "@/components/providers/RegionProvider";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" });
-const manrope = Manrope({ subsets: ["latin", "cyrillic"], variable: "--font-manrope" });
 
 const description =
   "Решения задач чистоты, честный рейтинг клининговых компаний и бренды для профи в Беларуси. Открытые источники оценки, прямые контакты.";
@@ -34,8 +32,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5fbfb" },
-    { media: "(prefers-color-scheme: dark)", color: "#071114" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f8fa" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0f13" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -49,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" suppressHydrationWarning className={`${inter.variable} ${manrope.variable}`}>
+    <html lang="ru" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

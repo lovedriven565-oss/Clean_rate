@@ -19,14 +19,13 @@ export function EditorialPartnerBlock({ ad }: { ad: EligibleAd }) {
   return (
     <section
       aria-label={`Реклама: партнёр сезона ${ad.brandName}`}
-      className="relative overflow-hidden rounded-[2rem] border border-border bg-card"
+      className="relative overflow-hidden rounded-panel border border-border bg-card"
     >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{ background: `radial-gradient(ellipse 55% 80% at 100% 0%, ${accent}2b, transparent 68%)` }}
       />
-      <div aria-hidden className="bg-grid-fade pointer-events-none absolute inset-0 opacity-70" />
 
       <div className="relative grid gap-10 p-7 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-16 lg:p-14">
         <div className="max-w-2xl">
@@ -61,13 +60,13 @@ export function EditorialPartnerBlock({ ad }: { ad: EligibleAd }) {
           <div
             aria-hidden
             className={cn(
-              "relative flex h-52 w-52 items-center justify-center rounded-[2.75rem] font-display text-8xl font-extrabold shadow-[0_40px_80px_-30px_hsl(var(--foreground)/0.5)]",
+              "relative flex h-52 w-52 items-center justify-center rounded-panel font-display text-8xl font-bold shadow-[0_40px_80px_-30px_hsl(var(--shadow-tint)/0.5)]",
               isLightColor(accent) ? "text-slate-900" : "text-white"
             )}
             style={{ background: `linear-gradient(140deg, ${accent}, ${accent}b3)` }}
           >
-            <span className="absolute inset-0 rounded-[2.75rem] ring-1 ring-inset ring-white/25" />
-            <span className="absolute -inset-3 rounded-[3.25rem] border border-border/70" />
+            <span className="absolute inset-0 rounded-panel ring-1 ring-inset ring-white/25" />
+            <span className="absolute -inset-3 rounded-panel border border-border/70" />
             {ad.brandName.charAt(0)}
           </div>
         </div>

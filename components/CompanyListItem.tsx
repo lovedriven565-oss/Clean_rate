@@ -30,11 +30,11 @@ export function CompanyListItem({
   );
 
   return (
-    <article className="group relative rounded-2xl border border-border bg-card p-4 transition-[border-color,box-shadow] duration-200 hover:border-primary/20 hover:shadow-lg sm:p-5">
+    <article className="group relative rounded-control border border-border bg-card p-4 transition-[border-color,box-shadow] duration-200 hover:border-primary/20 hover:shadow-lg sm:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
         {/* Left: rank + avatar */}
         <div className="flex items-start gap-3 sm:flex-col sm:items-center sm:gap-2">
-          <RankBadge rank={rank} className="h-7 w-7 rounded-lg" />
+          <RankBadge rank={rank} className="h-7 w-7 rounded-control" />
           <CompanyAvatar id={company.id} name={company.name} size="md" />
         </div>
 

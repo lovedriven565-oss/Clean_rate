@@ -100,7 +100,6 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
 
         {/* Hero */}
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative py-10 sm:py-16">
             <Breadcrumbs
               items={[
@@ -118,11 +117,11 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{AUDIENCE_LABELS[solution.audience]}</span>
             </div>
 
-            <h1 className="mt-5 max-w-4xl font-display text-3xl font-extrabold leading-[1.08] tracking-[-0.04em] text-foreground sm:text-5xl">
+            <h1 className="mt-5 max-w-4xl font-display text-3xl font-bold leading-[1.08] tracking-[-0.04em] text-foreground sm:text-5xl">
               {solution.title}
             </h1>
 
-            <div className="mt-6 flex max-w-3xl gap-3 rounded-[1.25rem] border border-border bg-card/80 p-4 text-sm leading-6 text-muted-foreground backdrop-blur">
+            <div className="mt-6 flex max-w-3xl gap-3 rounded-panel border border-border bg-card/80 p-4 text-sm leading-6 text-muted-foreground backdrop-blur">
               <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-star" />
               <p>
                 Протокол проверен на типовых материалах, но реакция конкретной обивки или покрытия может отличаться.
@@ -178,7 +177,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
                 Ответы собраны из протокола выше, без маркетинга и невыполнимых обещаний.
               </p>
             </div>
-            <div className="divide-y divide-border rounded-[1.5rem] border border-border bg-card">
+            <div className="divide-y divide-border rounded-panel border border-border bg-card">
               {faq.map((item) => (
                 <details key={item.question} className="group px-5 sm:px-6">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[15px] font-semibold text-foreground [&::-webkit-details-marker]:hidden">

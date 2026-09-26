@@ -28,7 +28,7 @@ export function TaskTicker({ solutions, estimates }: { solutions: Solution[]; es
               {pluralize(solution.diySteps.length, ["шаг", "шага", "шагов"])}
             </span>
             {estimate && (
-              <span className="text-xs font-semibold tabular-nums text-primary">от {formatMarketCurrency(estimate.priceMin, market)}</span>
+              <span className="text-xs font-semibold font-data text-primary">от {formatMarketCurrency(estimate.priceMin, market)}</span>
             )}
           </Link>
         );

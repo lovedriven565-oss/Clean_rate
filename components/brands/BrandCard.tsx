@@ -34,7 +34,7 @@ export function BrandCard({ brand, size = "sm" }: { brand: Brand; size?: "sm" | 
         onMouseLeave={handleMouseLeave}
         style={{ rotateX, rotateY, transformPerspective: 800 }}
         whileHover={{ scale: 1.02 }}
-        className="group relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-[var(--radius)] border border-border/60 bg-card/60 p-6 backdrop-blur-sm transition-shadow hover:shadow-2xl"
+        className="group relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-panel border border-border/60 bg-card/60 p-6 backdrop-blur-sm transition-shadow hover:shadow-2xl"
       >
         <div
           aria-hidden
@@ -44,7 +44,7 @@ export function BrandCard({ brand, size = "sm" }: { brand: Brand; size?: "sm" | 
 
         <div className="relative flex items-start justify-between gap-3">
           <span
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-bold text-white shadow-lg"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-control text-lg font-bold text-white shadow-lg"
             style={{ backgroundColor: brand.accent }}
           >
             {brand.name.charAt(0)}

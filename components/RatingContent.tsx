@@ -131,13 +131,12 @@ function RatingContentInner({ companies, categories, categoryAds }: RatingConten
     <div className="flex min-h-screen flex-col bg-background">
       <main className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative py-12 sm:py-18">
             <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Рейтинг компаний" }]} />
             <span className="mt-4 block text-xs font-bold uppercase tracking-[0.2em] text-primary">Открытая методология</span>
             <div className="mt-3 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <h1 className="max-w-3xl font-display text-3xl font-extrabold tracking-[-0.04em] text-foreground sm:text-5xl">
+                <h1 className="max-w-3xl font-display text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-5xl">
                   Рейтинг клининговых компаний
                 </h1>
                 <p className="mt-4 max-w-2xl text-muted-foreground">

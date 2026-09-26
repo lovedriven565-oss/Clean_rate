@@ -13,7 +13,7 @@ export function CategoryPartnerBanner({ ad }: { ad: EligibleAd }) {
   return (
     <aside
       aria-label={`Реклама: партнёр категории ${ad.brandName}`}
-      className="relative overflow-hidden rounded-[1.5rem] border border-border bg-card"
+      className="relative overflow-hidden rounded-panel border border-border bg-card"
     >
       <span
         aria-hidden

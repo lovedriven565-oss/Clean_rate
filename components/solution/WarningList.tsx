@@ -7,7 +7,7 @@ export function WarningList({ warnings, className }: { warnings: string[]; class
   return (
     <div
       role="alert"
-      className={cn("rounded-[1.25rem] border border-danger/25 bg-danger/[0.06] p-5", className)}
+      className={cn("rounded-panel border border-danger/25 bg-danger/[0.06] p-5", className)}
     >
       <div className="flex items-center gap-2 text-danger">
         <TriangleAlert className="h-4 w-4" />

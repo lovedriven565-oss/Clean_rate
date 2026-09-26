@@ -102,7 +102,7 @@ function ExplorerInner({ solutions }: { solutions: Solution[] }) {
           ))}
         </div>
       ) : (
-        <div className="mt-4 flex flex-col items-center gap-3 rounded-[1.5rem] border border-dashed border-border p-12 text-center">
+        <div className="mt-4 flex flex-col items-center gap-3 rounded-panel border border-dashed border-border p-12 text-center">
           <SearchX className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">Для этой комбинации решений пока нет.</p>
           <button
@@ -120,7 +120,7 @@ function ExplorerInner({ solutions }: { solutions: Solution[] }) {
 
 export function SolutionsExplorer({ solutions }: { solutions: Solution[] }) {
   return (
-    <Suspense fallback={<div className="h-64 animate-pulse rounded-[1.5rem] bg-muted/50" />}>
+    <Suspense fallback={<div className="h-64 animate-pulse rounded-panel bg-muted/50" />}>
       <ExplorerInner solutions={solutions} />
     </Suspense>
   );

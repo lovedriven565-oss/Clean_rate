@@ -15,7 +15,7 @@ export function TwoPathsBento({ featured, companies }: { featured: Solution | un
       {/* Путь 1: сделать самому */}
       <Link
         href={featured ? `/solutions/${featured.slug}` : "/solutions"}
-        className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-border bg-card p-7 transition-colors hover:border-primary/30 sm:p-9 lg:col-span-7"
+        className="group relative flex flex-col overflow-hidden rounded-panel border border-border bg-card p-7 transition-colors hover:border-primary/30 sm:p-9 lg:col-span-7"
       >
         <span className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
           <Hand className="h-4 w-4" />
@@ -29,7 +29,7 @@ export function TwoPathsBento({ featured, companies }: { featured: Solution | un
           <ol className="mt-8 grid gap-5 sm:grid-cols-3">
             {featured.diySteps.slice(0, 3).map((step) => (
               <li key={step.order}>
-                <span className="font-display text-5xl font-extrabold leading-none tracking-[-0.05em] text-muted">
+                <span className="font-display text-5xl font-bold leading-none tracking-[-0.05em] text-muted">
                   0{step.order}
                 </span>
                 <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{step.instruction}</p>
@@ -47,7 +47,7 @@ export function TwoPathsBento({ featured, companies }: { featured: Solution | un
       {/* Путь 2: вызвать мастера */}
       <Link
         href="/rating"
-        className="group relative flex flex-col overflow-hidden rounded-[2rem] bg-contrast p-7 text-contrast-foreground sm:p-9 lg:col-span-5"
+        className="group relative flex flex-col overflow-hidden rounded-panel bg-contrast p-7 text-contrast-foreground sm:p-9 lg:col-span-5"
       >
         <span className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
           <Sparkles className="h-4 w-4" />
@@ -87,9 +87,9 @@ export function TwoPathsBento({ featured, companies }: { featured: Solution | un
       {/* Для бизнеса */}
       <Link
         href="/rating?intent=b2b&category=offices"
-        className="group flex items-start gap-4 rounded-[1.5rem] bg-muted/60 p-6 transition-colors hover:bg-muted lg:col-span-6"
+        className="group flex items-start gap-4 rounded-panel bg-muted/60 p-6 transition-colors hover:bg-muted lg:col-span-6"
       >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-card text-primary">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-card text-primary">
           <Briefcase className="h-5 w-5" />
         </span>
         <span className="min-w-0">
@@ -104,9 +104,9 @@ export function TwoPathsBento({ featured, companies }: { featured: Solution | un
       {/* Для профи */}
       <Link
         href="/brands"
-        className="group flex items-start gap-4 rounded-[1.5rem] bg-muted/60 p-6 transition-colors hover:bg-muted lg:col-span-6"
+        className="group flex items-start gap-4 rounded-panel bg-muted/60 p-6 transition-colors hover:bg-muted lg:col-span-6"
       >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-card text-primary">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-card text-primary">
           <Boxes className="h-5 w-5" />
         </span>
         <span className="min-w-0">

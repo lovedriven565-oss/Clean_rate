@@ -18,7 +18,7 @@ export function SponsoredProductCard({ ad, surface }: { ad: EligibleAd; surface?
   return (
     <article
       aria-label={`Реклама: ${ad.title}`}
-      className="relative overflow-hidden rounded-[1.75rem] border border-border bg-card"
+      className="relative overflow-hidden rounded-panel border border-border bg-card"
     >
       <div
         aria-hidden
@@ -64,7 +64,7 @@ export function SponsoredProductCard({ ad, surface }: { ad: EligibleAd; surface?
           </div>
         </div>
 
-        <aside className="rounded-[1.25rem] border border-border/70 bg-muted/40 p-5 sm:p-6">
+        <aside className="rounded-panel border border-border/70 bg-muted/40 p-5 sm:p-6">
           <span className="text-xs font-bold uppercase tracking-[0.16em] text-foreground">Почему подходит</span>
           <ul className="mt-4 space-y-3">
             {reasons.map((reason) => (

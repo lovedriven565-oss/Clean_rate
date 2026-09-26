@@ -47,13 +47,13 @@ export function Select({
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         <BaseSelect.Positioner sideOffset={8} alignItemWithTrigger={false} className="z-50 outline-none">
-          <BaseSelect.Popup className="min-w-[var(--anchor-width)] origin-[var(--transform-origin)] rounded-2xl border border-border bg-card p-1.5 text-foreground shadow-2xl shadow-foreground/10 outline-none transition-[transform,opacity] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
+          <BaseSelect.Popup className="min-w-[var(--anchor-width)] origin-[var(--transform-origin)] rounded-control border border-border bg-card p-1.5 text-foreground shadow-2xl shadow-tint/10 outline-none transition-[transform,opacity] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
             <BaseSelect.List className="max-h-72 overflow-y-auto outline-none">
               {options.map((option) => (
                 <BaseSelect.Item
                   key={option.value}
                   value={option.value}
-                  className="grid cursor-default grid-cols-[1fr_auto] items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm outline-none data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
+                  className="grid cursor-default grid-cols-[1fr_auto] items-center gap-3 rounded-control px-3.5 py-2.5 text-sm outline-none data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
                 >
                   <BaseSelect.ItemText>{option.label}</BaseSelect.ItemText>
                   <BaseSelect.ItemIndicator className="text-primary">

@@ -2,6 +2,12 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Дизайн-система «Clinical Future»: светлая лаборатория / точный прибор.
+ * Один акцент (teal --primary) на весь сайт. pH-цвета — шкала данных, не акценты.
+ * Shape lock: интерактив = pill (rounded-full), панели = rounded-panel (16px),
+ * мелкие элементы и поля = rounded-control (10px).
+ */
 @theme inline {
   --color-border: hsl(var(--border));
   --color-background: hsl(var(--background));
@@ -21,60 +27,78 @@
   --color-sponsor-foreground: hsl(var(--sponsor-foreground));
   --color-contrast: hsl(var(--contrast));
   --color-contrast-foreground: hsl(var(--contrast-foreground));
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 4px);
-  --radius-sm: calc(var(--radius) - 8px);
+  --color-tint: hsl(var(--shadow-tint));
+  --color-ph-acid: hsl(var(--ph-acid));
+  --color-ph-mild-acid: hsl(var(--ph-mild-acid));
+  --color-ph-neutral: hsl(var(--ph-neutral));
+  --color-ph-mild-alkali: hsl(var(--ph-mild-alkali));
+  --color-ph-alkali: hsl(var(--ph-alkali));
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+  --radius-panel: 1rem;
+  --radius-control: 0.625rem;
 }
 
 :root {
   color-scheme: light;
-  --background: 186 43% 98%;
-  --foreground: 197 63% 9%;
-  --card: 0 0% 100%;
-  --card-foreground: 197 63% 9%;
-  --muted: 184 31% 94%;
-  --muted-foreground: 198 16% 39%;
-  --border: 186 24% 86%;
-  --primary: 171 82% 28%;
-  --primary-foreground: 0 0% 100%;
-  --accent: 189 91% 43%;
-  --accent-foreground: 197 63% 9%;
-  --star: 39 94% 50%;
-  --success: 145 66% 36%;
-  --danger: 0 74% 53%;
+  /* лёд: холодный off-white, не чистый #fff */
+  --background: 204 28% 97.6%;
+  --foreground: 210 32% 10%;
+  --card: 200 33% 99.6%;
+  --card-foreground: 210 32% 10%;
+  --muted: 206 22% 94%;
+  --muted-foreground: 210 13% 37%;
+  --border: 206 18% 87%;
+  --primary: 173 82% 27%;
+  --primary-foreground: 180 30% 99%;
+  /* accent = тот же teal, только для focus-ring (color lock) */
+  --accent: 173 70% 34%;
+  --accent-foreground: 180 30% 99%;
+  --star: 39 94% 46%;
+  --success: 152 62% 33%;
+  --danger: 356 72% 48%;
   --sponsor: 43 96% 56%;
   --sponsor-foreground: 30 60% 12%;
-  --contrast: 197 63% 9%;
-  --contrast-foreground: 180 20% 98%;
-  --radius: 1.25rem;
-  --grid-color: 184 44% 41%;
-  --surface-glow: 178 100% 45%;
+  --contrast: 210 32% 10%;
+  --contrast-foreground: 200 30% 98%;
+  --ph-acid: 356 72% 52%;
+  --ph-mild-acid: 32 92% 52%;
+  --ph-neutral: 152 55% 40%;
+  --ph-mild-alkali: 190 70% 42%;
+  --ph-alkali: 222 72% 54%;
+  --shadow-tint: 208 40% 28%;
+  --highlight: 0 0% 100%;
+  --radius: 1rem;
 }
 
 .dark {
   color-scheme: dark;
-  --background: 198 45% 5%;
-  --foreground: 180 20% 95%;
-  --card: 196 34% 8%;
-  --card-foreground: 180 20% 95%;
-  --muted: 194 24% 13%;
-  --muted-foreground: 188 11% 63%;
-  --border: 192 23% 18%;
-  --primary: 166 88% 56%;
-  --primary-foreground: 198 45% 5%;
-  --accent: 188 96% 52%;
-  --accent-foreground: 198 45% 5%;
+  --background: 210 26% 6%;
+  --foreground: 200 22% 94%;
+  --card: 210 22% 9%;
+  --card-foreground: 200 22% 94%;
+  --muted: 210 18% 13%;
+  --muted-foreground: 205 12% 65%;
+  --border: 210 16% 19%;
+  --primary: 170 68% 50%;
+  --primary-foreground: 210 26% 6%;
+  --accent: 170 60% 56%;
+  --accent-foreground: 210 26% 6%;
   --star: 43 96% 58%;
-  --success: 156 76% 48%;
-  --danger: 354 78% 62%;
+  --success: 156 60% 48%;
+  --danger: 354 76% 64%;
   --sponsor: 43 96% 60%;
   --sponsor-foreground: 30 60% 10%;
-  --contrast: 196 34% 12%;
-  --contrast-foreground: 180 20% 98%;
-  --grid-color: 177 75% 56%;
-  --surface-glow: 177 100% 50%;
+  --contrast: 210 22% 12%;
+  --contrast-foreground: 200 30% 98%;
+  --ph-acid: 356 78% 62%;
+  --ph-mild-acid: 32 92% 58%;
+  --ph-neutral: 152 55% 50%;
+  --ph-mild-alkali: 190 70% 52%;
+  --ph-alkali: 222 80% 66%;
+  --shadow-tint: 210 40% 2%;
+  --highlight: 200 30% 100%;
 }
 
 * {
@@ -84,6 +108,7 @@
 html {
   scroll-behavior: smooth;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
@@ -110,6 +135,11 @@ body {
   padding-inline: 1rem;
 }
 
+/* Единая тонкая линия иконок Lucide: CSS перекрывает атрибут stroke-width. */
+svg.lucide {
+  stroke-width: 1.5;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -123,62 +153,71 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Данные как у прибора: pH, цены, баллы, номера шагов. */
+@utility font-data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums slashed-zero;
+  letter-spacing: -0.01em;
+}
+
+/* Подложка hero каталогов: холодный градиент без свечений и декоративных сеток. */
 .bg-fresh {
   background:
-    radial-gradient(ellipse 54% 46% at 8% -8%, hsl(var(--primary) / 0.14), transparent 72%),
-    radial-gradient(ellipse 46% 42% at 96% 4%, hsl(var(--accent) / 0.12), transparent 70%),
-    linear-gradient(180deg, hsl(var(--background)), hsl(184 40% 97%));
+    radial-gradient(ellipse 60% 55% at 0% 0%, hsl(var(--primary) / 0.07), transparent 70%),
+    linear-gradient(180deg, hsl(var(--card)), hsl(var(--background)));
 }
 
-.bg-grid-fade {
-  background-image:
-    linear-gradient(hsl(var(--grid-color) / 0.075) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--grid-color) / 0.075) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: linear-gradient(to bottom, black 20%, transparent 92%);
-}
-
+/* Поверхность прибора: хромированный градиент, волосяная граница, внутренний блик, тонированная тень. */
 .data-surface {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: linear-gradient(145deg, hsl(var(--card) / 0.96), hsl(var(--muted) / 0.72));
-  box-shadow: 0 24px 80px hsl(var(--foreground) / 0.07);
+  background: linear-gradient(160deg, hsl(var(--card)), hsl(var(--muted) / 0.55));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--highlight) / 0.7),
+    0 1px 2px hsl(var(--shadow-tint) / 0.06),
+    0 18px 48px -24px hsl(var(--shadow-tint) / 0.18);
 }
 
-.data-surface::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  content: "";
-  background:
-    linear-gradient(90deg, transparent, hsl(var(--accent) / 0.09), transparent),
-    radial-gradient(circle at 78% 16%, hsl(var(--surface-glow) / 0.17), transparent 30%);
-  pointer-events: none;
+.dark .data-surface {
+  box-shadow:
+    inset 0 1px 0 hsl(var(--highlight) / 0.06),
+    0 18px 48px -24px hsl(var(--shadow-tint) / 0.6);
 }
 
+/* Матовое стекло — только ИИ-панель, поиск и навигация. */
 .glass {
   background: hsl(var(--card) / 0.78);
-  border: 1px solid hsl(var(--border) / 0.78);
-  box-shadow: 0 16px 48px hsl(var(--foreground) / 0.07);
-  backdrop-filter: blur(16px) saturate(135%);
+  border: 1px solid hsl(var(--border) / 0.8);
+  box-shadow:
+    inset 0 1px 0 hsl(var(--highlight) / 0.6),
+    0 12px 36px -18px hsl(var(--shadow-tint) / 0.22);
+  backdrop-filter: blur(16px) saturate(140%);
 }
 
-.clean-node {
-  box-shadow: 0 0 0 3px hsl(var(--background)), 0 0 0 4px hsl(var(--primary) / 0.35);
+.dark .glass {
+  box-shadow:
+    inset 0 1px 0 hsl(var(--highlight) / 0.05),
+    0 12px 36px -18px hsl(var(--shadow-tint) / 0.7);
 }
 
-.shimmer-badge {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(90deg, hsl(var(--accent) / 0.72), hsl(var(--accent) / 0.98), hsl(var(--accent) / 0.72));
-  background-size: 200% 100%;
-  animation: shimmer 2.8s linear infinite;
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: hsl(var(--card));
+    backdrop-filter: none;
+  }
 }
 
-@keyframes shimmer {
-  from { background-position: -200% 0; }
-  to { background-position: 200% 0; }
+/* Шкала pH 0–14: кислота → нейтраль → щёлочь. */
+.ph-gradient {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--ph-acid)) 0%,
+    hsl(var(--ph-mild-acid)) 28%,
+    hsl(var(--ph-neutral)) 50%,
+    hsl(var(--ph-mild-alkali)) 70%,
+    hsl(var(--ph-alkali)) 100%
+  );
 }
 
 @media (min-width: 40rem) {

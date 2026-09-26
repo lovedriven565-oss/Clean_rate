@@ -13,7 +13,7 @@ export function DiyPanel({ solution, brands }: { solution: Solution; brands: Bra
     <section
       id="diy"
       aria-labelledby="diy-title"
-      className="scroll-mt-32 flex h-full min-w-0 flex-col rounded-[1.75rem] border border-border bg-card p-6 sm:p-8"
+      className="scroll-mt-32 flex h-full min-w-0 flex-col rounded-panel border border-border bg-card p-6 sm:p-8"
     >
       <header className="flex items-start justify-between gap-4">
         <div>
@@ -81,7 +81,7 @@ export function DiyPanel({ solution, brands }: { solution: Solution; brands: Bra
                 </>
               );
               const className =
-                "group flex items-center gap-3 rounded-2xl border border-border/80 bg-muted/30 px-4 py-3 transition-colors hover:border-primary/30 hover:bg-card";
+                "group flex items-center gap-3 rounded-control border border-border/80 bg-muted/30 px-4 py-3 transition-colors hover:border-primary/30 hover:bg-card";
               return (
                 <li key={product.id ?? label}>
                   {brand ? (

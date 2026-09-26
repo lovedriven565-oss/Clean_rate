@@ -13,7 +13,7 @@ export function RatingEmptyState({ onReset, noCompaniesInRegion, regionName }: R
   if (noCompaniesInRegion) {
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+        <div className="flex h-16 w-16 items-center justify-center rounded-control bg-muted">
           <MapPinned className="h-7 w-7 text-muted-foreground" />
         </div>
         <div>
@@ -36,7 +36,7 @@ export function RatingEmptyState({ onReset, noCompaniesInRegion, regionName }: R
 
   return (
     <div className="flex flex-col items-center gap-4 py-20 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+      <div className="flex h-16 w-16 items-center justify-center rounded-control bg-muted">
         <Search className="h-7 w-7 text-muted-foreground" />
       </div>
       <div>

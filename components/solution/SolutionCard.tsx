@@ -10,7 +10,7 @@ export function SolutionCard({ solution, className }: { solution: Solution; clas
     <Link
       href={`/solutions/${solution.slug}`}
       className={cn(
-        "group flex h-full flex-col rounded-[1.5rem] border border-border bg-card p-5 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/25 hover:shadow-xl sm:p-6",
+        "group flex h-full flex-col rounded-panel border border-border bg-card p-5 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/25 hover:shadow-xl sm:p-6",
         className
       )}
     >

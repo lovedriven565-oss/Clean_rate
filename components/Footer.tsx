@@ -34,7 +34,7 @@ export function Footer() {
       <div className="container grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)] lg:py-18">
         <div className="flex flex-col items-start gap-5">
           <Link href="/" className="flex items-center gap-3 font-display font-bold tracking-tight">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <span className="flex h-9 w-9 items-center justify-center rounded-control bg-primary text-primary-foreground">
               <Network className="h-4 w-4" />
             </span>
             Клининг Рейтинг

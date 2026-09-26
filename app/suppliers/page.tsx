@@ -22,10 +22,9 @@ export default function SuppliersPage() {
       <Navbar />
       <main className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative py-16 sm:py-24">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Каталог формируется</span>
-            <h1 className="mt-4 max-w-4xl font-display text-4xl font-extrabold tracking-[-0.05em] text-foreground sm:text-6xl">
+            <h1 className="mt-4 max-w-4xl font-display text-4xl font-bold tracking-[-0.05em] text-foreground sm:text-6xl">
               Поставщики и сервис индустрии чистоты
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
@@ -38,15 +37,15 @@ export default function SuppliersPage() {
         <section className="container py-16 sm:py-24">
           <div className="grid gap-5 lg:grid-cols-3">
             {supplierTypes.map((type) => (
-              <article key={type.title} className="data-surface rounded-[1.75rem] border border-border p-7">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><type.icon className="h-5 w-5" /></span>
+              <article key={type.title} className="data-surface rounded-panel border border-border p-7">
+                <span className="flex h-11 w-11 items-center justify-center rounded-control bg-primary/10 text-primary"><type.icon className="h-5 w-5" /></span>
                 <h2 className="mt-7 font-display text-xl font-bold text-foreground">{type.title}</h2>
                 <p className="mt-3 text-sm leading-6 text-muted-foreground">{type.text}</p>
               </article>
             ))}
           </div>
 
-          <div className="mt-10 grid gap-6 rounded-[2rem] border border-border bg-card p-8 sm:p-12 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="mt-10 grid gap-6 rounded-panel border border-border bg-card p-8 sm:p-12 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
               <BadgeCheck className="h-7 w-7 text-primary" />
               <h2 className="mt-5 font-display text-3xl font-bold tracking-[-0.04em] text-foreground">Представляете поставщика?</h2>

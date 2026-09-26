@@ -36,14 +36,13 @@ export default function RatingMethodologyPage() {
       <Navbar />
       <main className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative py-16 sm:py-24">
             <Link href="/rating" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
               <ArrowLeft className="h-4 w-4" />
               Вернуться к рейтингу
             </Link>
             <span className="mt-10 block text-xs font-bold uppercase tracking-[0.2em] text-primary">Открытая формула</span>
-            <h1 className="mt-3 max-w-4xl font-display text-4xl font-extrabold tracking-[-0.045em] text-foreground sm:text-6xl">
+            <h1 className="mt-3 max-w-4xl font-display text-4xl font-bold tracking-[-0.045em] text-foreground sm:text-6xl">
               Рейтинг нельзя купить
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
@@ -56,12 +55,12 @@ export default function RatingMethodologyPage() {
         <section className="container py-16 sm:py-24">
           <div className="grid gap-5 lg:grid-cols-3">
             {factors.map((factor) => (
-              <article key={factor.title} className="data-surface rounded-[1.75rem] border border-border p-7">
+              <article key={factor.title} className="data-surface rounded-panel border border-border p-7">
                 <div className="flex items-center justify-between gap-4">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-control bg-primary/10 text-primary">
                     <factor.icon className="h-5 w-5" />
                   </span>
-                  <span className="font-display text-3xl font-extrabold text-primary">{factor.value}</span>
+                  <span className="font-display text-3xl font-bold text-primary">{factor.value}</span>
                 </div>
                 <h2 className="mt-8 font-display text-xl font-bold text-foreground">{factor.title}</h2>
                 <p className="mt-3 text-sm leading-6 text-muted-foreground">{factor.description}</p>
@@ -69,9 +68,9 @@ export default function RatingMethodologyPage() {
             ))}
           </div>
 
-          <div className="mt-8 rounded-[1.75rem] border border-border bg-card p-7 sm:p-10">
+          <div className="mt-8 rounded-panel border border-border bg-card p-7 sm:p-10">
             <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent/12 text-accent">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-primary/10 text-primary">
                 <CircleDollarSign className="h-5 w-5" />
               </span>
               <div>

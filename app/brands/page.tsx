@@ -17,7 +17,6 @@ export default async function BrandsPage() {
 
       <main className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative py-12 sm:py-18">
             <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Бренды" }]} />
             <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-primary">
@@ -26,7 +25,7 @@ export default async function BrandsPage() {
             </span>
             <div className="mt-3 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <h1 className="max-w-3xl font-display text-3xl font-extrabold tracking-[-0.04em] text-foreground sm:text-5xl">
+                <h1 className="max-w-3xl font-display text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-5xl">
                   Бренды, которыми реально работают профессионалы
                 </h1>
                 <p className="mt-4 max-w-2xl text-muted-foreground">
@@ -48,7 +47,7 @@ export default async function BrandsPage() {
         </section>
 
         <section className="container pb-16 sm:pb-24">
-          <div className="grid gap-6 rounded-[2rem] bg-contrast p-8 text-contrast-foreground sm:p-12 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="grid gap-6 rounded-panel bg-contrast p-8 text-contrast-foreground sm:p-12 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-2xl">
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Брендам</span>
               <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] sm:text-4xl">
@@ -78,7 +77,7 @@ function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="mt-1 font-display text-3xl font-extrabold tabular-nums tracking-[-0.03em] text-foreground">{value}</dd>
+      <dd className="mt-1 font-data text-3xl font-medium text-foreground">{value}</dd>
     </div>
   );
 }

@@ -87,7 +87,7 @@ export function PartnerLeadForm() {
 
   if (status === "success") {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-[var(--radius)] border border-border bg-card p-10 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-panel border border-border bg-card p-10 text-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
           <CheckCircle2 className="h-7 w-7" />
         </span>
@@ -102,7 +102,7 @@ export function PartnerLeadForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-4 rounded-[var(--radius)] border border-border bg-card p-6 sm:p-8"
+      className="flex flex-col gap-4 rounded-panel border border-border bg-card p-6 sm:p-8"
     >
       <div>
         <h3 className="font-display text-xl font-bold text-foreground">Заявка на размещение</h3>
@@ -182,7 +182,7 @@ export function PartnerLeadForm() {
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Ссылка на сайт или профиль, вопросы по размещению..."
           rows={3}
-          className="rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="rounded-control border border-border bg-card px-5 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
       </div>
 

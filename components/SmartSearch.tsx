@@ -168,7 +168,7 @@ export function SmartSearch() {
 
   return (
     <div ref={containerRef} className="relative w-full max-w-2xl">
-      <form onSubmit={handleSubmit} className="glass flex w-full flex-col gap-2 rounded-[1.35rem] p-2">
+      <form onSubmit={handleSubmit} className="glass flex w-full flex-col gap-2 rounded-panel p-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -233,7 +233,7 @@ export function SearchSuggestions({ search, className }: { search: ReturnType<ty
   return (
     <div
       className={cn(
-        "glass absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 max-h-[70vh] overflow-y-auto rounded-[1.1rem] p-2 shadow-lg",
+        "glass absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 max-h-[70vh] overflow-y-auto rounded-panel p-2 shadow-lg",
         className
       )}
     >
@@ -329,11 +329,11 @@ function SuggestionItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted/70",
+        "flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted/70",
         highlighted && "bg-muted/70"
       )}
     >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-muted text-muted-foreground">
         <Icon className="h-4 w-4" />
       </span>
       <span className="min-w-0 flex-1">

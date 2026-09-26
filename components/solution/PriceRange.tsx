@@ -25,7 +25,7 @@ export function PriceRange({
 
   if (!estimate) {
     return (
-      <div className={cn("rounded-[1.25rem] border border-dashed border-border p-5 text-sm text-muted-foreground", className)}>
+      <div className={cn("rounded-panel border border-dashed border-border p-5 text-sm text-muted-foreground", className)}>
         Смета для рынка «{market.name}» пока формируется. Цена уточняется у компании.
       </div>
     );
@@ -36,7 +36,7 @@ export function PriceRange({
 
   if (compact) {
     return (
-      <span className={cn("tabular-nums font-semibold text-foreground", className)}>
+      <span className={cn("font-data font-semibold text-foreground", className)}>
         {min} – {max}
         {estimate.unit && <span className="font-normal text-muted-foreground"> / {estimate.unit}</span>}
       </span>
@@ -44,14 +44,14 @@ export function PriceRange({
   }
 
   return (
-    <div className={cn("rounded-[1.25rem] border border-border bg-card p-5", className)}>
+    <div className={cn("rounded-panel border border-border bg-card p-5", className)}>
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
           Ориентир цены · {estimate.city ?? market.name}
         </span>
         {estimate.unit && <span className="text-xs text-muted-foreground">за {estimate.unit}</span>}
       </div>
-      <p className="mt-2 font-display text-2xl font-bold tracking-tight tabular-nums text-foreground sm:text-3xl">
+      <p className="mt-2 font-data text-2xl font-medium text-foreground sm:text-3xl">
         {min} <span className="text-muted-foreground/60">–</span> {max}
       </p>
       {estimate.note && <p className="mt-2 text-sm leading-6 text-muted-foreground">{estimate.note}</p>}

@@ -59,7 +59,6 @@ export default function ForPartnersPage() {
       <main className="flex-1">
         {/* Split Hero */}
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative grid gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 16 }}
@@ -72,7 +71,7 @@ export default function ForPartnersPage() {
                 Клининговым компаниям
               </span>
 
-              <h1 className="mt-5 max-w-2xl font-display text-4xl font-extrabold tracking-[-0.04em] text-foreground sm:text-5xl lg:text-6xl">
+              <h1 className="mt-5 max-w-2xl font-display text-4xl font-bold tracking-[-0.04em] text-foreground sm:text-5xl lg:text-6xl">
                 Получайте клиентов через независимый рейтинг
               </h1>
 
@@ -94,7 +93,7 @@ export default function ForPartnersPage() {
               initial={reduce ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.1 }}
-              className="data-surface rounded-[2rem] border border-border p-7 sm:p-9"
+              className="data-surface rounded-panel border border-border p-7 sm:p-9"
             >
               <span className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
                 <ShieldCheck className="h-4 w-4" />
@@ -154,7 +153,7 @@ export default function ForPartnersPage() {
           <ol className="grid gap-8 md:grid-cols-3">
             {steps.map((step) => (
               <li key={step.order} className="relative border-t border-border pt-6">
-                <span className="font-display text-5xl font-extrabold leading-none tracking-[-0.05em] text-muted sm:text-6xl">
+                <span className="font-display text-5xl font-bold leading-none tracking-[-0.05em] text-muted sm:text-6xl">
                   {step.order}
                 </span>
                 <h3 className="mt-4 font-display text-xl font-bold tracking-[-0.02em] text-foreground">{step.title}</h3>
@@ -177,7 +176,7 @@ export default function ForPartnersPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="rounded-[2rem] border border-border bg-card p-8 sm:p-10">
+              <div className="rounded-panel border border-border bg-card p-8 sm:p-10">
                 <h3 className="font-display text-2xl font-bold text-foreground">Базовое размещение</h3>
                 <p className="mt-1 font-semibold text-primary">Бесплатно навсегда</p>
                 <ul className="mt-7 flex flex-col gap-3.5">
@@ -190,7 +189,7 @@ export default function ForPartnersPage() {
                 </ul>
               </div>
 
-              <div className="rounded-[2rem] border-2 border-primary bg-card p-8 sm:p-10 shadow-lg shadow-primary/5">
+              <div className="rounded-panel border-2 border-primary bg-card p-8 sm:p-10 shadow-lg shadow-primary/5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h3 className="font-display text-2xl font-bold text-foreground">Партнёр платформы</h3>

@@ -41,7 +41,7 @@ export function ProPanel({
     <section
       id="pro"
       aria-labelledby="pro-title"
-      className="data-surface scroll-mt-32 flex h-full min-w-0 flex-col rounded-[1.75rem] border border-border p-6 sm:p-8"
+      className="data-surface scroll-mt-32 flex h-full min-w-0 flex-col rounded-panel border border-border p-6 sm:p-8"
     >
       <header className="flex items-start justify-between gap-4">
         <div>
@@ -91,7 +91,7 @@ export function ProPanel({
           ))}
         </ul>
       ) : (
-        <div className="mt-3 rounded-2xl border border-dashed border-border bg-card/60 p-5 text-sm leading-6 text-muted-foreground">
+        <div className="mt-3 rounded-control border border-dashed border-border bg-card/60 p-5 text-sm leading-6 text-muted-foreground">
           В городе {city.name} компании ещё подключаются к платформе.{" "}
           <Link href="/for-partners" className="font-semibold text-primary">
             Разместить компанию
@@ -122,7 +122,7 @@ function CompanyRow({ company }: { company: Company }) {
   const categoryId = company.categories[0];
 
   return (
-    <article className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 transition-colors hover:border-primary/30 sm:flex-row sm:items-center">
+    <article className="flex flex-col gap-3 rounded-control border border-border/80 bg-card p-4 transition-colors hover:border-primary/30 sm:flex-row sm:items-center">
       <Link href={`/companies/${company.slug}`} className="flex min-w-0 flex-1 items-center gap-3">
         <CompanyAvatar id={company.id} name={company.name} size="md" className="shrink-0" />
         <span className="min-w-0">

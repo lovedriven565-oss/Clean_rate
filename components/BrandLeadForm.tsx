@@ -74,7 +74,7 @@ export function BrandLeadForm() {
 
   if (status === "success") {
     return (
-      <div className="flex min-h-96 flex-col items-center justify-center rounded-[1.75rem] border border-border bg-card p-8 text-center">
+      <div className="flex min-h-96 flex-col items-center justify-center rounded-panel border border-border bg-card p-8 text-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
           <CheckCircle2 className="h-7 w-7" />
         </span>
@@ -87,7 +87,7 @@ export function BrandLeadForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-[1.75rem] border border-border bg-card p-6 shadow-xl shadow-foreground/5 sm:p-8">
+    <form onSubmit={handleSubmit} className="rounded-panel border border-border bg-card p-6 shadow-xl shadow-tint/5 sm:p-8">
       <h3 className="font-display text-2xl font-bold text-foreground">Обсудить пилот</h3>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">Расскажите, какую задачу бренда должна решить платформа.</p>
 
@@ -122,7 +122,7 @@ export function BrandLeadForm() {
           onChange={(event) => setGoal(event.target.value)}
           rows={4}
           placeholder="Например: представить новую линейку профессиональным компаниям и получить запросы на демонстрацию"
-          className="rounded-2xl border border-border bg-card px-4 py-3 text-sm font-normal text-foreground outline-none placeholder:text-muted-foreground focus:border-primary/45 focus:ring-2 focus:ring-primary/15"
+          className="rounded-control border border-border bg-card px-4 py-3 text-sm font-normal text-foreground outline-none placeholder:text-muted-foreground focus:border-primary/45 focus:ring-2 focus:ring-primary/15"
         />
       </label>
 

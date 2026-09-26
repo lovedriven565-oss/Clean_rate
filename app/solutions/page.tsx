@@ -23,7 +23,6 @@ export default async function SolutionsPage() {
 
       <main className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative py-12 sm:py-16">
             <nav aria-label="Хлебные крошки" className="text-xs text-muted-foreground">
               <ol className="flex items-center gap-2">
@@ -34,7 +33,7 @@ export default async function SolutionsPage() {
                 <li className="font-medium text-foreground">Решения</li>
               </ol>
             </nav>
-            <h1 className="mt-6 max-w-3xl font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.04em] text-foreground sm:text-5xl">
+            <h1 className="mt-6 max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-[-0.04em] text-foreground sm:text-5xl">
               Решения задач чистоты
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
@@ -59,7 +58,7 @@ export default async function SolutionsPage() {
         </section>
 
         <section className="container pb-16 sm:pb-24">
-          <div className="rounded-[1.75rem] border border-border bg-card p-6 sm:p-8 lg:flex lg:items-center lg:justify-between lg:gap-8">
+          <div className="rounded-panel border border-border bg-card p-6 sm:p-8 lg:flex lg:items-center lg:justify-between lg:gap-8">
             <div className="max-w-2xl">
               <h2 className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                 Не нашли свою задачу?

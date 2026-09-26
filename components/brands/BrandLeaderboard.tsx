@@ -62,7 +62,7 @@ export function BrandLeaderboard({ brands }: { brands: RankedBrand[] }) {
             <Info className="h-3.5 w-3.5" />
             Как считается индекс
           </summary>
-          <div className="glass absolute right-0 z-20 mt-2 w-72 rounded-2xl p-4 leading-5 sm:w-80">
+          <div className="glass absolute right-0 z-20 mt-2 w-72 rounded-control p-4 leading-5 sm:w-80">
             Каждая верифицированная компания на бренде: {BRAND_SCORE_WEIGHTS.verifiedCompany} балла, протокол с брендом
             в роли «рекомендуем»: {BRAND_SCORE_WEIGHTS.recommended}, «альтернатива»: {BRAND_SCORE_WEIGHTS.alternative},
             переход на сайт бренда: {BRAND_SCORE_WEIGHTS.click}. Индекс нельзя купить: спонсорство помечается отдельно.
@@ -70,7 +70,7 @@ export function BrandLeaderboard({ brands }: { brands: RankedBrand[] }) {
         </details>
       </div>
 
-      <ol className="mt-6 divide-y divide-border overflow-hidden rounded-[1.75rem] border border-border bg-card">
+      <ol className="mt-6 divide-y divide-border overflow-hidden rounded-panel border border-border bg-card">
         {visible.map((brand, index) => (
           <LeaderboardRow
             key={brand.id}
@@ -101,7 +101,7 @@ function LeaderboardRow({ brand, rank, share, prosChoice }: { brand: RankedBrand
       >
         <span
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-full font-display text-sm font-bold tabular-nums",
+            "flex h-8 w-8 items-center justify-center rounded-full font-data text-sm font-medium",
             rankTone[rank] ?? "bg-muted text-muted-foreground"
           )}
         >
@@ -110,7 +110,7 @@ function LeaderboardRow({ brand, rank, share, prosChoice }: { brand: RankedBrand
 
         <span
           className={cn(
-            "hidden h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold shadow-sm sm:flex",
+            "hidden h-12 w-12 items-center justify-center rounded-control text-lg font-bold shadow-sm sm:flex",
             isLightColor(brand.accent) ? "text-slate-900" : "text-white"
           )}
           style={{ backgroundColor: brand.accent }}
@@ -135,7 +135,7 @@ function LeaderboardRow({ brand, rank, share, prosChoice }: { brand: RankedBrand
         </span>
 
         <span className="flex items-center justify-end gap-2 text-right">
-          <span className="font-display text-xl font-extrabold tabular-nums tracking-[-0.03em] text-foreground">
+          <span className="font-data text-xl font-medium text-foreground">
             <CountUp value={score} />
           </span>
           <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />

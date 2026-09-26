@@ -13,7 +13,7 @@ export function StatCounter({
 }) {
   return (
     <div className="flex flex-col items-center gap-1 text-center">
-      <span className="font-display text-3xl font-extrabold tabular-nums text-foreground sm:text-4xl">
+      <span className="font-data text-3xl font-medium text-foreground sm:text-4xl">
         {decimals ? value.toFixed(decimals) : formatNumber(value)}
         {suffix}
       </span>

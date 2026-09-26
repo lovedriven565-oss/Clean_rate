@@ -19,7 +19,7 @@ export function HowItWorks() {
     <ol className="grid gap-10 md:grid-cols-3 md:gap-8">
       {steps.map((step, index) => (
         <li key={step.title} className="relative border-t border-border pt-6">
-          <span className="font-display text-6xl font-extrabold leading-none tracking-[-0.06em] text-muted sm:text-7xl">
+          <span className="font-display text-6xl font-bold leading-none tracking-[-0.06em] text-muted sm:text-7xl">
             0{index + 1}
           </span>
           <h3 className="mt-4 font-display text-xl font-bold tracking-[-0.02em] text-foreground">{step.title}</h3>

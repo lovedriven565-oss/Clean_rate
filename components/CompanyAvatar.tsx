@@ -24,7 +24,7 @@ export function CompanyAvatar({ id, name, size = "md", className, showIcon }: Co
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-2xl font-display font-bold text-white shadow-sm",
+        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-control font-display font-bold text-white shadow-sm",
         sizeMap[size].wrapper,
         sizeMap[size].font,
         className

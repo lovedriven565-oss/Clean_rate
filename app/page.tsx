@@ -75,30 +75,15 @@ export default async function Home() {
           />
 
           {/* Hero */}
-          <section className="relative overflow-hidden">
-            <svg
-              aria-hidden
-              viewBox="0 0 800 600"
-              className="pointer-events-none absolute -right-32 -top-40 h-[42rem] w-[42rem] opacity-[0.09] lg:-right-16"
-            >
-              <defs>
-                <linearGradient id="hero-pour" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="hsl(var(--primary))" />
-                  <stop offset="1" stopColor="hsl(var(--accent))" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M420 20c120-30 260 40 320 160s20 250-90 320-260 60-360-20S110 250 180 150 300 50 420 20z"
-                fill="url(#hero-pour)"
-              />
-            </svg>
-
-            <div className="container relative grid items-start gap-12 py-14 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-24">
+          <section className="bg-fresh relative overflow-hidden">
+            <div className="container relative grid items-start gap-12 py-12 sm:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-20">
               <div className="flex flex-col items-start">
                 <MarketBadge />
-                <h1 className="mt-7 max-w-2xl font-display text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.045em] text-foreground sm:text-6xl lg:text-[4.4rem]">
+                <h1 className="mt-7 max-w-2xl font-display text-4xl font-bold leading-[1.05] tracking-[-0.04em] text-foreground sm:text-5xl lg:text-6xl">
                   Пятно, запах, налёт?
-                  <span className="mt-2 block text-muted-foreground">Покажем, как убрать или кого позвать.</span>
+                  <span className="mt-3 block text-[0.55em] font-semibold leading-tight tracking-[-0.03em] text-muted-foreground">
+                    Покажем, как убрать или кого позвать.
+                  </span>
                 </h1>
                 <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
                   Опишите задачу своими словами: получите пошаговый протокол, честную границу «звать мастера» и
@@ -243,7 +228,7 @@ export default async function Home() {
           {/* Манифест */}
           <section className="container pb-16 sm:pb-24">
             <Reveal>
-              <div className="grid gap-10 rounded-[2rem] border border-border bg-card p-8 sm:p-12 lg:grid-cols-[0.8fr_1.2fr] lg:p-16">
+              <div className="grid gap-10 rounded-panel border border-border bg-card p-8 sm:p-12 lg:grid-cols-[0.8fr_1.2fr] lg:p-16">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Принципы</span>
                   <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.035em] text-foreground sm:text-4xl">
@@ -269,7 +254,7 @@ export default async function Home() {
           {/* B2B */}
           <section className="container pb-16 sm:pb-24">
             <Reveal>
-              <div className="relative overflow-hidden rounded-[2rem] bg-contrast p-8 text-contrast-foreground sm:p-12 lg:p-16">
+              <div className="relative overflow-hidden rounded-panel bg-contrast p-8 text-contrast-foreground sm:p-12 lg:p-16">
                 <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
                   <div className="max-w-3xl">
                     <h2 className="font-display text-3xl font-bold tracking-[-0.04em] sm:text-5xl">

@@ -20,7 +20,7 @@ export function CategoryPills({ categories, companies }: { categories: Category[
               <Icon className="h-3.5 w-3.5" />
             </span>
             {category.name}
-            <span className="tabular-nums text-xs text-muted-foreground">{count}</span>
+            <span className="font-data text-xs text-muted-foreground">{count}</span>
           </Link>
         );
       })}

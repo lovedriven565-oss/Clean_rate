@@ -29,14 +29,13 @@ export default function ForBrandsPage() {
       <Navbar />
       <main className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
-          <div className="bg-grid-fade absolute inset-0" aria-hidden />
           <div className="container relative grid gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-primary shadow-sm backdrop-blur">
                 <Boxes className="h-3.5 w-3.5" />
                 Брендам и поставщикам
               </span>
-              <h1 className="mt-5 max-w-4xl font-display text-4xl font-extrabold tracking-[-0.04em] text-foreground sm:text-6xl">
+              <h1 className="mt-5 max-w-4xl font-display text-4xl font-bold tracking-[-0.04em] text-foreground sm:text-6xl">
                 Не покупать баннер. Стать частью инфраструктуры рынка.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
@@ -49,8 +48,8 @@ export default function ForBrandsPage() {
                 <span className="rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-primary">Пилотная стадия</span>
               </div>
             </div>
-            <div className="data-surface rounded-[2rem] border border-border p-7 sm:p-9">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="data-surface rounded-panel border border-border p-7 sm:p-9">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-control bg-primary/10 text-primary">
                 <Users className="h-6 w-6" />
               </span>
               <h2 className="mt-6 font-display text-2xl font-bold text-foreground">Сначала: полезная аудитория</h2>
@@ -71,7 +70,7 @@ export default function ForBrandsPage() {
           <div className="grid gap-8 md:grid-cols-3">
             {outcomes.map((outcome) => (
               <div key={outcome.title} className="border-t border-border pt-6">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <span className="flex h-11 w-11 items-center justify-center rounded-control bg-primary/10 text-primary">
                   <outcome.icon className="h-5 w-5" />
                 </span>
                 <h3 className="mt-5 font-display text-xl font-bold text-foreground">{outcome.title}</h3>
@@ -91,9 +90,9 @@ export default function ForBrandsPage() {
               {formats.map((format) => (
                 <article
                   key={format.title}
-                  className="rounded-[1.75rem] border border-border bg-card p-7 transition-[border-color,box-shadow] hover:border-primary/30"
+                  className="rounded-panel border border-border bg-card p-7 transition-[border-color,box-shadow] hover:border-primary/30"
                 >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-primary/10 text-primary">
                     <format.icon className="h-5 w-5" />
                   </span>
                   <h3 className="mt-5 font-display text-lg font-bold text-foreground">{format.title}</h3>

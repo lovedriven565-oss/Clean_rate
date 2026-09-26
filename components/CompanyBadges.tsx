@@ -15,7 +15,7 @@ export function RankBadge({ rank, onlyTop = false, className }: { rank?: number;
   return (
     <span
       className={cn(
-        "flex shrink-0 items-center justify-center text-xs font-bold",
+        "font-data flex shrink-0 items-center justify-center text-xs font-medium",
         rankClass[rank] ?? "bg-muted text-muted-foreground",
         className
       )}
@@ -33,7 +33,7 @@ export function hasVerifiedRating(company: Company) {
 export function RatingBadge({ company, className }: { company: Company; className?: string }) {
   if (hasVerifiedRating(company)) {
     return (
-      <span className={cn("inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-950/70 dark:text-amber-200", className)}>
+      <span className={cn("font-data inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-950/70 dark:text-amber-200", className)}>
         <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
         {formatRating(company.baseRating)}
         <span className="text-amber-700/80 dark:text-amber-300/80">({formatNumber(company.reviewCount)})</span>

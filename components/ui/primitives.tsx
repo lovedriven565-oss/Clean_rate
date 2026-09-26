@@ -51,7 +51,7 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        "rounded-[var(--radius)] border border-border/80 bg-card text-card-foreground shadow-[0_16px_48px_hsl(var(--foreground)/0.045)]",
+        "rounded-panel border border-border/80 bg-card text-card-foreground shadow-[0_18px_48px_-24px_hsl(var(--shadow-tint)/0.18)]",
         className
       )}
       {...props}
@@ -64,7 +64,7 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
     <input
       ref={ref}
       className={cn(
-        "flex h-12 w-full rounded-full border border-border bg-card/90 px-5 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus:border-primary/45 focus:ring-2 focus:ring-primary/15",
+        "flex h-12 w-full rounded-control border border-border bg-card/90 px-4 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus:border-primary/45 focus:ring-2 focus:ring-primary/15",
         className
       )}
       {...props}
