@@ -123,3 +123,36 @@ describe("market focus", () => {
     assert.equal(isValidPhone("1".repeat(16)), false);
   });
 });
+
+describe("admin surface", () => {
+  it("is open in dev and requires Cloudflare Access in production", async () => {
+    const { isAdminAllowed } = await import("../lib/admin/guard.js");
+    process.env.NEXTJS_ENV = "development";
+    assert.equal(isAdminAllowed(new Headers()), true);
+    process.env.NEXTJS_ENV = "production";
+    assert.equal(isAdminAllowed(new Headers()), false);
+    assert.equal(
+      isAdminAllowed(new Headers({ "cf-access-authenticated-user-email": "owner@cleanhub.by" })),
+      true
+    );
+  });
+
+  it("returns 404 for the CSV report without admin access", async () => {
+    const { GET } = await import("../app/api/admin/report/route.js");
+    process.env.NEXTJS_ENV = "production";
+    const res = await GET(new Request("http://localhost/api/admin/report"));
+    assert.equal(res.status, 404);
+  });
+
+  it("exports a parseable CSV report with BOM and campaign columns", async () => {
+    const { GET } = await import("../app/api/admin/report/route.js");
+    process.env.NEXTJS_ENV = "development";
+    const res = await GET(new Request("http://localhost/api/admin/report"));
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get("Content-Type") ?? "", /text\/csv/);
+    const buf = new Uint8Array(await res.arrayBuffer());
+    assert.deepEqual([...buf.slice(0, 3)], [0xef, 0xbb, 0xbf]);
+    const text = new TextDecoder().decode(buf.slice(3));
+    assert.match(text.split("\r\n")[0], /Кампания.*CTR/);
+  });
+});
