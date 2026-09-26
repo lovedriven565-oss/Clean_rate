@@ -10,7 +10,7 @@ import { CompanyCard } from "@/components/CompanyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getAllCompanies, getAllSolutions, getBrandSlugs, getBrandsByScore } from "@/lib/db/queries";
 import { prosChoiceIds } from "@/lib/brand-score";
-import { affiliateProducts } from "@/lib/mock-data";
+import { seedAffiliateProducts } from "@/db/seed-data";
 import { pageAlternates } from "@/lib/site";
 
 export async function generateStaticParams() {
@@ -37,7 +37,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
   if (!brand) notFound();
 
   const [companies, solutions] = await Promise.all([getAllCompanies(), getAllSolutions()]);
-  const products = affiliateProducts.filter((p) => p.brandId === brand.id);
+  const products = seedAffiliateProducts.filter((p) => p.brandId === brand.id);
   const partnerCompanies = companies.filter((c) => c.equipment?.includes(brand.id));
   const brandSolutions = solutions.filter((s) => s.recommendedProducts?.some((p) => p.brandId === brand.id));
   const prosChoice = prosChoiceIds(ranked).has(brand.id);

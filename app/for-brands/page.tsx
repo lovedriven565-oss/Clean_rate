@@ -3,7 +3,7 @@ import { BarChart3, Boxes, FileText, MousePointerClick, Network, Presentation, T
 import { BrandLeadForm } from "@/components/BrandLeadForm";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { brands, companies } from "@/lib/mock-data";
+import { seedBrands, seedCompanies } from "@/db/seed-data";
 
 export const metadata: Metadata = {
   title: "Брендам и поставщикам | Клининг Рейтинг",
@@ -43,8 +43,8 @@ export default function ForBrandsPage() {
                 дилером и измеримым действием: отдельно от органического рейтинга компаний.
               </p>
               <div className="mt-8 flex flex-wrap gap-2.5">
-                <span className="rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-foreground">{companies.length} компаний в каталоге</span>
-                <span className="rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-foreground">{brands.length} профилей решений</span>
+                <span className="rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-foreground">{seedCompanies.length} компаний в каталоге</span>
+                <span className="rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-foreground">{seedBrands.length} профилей решений</span>
                 <span className="rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-primary">Пилотная стадия</span>
               </div>
             </div>

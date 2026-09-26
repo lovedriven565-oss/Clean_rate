@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { companies } from "../lib/mock-data.js";
+import { getFallbackCompanies } from "../lib/db/fallback.js";
 import { calculateOrganicScore, calculateRelevanceScore, hasPublishedRating } from "../lib/rating.js";
+
+const companies = getFallbackCompanies();
 
 const ratedCompany = companies.find((company) => company.reviewCount > 0);
 const unratedCompany = companies.find((company) => company.reviewCount === 0);

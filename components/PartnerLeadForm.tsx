@@ -8,7 +8,7 @@ import { Select } from "@/components/ui/Select";
 import { TurnstileWidget, turnstileEnabled } from "@/components/TurnstileWidget";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { ENABLED_MARKETS } from "@/lib/markets";
-import { categories } from "@/lib/mock-data";
+import { CATEGORIES } from "@/lib/categories";
 import type { CategoryId } from "@/lib/types";
 import { parseApiResult } from "@/lib/api-result";
 import { cn } from "@/lib/utils";
@@ -156,7 +156,7 @@ export function PartnerLeadForm() {
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium text-muted-foreground">Какие услуги оказываете</span>
         <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
+          {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               type="button"

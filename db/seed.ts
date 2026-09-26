@@ -18,7 +18,11 @@ import {
   seedCampaigns,
   seedCategories,
   seedCompanies,
+  seedIntentKeywords,
+  seedPriceEstimates,
   seedProducts,
+  seedSolutionProducts,
+  seedSolutions,
   seedTimestamp,
 } from "./seed-data";
 
@@ -54,6 +58,10 @@ statements.push("DELETE FROM `rating_sources`;");
 statements.push("DELETE FROM `company_brands`;");
 statements.push("DELETE FROM `company_categories`;");
 statements.push("DELETE FROM `cleaning_companies`;");
+statements.push("DELETE FROM `solution_products`;");
+statements.push("DELETE FROM `price_estimates`;");
+statements.push("DELETE FROM `intent_keywords`;");
+statements.push("DELETE FROM `solutions`;");
 statements.push("DELETE FROM `products`;");
 statements.push("DELETE FROM `supplier_brands`;");
 statements.push("DELETE FROM `suppliers`;");
@@ -116,6 +124,34 @@ for (const product of seedProducts) {
 for (const camp of seedCampaigns) {
   statements.push(
     `INSERT INTO \`campaigns\` (\`id\`, \`brand_id\`, \`product_id\`, \`name\`, \`placement\`, \`status\`, \`starts_at\`, \`ends_at\`, \`target_countries\`, \`target_categories\`, \`target_surfaces\`, \`target_solutions\`, \`max_impressions\`, \`max_clicks\`, \`current_impressions\`, \`current_clicks\`, \`title\`, \`description\`, \`cta_text\`, \`cta_url\`, \`cta_type\`, \`badge_text\`, \`priority\`, \`created_at\`, \`updated_at\`) VALUES (${esc(camp.id)}, ${esc(camp.brandId)}, ${esc(camp.productId)}, ${esc(camp.name)}, '${camp.placement}', '${camp.status}', ${num(camp.startsAt)}, ${num(camp.endsAt)}, ${jsonArray(camp.targetCountries)}, ${jsonArray(camp.targetCategories)}, ${jsonArray(camp.targetSurfaces)}, ${jsonArray(camp.targetSolutions)}, ${num(camp.maxImpressions)}, ${num(camp.maxClicks)}, ${num(camp.currentImpressions)}, ${num(camp.currentClicks)}, ${esc(camp.title)}, ${esc(camp.description)}, ${esc(camp.ctaText)}, ${esc(camp.ctaUrl)}, ${esc(camp.ctaType)}, ${esc(camp.badgeText)}, ${num(camp.priority)}, ${num(seedTimestamp)}, ${num(seedTimestamp)});`
+  );
+}
+
+// --- Продуктовый граф решений (Solutions) ---
+for (const sol of seedSolutions) {
+  statements.push(
+    `INSERT INTO \`solutions\` (\`id\`, \`slug\`, \`title\`, \`problem_type\`, \`surface\`, \`material\`, \`severity\`, \`audience\`, \`diy_steps\`, \`warnings\`, \`when_to_call_pro\`, \`diy_cost_note\`, \`pro_time_note\`, \`search_keywords\`, \`related_category\`, \`status\`, \`created_at\`, \`updated_at\`) VALUES (${esc(sol.id)}, ${esc(sol.slug)}, ${esc(sol.title)}, '${sol.problemType}', '${sol.surface}', ${esc(sol.material)}, '${sol.severity}', '${sol.audience}', ${esc(JSON.stringify(sol.diySteps))}, ${jsonArray(sol.warnings)}, ${esc(sol.whenToCallPro)}, ${esc(sol.diyCostNote)}, ${esc(sol.proTimeNote)}, ${jsonArray(sol.searchKeywords)}, ${esc(sol.relatedCategory)}, '${sol.status}', ${num(seedTimestamp)}, ${num(seedTimestamp)});`
+  );
+}
+
+// --- Рекомендуемые средства в протоколах ---
+for (const sp of seedSolutionProducts) {
+  statements.push(
+    `INSERT INTO \`solution_products\` (\`id\`, \`solution_id\`, \`brand_id\`, \`product_id\`, \`role\`, \`note\`) VALUES (${esc(sp.id)}, ${esc(sp.solutionId)}, ${esc(sp.brandId)}, ${esc(sp.productId)}, '${sp.role}', ${esc(sp.note)});`
+  );
+}
+
+// --- Ключевые слова интента для поиска ---
+for (const kw of seedIntentKeywords) {
+  statements.push(
+    `INSERT INTO \`intent_keywords\` (\`id\`, \`keyword\`, \`intent\`, \`weight\`, \`target_kind\`, \`target_slug\`) VALUES (${esc(kw.id)}, ${esc(kw.keyword)}, '${kw.intent}', ${num(kw.weight)}, '${kw.targetKind}', ${esc(kw.targetSlug)});`
+  );
+}
+
+// --- Сметы стоимости по рынкам (BY/RU/KZ) ---
+for (const pe of seedPriceEstimates) {
+  statements.push(
+    `INSERT INTO \`price_estimates\` (\`id\`, \`solution_id\`, \`category_id\`, \`country_code\`, \`city\`, \`currency\`, \`price_min\`, \`price_max\`, \`unit\`, \`note\`) VALUES (${esc(pe.id)}, ${esc(pe.solutionId)}, ${esc(pe.categoryId)}, '${pe.countryCode}', ${esc(pe.city)}, '${pe.currency}', ${num(pe.priceMin)}, ${num(pe.priceMax)}, ${esc(pe.unit)}, ${esc(pe.note)});`
   );
 }
 

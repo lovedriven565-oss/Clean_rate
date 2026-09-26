@@ -7,7 +7,8 @@ import { Navbar } from "@/components/Navbar";
 import { PartnerLeadForm } from "@/components/PartnerLeadForm";
 import { StatCounter } from "@/components/StatCounter";
 import { Button } from "@/components/ui/primitives";
-import { categories, companies } from "@/lib/mock-data";
+import { CATEGORIES } from "@/lib/categories";
+import { seedCompanies } from "@/db/seed-data";
 import { ENABLED_MARKETS } from "@/lib/markets";
 import { pluralize } from "@/lib/format";
 
@@ -129,8 +130,8 @@ export default function ForPartnersPage() {
         {/* Honest Stats */}
         <section className="border-b border-border bg-muted/30">
           <div className="container grid grid-cols-1 gap-8 py-10 sm:grid-cols-3">
-            <StatCounter value={companies.length} label="компаний в каталоге" />
-            <StatCounter value={categories.length} label="категорий услуг" />
+            <StatCounter value={seedCompanies.length} label="компаний в каталоге" />
+            <StatCounter value={CATEGORIES.length} label="категорий услуг" />
             <StatCounter
               value={enabledCities.length}
               suffix={` ${pluralize(enabledCities.length, ["город", "города", "городов"]).split(" ")[1]}`}

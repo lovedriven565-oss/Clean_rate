@@ -16,8 +16,7 @@ import {
 import { Input } from "@/components/ui/primitives";
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
-import { categories } from "@/lib/mock-data";
-import type { CategoryId } from "@/lib/types";
+import type { Category, CategoryId } from "@/lib/types";
 
 export type SortKey = "relevance" | "rating" | "reviews" | "price" | "experience";
 export type ViewMode = "list" | "grid";
@@ -35,6 +34,7 @@ function categoryIcon(name: string): LucideIcon {
 }
 
 interface RatingToolbarProps {
+  categories: Category[];
   query: string;
   onQueryChange: (value: string) => void;
   activeCategory: CategoryId | "all";
@@ -57,6 +57,7 @@ interface RatingToolbarProps {
 }
 
 export function RatingToolbar({
+  categories,
   query,
   onQueryChange,
   activeCategory,

@@ -9,7 +9,7 @@ import {
 } from "../lib/ads/eligibility.js";
 import { getEligibleAd } from "../lib/ads/queries.js";
 import { computeBrandScore } from "../lib/brand-score.js";
-import { companies } from "../lib/mock-data.js";
+import { getFallbackCompanies } from "../lib/db/fallback.js";
 import { calculateOrganicScore, calculateRelevanceScore } from "../lib/rating.js";
 import type {
   AdTargetContext,
@@ -414,6 +414,7 @@ describe("Ad Engine & Eligibility Gate", () => {
   });
 
   describe("разделение данных: рекламные кампании НЕ меняют органический рейтинг", () => {
+    const companies = getFallbackCompanies();
     const ratedCompany = companies.find((c) => c.reviewCount > 0);
     if (!ratedCompany) throw new Error("No rated company found for test");
 

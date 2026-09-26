@@ -10,7 +10,7 @@ import { RankBadge, RatingBadge } from "@/components/CompanyBadges";
 import { CompanyContactActions } from "@/components/CompanyContactActions";
 import { CompanyEquipmentTags } from "@/components/CompanyEquipmentTags";
 import { formatCompanyPriceFrom } from "@/lib/format";
-import { categories } from "@/lib/mock-data";
+import { getCategoryName } from "@/lib/categories";
 
 export function CompanyCard({
   company,
@@ -20,9 +20,7 @@ export function CompanyCard({
   index?: number;
   rank?: number;
 }) {
-  const categoryNames = company.categories
-    .map((id) => categories.find((c) => c.id === id)?.name ?? id)
-    .slice(0, 3);
+  const categoryNames = company.categories.map(getCategoryName).slice(0, 3);
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-control border border-border bg-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl">

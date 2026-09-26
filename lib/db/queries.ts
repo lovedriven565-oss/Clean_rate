@@ -28,7 +28,6 @@ import {
 import type {
   Brand,
   BrandLead,
-  BrandScore,
   Category,
   CategoryId,
   Company,
@@ -36,21 +35,23 @@ import type {
   PartnerLead,
   PriceEstimate,
   RankedBrand,
-  RatingSource,
   Solution,
   SolutionProduct,
 } from "@/lib/types";
-import { computeBrandScore, rankBrands, type BrandScoreInput } from "@/lib/brand-score";
+import { computeBrandScore, rankBrands } from "@/lib/brand-score";
 import { getDb } from "./client";
 import {
-  seedBrands,
-  seedCategories,
-  seedCompanies,
-  seedIntentKeywords,
-  seedPriceEstimates,
-  seedSolutionProducts,
-  seedSolutions,
-} from "@/db/seed-data";
+  getFallbackBrands,
+  getFallbackBrandScores,
+  getFallbackCategories,
+  getFallbackCompanies,
+  getFallbackIntentKeywords,
+  getFallbackPriceEstimates,
+  getFallbackSolutions,
+  getSeedSolutionProductLinks,
+  initScoreInputs,
+} from "./fallback";
+import { mapBrandRow, mapCompanyRow, parseJsonArray, parseJsonGeneric, type CompanyRow } from "./mappers";
 
 /**
  * Ошибка чтения D1. Локально (частично засеянная D1, next start) — лог и откат на seed.
@@ -60,263 +61,6 @@ import {
 function reportDbError(label: string, err: unknown): void {
   console.error(label, err);
   if (process.env.STRICT_DB === "1") throw err;
-}
-
-// --- Fallback: маппинг seed-data в типы UI ---
-
-function seedCompanyToCompany(seed: (typeof seedCompanies)[number]): Company {
-  return {
-    id: seed.id,
-    slug: seed.slug,
-    name: seed.name,
-    categories: seed.categories,
-    city: seed.city,
-    address: seed.address,
-    verified: seed.verified,
-    promoted: seed.promoted,
-    equipment: seed.equipment,
-    baseRating: seed.rating?.rating ?? 0,
-    reviewCount: seed.rating?.reviewCount ?? 0,
-    ratingSource: seed.ratingSource,
-    priceFrom: seed.priceFrom,
-    priceUnit: seed.priceUnit,
-    coverImage: seed.coverImage,
-    description: seed.description,
-    tags: seed.tags,
-    guarantees: seed.guarantees,
-    websiteUrl: seed.websiteUrl,
-    phone: seed.phone,
-    telegramUrl: seed.telegramUrl,
-    email: seed.email,
-    experienceYears: seed.experienceYears,
-  };
-}
-
-function seedBrandToBrand(seed: (typeof seedBrands)[number]): Brand {
-  return {
-    id: seed.id,
-    slug: seed.slug,
-    name: seed.name,
-    tagline: seed.tagline,
-    accent: seed.accent,
-    focus: seed.focus,
-    description: seed.description,
-    affiliateUrl: seed.affiliateUrl,
-    isSponsor: seed.isSponsor,
-  };
-}
-
-function getFallbackCompanies(): Company[] {
-  return seedCompanies.map(seedCompanyToCompany);
-}
-
-function getFallbackBrands(): Brand[] {
-  return seedBrands.map(seedBrandToBrand);
-}
-
-function getFallbackCategories(): Category[] {
-  return seedCategories as Category[];
-}
-
-function seedSolutionToSolution(seed: (typeof seedSolutions)[number]): Solution {
-  const brandMap = new Map(seedBrands.map((b) => [b.id, b.name]));
-  const products: SolutionProduct[] = seedSolutionProducts
-    .filter((sp) => sp.solutionId === seed.id)
-    .map((sp) => ({
-      id: sp.id,
-      solutionId: sp.solutionId,
-      brandId: sp.brandId,
-      brandName: sp.brandId ? brandMap.get(sp.brandId) : undefined,
-      role: sp.role,
-      note: sp.note,
-    }));
-
-  return {
-    id: seed.id,
-    slug: seed.slug,
-    title: seed.title,
-    problemType: seed.problemType,
-    surface: seed.surface,
-    material: seed.material,
-    severity: seed.severity,
-    audience: seed.audience,
-    diySteps: seed.diySteps,
-    warnings: seed.warnings,
-    whenToCallPro: seed.whenToCallPro,
-    diyCostNote: seed.diyCostNote,
-    proTimeNote: seed.proTimeNote,
-    searchKeywords: seed.searchKeywords,
-    relatedCategory: seed.relatedCategory,
-    status: seed.status,
-    recommendedProducts: products,
-  };
-}
-
-function getFallbackSolutions(): Solution[] {
-  return seedSolutions.filter((s) => s.status === "published").map(seedSolutionToSolution);
-}
-
-function getFallbackIntentKeywords(): IntentKeyword[] {
-  return seedIntentKeywords.map((k) => ({
-    id: k.id,
-    keyword: k.keyword,
-    intent: k.intent,
-    weight: k.weight,
-    targetKind: k.targetKind,
-    targetSlug: k.targetSlug,
-  }));
-}
-
-function getFallbackPriceEstimates(filter?: {
-  solutionId?: string;
-  categoryId?: CategoryId;
-  countryCode?: string;
-}): PriceEstimate[] {
-  return seedPriceEstimates
-    .filter((pe) => {
-      if (filter?.solutionId && pe.solutionId !== filter.solutionId) return false;
-      if (filter?.categoryId && pe.categoryId !== filter.categoryId) return false;
-      if (filter?.countryCode && pe.countryCode !== filter.countryCode) return false;
-      return true;
-    })
-    .map((pe) => ({
-      id: pe.id,
-      solutionId: pe.solutionId,
-      categoryId: pe.categoryId,
-      countryCode: pe.countryCode,
-      city: pe.city,
-      currency: pe.currency,
-      priceMin: pe.priceMin,
-      priceMax: pe.priceMax,
-      unit: pe.unit,
-      note: pe.note,
-    }));
-}
-
-// --- D1: маппинг строк в типы UI ---
-
-interface CompanyRow {
-  id: string;
-  slug: string;
-  name: string;
-  legal_name: string | null;
-  city: string;
-  address: string | null;
-  description: string;
-  website_url: string | null;
-  phone: string | null;
-  email: string | null;
-  telegram_url: string | null;
-  price_from: number | null;
-  price_unit: string | null;
-  experience_years: number | null;
-  cover_image: string | null;
-  tags: string | null;
-  guarantees: string | null;
-  verified: number;
-  promoted: number;
-}
-
-interface CategoryRow {
-  category_id: string;
-}
-
-interface RatingRow {
-  source: string;
-  source_url: string;
-  rating: number;
-  review_count: number;
-}
-
-interface BrandRow {
-  id: string;
-  slug: string;
-  name: string;
-  tagline: string | null;
-  description: string;
-  focus: string;
-  website_url: string | null;
-  affiliate_url: string | null;
-  accent: string | null;
-  is_sponsor: number;
-}
-
-interface EquipmentRow {
-  brand_id: string;
-}
-
-function parseJsonArray(value: string | null): string[] {
-  if (!value) return [];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function parseJsonGeneric<T>(value: string | null, fallback: T): T {
-  if (!value) return fallback;
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function mapRatingSource(source: string | null): RatingSource {
-  if (source === "google") return "google";
-  if (source === "yandex") return "yandex";
-  return "unverified";
-}
-
-function mapCompanyRow(
-  row: CompanyRow,
-  categories: CategoryRow[],
-  ratings: RatingRow[],
-  equipment: EquipmentRow[]
-): Company {
-  const hasRating = ratings.length > 0;
-  const primaryRating = ratings[0];
-  return {
-    id: row.id,
-    slug: row.slug,
-    name: row.name,
-    categories: categories.map((c) => c.category_id as CategoryId),
-    city: row.city,
-    address: row.address ?? undefined,
-    verified: row.verified === 1,
-    promoted: row.promoted === 1,
-    equipment: equipment.map((e) => e.brand_id),
-    baseRating: hasRating ? primaryRating.rating : 0,
-    reviewCount: hasRating ? primaryRating.review_count : 0,
-    ratingSource: hasRating ? mapRatingSource(primaryRating.source) : "unverified",
-    priceFrom: row.price_from ?? undefined,
-    priceUnit: row.price_unit ?? undefined,
-    coverImage: row.cover_image ?? undefined,
-    description: row.description,
-    tags: parseJsonArray(row.tags),
-    guarantees: parseJsonArray(row.guarantees),
-    websiteUrl: row.website_url ?? undefined,
-    phone: row.phone ?? undefined,
-    telegramUrl: row.telegram_url ?? undefined,
-    email: row.email ?? undefined,
-    experienceYears: row.experience_years ?? undefined,
-  };
-}
-
-function mapBrandRow(row: BrandRow): Brand {
-  return {
-    id: row.id,
-    slug: row.slug,
-    name: row.name,
-    tagline: row.tagline ?? "",
-    accent: row.accent ?? "#0EA5E9",
-    focus: row.focus as Brand["focus"],
-    description: row.description,
-    affiliateUrl: row.affiliate_url ?? row.website_url ?? "#",
-    isSponsor: row.is_sponsor === 1,
-  };
 }
 
 // --- Публичные функции ---
@@ -423,34 +167,6 @@ export async function getBrandSlugs(): Promise<string[]> {
   return (await getAllBrands()).map((b) => b.slug);
 }
 
-function scoreInputs(brandIds: string[]): Map<string, BrandScoreInput> {
-  return new Map(
-    brandIds.map((brandId) => [
-      brandId,
-      { brandId, verifiedCompanyCount: 0, recommendedCount: 0, alternativeCount: 0, clickCount: 0 },
-    ])
-  );
-}
-
-/** Fallback-индекс: verified-связи = equipment верифицированных компаний (как в db/seed.ts). */
-function getFallbackBrandScores(brandIds: string[]): Map<string, BrandScore> {
-  const inputs = scoreInputs(brandIds);
-  for (const company of seedCompanies) {
-    if (!company.verified) continue;
-    for (const brandId of company.equipment) {
-      const input = inputs.get(brandId);
-      if (input) input.verifiedCompanyCount += 1;
-    }
-  }
-  for (const sp of seedSolutionProducts) {
-    const input = sp.brandId ? inputs.get(sp.brandId) : undefined;
-    if (!input) continue;
-    if (sp.role === "recommended") input.recommendedCount += 1;
-    else input.alternativeCount += 1;
-  }
-  return new Map([...inputs].map(([id, input]) => [id, computeBrandScore(input)]));
-}
-
 /**
  * Бренды, отсортированные по «Индексу доверия профи».
  * Источники: company_brands (только verified), solution_products, analytics_events(entity_type=brand).
@@ -480,7 +196,7 @@ export async function getBrandsByScore(): Promise<RankedBrand[]> {
         .groupBy(analyticsEvents.entityId),
     ]);
 
-    const inputs = scoreInputs(brandIds);
+    const inputs = initScoreInputs(brandIds);
     for (const row of verifiedRows) {
       const input = inputs.get(row.brandId);
       if (input) input.verifiedCompanyCount = row.total;
@@ -493,7 +209,7 @@ export async function getBrandsByScore(): Promise<RankedBrand[]> {
     const productLinks =
       productRows.length > 0
         ? productRows.map((row) => ({ brandId: row.brandId, role: row.role, total: row.total }))
-        : seedSolutionProducts.map((sp) => ({ brandId: sp.brandId, role: sp.role, total: 1 }));
+        : getSeedSolutionProductLinks();
     for (const link of productLinks) {
       const input = link.brandId ? inputs.get(link.brandId) : undefined;
       if (!input) continue;

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, BadgeCheck, Boxes, MapPin, PackageSearch, Wrench } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { brands } from "@/lib/mock-data";
+import { getAllBrands } from "@/lib/db/queries";
 
 export const metadata: Metadata = {
   title: "Поставщики оборудования и химии | Клининг Рейтинг",
@@ -16,7 +16,8 @@ const supplierTypes = [
   { icon: Wrench, title: "Сервис и обучение", text: "Демонстрации, ремонт, запасные части и обучение персонала." },
 ];
 
-export default function SuppliersPage() {
+export default async function SuppliersPage() {
+  const brands = await getAllBrands();
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />

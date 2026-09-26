@@ -151,6 +151,7 @@ function RatingContentInner({ companies, categories, categoryAds }: RatingConten
         </section>
 
         <RatingToolbar
+          categories={categories}
           query={query}
           onQueryChange={setQuery}
           activeCategory={activeCategory}

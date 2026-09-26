@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Brand } from "@/lib/types";
-import { brands } from "@/lib/mock-data";
+import { seedBrands } from "@/db/seed-data";
 
 export function CompanyEquipmentTags({
   brands: passedBrands,
@@ -12,8 +12,8 @@ export function CompanyEquipmentTags({
   const resolved =
     passedBrands ??
     (brandIds ?? [])
-      .map((id) => brands.find((b) => b.id === id))
-      .filter((b): b is Brand => Boolean(b));
+      .map((id) => seedBrands.find((b) => b.id === id))
+      .filter((b): b is (typeof seedBrands)[number] => Boolean(b));
 
   if (resolved.length === 0) return null;
 
