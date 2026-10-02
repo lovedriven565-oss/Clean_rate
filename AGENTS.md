@@ -100,6 +100,7 @@
 ### Деплой-заметки
 - Прод-D1: связи `company_brands` остаются 'pending' → индекс в проде = 0 до верификации. После пересида (`migrations/seed.sql`) verified-компании получат 'verified' автоматически; либо точечный `UPDATE company_brands SET evidence_status='verified'` для подтверждённых связей.
 - «Спонсор» = бывший «Партнёр»: золотая плашка, title «Платное размещение. Органический рейтинг не зависит от оплаты».
+- **CD:** Git-интеграция Workers Builds — воркер `clean-rate` (аккаунт `66dfb4ebcaecc905458a8f071cbbee82`) автодеплоит `main` на push; статус = GitHub check-run `Workers Builds: clean-rate`. wrangler локально НЕ авторизован. `workers.dev` поддомен выключен (530), `cleaning-rating.by` публично не резолвится — живой домен смотреть в dashboard `workers/services/view/clean-rate/production`.
 
 ## Блок 2 — Рекламный бэкенд и логика допусков (Ad Engine & Eligibility Gate) (сделано)
 - `db/schema.ts` — расширена таблица `campaigns`: плейсменты (`solution.sponsored_product`, `rating.category_partner`, `home.editorial_partner`, `search.sponsored_result`, `products.sponsored_slot`, `brand.profile_campaign`, `dealer.local_partner`), сроки (`startsAt`, `endsAt`), таргетинг (`targetCountries`, `targetCategories`, `targetSurfaces`, `targetSolutions`), лимиты (`maxImpressions`, `maxClicks`, `currentImpressions`, `currentClicks`), креативы (`title`, `description`, `ctaText`, `ctaUrl`, `ctaType`, `badgeText`), `priority`. В таблицу `products` добавлены поля `ph`, `compatibleSurfaces`, `prohibitedSurfaces`.
@@ -150,3 +151,10 @@
 - Тесты: `tests/dev-hero-search.test.ts` (10 unit), `tests/browser/dev-hero.spec.ts` (12 Playwright, запуск: `npx playwright test tests/browser/dev-hero.spec.ts` при dev-сервере на 3111).
 - Уроки: `grid` без `grid-cols-*` на мобильном → implicit-колонка ширится до max-content (overflow); лечится `grid-cols-1` + `min-w-0`. `body.style.zoom` не эмулирует браузерный zoom — reflow проверять узким viewport (400 CSS px ≈ zoom 200% @800). Маркер `data-hydrated` через ref-колбэк (setState-in-effect запрещён линтером). Playwright: ждать `[data-hydrated]` до интеракций в dev (иначе fill/click теряются до гидрации).
 - Стандарт рисков (одобрен): «справочный характер, не оферта, ответственность за пользователем» + проверка на незаметном участке — применять во всех фазах.
+
+## Дизайн-этап 1.4 — тематические полки прототипа A (сделано, на приёмке)
+- `components/dev/task-shelves.ts` — чистый `buildTaskShelves(solutions)`: 6 дескрипторов (stains/odors/renovation/kitchen/bathroom/office), count/‌slugs вычисляются предикатом из published-решений, полка без совпадений исключается. href → реальные фильтры `/solutions?type=|surface=` (читаются SolutionsExplorer).
+- `components/dev/TaskShelf.tsx` — CSS scroll-snap лента: стрелки size-11 с disabled по scrollLeft (ResizeObserver + rAF, не set-state-in-effect), ArrowLeft/Right на focusable `<ul>`, свайп нативный, «Все решения» → /solutions (десктоп в шапке, мобилка под лентой).
+- `components/dev/TaskCover.tsx` — обложка-ссылка с photo+gradient, счётчик `pluralize` (он уже возвращает число!), featured «Пятна» шире и выше.
+- `public/dev/a-tasks/` — 6 Pexels-фото (Pexels License): stains 5659651, odors 13450868, renovation 9908376, kitchen 4850197, bathroom 7587870, office 12526862.
+- Тесты: `tests/dev-task-shelves.test.ts` (8 unit), `tests/browser/dev-shelf.spec.ts` (7 Playwright). Урок: клик по кнопке которая станет disabled → scrollTo instant + expect(disabled), цикл слепых click виснет.

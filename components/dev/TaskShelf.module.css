@@ -1,0 +1,29 @@
+/* Тематическая полка прототипа A (этап 1.4): только то, что Tailwind
+   не выражает — поведение скролла и затенение обложек. */
+
+.track {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Затенение нижней части обложки — одинаково читаемо в обеих темах,
+   поэтому не зависит от токенов .va. */
+.coverShade {
+  background: linear-gradient(
+    180deg,
+    hsl(222 40% 8% / 0) 28%,
+    hsl(222 40% 8% / 0.35) 62%,
+    hsl(222 40% 8% / 0.78) 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    scroll-behavior: auto;
+  }
+}

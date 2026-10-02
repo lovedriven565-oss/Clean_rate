@@ -116,9 +116,11 @@ test("no-match: честное сообщение и ссылка на /solution
 
   const input = page.getByRole("combobox");
   await input.fill("квантовая запутанность полов");
-  await expect(page.getByText("В локальном образце такого протокола нет")).toBeVisible();
-  const all = page.getByRole("link", { name: /Все решения/ });
+  const noMatch = page.getByText("В локальном образце такого протокола нет");
+  await expect(noMatch).toBeVisible();
+  const all = noMatch.locator("..").getByRole("link", { name: "Все решения" });
   await expect(all).toBeVisible();
+  await expect(all).toHaveAttribute("href", "/solutions");
   await shot(page, "search-no-match");
 });
 

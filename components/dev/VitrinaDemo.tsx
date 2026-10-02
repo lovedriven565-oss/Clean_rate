@@ -6,14 +6,17 @@ import Image from "next/image";
 import { ArrowRight, ArrowUpRight, Phone } from "lucide-react";
 import type { Solution } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { demoTasks, demoProducts, demoCompany, demoAd } from "./demo-data";
+import { demoProducts, demoCompany, demoAd } from "./demo-data";
 import { heroExampleChips } from "./hero-search";
+import { buildTaskShelves } from "./task-shelves";
+import { TaskShelf } from "./TaskShelf";
 import { VitrinaHero } from "./VitrinaHero";
 import styles from "./VitrinaHero.module.css";
 
 export default function VitrinaDemo({ solutions }: { solutions: Solution[] }) {
   const [dark, setDark] = useState(false);
   const chips = heroExampleChips(solutions);
+  const shelves = buildTaskShelves(solutions);
 
   return (
     <div className={cn("va", dark && "va-dark", styles.scope, dark && styles.scopeDark, "min-h-screen bg-[hsl(var(--v-bg))] font-sans text-[hsl(var(--v-ink))] antialiased")}>
@@ -53,32 +56,9 @@ export default function VitrinaDemo({ solutions }: { solutions: Solution[] }) {
 
       <main className="mx-auto max-w-6xl px-5">
 
-        {/* Task shelf */}
-        <section className="border-t border-[hsl(var(--v-line))] py-10">
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <h2 className="text-2xl font-bold tracking-tight">Выберите задачу</h2>
-            <span className="flex cursor-default items-center gap-1 text-sm font-medium text-[hsl(var(--v-accent))]">
-              Все задачи <ArrowRight className="size-4" />
-            </span>
-          </div>
-          <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0">
-            {demoTasks.map((task) => (
-              <article key={task.slug} className="group w-[70vw] max-w-[280px] shrink-0 snap-start lg:w-auto lg:max-w-none">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[hsl(var(--v-tint))]">
-                  <Image
-                    src={task.img}
-                    alt={`Демо: ${task.title}`}
-                    fill
-                    sizes="(min-width: 1024px) 22vw, 70vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                  />
-                </div>
-                <h3 className="mt-3 text-[15px] font-semibold">{task.title}</h3>
-                <p className="text-sm text-[hsl(var(--v-ink2))]">{task.note}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+        {/* Тематические полки (этап 1.4): обложки из published-решений,
+            scroll-snap + стрелки + клавиатура, без демо-«популярности» */}
+        <TaskShelf shelves={shelves} />
 
         {/* Products */}
         <section className="border-t border-[hsl(var(--v-line))] py-10">
