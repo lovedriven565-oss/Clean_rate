@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import VitrinaDemo from "@/components/dev/VitrinaDemo";
-import { getFallbackSolutions } from "@/lib/db/fallback";
+import { getFallbackCompanies, getFallbackSolutions } from "@/lib/db/fallback";
 
 export const metadata: Metadata = {
   title: "Прототип A — Предметная витрина",
@@ -13,5 +13,5 @@ export default function DesignVariantA() {
   if (process.env.NODE_ENV === "production") notFound();
   // Локальный образец опубликованных решений — без D1/API/аналитики.
   const solutions = getFallbackSolutions();
-  return <VitrinaDemo solutions={solutions} />;
+  return <VitrinaDemo solutions={solutions} companies={getFallbackCompanies()} />;
 }

@@ -158,3 +158,11 @@
 - `components/dev/TaskCover.tsx` — обложка-ссылка с photo+gradient, счётчик `pluralize` (он уже возвращает число!), featured «Пятна» шире и выше.
 - `public/dev/a-tasks/` — 6 Pexels-фото (Pexels License): stains 5659651, odors 13450868, renovation 9908376, kitchen 4850197, bathroom 7587870, office 12526862.
 - Тесты: `tests/dev-task-shelves.test.ts` (8 unit), `tests/browser/dev-shelf.spec.ts` (7 Playwright). Урок: клик по кнопке которая станет disabled → scrollTo instant + expect(disabled), цикл слепых click виснет.
+
+## Дизайн-этап 1.5 — карточки и быстрый просмотр прототипа A (сделано, на приёмке)
+- `components/dev/card-models.ts` — чистые модели `CardModel` (kind: task/product/company/ad). Задачи и компании строятся из реальных published-решений и seed-компаний. Продукт — явный демо-образец без выдуманных цен, рейтингов и ссылок (все поля «не указано», изображение недоступно). Реклама — явный образец с маркировкой «Реклама», без ссылок, в отдельной секции.
+- Рейтинг и доверие компании: если есть подтверждённые отзывы (Google/Яндекс) — показывается честный балл; для спонсоров и верифицированных компаний без внешних отзывов вместо «не публикуется» выводится подтверждённый редакцией статус доверия («Спонсор показа · Профиль проверен» / «Профиль проверен редакцией»); спонсоры стоят первыми в блоке.
+- `components/dev/ProtoCard.tsx` — единая карточка с быстрым просмотром (quick view): открывается по hover, по фокусу Tab и по явной кнопке (≥44px на touch); Escape закрывает без потери фокуса; оверлей внутри карточки (без сдвига раскладки/CLS=0); предупреждение видно на лицевой стороне без открытия просмотра; внизу просмотра закреплён стандарт рисков. Состояния: skeleton (`role="status"`), empty, error (`role="alert"`), image unavailable, long-content.
+- `components/dev/CardsShowcase.tsx` — сборка витрины карточек по секциям (задачи, средства, компании со спонсором во главе, реклама, состояния).
+- Тесты: `tests/dev-card-models.test.ts` (8 unit), `tests/browser/dev-cards.spec.ts` (11 Playwright).
+- Проверки: typecheck 0; unit-тесты 122/122; Playwright 11/11; build 114 страниц (SSG); production smoke :3210 отдаёт 404 для /dev/design/a-vitrina и 200 для публичных страниц.
