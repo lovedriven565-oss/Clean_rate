@@ -463,7 +463,7 @@ export interface AnalyticsEventInput {
   campaignId?: string;
   entityType: "company" | "brand" | "supplier" | "product" | "page";
   entityId: string;
-  eventType: "impression" | "view" | "phone" | "website" | "telegram" | "lead" | "download";
+  eventType: "impression" | "view" | "phone" | "website" | "telegram" | "lead" | "download" | "share" | "feedback";
   path?: string;
   countryCode?: string;
   metadata?: Record<string, unknown>;

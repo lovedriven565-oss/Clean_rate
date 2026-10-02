@@ -10,6 +10,8 @@ export type CurrencyCode = "BYN" | "RUB" | "KZT";
 export interface City {
   slug: string;
   name: string;
+  /** Предложный падеж для заголовков посадочных: «в Минске». */
+  nameIn: string;
 }
 
 export interface Market {
@@ -40,8 +42,8 @@ export const MARKETS: Record<CountryCode, Market> = {
     mapsHost: "yandex.by",
     enabled: true,
     cities: [
-      { slug: "minsk", name: "Минск" },
-      { slug: "brest", name: "Брест" },
+      { slug: "minsk", name: "Минск", nameIn: "Минске" },
+      { slug: "brest", name: "Брест", nameIn: "Бресте" },
     ],
   },
   RU: {
@@ -53,8 +55,8 @@ export const MARKETS: Record<CountryCode, Market> = {
     mapsHost: "yandex.ru",
     enabled: false,
     cities: [
-      { slug: "moscow", name: "Москва" },
-      { slug: "spb", name: "Санкт-Петербург" },
+      { slug: "moscow", name: "Москва", nameIn: "Москве" },
+      { slug: "spb", name: "Санкт-Петербург", nameIn: "Санкт-Петербурге" },
     ],
   },
   KZ: {
@@ -66,8 +68,8 @@ export const MARKETS: Record<CountryCode, Market> = {
     mapsHost: "yandex.kz",
     enabled: false,
     cities: [
-      { slug: "almaty", name: "Алматы" },
-      { slug: "astana", name: "Астана" },
+      { slug: "almaty", name: "Алматы", nameIn: "Алматы" },
+      { slug: "astana", name: "Астана", nameIn: "Астане" },
     ],
   },
 };
@@ -108,4 +110,22 @@ export function getDefaultCity(countryCode: CountryCode = DEFAULT_COUNTRY_CODE):
 export function getCity(countryCode: CountryCode, citySlug?: string | null): City {
   const market = MARKETS[countryCode];
   return market.cities.find((city) => city.slug === citySlug) ?? market.cities[0];
+}
+
+/** Город по slug среди открытых рынков — для посадочных /[city]/[category]. */
+export function getCityBySlug(slug: string): { market: Market; city: City } | undefined {
+  for (const market of ENABLED_MARKETS) {
+    const city = market.cities.find((c) => c.slug === slug);
+    if (city) return { market, city };
+  }
+  return undefined;
+}
+
+/** Город по русскому названию (как в данных компаний) — для ссылок со страниц компаний. */
+export function getCityByName(name: string): { market: Market; city: City } | undefined {
+  for (const market of MARKET_LIST) {
+    const city = market.cities.find((c) => c.name === name);
+    if (city) return { market, city };
+  }
+  return undefined;
 }

@@ -17,6 +17,7 @@ import { TwoPathsBento } from "@/components/home/TwoPathsBento";
 import { AdCreative } from "@/components/ads/AdCreative";
 import { getEligibleAd } from "@/lib/ads/queries";
 import { getAllBrands, getAllCategories, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
+import { pickHomeCompanies } from "@/lib/rating";
 import { SITE_NAME, SITE_URL, absoluteUrl, pageAlternates } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -44,10 +45,9 @@ export default async function Home() {
     getEligibleAd("home.editorial_partner", {}),
   ]);
 
-  // Партнёры платформы (открытое платное размещение) показываются первыми, порядок остальных —
-  // как в каталоге. Это не рейтинг по качеству — честный рейтинг по отзывам появится, когда
-  // у компаний будут проверенные отзывы.
-  const homeCompanies = [...companies].sort((a, b) => Number(b.promoted) - Number(a.promoted));
+  // Блок «Рейтинг» показывает органический топ: спонсор выводится отдельной строкой
+  // с открытой пометкой и без номера — платное размещение не даёт позицию #1.
+  const { organic: homeCompanies, sponsors: homeSponsors } = pickHomeCompanies(companies);
   const featuredSolution = solutions[0];
   const moreSolutions = solutions.slice(1, 4);
 
@@ -196,9 +196,21 @@ export default async function Home() {
               </Reveal>
               <Reveal delay={0.08}>
                 <div className="flex flex-col gap-4">
-                  {homeCompanies.slice(0, 3).map((company, index) => (
+                  {homeCompanies.map((company, index) => (
                     <CompanyListItem key={company.id} company={company} index={index} rank={index + 1} />
                   ))}
+                  {homeSponsors.length > 0 && (
+                    <div className="mt-1">
+                      <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        Рекламное размещение — не участвует в рейтинге
+                      </span>
+                      <div className="flex flex-col gap-4">
+                        {homeSponsors.map((company, index) => (
+                          <CompanyListItem key={company.id} company={company} index={index} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Reveal>
             </div>

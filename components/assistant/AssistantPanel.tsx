@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AlertTriangle, ImagePlus, Loader2, ShieldCheck, Sparkles, X } from "lucide-react";
@@ -22,6 +22,12 @@ export function AssistantPanel() {
   const [answer, setAnswer] = useState<AssistantAnswer | null>(null);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Вход «по фото» из главной строки поиска: сразу открываем выбор файла.
+  useEffect(() => {
+    if (params.get("photo") === "1") fileRef.current?.click();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleFile(file: File | undefined) {
     setImageError(null);

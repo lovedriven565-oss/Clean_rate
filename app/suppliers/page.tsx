@@ -4,10 +4,12 @@ import { ArrowRight, BadgeCheck, Boxes, MapPin, PackageSearch, Wrench } from "lu
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { getAllBrands } from "@/lib/db/queries";
+import { pageAlternates } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Поставщики оборудования и химии | Клининг Рейтинг",
+  title: "Поставщики оборудования и химии",
   description: "Формирующийся каталог производителей, импортёров, дилеров и сервисных центров индустрии чистоты.",
+  alternates: pageAlternates("/suppliers"),
 };
 
 const supplierTypes = [

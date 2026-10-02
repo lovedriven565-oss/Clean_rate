@@ -1,0 +1,41 @@
+/* Scoped стили первого экрана прототипа A.
+   Токены .va/.va-dark живут в VitrinaDemo — здесь только то, что Tailwind
+   не выражает: color-scheme контейнера, фокус и fallback'и медиа-фич. */
+
+.scope {
+  color-scheme: light;
+}
+
+.scopeDark {
+  color-scheme: dark;
+}
+
+/* Видимый фокус внутри прототипа — в акценте темы A, не в глобальном стиле. */
+.scope :is(a, button, input, [role="option"]):focus-visible {
+  outline: 2px solid hsl(var(--v-accent));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Поле поиска: фокус по контейнеру, не по input. */
+.searchBox:focus-within {
+  border-color: hsl(var(--v-accent) / 0.55);
+  box-shadow:
+    0 0 0 3px hsl(var(--v-accent) / 0.15),
+    0 18px 40px -24px hsl(222 40% 20% / 0.25);
+}
+
+/* Sticky-шапка: при reduced-transparency — сплошной фон вместо blur. */
+@media (prefers-reduced-transparency: reduce) {
+  .glassBar {
+    backdrop-filter: none;
+    background: hsl(var(--v-bg));
+  }
+}
+
+/* Reduced motion: прототип не теряет функций, просто без движения. */
+@media (prefers-reduced-motion: reduce) {
+  .scope :where(a, button, input, [role="option"], img) {
+    transition-duration: 0.01ms !important;
+  }
+}

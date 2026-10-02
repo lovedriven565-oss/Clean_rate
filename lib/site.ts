@@ -7,6 +7,29 @@ import { ENABLED_MARKETS } from "@/lib/markets";
  */
 export const SITE_NAME = "Клининг Рейтинг";
 
+/** Короткий слоган для OG-картинок, манифеста и подписи логотипа. */
+export const SITE_TAGLINE = "Решения задач чистоты и честный рейтинг компаний";
+
+/**
+ * Монограмма знака (favicon, логотип, OG): первые буквы слов SITE_NAME.
+ * При смене имени бренда меняется автоматически.
+ */
+export const SITE_MONOGRAM = SITE_NAME.split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((word) => word[0]!.toUpperCase())
+  .join("");
+
+/** Фирменные цвета для растровых картинок (ImageResponse не читает CSS-переменные). */
+export const BRAND_COLORS = {
+  ink: "#0b0f13",
+  inkSoft: "#16202a",
+  primary: "#0c7d70",
+  primaryBright: "#29d6b8",
+  paper: "#f6f8fa",
+  muted: "#9aa7b3",
+} as const;
+
 /**
  * Версия политики конфиденциальности, под которую зафиксировано согласие
  * в B2B-формах. Менять при существенном обновлении текста /privacy.

@@ -64,16 +64,25 @@ export default async function SolutionsPage() {
                 Не нашли свою задачу?
               </h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Компании из рейтинга берут нестандартные случаи: опишите задачу по телефону, оценка бесплатна.
+                Опишите её консультанту — он ответит по проверенным протоколам или честно скажет, что данных нет.
+                Можно приложить фото.
               </p>
             </div>
-            <Link
-              href="/rating"
-              className="mt-5 inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5 lg:mt-0"
-            >
-              Открыть рейтинг
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <div className="mt-5 flex shrink-0 flex-wrap gap-3 lg:mt-0">
+              <Link
+                href="/assistant"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
+              >
+                Спросить консультанта
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/rating"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
+              >
+                Открыть рейтинг
+              </Link>
+            </div>
           </div>
         </section>
       </main>

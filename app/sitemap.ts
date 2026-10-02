@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllBrands, getCompanySlugs, getSolutionSlugs } from "@/lib/db/queries";
+import { getIndexableLandings } from "@/lib/landing";
 import { absoluteUrl } from "@/lib/site";
 
 /**
@@ -7,10 +8,11 @@ import { absoluteUrl } from "@/lib/site";
  * и параметризованные URL отдавали бы одинаковый HTML — дубли для индексации.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [solutionSlugs, companySlugs, brands] = await Promise.all([
+  const [solutionSlugs, companySlugs, brands, landings] = await Promise.all([
     getSolutionSlugs(),
     getCompanySlugs(),
     getAllBrands(),
+    getIndexableLandings(),
   ]);
   const lastModified = new Date();
 
@@ -46,6 +48,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.5,
+    })),
+    // Посадочные «услуга × город» — только индексируемые (≥2 компании).
+    ...landings.map(({ city, category }) => ({
+      url: absoluteUrl(`/${city}/${category}`),
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
     })),
   ];
 }

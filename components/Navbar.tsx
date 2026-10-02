@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Menu, Network, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { NavSearch } from "@/components/NavSearch";
 import { RegionSelector } from "@/components/RegionSelector";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -14,7 +15,6 @@ const navLinks = [
   { href: "/solutions", label: "Решения" },
   { href: "/rating", label: "Рейтинг" },
   { href: "/brands", label: "Бренды" },
-  { href: "/suppliers", label: "Поставщики" },
   { href: "/for-brands", label: "Для брендов" },
 ];
 
@@ -39,18 +39,8 @@ export function Navbar() {
   return (
     <header className="glass sticky top-0 z-40 border-x-0 border-t-0">
       <div className="container flex h-17 items-center justify-between gap-3">
-        <Link href="/" className="group flex min-w-0 items-center gap-3" onClick={() => setOpen(false)}>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-foreground text-background transition-transform group-hover:scale-105">
-            <Network className="h-4 w-4" />
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate font-display text-sm font-bold tracking-[-0.02em] text-foreground sm:text-base">
-              Клининг Рейтинг
-            </span>
-            <span className="hidden text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground sm:block">
-              Clean Intelligence
-            </span>
-          </span>
+        <Link href="/" className="group flex min-w-0 items-center text-foreground" onClick={() => setOpen(false)}>
+          <BrandLogo markClassName="transition-transform group-hover:scale-105" />
         </Link>
 
         <nav className="hidden items-center gap-1 rounded-full border border-border/80 bg-card/65 p-1 text-sm lg:flex">

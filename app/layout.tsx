@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+import { ExternalAnalytics } from "@/components/analytics/ExternalAnalytics";
+import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { RegionProvider } from "@/components/providers/RegionProvider";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
@@ -53,6 +55,8 @@ export default function RootLayout({
       </head>
       <body>
         <RegionProvider>{children}</RegionProvider>
+        <PageViewTracker />
+        <ExternalAnalytics />
       </body>
     </html>
   );

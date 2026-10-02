@@ -34,8 +34,9 @@ interface RatingContentProps {
 
 const SORT_KEYS: SortKey[] = ["relevance", "rating", "reviews", "price", "experience"];
 
-function RatingContentInner({ companies, categories, categoryAds }: RatingContentProps) {
-  const searchParams = useSearchParams();
+type ParamsReader = Pick<URLSearchParams, "get">;
+
+function RatingView({ companies, categories, categoryAds, searchParams }: RatingContentProps & { searchParams: ParamsReader }) {
   const router = useRouter();
   const pathname = usePathname();
   const { market } = useRegion();
@@ -211,10 +212,22 @@ function RatingContentInner({ companies, categories, categoryAds }: RatingConten
   );
 }
 
+function RatingWithSearchParams(props: RatingContentProps) {
+  const searchParams = useSearchParams();
+  return <RatingView {...props} searchParams={searchParams} />;
+}
+
+const EMPTY_PARAMS: ParamsReader = new URLSearchParams();
+
+/**
+ * useSearchParams на статической странице уводит ближайший Suspense в клиентский рендер.
+ * Поэтому fallback — тот же список без фильтров: H1 и органический порядок компаний попадают
+ * в SSR-HTML (индексация), а высота страницы совпадает с гидратированной версией (нет CLS).
+ */
 export function RatingContent(props: RatingContentProps) {
   return (
-    <Suspense>
-      <RatingContentInner {...props} />
+    <Suspense fallback={<RatingView {...props} searchParams={EMPTY_PARAMS} />}>
+      <RatingWithSearchParams {...props} />
     </Suspense>
   );
 }

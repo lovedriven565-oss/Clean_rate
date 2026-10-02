@@ -5,6 +5,7 @@ import { ChevronDown, Hand, ShieldAlert, Sparkles } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ShareButton } from "@/components/ShareButton";
 import { AdPlacement } from "@/components/ads/AdPlacement";
 import { DiyPanel } from "@/components/solution/DiyPanel";
 import { ProPanel } from "@/components/solution/ProPanel";
@@ -121,11 +122,16 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               {solution.title}
             </h1>
 
+            <div className="mt-4">
+              <ShareButton url={url} title={solution.title} text={`${solution.title} — протокол «два пути»`} />
+            </div>
+
             <div className="mt-6 flex max-w-3xl gap-3 rounded-panel border border-border bg-card/80 p-4 text-sm leading-6 text-muted-foreground backdrop-blur">
               <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-star" />
               <p>
                 Протокол проверен на типовых материалах, но реакция конкретной обивки или покрытия может отличаться.
-                Тестируйте средство на незаметном участке. Если сомневаетесь, начните со второго пути.
+                Тестируйте средство на незаметном участке. Действуя по протоколу, вы принимаете риск на себя:
+                площадка не отвечает за результат. Если сомневаетесь, начните со второго пути.
               </p>
             </div>
 

@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Clock, MessageCircle, Phone, Sparkles, Star } from "lucide-react";
+import { ArrowRight, BadgeCheck, Clock, MessageCircle, Sparkles, Star } from "lucide-react";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
+import { PhoneButton } from "@/components/PhoneButton";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { StickyCallBar } from "@/components/StickyCallBar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { trackClick } from "@/lib/analytics";
+import { categoryLandingHref } from "@/lib/categories";
 import { formatRating } from "@/lib/format";
 import type { Company, PriceEstimate, Solution } from "@/lib/types";
 import { PriceRange } from "./PriceRange";
@@ -35,7 +37,7 @@ export function ProPanel({
   const { market, city } = useRegion();
   const cityNames = market.cities.map((c) => c.name);
   const picked = pickCompanies(companies, cityNames, solution);
-  const ratingHref = solution.relatedCategory ? `/rating?category=${solution.relatedCategory}` : "/rating";
+  const ratingHref = solution.relatedCategory ? categoryLandingHref(city.slug, solution.relatedCategory) : "/rating";
 
   return (
     <section
@@ -147,14 +149,7 @@ function CompanyRow({ company }: { company: Company }) {
 
       <div className="flex shrink-0 items-center gap-2">
         {company.phone && (
-          <a
-            href={`tel:${company.phone.replace(/[^\d+]/g, "")}`}
-            onClick={() => trackClick({ companyId: company.id, categoryId, clickType: "phone" })}
-            className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5 sm:flex-none"
-          >
-            <Phone className="h-3.5 w-3.5" />
-            Позвонить
-          </a>
+          <PhoneButton phone={company.phone} companyId={company.id} categoryId={categoryId} compact />
         )}
         {company.telegramUrl && (
           <a

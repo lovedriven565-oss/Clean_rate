@@ -47,7 +47,19 @@ export default function PrivacyPage() {
               </p>
 
               <h2 className="font-display text-xl font-semibold text-foreground">
-                3. B2B-заявки
+                3. Веб-аналитика
+              </h2>
+              <p>
+                Для оценки посещаемости могут использоваться Яндекс Метрика и
+                Cloudflare Web Analytics. Эти сервисы собирают обезличенную
+                статистику (страницы, источники переходов, тип устройства) и могут
+                устанавливать собственные cookie по своим условиям обработки
+                данных. Отключить Метрику можно официальным блокировщиком
+                Яндекса или настройками браузера.
+              </p>
+
+              <h2 className="font-display text-xl font-semibold text-foreground">
+                4. B2B-заявки
               </h2>
               <p>
                 Формы для компаний и рекламодателей (размещение в каталоге, партнёрство,
@@ -57,7 +69,7 @@ export default function PrivacyPage() {
               </p>
 
               <h2 className="font-display text-xl font-semibold text-foreground">
-                4. Хранение и безопасность
+                5. Хранение и безопасность
               </h2>
               <p>
                 Заявки B2B пересылаются в защищённый Telegram-чат владельца платформы.
@@ -66,7 +78,7 @@ export default function PrivacyPage() {
               </p>
 
               <h2 className="font-display text-xl font-semibold text-foreground">
-                5. Согласие
+                6. Согласие
               </h2>
               <p>
                 Отправляя B2B-форму, вы подтверждаете согласие на обработку указанных

@@ -236,7 +236,7 @@ export const analyticsEvents = sqliteTable(
     campaignId: text("campaign_id").references(() => campaigns.id, { onDelete: "set null" }),
     entityType: text("entity_type", { enum: ["company", "brand", "supplier", "product", "page"] }).notNull(),
     entityId: text("entity_id").notNull(),
-    eventType: text("event_type", { enum: ["impression", "view", "phone", "website", "telegram", "lead", "download"] }).notNull(),
+    eventType: text("event_type", { enum: ["impression", "view", "phone", "website", "telegram", "lead", "download", "share", "feedback"] }).notNull(),
     path: text("path"),
     countryCode: text("country_code"),
     metadata: text("metadata"),

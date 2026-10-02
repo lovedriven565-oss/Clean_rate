@@ -45,3 +45,23 @@ export function ratingSourceLabel(source?: RatingSource) {
   if (source === "new") return "Новый профиль";
   return "Источник не подтверждён";
 }
+
+export interface HomeCompanies {
+  /** Топ по органическому баллу — единственные, кто получает ранг на главной. */
+  organic: Company[];
+  /** Платные размещения — показываются отдельной строкой с пометкой «Спонсор», без ранга. */
+  sponsors: Company[];
+}
+
+/**
+ * Блок «Рейтинг» на главной: ранги достаются только органическому топу,
+ * спонсоры выносятся из нумерации — платное размещение не даёт позицию #1.
+ */
+export function pickHomeCompanies(companies: Company[], limit = 3): HomeCompanies {
+  const sponsors = companies.filter((c) => c.promoted);
+  const organic = companies
+    .filter((c) => !c.promoted)
+    .sort((a, b) => calculateRelevanceScore(b) - calculateRelevanceScore(a))
+    .slice(0, limit);
+  return { organic, sponsors };
+}

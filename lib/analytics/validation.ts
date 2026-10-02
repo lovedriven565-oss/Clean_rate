@@ -11,7 +11,7 @@ export const ANALYTICS_ENTITY_TYPES = ["company", "brand", "supplier", "product"
 
 /** Типы, которые клиенту разрешено присылать в /api/analytics/click.
  *  impression — только через свой endpoint; lead — только серверная запись после сохранения заявки. */
-export const CLIENT_CLICK_TYPES = ["phone", "website", "telegram", "view", "download"] as const;
+export const CLIENT_CLICK_TYPES = ["phone", "website", "telegram", "view", "download", "share", "feedback"] as const;
 
 export type AnalyticsEntity = (typeof ANALYTICS_ENTITY_TYPES)[number];
 export type ClientClickType = (typeof CLIENT_CLICK_TYPES)[number];

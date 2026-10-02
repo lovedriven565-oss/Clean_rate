@@ -1,8 +1,9 @@
 "use client";
 
-import { Globe, Mail, MessageCircle, Phone } from "lucide-react";
+import { Globe, Mail, MessageCircle } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { trackClick } from "@/lib/analytics";
+import { PhoneButton } from "@/components/PhoneButton";
 import { cn } from "@/lib/utils";
 
 /**
@@ -27,10 +28,7 @@ export function CompanyContactActions({ company, compact = false, className }: {
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
       {company.phone && (
-        <a href={`tel:${company.phone.replace(/[^\d+]/g, "")}`} onClick={track("phone")} className={primaryClass}>
-          <Phone className={iconClass} />
-          {compact ? "Позвонить" : company.phone}
-        </a>
+        <PhoneButton phone={company.phone} companyId={company.id} categoryId={categoryId} compact={compact} />
       )}
       {company.telegramUrl && (
         <a

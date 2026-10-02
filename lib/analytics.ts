@@ -1,6 +1,6 @@
 export type ClickType = "phone" | "website" | "telegram";
 export type AnalyticsEntityType = "company" | "brand" | "supplier" | "product" | "page";
-export type AnalyticsEventType = "impression" | "view" | "phone" | "website" | "telegram" | "lead" | "download";
+export type AnalyticsEventType = "impression" | "view" | "phone" | "website" | "telegram" | "lead" | "download" | "share" | "feedback";
 
 export interface ClickPayload {
   companyId: string;
@@ -19,6 +19,24 @@ export interface AnalyticsPayload {
   path?: string;
   countryCode?: string;
   metadata?: Record<string, unknown>;
+}
+
+/** ID счётчика Яндекс Метрики (инлайнится при сборке). Пусто — Метрика не подключена. */
+export const YM_ID = process.env.NEXT_PUBLIC_YM_ID ? Number(process.env.NEXT_PUBLIC_YM_ID) : undefined;
+
+/** События, которые дублируются целями в Метрику (конверсии, а не просмотры/показы). */
+const YM_GOALS = new Set<AnalyticsEventType>(["phone", "telegram", "website", "lead", "share", "feedback"]);
+
+type YmFn = (id: number, method: string, ...args: unknown[]) => void;
+
+function ym(method: string, ...args: unknown[]) {
+  if (!YM_ID || typeof window === "undefined") return;
+  const fn = (window as unknown as { ym?: YmFn }).ym;
+  try {
+    fn?.(YM_ID, method, ...args);
+  } catch {
+    // Метрика не должна ломать UX
+  }
 }
 
 /**
@@ -40,12 +58,23 @@ function newId(): string {
  * Вызывается PageViewTracker при смене пути; повторный вызов для того же
  * пути возвращает существующий ID (защита от StrictMode double-mount).
  */
-export function startPageView(pathname: string): string {
-  if (currentPageViewPath !== pathname) {
+export function startPageView(pathname: string): { id: string; isNew: boolean } {
+  const isNew = currentPageViewPath !== pathname;
+  if (isNew) {
     currentPageViewPath = pathname;
     currentPageViewId = newId();
   }
-  return currentPageViewId!;
+  return { id: currentPageViewId!, isNew };
+}
+
+/** Хит Метрики при SPA-переходе (счётчик инициализируется с defer: true). */
+export function ymHit(url: string, referrer?: string) {
+  ym("hit", url, referrer ? { referer: referrer } : undefined);
+}
+
+/** Цель Метрики для событий, которые не пишутся в D1 (например, лид пишется сервером). */
+export function reachGoal(goal: AnalyticsEventType, params?: Record<string, unknown>) {
+  ym("reachGoal", goal, params);
 }
 
 /**
@@ -55,6 +84,10 @@ export function startPageView(pathname: string): string {
  */
 export function trackEvent(payload: AnalyticsPayload) {
   if (typeof window === "undefined") return;
+
+  if (YM_GOALS.has(payload.eventType)) {
+    reachGoal(payload.eventType, { entityType: payload.entityType, entityId: payload.entityId });
+  }
 
   const body = JSON.stringify({
     ...payload,

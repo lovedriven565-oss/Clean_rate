@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/primitives";
@@ -23,6 +24,25 @@ export default function DesignSystemPage() {
       <Navbar />
       <main className="container space-y-12 py-12">
         <h1 className="font-display text-4xl font-bold tracking-tight text-foreground">Clinical Future</h1>
+
+        <section className="grid gap-4 sm:grid-cols-2">
+          <Link
+            href="/dev/design/a-vitrina"
+            className="group rounded-panel border border-border bg-card p-6 transition-shadow hover:shadow-md"
+          >
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Прототип A</p>
+            <h2 className="mt-1 text-lg font-semibold text-foreground group-hover:text-primary">Предметная витрина →</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Off-white, синий акцент, крупные предметные карточки и тематические полки.</p>
+          </Link>
+          <Link
+            href="/dev/design/b-editorial"
+            className="group rounded-panel border border-border bg-card p-6 transition-shadow hover:shadow-md"
+          >
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Прототип B</p>
+            <h2 className="mt-1 text-lg font-semibold text-foreground group-hover:text-primary">Редакционный навигатор →</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Paper-основа, крупная типографика, асимметричная editorial-сетка.</p>
+          </Link>
+        </section>
 
         <section className="grid gap-4 md:grid-cols-3">
           <Panel className="p-6">

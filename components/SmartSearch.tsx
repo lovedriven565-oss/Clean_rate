@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, Home, Loader2, Search, Sparkles, Wrench } from "lucide-react";
+import { Briefcase, Camera, Home, Loader2, Search, Sparkles, Wrench } from "lucide-react";
 import { Input } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 import type { SearchIntent } from "@/lib/types";
@@ -207,7 +207,7 @@ export function SmartSearch() {
         </div>
       </form>
 
-      <div className="mt-2 flex flex-wrap gap-1.5 px-1">
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 px-1">
         {QUICK_CHIPS.map((chip) => (
           <button
             key={chip}
@@ -218,6 +218,14 @@ export function SmartSearch() {
             {chip}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => search.navigate("/assistant?photo=1")}
+          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+        >
+          <Camera className="h-3.5 w-3.5" />
+          По фото пятна
+        </button>
       </div>
 
       {open && query.trim() && <SearchSuggestions search={search} />}

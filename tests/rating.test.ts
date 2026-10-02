@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { getFallbackCompanies } from "../lib/db/fallback.js";
-import { calculateOrganicScore, calculateRelevanceScore, hasPublishedRating } from "../lib/rating.js";
+import { calculateOrganicScore, calculateRelevanceScore, hasPublishedRating, pickHomeCompanies } from "../lib/rating.js";
 
 const companies = getFallbackCompanies();
 
@@ -35,5 +35,21 @@ describe("organic rating", () => {
     assert.notEqual(score, null);
     assert.ok((score as number) >= 0);
     assert.ok((score as number) <= 100);
+  });
+});
+
+describe("home rating block", () => {
+  it("moves promoted companies out of the ranked organic list", () => {
+    const { organic, sponsors } = pickHomeCompanies(companies);
+    assert.equal(organic.every((c) => !c.promoted), true);
+    assert.equal(sponsors.every((c) => c.promoted), true);
+    assert.equal(organic.length <= 3, true);
+  });
+
+  it("sorts organic top by relevance, not by payment", () => {
+    const { organic } = pickHomeCompanies(companies);
+    for (let i = 1; i < organic.length; i++) {
+      assert.ok(calculateRelevanceScore(organic[i - 1]) >= calculateRelevanceScore(organic[i]));
+    }
   });
 });

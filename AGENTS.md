@@ -141,3 +141,12 @@
 
 ## Полный план
 - `C:/Users/gushc/.devin/plans/plan-37033ecb36053b1b.md`
+
+## Дизайн-этап 1.3 — первый экран прототипа A (сделано, на приёмке)
+- `app/dev/design/a-vitrina/page.tsx` — guard notFound в production до данных → `getFallbackSolutions()` → props в `VitrinaDemo`.
+- `components/dev/VitrinaHero.tsx` + `HeroSearch.tsx` + `hero-search.ts` + `VitrinaHero.module.css` — шапка (реальные ссылки, регион «Минск · BY» без cookie, локальная тема без ch_theme/html.dark), hero «Пятно, запах, налёт?», локальный combobox-поиск по published решениям (без API/D1/аналитики), pro → честная граница + /brands.
+- `PageViewTracker`/`ExternalAnalytics` + `DevDesignAnalyticsGate` — /dev/design исключён из трекинга только при NODE_ENV≠production; production-ветка неизменна.
+- Фото `public/dev/a-hero/hero-main.jpg` — Pexels №28576627, свободная лицензия, атрибуция в figcaption.
+- Тесты: `tests/dev-hero-search.test.ts` (10 unit), `tests/browser/dev-hero.spec.ts` (12 Playwright, запуск: `npx playwright test tests/browser/dev-hero.spec.ts` при dev-сервере на 3111).
+- Уроки: `grid` без `grid-cols-*` на мобильном → implicit-колонка ширится до max-content (overflow); лечится `grid-cols-1` + `min-w-0`. `body.style.zoom` не эмулирует браузерный zoom — reflow проверять узким viewport (400 CSS px ≈ zoom 200% @800). Маркер `data-hydrated` через ref-колбэк (setState-in-effect запрещён линтером). Playwright: ждать `[data-hydrated]` до интеракций в dev (иначе fill/click теряются до гидрации).
+- Стандарт рисков (одобрен): «справочный характер, не оферта, ответственность за пользователем» + проверка на незаметном участке — применять во всех фазах.

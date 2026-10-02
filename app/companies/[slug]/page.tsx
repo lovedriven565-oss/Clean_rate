@@ -8,14 +8,16 @@ import { CompanyEquipmentTags } from "@/components/CompanyEquipmentTags";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ShareButton } from "@/components/ShareButton";
 import { StickyCallBar } from "@/components/StickyCallBar";
 import { Badge } from "@/components/ui/primitives";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getAllBrands, getAllCategories, getCompanyBySlug, getCompanySlugs } from "@/lib/db/queries";
 import { calculateOrganicScore, hasPublishedRating, ratingSourceLabel } from "@/lib/rating";
 import { formatCompanyPriceFrom, formatNumber, formatRating } from "@/lib/format";
-import { getMarketByCity } from "@/lib/markets";
-import { pageAlternates } from "@/lib/site";
+import { getCityByName, getMarketByCity } from "@/lib/markets";
+import { categoryLandingHref } from "@/lib/categories";
+import { absoluteUrl, pageAlternates } from "@/lib/site";
 
 export async function generateStaticParams() {
   const slugs = await getCompanySlugs();
@@ -104,8 +106,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                   </div>
                 </div>
                 <p className="mt-7 max-w-3xl text-base leading-7 text-muted-foreground sm:text-lg">{company.description}</p>
-                <div className="mt-7">
+                <div className="mt-7 flex flex-wrap items-center gap-3">
                   <CompanyContactActions company={company} />
+                  <ShareButton url={`/companies/${company.slug}`} title={`${company.name} — ${company.city}`} />
                 </div>
               </div>
 
@@ -144,11 +147,17 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 <h2 className="font-display text-2xl font-bold text-foreground">Услуги и специализация</h2>
               </div>
               <div className="mt-6 flex flex-wrap gap-2">
-                {companyCategories.map((category) => (
-                  <Link key={category.id} href={`/rating?category=${category.id}`}>
-                    <Badge className="px-3 py-1.5 text-xs text-foreground hover:border-primary/30">{category.name}</Badge>
-                  </Link>
-                ))}
+                {companyCategories.map((category) => {
+                  const companyCity = getCityByName(company.city);
+                  return (
+                    <Link
+                      key={category.id}
+                      href={companyCity ? categoryLandingHref(companyCity.city.slug, category.id) : `/rating?category=${category.id}`}
+                    >
+                      <Badge className="px-3 py-1.5 text-xs text-foreground hover:border-primary/30">{category.name}</Badge>
+                    </Link>
+                  );
+                })}
               </div>
               {company.tags.length > 0 && (
                 <ul className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -214,6 +223,24 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 Подтвердить профиль
               </Link>
             </div>
+
+            {company.verified && (
+              <div className="rounded-panel border border-border bg-card p-6">
+                <h2 className="font-display text-lg font-bold text-foreground">Бейдж для сайта</h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Покажите проверенный профиль — бейдж обновляется автоматически.
+                </p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/badge/${company.slug}`}
+                  alt={`Бейдж «${company.name}» в Клининг Рейтинге`}
+                  width={300}
+                  height={72}
+                  className="mt-4"
+                />
+                <pre className="mt-4 overflow-x-auto rounded-control bg-muted/60 p-3 text-[11px] leading-5 text-muted-foreground">{`<a href="${absoluteUrl(`/companies/${company.slug}`)}"><img src="${absoluteUrl(`/badge/${company.slug}`)}" alt="${company.name} — профиль проверен" width="300" height="72"></a>`}</pre>
+              </div>
+            )}
           </aside>
         </section>
       </main>

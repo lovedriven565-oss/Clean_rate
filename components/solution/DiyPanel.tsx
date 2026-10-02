@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowUpRight, Hand, Lightbulb, Wallet } from "lucide-react";
+import { ArrowUpRight, Hand, Wallet } from "lucide-react";
 import type { Brand, Solution } from "@/lib/types";
+import { DiyChecklist } from "./DiyChecklist";
 import { WarningList } from "./WarningList";
 
 export function DiyPanel({ solution, brands }: { solution: Solution; brands: Brand[] }) {
@@ -33,24 +34,7 @@ export function DiyPanel({ solution, brands }: { solution: Solution; brands: Bra
         )}
       </header>
 
-      <ol className="mt-8 space-y-6">
-        {solution.diySteps.map((step) => (
-          <li key={step.order} className="grid grid-cols-[2.25rem_1fr] gap-4">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground font-display text-sm font-bold text-background">
-              {step.order}
-            </span>
-            <div className="pt-1.5">
-              <p className="text-[15px] leading-7 text-foreground">{step.instruction}</p>
-              {step.tip && (
-                <p className="mt-2 flex gap-2 text-sm leading-6 text-muted-foreground">
-                  <Lightbulb className="mt-1 h-3.5 w-3.5 shrink-0 text-star" />
-                  {step.tip}
-                </p>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
+      <DiyChecklist slug={solution.slug} steps={solution.diySteps} />
 
       {solution.diyCostNote && (
         <p className="mt-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground sm:hidden">
