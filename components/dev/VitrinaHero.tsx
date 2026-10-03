@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowUpRight, Menu, Moon, Sun, X } from "lucide-react";
+import { Menu, Moon, Sun, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import type { Solution } from "@/lib/types";
+import type { PriceEstimate, Solution } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import type { DiagnosticSelection } from "./diagnostic-model";
+import { DiagnosticStage } from "./DiagnosticStage";
 import { HeroSearch } from "./HeroSearch";
 import styles from "./VitrinaHero.module.css";
 
@@ -19,17 +20,29 @@ const navLinks = [
 
 interface VitrinaHeroProps {
   solutions: Solution[];
+  estimates: PriceEstimate[];
   chips: string[];
   dark: boolean;
   onToggleDark: () => void;
+  selection: DiagnosticSelection;
+  onSelectionChange: (next: DiagnosticSelection) => void;
 }
 
 /**
  * Шапка + первый экран прототипа A. Навигация ведёт на реальные разделы
  * рабочего сайта; регион — контекст прототипа (cookie ch_region не пишется),
  * переключатель темы локальный (ch_theme и html.dark не затрагиваются).
+ * Правая колонка (этап 1.6) — интерактивная диагностика вместо фото.
  */
-export function VitrinaHero({ solutions, chips, dark, onToggleDark }: VitrinaHeroProps) {
+export function VitrinaHero({
+  solutions,
+  estimates,
+  chips,
+  dark,
+  onToggleDark,
+  selection,
+  onSelectionChange,
+}: VitrinaHeroProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -116,12 +129,12 @@ export function VitrinaHero({ solutions, chips, dark, onToggleDark }: VitrinaHer
         )}
       </header>
 
-      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-5 pb-12 pt-10 sm:pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14">
+      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-5 pb-12 pt-10 sm:pt-14 lg:grid-cols-[1fr_1fr] lg:items-start lg:gap-14">
         <div className="min-w-0">
           <h1 className="text-balance text-4xl font-bold leading-[1.06] tracking-tight sm:text-5xl">
             Пятно, запах, налёт?
             <span className="mt-2 block text-[0.6em] font-semibold leading-snug tracking-tight text-[hsl(var(--v-ink2))]">
-              Подскажем, как убрать — или кого позвать.
+              Подскажем, как убрать&nbsp;— или кого позвать.
             </span>
           </h1>
           <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-[hsl(var(--v-ink2))]">
@@ -133,28 +146,12 @@ export function VitrinaHero({ solutions, chips, dark, onToggleDark }: VitrinaHer
           </div>
         </div>
 
-        <figure className="relative min-w-0">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-[hsl(var(--v-line))] bg-[hsl(var(--v-tint))]">
-            <Image
-              src="/dev/a-hero/hero-main.jpg"
-              alt="Прозрачный спрей для уборки и синяя губка на светлой поверхности"
-              fill
-              priority
-              sizes="(min-width: 1024px) 44vw, 92vw"
-              className="object-cover object-[50%_58%]"
-            />
-          </div>
-          <Link
-            href="/solutions/vodny-kamen-dushevaya"
-            className="absolute bottom-3 left-3 inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))]/95 px-4 text-sm font-semibold text-[hsl(var(--v-ink))] shadow-sm backdrop-blur-sm transition-colors hover:text-[hsl(var(--v-accent))]"
-          >
-            Стекло без налёта — протокол
-            <ArrowUpRight className="size-4" aria-hidden />
-          </Link>
-          <figcaption className="mt-2.5 text-xs text-[hsl(var(--v-ink2))]">
-            Фото: Pexels №28576627, свободная лицензия для коммерческого использования.
-          </figcaption>
-        </figure>
+        <DiagnosticStage
+          solutions={solutions}
+          estimates={estimates}
+          selection={selection}
+          onSelectionChange={onSelectionChange}
+        />
       </section>
     </>
   );

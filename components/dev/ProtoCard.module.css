@@ -1,0 +1,94 @@
+/* Карточка прототипа A (этап 1.5, ретрофит 1.6): многослойные тонированные тени,
+   внутренняя грань и spotlight-граница под курсором (только для мыши/пера).
+   Токены --v-* и шкала радиусов --v-r-* заданы в VitrinaDemo. */
+
+.card {
+  position: relative;
+  border-radius: var(--v-r-card);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.7),
+    0 1px 2px hsl(222 40% 20% / 0.06),
+    0 10px 24px -18px hsl(222 45% 22% / 0.25);
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.card[data-open="true"] {
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.7),
+    0 1px 2px hsl(222 40% 20% / 0.08),
+    0 24px 44px -22px hsl(222 45% 22% / 0.4);
+}
+
+:global(.va-dark) .card {
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.05),
+    0 1px 2px hsl(220 50% 3% / 0.5),
+    0 12px 26px -18px hsl(220 60% 2% / 0.7);
+}
+
+:global(.va-dark) .card[data-open="true"] {
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.05),
+    0 1px 2px hsl(220 50% 3% / 0.6),
+    0 24px 44px -22px hsl(220 60% 2% / 0.85);
+}
+
+/* Spotlight: фоновый градиент задаёт motion-значение (позиция курсора),
+   маска оставляет видимой только 1px границу. Прозрачность управляется data-hot. */
+.spotBorder,
+.spotGlow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.spotBorder {
+  padding: 1px;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+.spotBorder[data-hot="true"],
+.spotGlow[data-hot="true"] {
+  opacity: 1;
+}
+
+/* Плавное появление быстрого просмотра: только opacity, раскладка не меняется. */
+.quickview {
+  animation: quickviewIn 0.16s ease-out;
+}
+
+@keyframes quickviewIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .spotBorder,
+  .spotGlow {
+    transition: none;
+  }
+
+  .quickview {
+    animation: none;
+  }
+}
+
+@media (hover: none) {
+  .spotBorder,
+  .spotGlow {
+    display: none;
+  }
+}

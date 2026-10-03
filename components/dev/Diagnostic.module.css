@@ -1,0 +1,124 @@
+/* Светлый spatial-слой диагностики и секций 1.6 (прототип A).
+   Токены --v-* и шкала радиусов --v-r-* заданы в VitrinaDemo (.va / .va-dark).
+   Здесь только то, что Tailwind не выражает: ambient-свет, многослойные
+   тонированные тени, внутренняя грань, fallback'и медиа-фич. */
+
+.stage {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+}
+
+/* Ambient за панелью: тонкий акцентный свет и тёплый отсвет, без анимации.
+   inset не больше горизонтального padding страницы (20px) — без overflow. */
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 40px;
+  background:
+    radial-gradient(55% 50% at 80% 8%, hsl(var(--v-accent) / 0.16), transparent 70%),
+    radial-gradient(45% 45% at 6% 98%, hsl(var(--v-ad) / 0.1), transparent 72%);
+}
+
+:global(.va-dark) .stage::before {
+  background:
+    radial-gradient(55% 50% at 80% 8%, hsl(var(--v-accent) / 0.12), transparent 70%),
+    radial-gradient(45% 45% at 6% 98%, hsl(var(--v-ad) / 0.06), transparent 72%);
+}
+
+/* Стеклянная панель (веб-аппроксимация frosted glass, не Apple Liquid Glass). */
+.panel {
+  border: 1px solid hsl(var(--v-line));
+  border-radius: var(--v-r-panel);
+  background: linear-gradient(180deg, hsl(var(--v-surface) / 0.94), hsl(var(--v-surface) / 0.82));
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.75),
+    0 1px 2px hsl(222 40% 20% / 0.06),
+    0 28px 56px -28px hsl(222 45% 22% / 0.35);
+}
+
+:global(.va-dark) .panel {
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.06),
+    0 1px 2px hsl(220 50% 3% / 0.5),
+    0 28px 56px -28px hsl(220 60% 2% / 0.8);
+}
+
+/* Поднятые элементы внутри панели и секций: плитки, строки компаний. */
+.raised {
+  border: 1px solid hsl(var(--v-line));
+  border-radius: var(--v-r-ctl);
+  background: hsl(var(--v-surface));
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.7),
+    0 1px 2px hsl(222 40% 20% / 0.05);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.raised:hover {
+  border-color: hsl(var(--v-accent) / 0.4);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.7),
+    0 10px 22px -14px hsl(222 45% 22% / 0.35);
+}
+
+:global(.va-dark) .raised {
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.05),
+    0 1px 2px hsl(220 50% 3% / 0.5);
+}
+
+:global(.va-dark) .raised:hover {
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.05),
+    0 10px 22px -14px hsl(220 60% 2% / 0.8);
+}
+
+/* Блок «Не делайте»: янтарный сигнал осторожности, как предупреждения карточек 1.5. */
+.warn {
+  border: 1px solid hsl(var(--v-ad) / 0.5);
+  border-radius: var(--v-r-ctl);
+  background: hsl(var(--v-ad) / 0.1);
+}
+
+/* Спонсорский слот: отдельная рамка вне органической выдачи. */
+.sponsorSlot {
+  border: 1px dashed hsl(var(--v-ad) / 0.7);
+  border-radius: var(--v-r-ctl);
+  background: hsl(var(--v-ad) / 0.07);
+}
+
+/* Тактильное нажатие управляющих элементов. */
+.press {
+  transition: transform 0.15s ease;
+}
+
+.press:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: hsl(var(--v-surface));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .raised,
+  .press {
+    transition-duration: 0.01ms !important;
+  }
+
+  .press:active {
+    transform: none;
+  }
+}

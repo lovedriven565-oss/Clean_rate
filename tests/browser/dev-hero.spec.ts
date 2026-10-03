@@ -24,7 +24,9 @@ async function shot(page: Page, name: string) {
  * иначе ранние fill/click в dev-режиме уходят до установки обработчиков.
  */
 async function gotoReady(page: Page) {
-  await page.goto(ROUTE);
+  // Dev-сервер может быть занят remote-коннектами getCloudflareContext
+  // от параллельных тестов — 30с дефолта иногда не хватает.
+  await page.goto(ROUTE, { timeout: 90_000 });
   await page.waitForSelector("[data-hydrated]");
 }
 
@@ -67,6 +69,19 @@ test("390x844: заголовок и кнопка поиска видны до �
   await shot(page, "mobile-390");
 });
 
+test("этап 1.6: справа диагностика вместо фото, без атрибуции фото и без сетевых запросов", async ({ page }) => {
+  const forbidden = collectForbiddenRequests(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await gotoReady(page);
+
+  await expect(page.locator("img[src*='hero-main']")).toHaveCount(0);
+  await expect(page.locator("figure, figcaption")).toHaveCount(0);
+  await expect(page.getByText("Pexels №28576627")).toHaveCount(0);
+  await expect(page.getByRole("radiogroup", { name: "Поверхность" })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Не делайте" }).first()).toBeVisible();
+  expect(forbidden).toEqual([]);
+});
+
 test("1440x900: поисковое действие в первом viewport, навигация в одну строку", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await gotoReady(page);
@@ -87,7 +102,10 @@ test("1440x900: поисковое действие в первом viewport, н
 });
 
 test("поиск: подсказки, клавиатура и Enter ведут на реальное решение", async ({ page }) => {
-  test.setTimeout(90_000); // первая SPA-навигация ждёт dev-компиляцию /solutions/[slug]
+  // Каждый рендер /solutions/[slug] в dev открывает remote-коннекты
+  // getCloudflareContext (известный артефакт OpenNext): один цикл рендера
+  // может занять до ~90с под нагрузкой параллельных прогонов.
+  test.setTimeout(240_000);
   const forbidden = collectForbiddenRequests(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await gotoReady(page);
@@ -103,6 +121,9 @@ test("поиск: подсказки, клавиатура и Enter ведут �
 
   await input.press("ArrowDown");
   await expect(options.first()).toHaveAttribute("aria-selected", "true");
+  // Прогрев dev-компиляции целевого маршрута: App Router меняет URL
+  // только после ответа RSC, под параллельной нагрузкой компиляция >90с.
+  await page.request.get("/solutions/vino-na-divane");
   await input.press("Enter");
   await page.waitForURL("**/solutions/**");
   expect(new URL(page.url()).pathname).toMatch(/^\/solutions\/[a-z0-9-]+$/);

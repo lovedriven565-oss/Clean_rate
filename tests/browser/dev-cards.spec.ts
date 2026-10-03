@@ -19,7 +19,7 @@ async function shot(page: Page, name: string) {
 }
 
 async function gotoReady(page: Page) {
-  await page.goto(ROUTE);
+  await page.goto(ROUTE, { timeout: 90_000 });
   await page.waitForSelector("[data-hydrated]");
 }
 
