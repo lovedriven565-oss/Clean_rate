@@ -1,0 +1,99 @@
+/* Прототип C (/dev/design/c-showcase): scoped-токены, не затрагивают глобальную тему. */
+.vc {
+  --c-bg: 150 12% 96%;
+  --c-surface: 0 0% 100%;
+  --c-raise: 150 14% 94%;
+  --c-ink: 160 24% 8%;
+  --c-ink2: 160 8% 36%;
+  --c-line: 150 10% 86%;
+  --c-accent: 84 72% 50%;
+  --c-accent-ink: 160 40% 8%;
+  --c-link: 158 62% 24%;
+  --c-mint: 158 60% 45%;
+  --c-aurora: 0.22;
+  --c-ad: 38 92% 38%;
+  --c-shadow: 160 30% 20%;
+  color-scheme: light;
+  background: hsl(var(--c-bg));
+  color: hsl(var(--c-ink));
+}
+
+.vc.vc-dark {
+  --c-bg: 160 14% 6%;
+  --c-surface: 160 12% 10%;
+  --c-raise: 160 12% 14%;
+  --c-ink: 150 16% 94%;
+  --c-ink2: 155 8% 64%;
+  --c-line: 160 10% 19%;
+  --c-accent: 84 78% 56%;
+  --c-link: 84 70% 62%;
+  --c-mint: 158 60% 40%;
+  --c-aurora: 0.16;
+  --c-ad: 40 90% 60%;
+  --c-shadow: 160 40% 2%;
+  color-scheme: dark;
+}
+
+.vc .c-surface { background: hsl(var(--c-surface)); }
+.vc .c-raise { background: hsl(var(--c-raise)); }
+.vc .c-ink2 { color: hsl(var(--c-ink2)); }
+.vc .c-link { color: hsl(var(--c-link)); }
+.vc .c-line { border-color: hsl(var(--c-line)); }
+.vc .c-accent-bg { background: hsl(var(--c-accent)); color: hsl(var(--c-accent-ink)); }
+.vc .c-ad { color: hsl(var(--c-ad)); }
+
+.vc .c-card {
+  background: hsl(var(--c-surface));
+  border: 1px solid hsl(var(--c-line));
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.06),
+    0 1px 2px hsl(var(--c-shadow) / 0.06),
+    0 20px 40px -28px hsl(var(--c-shadow) / 0.28);
+}
+
+.vc .c-edge {
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.vc :is(a, button, input):focus-visible {
+  outline: 2px solid hsl(var(--c-accent));
+  outline-offset: 2px;
+}
+
+.vc ::selection { background: hsl(var(--c-accent) / 0.35); }
+
+.vc-spin { animation: vc-spin 4.5s linear infinite; }
+.vc-drift { animation: vc-drift 18s ease-in-out infinite; }
+.vc-drift2 { animation: vc-drift 24s ease-in-out infinite reverse; }
+
+.vc-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.vc.vc-dark .vc-grain::after { mix-blend-mode: screen; opacity: 0.04; }
+
+@keyframes vc-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes vc-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(5%, 4%, 0) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vc-spin, .vc-drift, .vc-drift2 { animation: none; }
+  .vc *, .vc *::before, .vc *::after { transition-duration: 0.01ms !important; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .vc .c-glass { backdrop-filter: none; background: hsl(var(--c-bg)); }
+}

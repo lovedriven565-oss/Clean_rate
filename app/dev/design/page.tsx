@@ -42,6 +42,14 @@ export default function DesignSystemPage() {
             <h2 className="mt-1 text-lg font-semibold text-foreground group-hover:text-primary">Редакционный навигатор →</h2>
             <p className="mt-1 text-sm text-muted-foreground">Paper-основа, крупная типографика, асимметричная editorial-сетка.</p>
           </Link>
+          <Link
+            href="/dev/design/c-showcase"
+            className="group rounded-panel border border-border bg-card p-6 transition-shadow hover:shadow-md sm:col-span-2"
+          >
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Прототип C</p>
+            <h2 className="mt-1 text-lg font-semibold text-foreground group-hover:text-primary">Витрина: Steam / Netflix / gg.deals →</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Лайм-акцент, полки с превью, spotlight и tilt, таблица цен, светлая и тёмная темы.</p>
+          </Link>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
