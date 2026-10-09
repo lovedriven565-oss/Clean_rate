@@ -7,7 +7,7 @@ const nextConfig = {
   experimental: {
     // Меньше страниц на воркер → меньше конкурирующих remote-коннектов и
     // пиковой памяти (vips при рендере OG-изображений).
-    staticGenerationMaxConcurrency: 2,
+    staticGenerationMaxConcurrency: 1,
   },
 };
 

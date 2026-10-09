@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, Camera, Home, Loader2, Search, Sparkles, Wrench } from "lucide-react";
+import { ArrowRight, Briefcase, Camera, Home, Loader2, Search, Sparkles, Wrench } from "lucide-react";
 import { Input } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 import type { SearchIntent } from "@/lib/types";
@@ -168,52 +168,57 @@ export function SmartSearch() {
 
   return (
     <div ref={containerRef} className="relative w-full max-w-2xl">
-      <form onSubmit={handleSubmit} className="glass flex w-full flex-col gap-2 rounded-panel p-2">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(event) => handleQueryChange(event.target.value)}
-            onFocus={() => query.trim() && setOpen(true)}
-            onKeyDown={handleKeyDown}
-            type="search"
-            aria-label="Умный поиск по платформе"
-            placeholder="Опишите задачу: «пятно вина», «офис 500 м²», «Kiehl»"
-            className="h-13 border-transparent bg-transparent pl-11 pr-11 shadow-none focus:border-transparent"
-          />
-          {loading && (
-            <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5 px-1 pb-1">
-          {SEGMENTS.map(({ value, label, icon: Icon }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setSegment((current) => (current === value ? "auto" : value))}
-              className={cn(
-                "inline-flex h-9 items-center gap-1.5 rounded-full border border-border/70 px-3.5 text-xs font-semibold text-muted-foreground transition-colors",
-                segment === value
-                  ? "border-primary/40 bg-primary text-primary-foreground"
-                  : "bg-card/70 hover:border-primary/30 hover:text-foreground"
-              )}
-              aria-pressed={segment === value}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
+      <form
+        onSubmit={handleSubmit}
+        role="search"
+        className="glass flex w-full items-center gap-2 rounded-full p-1.5 pl-5 transition-shadow focus-within:border-brand focus-within:shadow-[0_0_0_4px_hsl(var(--brand)/0.18)]"
+      >
+        <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        <Input
+          value={query}
+          onChange={(event) => handleQueryChange(event.target.value)}
+          onFocus={() => query.trim() && setOpen(true)}
+          onKeyDown={handleKeyDown}
+          type="search"
+          aria-label="Умный поиск по платформе"
+          placeholder="Опишите задачу: «вино на диване», «офис 500 м²», «Kiehl»"
+          className="h-11 min-w-0 flex-1 border-transparent bg-transparent px-0 text-[15px] shadow-none focus:border-transparent"
+        />
+        {loading && <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />}
+        <button
+          type="submit"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground transition-transform active:scale-[0.98]"
+        >
+          Найти
+          <ArrowRight className="size-4" aria-hidden />
+        </button>
       </form>
 
-      <div className="mt-2 flex flex-wrap items-center gap-1.5 px-1">
+      <div className="mt-3 flex flex-wrap items-center gap-1.5 px-1">
+        {SEGMENTS.map(({ value, label, icon: Icon }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setSegment((current) => (current === value ? "auto" : value))}
+            className={cn(
+              "inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors",
+              segment === value
+                ? "border-transparent bg-primary text-primary-foreground"
+                : "border-border/70 bg-card/70 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+            )}
+            aria-pressed={segment === value}
+          >
+            <Icon className="h-3.5 w-3.5" aria-hidden />
+            {label}
+          </button>
+        ))}
+        <span aria-hidden className="mx-1 hidden h-5 w-px bg-border sm:block" />
         {QUICK_CHIPS.map((chip) => (
           <button
             key={chip}
             type="button"
             onClick={() => handleChip(chip)}
-            className="h-8 rounded-full border border-border/70 bg-card/60 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+            className="h-9 rounded-full border border-border/70 bg-card/60 px-3.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
           >
             {chip}
           </button>
@@ -221,9 +226,9 @@ export function SmartSearch() {
         <button
           type="button"
           onClick={() => search.navigate("/assistant?photo=1")}
-          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
         >
-          <Camera className="h-3.5 w-3.5" />
+          <Camera className="h-3.5 w-3.5" aria-hidden />
           По фото пятна
         </button>
       </div>
