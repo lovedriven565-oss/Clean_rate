@@ -56,7 +56,7 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1">
           <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+            <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${progress}%` }} />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             {done.length} из {steps.length} шагов · прогресс сохраняется на этом устройстве
@@ -97,11 +97,11 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
                 aria-label={`Шаг ${step.order}`}
                 onClick={() => toggle(step.order)}
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-full font-display text-sm font-bold transition-colors",
-                  checked ? "bg-primary text-primary-foreground" : "bg-foreground text-background hover:bg-foreground/85"
+                  "flex h-9 w-9 items-center justify-center rounded-full font-data text-sm font-semibold transition-colors",
+                  checked ? "bg-brand text-brand-foreground" : "bg-foreground text-background hover:bg-foreground/85"
                 )}
               >
-                {checked ? <Check className="h-4 w-4" /> : step.order}
+                {checked ? <Check className="h-4 w-4" /> : String(step.order).padStart(2, "0")}
               </button>
               <div className="pt-1.5">
                 <p className={cn("text-[15px] leading-7 text-foreground", checked && "text-muted-foreground line-through decoration-muted-foreground/40")}>

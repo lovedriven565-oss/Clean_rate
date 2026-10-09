@@ -43,7 +43,7 @@ export function ProPanel({
     <section
       id="pro"
       aria-labelledby="pro-title"
-      className="data-surface scroll-mt-32 flex h-full min-w-0 flex-col rounded-panel border border-border p-6 sm:p-8"
+      className="data-surface scroll-mt-32 flex h-full min-w-0 flex-col rounded-panel p-6 sm:p-8"
     >
       <header className="flex items-start justify-between gap-4">
         <div>

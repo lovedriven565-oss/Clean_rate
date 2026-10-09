@@ -14,7 +14,7 @@ export function DiyPanel({ solution, brands }: { solution: Solution; brands: Bra
     <section
       id="diy"
       aria-labelledby="diy-title"
-      className="scroll-mt-32 flex h-full min-w-0 flex-col rounded-panel border border-border bg-card p-6 sm:p-8"
+      className="data-surface scroll-mt-32 flex h-full min-w-0 flex-col rounded-panel p-6 sm:p-8"
     >
       <header className="flex items-start justify-between gap-4">
         <div>
@@ -34,6 +34,9 @@ export function DiyPanel({ solution, brands }: { solution: Solution; brands: Bra
         )}
       </header>
 
+      {/* «Не делайте» первым: предупреждения важнее самих шагов протокола */}
+      <WarningList warnings={solution.warnings} className="mt-6" />
+
       <DiyChecklist slug={solution.slug} steps={solution.diySteps} />
 
       {solution.diyCostNote && (
@@ -42,8 +45,6 @@ export function DiyPanel({ solution, brands }: { solution: Solution; brands: Bra
           {solution.diyCostNote}
         </p>
       )}
-
-      <WarningList warnings={solution.warnings} className="mt-8" />
 
       {products.length > 0 && (
         <div className="mt-8 border-t border-border/70 pt-6">

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronDown, Hand, ShieldAlert, Sparkles } from "lucide-react";
+import { Ban, ChevronDown, Hand, ShieldAlert, Sparkles } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -18,6 +19,7 @@ import {
   getSolutionBySlug,
   getSolutionSlugs,
 } from "@/lib/db/queries";
+import { solutionCover } from "@/lib/solutions/covers";
 import { absoluteUrl, pageAlternates } from "@/lib/site";
 import {
   AUDIENCE_LABELS,
@@ -111,46 +113,73 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               ]}
             />
 
-            <div className="mt-6 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
-              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">{SURFACE_LABELS[solution.surface]}</span>
-              {solution.material && <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{solution.material}</span>}
-              <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{SEVERITY_LABELS[solution.severity]}</span>
-              <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{AUDIENCE_LABELS[solution.audience]}</span>
-            </div>
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
+                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">{SURFACE_LABELS[solution.surface]}</span>
+                  {solution.material && <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{solution.material}</span>}
+                  <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{SEVERITY_LABELS[solution.severity]}</span>
+                  <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{AUDIENCE_LABELS[solution.audience]}</span>
+                </div>
 
-            <h1 className="mt-5 max-w-4xl font-display text-3xl font-bold leading-[1.08] tracking-[-0.04em] text-foreground sm:text-5xl">
-              {solution.title}
-            </h1>
+                <h1 className="mt-5 max-w-3xl font-display text-3xl font-bold leading-[1.08] tracking-[-0.04em] text-foreground sm:text-5xl">
+                  {solution.title}
+                </h1>
+              </div>
 
-            <div className="mt-4">
-              <ShareButton url={url} title={solution.title} text={`${solution.title} — протокол «два пути»`} />
-            </div>
+              {/* Баннер с обложкой: первое «Не делайте» прямо на фото — предупреждение
+                  до прокрутки к чек-листу и на любом экране */}
+              <div className="data-surface relative min-h-[240px] overflow-hidden rounded-panel sm:min-h-[300px] lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:min-h-full">
+                <Image
+                  src={solutionCover(solution)}
+                  alt=""
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 560px, 100vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+                {solution.warnings[0] && (
+                  <p className="absolute inset-x-0 bottom-0 flex items-start gap-2.5 p-5 text-[13px] leading-snug text-white sm:p-6">
+                    <Ban className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
+                    <span>
+                      <span className="font-semibold">Не делайте: </span>
+                      {solution.warnings[0]}
+                    </span>
+                  </p>
+                )}
+              </div>
 
-            <div className="mt-6 flex max-w-3xl gap-3 rounded-panel border border-border bg-card/80 p-4 text-sm leading-6 text-muted-foreground backdrop-blur">
-              <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-star" />
-              <p>
-                Протокол проверен на типовых материалах, но реакция конкретной обивки или покрытия может отличаться.
-                Тестируйте средство на незаметном участке. Действуя по протоколу, вы принимаете риск на себя:
-                площадка не отвечает за результат. Если сомневаетесь, начните со второго пути.
-              </p>
-            </div>
+              <div className="min-w-0 lg:col-start-1">
+                <ShareButton url={url} title={solution.title} text={`${solution.title} — протокол «два пути»`} />
 
-            {/* Mobile path switcher */}
-            <div className="mt-6 grid grid-cols-2 gap-2 lg:hidden">
-              <a
-                href="#diy"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border bg-card text-sm font-semibold text-foreground"
-              >
-                <Hand className="h-4 w-4 text-primary" />
-                Сделать самому
-              </a>
-              <a
-                href="#pro"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground"
-              >
-                <Sparkles className="h-4 w-4" />
-                Вызвать мастера
-              </a>
+                <div className="mt-5 flex gap-3 rounded-panel border border-border bg-card/80 p-4 text-sm leading-6 text-muted-foreground backdrop-blur">
+                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-star" />
+                  <p>
+                    Протокол проверен на типовых материалах, но реакция конкретной обивки или покрытия может отличаться.
+                    Тестируйте средство на незаметном участке. Действуя по протоколу, вы принимаете риск на себя:
+                    площадка не отвечает за результат. Если сомневаетесь, начните со второго пути.
+                  </p>
+                </div>
+
+                {/* Mobile path switcher */}
+                <div className="mt-6 grid grid-cols-2 gap-2 lg:hidden">
+                  <a
+                    href="#diy"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border bg-card text-sm font-semibold text-foreground"
+                  >
+                    <Hand className="h-4 w-4 text-primary" />
+                    Сделать самому
+                  </a>
+                  <a
+                    href="#pro"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand text-sm font-semibold text-brand-foreground"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Вызвать мастера
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </section>
