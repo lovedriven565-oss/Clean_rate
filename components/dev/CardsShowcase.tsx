@@ -6,7 +6,9 @@ import {
   buildLongContentSample,
   buildProductSampleCard,
   buildTaskCard,
+  pickShowcaseTasks,
 } from "./card-models";
+import { rankOrganicCompanies } from "./diagnostic-model";
 import { CardEmpty, CardError, CardSkeleton, ProtoCard } from "./ProtoCard";
 
 const TASK_LIMIT = 3;
@@ -16,9 +18,9 @@ function Group({ id, title, note, children }: { id: string; title: string; note:
   return (
     <section aria-labelledby={id} className="border-t border-[hsl(var(--v-line))] py-10">
       <div className="mb-5">
-        <h2 id={id} className="text-2xl font-bold tracking-tight">
+        <h3 id={id} className="text-xl font-bold tracking-tight">
           {title}
-        </h2>
+        </h3>
         <p className="mt-1 text-sm text-[hsl(var(--v-ink2))]">{note}</p>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
@@ -31,21 +33,17 @@ function Group({ id, title, note, children }: { id: string; title: string; note:
  * прототипа (published-решения, seed-компании); средство и реклама — явные образцы.
  */
 export function CardsShowcase({ solutions, companies }: { solutions: Solution[]; companies: Company[] }) {
-  const tasks = solutions.filter((s) => s.status === "published").slice(0, TASK_LIMIT).map(buildTaskCard);
-  // Спонсоры и проверенные компании идут первыми в подборке, чтобы новый партнёр получал охват
-  const sortedCompanies = [...companies].sort((a, b) => {
-    if (a.promoted !== b.promoted) return a.promoted ? -1 : 1;
-    if (a.verified !== b.verified) return a.verified ? -1 : 1;
-    return (b.baseRating ?? 0) - (a.baseRating ?? 0);
-  });
-  const orgCompanies = sortedCompanies.slice(0, COMPANY_LIMIT).map(buildCompanyCard);
+  const tasks = pickShowcaseTasks(solutions, TASK_LIMIT).map(buildTaskCard);
+  // Органический порядок по доверию, как в «Вызвать мастера»: promoted на позицию не влияет,
+  // спонсор отличается только плашкой (принцип «Оплата не покупает место в рейтинге»).
+  const orgCompanies = rankOrganicCompanies(companies).slice(0, COMPANY_LIMIT).map(buildCompanyCard);
 
   return (
     <>
       <Group
         id="cards-tasks"
         title="Карточки задач"
-        note="Из опубликованных протоколов. Подробности — по кнопке «Быстрый просмотр», при наведении или с клавиатуры."
+        note="Из опубликованных протоколов. Подробности открываются кнопкой «Быстрый просмотр», наведением или с клавиатуры."
       >
         {tasks.length > 0 ? (
           tasks.map((c) => <ProtoCard key={c.id} card={c} />)
@@ -76,9 +74,9 @@ export function CardsShowcase({ solutions, companies }: { solutions: Solution[];
 
       <section aria-labelledby="cards-ad" className="border-t border-[hsl(var(--v-line))] py-10">
         <div className="mb-5 flex items-center gap-3">
-          <h2 id="cards-ad" className="text-2xl font-bold tracking-tight">
+          <h3 id="cards-ad" className="text-xl font-bold tracking-tight">
             Рекламный образец
-          </h2>
+          </h3>
           <span className="h-px flex-1 bg-[hsl(var(--v-ad))]/50" aria-hidden="true" />
           <span className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--v-ink2))]">Реклама · отдельно от органики</span>
         </div>
@@ -89,9 +87,9 @@ export function CardsShowcase({ solutions, companies }: { solutions: Solution[];
 
       <section aria-labelledby="cards-states" className="border-t border-[hsl(var(--v-line))] py-10">
         <div className="mb-5">
-          <h2 id="cards-states" className="text-2xl font-bold tracking-tight">
+          <h3 id="cards-states" className="text-xl font-bold tracking-tight">
             Состояния карточек
-          </h2>
+          </h3>
           <p className="mt-1 text-sm text-[hsl(var(--v-ink2))]">Макеты состояний — не данные и не сетевые запросы.</p>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" data-states>

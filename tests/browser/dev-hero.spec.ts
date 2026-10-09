@@ -69,14 +69,22 @@ test("390x844: заголовок и кнопка поиска видны до �
   await shot(page, "mobile-390");
 });
 
-test("этап 1.6: справа диагностика вместо фото, без атрибуции фото и без сетевых запросов", async ({ page }) => {
+test("этап 1.3 v2: слева предметное фото с alt, справа диагностика, без наложенных подписей и сетевых запросов", async ({
+  page,
+}) => {
   const forbidden = collectForbiddenRequests(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await gotoReady(page);
 
+  const photo = page.locator("figure img[src*='hero-scene']");
+  await expect(photo).toHaveCount(1);
+  await expect(photo).toHaveAttribute("alt", /.{20,}/);
+  await expect(page.locator("figure figcaption")).toHaveCount(0);
   await expect(page.locator("img[src*='hero-main']")).toHaveCount(0);
-  await expect(page.locator("figure, figcaption")).toHaveCount(0);
-  await expect(page.getByText("Pexels №28576627")).toHaveCount(0);
+  expect(await photo.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
+  const heroText = await page.locator("h1").innerText();
+  expect(heroText).not.toMatch(/[—–]/);
+  expect(heroText.split("\n").length).toBeLessThanOrEqual(2);
   await expect(page.getByRole("radiogroup", { name: "Поверхность" })).toBeVisible();
   await expect(page.getByRole("group", { name: "Не делайте" }).first()).toBeVisible();
   expect(forbidden).toEqual([]);

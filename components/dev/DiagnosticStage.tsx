@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useRef } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
@@ -34,7 +34,6 @@ import {
   type DiagnosticSelection,
 } from "./diagnostic-model";
 import styles from "./Diagnostic.module.css";
-import { EstimateCard } from "./EstimateCard";
 
 const SURFACE_ICONS: Record<SolutionSurface, LucideIcon> = {
   upholstery: Sofa,
@@ -115,7 +114,7 @@ function RadioGroup({
               "relative min-w-0 border text-left text-[hsl(var(--v-ink))] transition-colors",
               styles.press,
               kind === "tile" &&
-                "flex min-h-[4.75rem] flex-col items-start justify-between gap-1.5 rounded-[var(--v-r-ctl)] border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] p-2.5 hover:border-[hsl(var(--v-accent)/0.4)]",
+                "flex min-h-[4.75rem] flex-[1_1_7rem] flex-col items-start justify-between gap-1.5 rounded-[var(--v-r-ctl)] border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] p-2.5 hover:border-[hsl(var(--v-accent)/0.4)]",
               kind === "chip" &&
                 "inline-flex min-h-11 items-center gap-1.5 rounded-full border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] px-4 text-sm font-medium whitespace-nowrap hover:border-[hsl(var(--v-accent)/0.4)]",
               kind === "row" &&
@@ -161,133 +160,50 @@ function RadioGroup({
   );
 }
 
-type Path = "diy" | "pro";
-
-const PATHS: { id: Path; label: string; icon: LucideIcon }[] = [
-  { id: "diy", label: "Сделать самому", icon: Hand },
-  { id: "pro", label: "Вызвать мастера", icon: Wrench },
-];
-
-function PathTabs({ result, reduce }: { result: DiagnosticResult; reduce: boolean }) {
-  const uid = useId();
-  const [path, setPath] = useState<Path>("diy");
-  const refs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  function onKeyDown(e: React.KeyboardEvent, index: number) {
-    const next = nextRadioIndex(e.key, index, PATHS.length);
-    if (next === null) return;
-    e.preventDefault();
-    refs.current[next]?.focus();
-    setPath(PATHS[next].id);
-  }
-
-  return (
-    <div>
-      <div
-        role="tablist"
-        aria-label="Путь решения"
-        className="grid grid-cols-2 gap-1 rounded-[var(--v-r-ctl)] bg-[hsl(var(--v-tint))] p-1"
-      >
-        {PATHS.map((item, index) => {
-          const selected = item.id === path;
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.id}
-              ref={(el) => {
-                refs.current[index] = el;
-              }}
-              type="button"
-              role="tab"
-              id={`${uid}-tab-${item.id}`}
-              aria-selected={selected}
-              aria-controls={`${uid}-panel`}
-              tabIndex={selected ? 0 : -1}
-              onClick={() => setPath(item.id)}
-              onKeyDown={(e) => onKeyDown(e, index)}
-              className={cn(
-                "relative inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[10px] px-2 text-sm font-semibold whitespace-nowrap transition-colors",
-                styles.press,
-                selected ? "text-[hsl(var(--v-ink))]" : "text-[hsl(var(--v-ink2))] hover:text-[hsl(var(--v-ink))]",
-              )}
-            >
-              {selected && (
-                <motion.span
-                  layoutId={`${uid}-tabsel`}
-                  transition={reduce ? { duration: 0 } : SPRING}
-                  aria-hidden="true"
-                  className="absolute inset-0 rounded-[inherit] bg-[hsl(var(--v-surface))] shadow-[0_1px_2px_hsl(222_40%_20%/0.12),inset_0_1px_0_hsl(0_0%_100%/0.6)]"
-                />
-              )}
-              <Icon className="relative size-4" aria-hidden="true" />
-              <span className="relative">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div role="tabpanel" id={`${uid}-panel`} aria-labelledby={`${uid}-tab-${path}`} tabIndex={0} className="mt-3 rounded-[var(--v-r-ctl)]">
-        <motion.div
-          key={path}
-          initial={reduce ? false : { opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 28 }}
-        >
-          {path === "diy" ? <DiyTab result={result} reduce={reduce} /> : <ProTab result={result} />}
-        </motion.div>
-      </div>
-    </div>
+/**
+ * Выжимка двух путей (этап 1.7): вместо вкладок с повтором шагов и сметы —
+ * два перехода к секции «Два пути» ниже, где полный чеклист и мастера.
+ * В hero остаются только ключевые числа: сколько шагов и ориентир цены.
+ */
+function PathLinks({ result }: { result: DiagnosticResult }) {
+  const item = cn(
+    styles.raised,
+    styles.press,
+    "group flex min-h-11 min-w-0 items-start gap-3 p-3 text-[hsl(var(--v-ink))]",
   );
-}
+  const arrow =
+    "mt-0.5 size-4 shrink-0 text-[hsl(var(--v-ink2))] transition-transform group-hover:translate-y-0.5 motion-reduce:transition-none";
 
-function DiyTab({ result, reduce }: { result: DiagnosticResult; reduce: boolean }) {
   return (
-    <div>
-      <motion.ol
-        initial={reduce ? false : "hidden"}
-        animate="show"
-        variants={{ show: { transition: { staggerChildren: 0.07 } } }}
-        className="space-y-2.5"
-      >
-        {result.steps.map((step) => (
-          <motion.li
-            key={step.order}
-            variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0 } }}
-            className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-2.5 text-[13px] leading-snug"
-          >
-            <span className="mt-px grid size-6 place-items-center rounded-full bg-[hsl(var(--v-accent))] text-xs font-semibold tabular-nums text-[hsl(var(--v-accent-ink))]">
-              {step.order}
-            </span>
-            <span className="line-clamp-3 [overflow-wrap:anywhere]">{step.instruction}</span>
-          </motion.li>
-        ))}
-      </motion.ol>
-      {result.hiddenSteps > 0 && (
-        <a
-          href="#two-paths"
-          className="mt-3 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[hsl(var(--v-accent))] hover:underline"
-        >
-          Ещё {pluralize(result.hiddenSteps, ["шаг", "шага", "шагов"])} в чеклисте ниже
-          <ArrowDown className="size-4" aria-hidden="true" />
-        </a>
-      )}
-    </div>
-  );
-}
-
-function ProTab({ result }: { result: DiagnosticResult }) {
-  return (
-    <div className="space-y-3">
-      <p className="text-[13px] leading-snug [overflow-wrap:anywhere]">{result.whenToCallPro}</p>
-      <EstimateCard estimate={result.estimate} />
-      <a
-        href="#pro"
-        className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[hsl(var(--v-accent))] hover:underline"
-      >
-        Компании в Минске ниже
-        <ArrowDown className="size-4" aria-hidden="true" />
+    <nav aria-label="Путь решения" data-diagnostic-paths className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <a href="#diy" className={item}>
+        <Hand className="mt-0.5 size-5 shrink-0 text-[hsl(var(--v-accent))]" aria-hidden="true" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold">Сделать самому</span>
+          <span className="mt-0.5 block text-xs tabular-nums text-[hsl(var(--v-ink2))]">
+            {pluralize(result.totalSteps, ["шаг", "шага", "шагов"])} в чеклисте
+          </span>
+        </span>
+        <ArrowDown className={arrow} aria-hidden="true" />
       </a>
-    </div>
+      <a href="#pro" className={item} data-path-pro>
+        <Wrench className="mt-0.5 size-5 shrink-0 text-[hsl(var(--v-accent))]" aria-hidden="true" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold">Вызвать мастера</span>
+          {result.estimate ? (
+            <>
+              <span className="mt-0.5 block text-xs font-semibold tabular-nums">
+                от {result.estimate.min} до {result.estimate.max}
+              </span>
+              <span className="block text-xs text-[hsl(var(--v-ink2))]">Ориентир цены, не оферта</span>
+            </>
+          ) : (
+            <span className="mt-0.5 block text-xs text-[hsl(var(--v-ink2))]">Цена уточняется у компании</span>
+          )}
+        </span>
+        <ArrowDown className={arrow} aria-hidden="true" />
+      </a>
+    </nav>
   );
 }
 
@@ -346,7 +262,7 @@ export function DiagnosticStage({ solutions, estimates, selection, onSelectionCh
               value={resolved.surface}
               onChange={(id) => onSelectionChange({ surface: id as SolutionSurface })}
               reduce={reduce}
-              className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 max-sm:[&>:last-child:nth-child(odd)]:col-span-2"
+              className="mt-2 flex flex-wrap gap-2"
             />
 
             <p className="mt-3 text-sm font-medium">Что случилось?</p>
@@ -404,15 +320,21 @@ export function DiagnosticStage({ solutions, estimates, selection, onSelectionCh
                         Не делайте
                       </p>
                       <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[13px] leading-snug [overflow-wrap:anywhere]">
-                        {result.warnings.map((warning) => (
+                        {result.warnings.slice(0, 1).map((warning) => (
                           <li key={warning}>{warning}</li>
                         ))}
                       </ul>
+                      {result.warnings.length > 1 && (
+                        <a
+                          href="#diy"
+                          className="mt-1 inline-flex min-h-11 items-center gap-1 text-[13px] font-semibold text-[hsl(var(--v-ink))] underline decoration-[hsl(var(--v-ad)/0.6)] underline-offset-4 hover:decoration-[hsl(var(--v-ad))]"
+                        >
+                          Ещё {pluralize(result.warnings.length - 1, ["предупреждение", "предупреждения", "предупреждений"])} в чеклисте
+                        </a>
+                      )}
                     </div>
 
-                    <div className="mt-3">
-                      <PathTabs result={result} reduce={reduce} />
-                    </div>
+                    <PathLinks result={result} />
 
                     <Link
                       href={result.href}

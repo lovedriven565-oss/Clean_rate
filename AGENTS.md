@@ -175,3 +175,8 @@
 - `components/dev/ProtoCard.module.css` — визуальный ретрофит карточек 1.5 (глубина, spotlight, типографика) без изменения поведения quick view.
 - Тесты: `tests/dev-diagnostic-model.test.ts` (22 unit), `tests/browser/dev-diagnostic.spec.ts` (16 Playwright: мышь/клавиатура, reflow 320–1440 ×2 темы, reduced-motion, нет запросов к API/аналитике). `dev-hero.spec.ts` обновлён: регресс «диагностика вместо фото», прогрев `/solutions/[slug]` + таймаут 240с — каждый dev-рендер открывает remote-коннекты getCloudflareContext (известный артефакт OpenNext), SPA-коммит ждёт RSC-рендер.
 - Уроки: декоративные ambient-слои — только внутри контейнера с clip, иначе scrollWidth-метрика overflow ловит их вынос; читать заголовок результата после стабилизации анимации, не во время exit.
+
+## Дизайн-этап 1.3 v2 — первый экран прототипа A переделан (на приёмке)
+- `VitrinaHero.tsx`: шапка logo/nav по центру/регион+тема; hero в сетке 2 колонки: слева текст+поиск, под ним фото `public/dev/a-hero/hero-scene.jpg` (Pexels №10566514, Ron Lach, Pexels License), справа диагностика 1.6. Мобильный порядок: текст, фото, диагностика.
+- Урок: переключатель аудитории на 320px требует `min-w-0 px-1.5 text-[13px]`, иначе overflow.
+- Известное: `tests/browser/dev-diagnostic.spec.ts` устарел (вкладки заменены на nav в незакоммиченном DiagnosticStage). `next build` под нагрузкой может упасть по таймауту 60с на SSG; повтор помогает.

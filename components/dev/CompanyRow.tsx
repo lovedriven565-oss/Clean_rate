@@ -3,15 +3,9 @@ import { BadgeCheck, Globe, Phone, Send } from "lucide-react";
 import { pluralize } from "@/lib/format";
 import type { Company } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { companyRatingText } from "./card-models";
+import { companyRatingText, initials } from "./card-models";
 import { companyPriceLabel, telHref } from "./diagnostic-model";
 import styles from "./Diagnostic.module.css";
-
-function initials(name: string): string {
-  const words = name.match(/[\p{L}\d]+/gu) ?? [];
-  const [first = "?", second] = words;
-  return (second ? first[0] + second[0] : first.slice(0, 2)).toUpperCase();
-}
 
 const iconLink =
   "grid size-11 shrink-0 place-items-center rounded-[var(--v-r-ctl)] border border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] text-[hsl(var(--v-ink2))] transition-colors hover:border-[hsl(var(--v-accent)/0.4)] hover:text-[hsl(var(--v-ink))]";

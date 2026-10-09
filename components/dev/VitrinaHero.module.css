@@ -38,3 +38,18 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Предметное фото первого экрана: тонкая внутренняя грань вместо рамки;
+   в тёмной теме приглушено, чтобы белая сцена не слепила. */
+.photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px hsl(var(--v-ink) / 0.06);
+}
+
+:global(.va-dark) .photo img {
+  filter: brightness(0.74) contrast(1.06);
+}

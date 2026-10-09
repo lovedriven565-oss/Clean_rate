@@ -42,10 +42,13 @@ export default function VitrinaDemo({ solutions, companies, estimates, brands }:
           --v-accent: 221 70% 49%;
           --v-accent-ink: 0 0% 100%;
           --v-tint: 221 70% 96%;
+          --v-raise: 0 0% 100%;
           --v-ad: 38 92% 40%;
           --v-r-panel: 24px;
           --v-r-card: 20px;
+          --v-r-field: 16px;
           --v-r-ctl: 12px;
+          --v-r-inner: 8px;
         }
         .va.va-dark {
           --v-bg: 216 32% 9%;
@@ -53,9 +56,10 @@ export default function VitrinaDemo({ solutions, companies, estimates, brands }:
           --v-ink: 214 32% 93%;
           --v-ink2: 215 16% 62%;
           --v-line: 215 20% 24%;
-          --v-accent: 218 95% 76%;
+          --v-accent: 217 72% 68%;
           --v-accent-ink: 220 40% 12%;
           --v-tint: 216 28% 18%;
+          --v-raise: 216 24% 27%;
           --v-ad: 40 90% 60%;
         }
         .va img { display: block; }
@@ -86,7 +90,19 @@ export default function VitrinaDemo({ solutions, companies, estimates, brands }:
         <IndependenceBlock />
 
         {/* Карточки и быстрый просмотр (этап 1.5) */}
-        <CardsShowcase solutions={solutions} companies={companies} />
+        <section
+          aria-labelledby="component-lab-title"
+          data-component-lab
+          className="mb-12 mt-4 rounded-[var(--v-r-panel)] border border-dashed border-[hsl(var(--v-line))] bg-[hsl(var(--v-tint)/0.45)] px-4 pt-8 sm:px-8"
+        >
+          <h2 id="component-lab-title" className="text-balance text-2xl font-bold tracking-tight sm:text-3xl">
+            Витрина компонентов
+          </h2>
+          <p className="mt-2 max-w-2xl text-pretty text-[15px] leading-relaxed text-[hsl(var(--v-ink2))]">
+            Образцы карточек и их состояний для согласования. Это не часть главной: на рабочем сайте раздела не будет.
+          </p>
+          <CardsShowcase solutions={solutions} companies={companies} />
+        </section>
       </main>
 
       <footer className="border-t border-[hsl(var(--v-line))] py-6">

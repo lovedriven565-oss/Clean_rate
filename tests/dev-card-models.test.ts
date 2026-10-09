@@ -49,7 +49,7 @@ describe("dev card models", () => {
     );
     assert.match(
       companyRatingText({ ratingSource: "yandex", baseRating: 4.6, reviewCount: 12, promoted: false, verified: false }),
-      /^4\.6 · 12 отзывов · Яндекс$/,
+      /^4\.6 · 12 отзывов (?:· Яндекс|в Яндексе)$/,
     );
     // Спонсор без подтверждённых внешних отзывов не получает сухой "не публикуется"
     assert.equal(

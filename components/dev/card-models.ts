@@ -57,7 +57,7 @@ export const CARD_KIND_LABELS: Record<CardKind, string> = {
 };
 
 export const RISK_NOTE =
-  "Справочная информация, не оферта и не гарантия результата. Проверьте на незаметном участке и следуйте инструкции производителя — решение и ответственность за применение за вами.";
+  "Справочная информация, не оферта и не гарантия результата. Проверьте на незаметном участке и следуйте инструкции производителя: решение и ответственность за применение за вами.";
 
 const TASK_IMAGES: Record<string, string> = {
   stain: "/dev/a-tasks/stains.jpg",
@@ -71,6 +71,26 @@ function taskImage(s: Pick<Solution, "surface" | "problemType">): string {
   if (s.surface === "kitchen") return "/dev/a-tasks/kitchen.jpg";
   if (s.surface === "bathroom" || s.surface === "window") return "/dev/a-tasks/bathroom.jpg";
   return TASK_IMAGES[s.problemType] ?? TASK_IMAGES.general;
+}
+
+/** Задачи для витрины: сначала по одной на каждую тематическую фотографию, затем остальные (только published). */
+export function pickShowcaseTasks(solutions: Solution[], limit: number): Solution[] {
+  const seen = new Set<string>();
+  const distinct: Solution[] = [];
+  const rest: Solution[] = [];
+  for (const solution of solutions.filter((s) => s.status === "published")) {
+    const img = taskImage(solution);
+    (seen.has(img) ? rest : distinct).push(solution);
+    seen.add(img);
+  }
+  return [...distinct, ...rest].slice(0, limit);
+}
+
+/** Монограмма названия: первые буквы двух слов или две буквы одного. */
+export function initials(name: string): string {
+  const words = name.match(/[\p{L}\d]+/gu) ?? [];
+  const [first = "?", second] = words;
+  return (second ? first[0] + second[0] : first.slice(0, 2)).toUpperCase();
 }
 
 export function clampText(text: string, max: number): string {
@@ -117,6 +137,8 @@ const RATING_SOURCE_LABELS: Record<RatingSource, string> = {
   new: "новая компания",
 };
 
+const RATING_SOURCE_IN: Record<"google" | "yandex", string> = { google: "в Google", yandex: "в Яндексе" };
+
 /**
  * Отображение рейтинга или факта доверия:
  * 1. При подтверждённом источнике (Google/Яндекс) и наличии отзывов — честная оценка.
@@ -129,7 +151,7 @@ export function companyRatingText(
 ): string {
   const source = company.ratingSource;
   if ((source === "google" || source === "yandex") && company.reviewCount > 0 && company.baseRating > 0) {
-    return `${company.baseRating.toFixed(1)} · ${pluralize(company.reviewCount, ["отзыв", "отзыва", "отзывов"])} · ${RATING_SOURCE_LABELS[source]}`;
+    return `${company.baseRating.toFixed(1)} · ${pluralize(company.reviewCount, ["отзыв", "отзыва", "отзывов"])} ${RATING_SOURCE_IN[source]}`;
   }
   if (company.promoted && company.verified) {
     return "Спонсор показа · Профиль проверен";
@@ -165,7 +187,7 @@ export function buildCompanyCard(company: Company): CardModel {
     ],
     badges,
     href: `/companies/${company.slug}`,
-    hrefLabel: "Профиль компании",
+    hrefLabel: "О компании",
     quick: {
       points: [
         ...(company.experienceYears ? [`Опыт: ${pluralize(company.experienceYears, ["год", "года", "лет"])}`] : []),

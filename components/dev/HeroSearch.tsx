@@ -88,49 +88,40 @@ export function HeroSearch({ solutions, chips }: { solutions: Solution[]; chips:
         }
       }}
     >
-      <div
-        role="group"
-        aria-label="Аудитория"
-        className="flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] p-1"
-      >
-        {AUDIENCES.map(({ id, label }) => (
-          <button
-            key={id}
-            type="button"
-            aria-pressed={audience === id}
-            onClick={() => {
-              setAudience(id);
-              setActiveIndex(-1);
-            }}
-            className={cn(
-              "min-h-11 flex-1 whitespace-nowrap rounded-lg px-4 text-sm font-medium transition-colors",
-              audience === id
-                ? "bg-[hsl(var(--v-accent))] text-[hsl(var(--v-accent-ink))]"
-                : "text-[hsl(var(--v-ink2))] hover:text-[hsl(var(--v-ink))]",
-            )}
+      <form role="search" onSubmit={onSubmit} className="relative max-w-xl">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <label htmlFor={inputId} className="text-sm font-medium text-[hsl(var(--v-ink))]">
+            Что нужно убрать?
+          </label>
+          <div
+            role="group"
+            aria-label="Аудитория"
+            className="flex w-full gap-1 rounded-[var(--v-r-ctl)] bg-[hsl(var(--v-tint))] p-1 sm:w-auto"
           >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {audience === "pro" && (
-        <p className="mt-3 max-w-xl text-sm leading-6 text-[hsl(var(--v-ink2))]">
-          Локальный прототип не подбирает профессиональную химию — смотрите{" "}
-          <Link href="/brands" className="font-semibold text-[hsl(var(--v-accent))] underline-offset-2 hover:underline">
-            каталог брендов
-          </Link>
-          .
-        </p>
-      )}
-
-      <form role="search" onSubmit={onSubmit} className="relative mt-3 max-w-xl">
-        <label htmlFor={inputId} className="mb-2 block text-sm font-medium text-[hsl(var(--v-ink))]">
-          Что нужно убрать?
-        </label>
+            {AUDIENCES.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={audience === id}
+                onClick={() => {
+                  setAudience(id);
+                  setActiveIndex(-1);
+                }}
+                className={cn(
+                  "min-h-11 min-w-0 flex-1 whitespace-nowrap rounded-[var(--v-r-inner)] px-1.5 text-[13px] font-medium transition-colors sm:px-3.5 sm:text-sm",
+                  audience === id
+                    ? "bg-[hsl(var(--v-raise))] text-[hsl(var(--v-ink))] shadow-[0_1px_2px_hsl(222_40%_20%/0.12)]"
+                    : "text-[hsl(var(--v-ink2))] hover:text-[hsl(var(--v-ink))]",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div
           className={cn(
-            "flex h-14 items-center gap-2 rounded-2xl border border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] pl-5 pr-2 transition-shadow",
+            "flex h-14 items-center gap-2 rounded-[var(--v-r-field)] border border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] pl-5 pr-2 transition-shadow",
             styles.searchBox,
           )}
         >
@@ -168,7 +159,7 @@ export function HeroSearch({ solutions, chips }: { solutions: Solution[]; chips:
           )}
           <button
             type="submit"
-            className="h-11 shrink-0 rounded-xl bg-[hsl(var(--v-accent))] px-6 text-sm font-semibold text-[hsl(var(--v-accent-ink))] transition-colors hover:brightness-105 active:brightness-95"
+            className="h-11 shrink-0 rounded-[var(--v-r-ctl)] bg-[hsl(var(--v-accent))] px-6 text-sm font-semibold text-[hsl(var(--v-accent-ink))] transition-[filter,transform] hover:brightness-105 active:scale-[0.98] active:brightness-95 motion-reduce:active:scale-100"
           >
             Найти
           </button>
@@ -177,7 +168,7 @@ export function HeroSearch({ solutions, chips }: { solutions: Solution[]; chips:
         {showPanel && (
           <div
             id={listboxId}
-            className="absolute inset-x-0 top-full z-20 mt-2 overflow-hidden rounded-2xl border border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] shadow-[0_24px_48px_-20px_hsl(222_40%_20%/0.35)]"
+            className="absolute inset-x-0 top-full z-20 mt-2 overflow-hidden rounded-[var(--v-r-field)] border border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] shadow-[0_24px_48px_-20px_hsl(222_40%_20%/0.35)]"
           >
             {items.length > 0 ? (
               <ul role="listbox" aria-label="Подсказки решений" className="max-h-72 overflow-y-auto p-1.5">
@@ -188,7 +179,7 @@ export function HeroSearch({ solutions, chips }: { solutions: Solution[]; chips:
                     role="option"
                     aria-selected={i === activeIndex}
                     onMouseEnter={() => setActiveIndex(i)}
-                    className={cn("rounded-xl", i === activeIndex && "bg-[hsl(var(--v-tint))]")}
+                    className={cn("rounded-[var(--v-r-ctl)]", i === activeIndex && "bg-[hsl(var(--v-tint))]")}
                   >
                     <Link
                       href={item.href}
@@ -221,11 +212,21 @@ export function HeroSearch({ solutions, chips }: { solutions: Solution[]; chips:
         <div role="status" aria-live="polite" className="sr-only">
           {showPanel
             ? items.length > 0
-              ? `Найдено решений: ${items.length}. Стрелки для выбора, Enter — открыть.`
-              : "Совпадений нет — доступна ссылка на все решения."
+              ? `Найдено решений: ${items.length}. Стрелки для выбора, Enter открывает.`
+              : "Совпадений нет, доступна ссылка на все решения."
             : ""}
         </div>
       </form>
+
+      {audience === "pro" && (
+        <p className="mt-3 max-w-xl text-sm leading-6 text-[hsl(var(--v-ink2))]">
+          Локальный прототип не подбирает профессиональную химию. Смотрите{" "}
+          <Link href="/brands" className="font-semibold text-[hsl(var(--v-accent))] underline-offset-2 hover:underline">
+            каталог брендов
+          </Link>
+          .
+        </p>
+      )}
 
       <div className="mt-3 flex flex-wrap gap-2" aria-label="Примеры задач">
         {chips.map((chip) => (
@@ -238,7 +239,7 @@ export function HeroSearch({ solutions, chips }: { solutions: Solution[]; chips:
               setActiveIndex(-1);
               inputRef.current?.focus();
             }}
-            className="inline-flex h-11 items-center rounded-full border border-[hsl(var(--v-line))] bg-[hsl(var(--v-surface))] px-4 text-sm text-[hsl(var(--v-ink2))] transition-colors hover:border-[hsl(var(--v-accent))]/50 hover:text-[hsl(var(--v-ink))]"
+            className="inline-flex h-11 items-center rounded-full border border-[hsl(var(--v-line))] px-4 text-sm text-[hsl(var(--v-ink2))] transition-colors hover:border-[hsl(var(--v-accent))]/50 hover:bg-[hsl(var(--v-surface))] hover:text-[hsl(var(--v-ink))]"
           >
             {chip}
           </button>
@@ -246,8 +247,7 @@ export function HeroSearch({ solutions, chips }: { solutions: Solution[]; chips:
       </div>
 
       <p className="mt-3 max-w-xl text-xs leading-5 text-[hsl(var(--v-ink2))]">
-        Поиск по локальному образцу протоколов — прототип без сервера. Перед применением средства
-        проверяйте его на незаметном участке и сверяйтесь с инструкцией производителя на упаковке.
+        Прототип: поиск по локальному образцу протоколов, без сервера.
       </p>
     </div>
   );

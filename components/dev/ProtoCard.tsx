@@ -6,7 +6,7 @@ import Image from "next/image";
 import { motion, useMotionTemplate, useMotionValue } from "motion/react";
 import { ArrowUpRight, Building2, ClipboardList, Eye, FlaskConical, ImageOff, Megaphone, TriangleAlert, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { RISK_NOTE, type CardBadgeTone, type CardKind, type CardModel } from "./card-models";
+import { RISK_NOTE, initials, type CardBadgeTone, type CardKind, type CardModel } from "./card-models";
 import diagnostic from "./Diagnostic.module.css";
 import styles from "./ProtoCard.module.css";
 
@@ -24,18 +24,23 @@ const BADGE_TONES: Record<CardBadgeTone, string> = {
   ad: "border-[hsl(var(--v-ad))] bg-transparent text-[hsl(var(--v-ink))]",
 };
 
-function CardMedia({ card }: { card: CardModel }) {
-  const [failed, setFailed] = useState(false);
+/** Карточка без слота изображения: компактная монограмма (компания) или знак типа вместо пустой рамки. */
+function CardMark({ card }: { card: CardModel }) {
   const Icon = KIND_ICONS[card.kind];
+  return (
+    <span
+      aria-hidden="true"
+      className="grid size-11 shrink-0 place-items-center rounded-[var(--v-r-ctl)] bg-[hsl(var(--v-tint))] text-sm font-semibold text-[hsl(var(--v-accent))]"
+    >
+      {card.kind === "company" ? initials(card.title) : <Icon className="size-5" />}
+    </span>
+  );
+}
+
+function CardMedia({ card, img }: { card: CardModel; img: NonNullable<CardModel["img"]> }) {
+  const [failed, setFailed] = useState(false);
   const box = "relative aspect-[16/9] w-full overflow-hidden rounded-[var(--v-r-ctl)] bg-[hsl(var(--v-tint))]";
 
-  if (!card.img) {
-    return (
-      <div className={cn(box, "grid place-items-center")} aria-hidden="true">
-        <Icon className="size-8 text-[hsl(var(--v-ink2))]" />
-      </div>
-    );
-  }
   if (failed) {
     return (
       <div className={cn(box, "grid place-items-center")} data-media-state="unavailable">
@@ -49,8 +54,8 @@ function CardMedia({ card }: { card: CardModel }) {
   return (
     <div className={box}>
       <Image
-        src={card.img.src}
-        alt={card.img.alt}
+        src={img.src}
+        alt={img.alt}
         fill
         sizes="(min-width: 1024px) 360px, 92vw"
         className="object-cover"
@@ -147,19 +152,22 @@ export function ProtoCard({ card }: { card: CardModel }) {
       )}
 
       <div className="relative flex min-h-[19rem] flex-1 flex-col gap-3 p-4">
-        <CardMedia card={card} />
+        {card.img && <CardMedia card={card} img={card.img} />}
 
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs font-medium text-[hsl(var(--v-ink2))]">{card.kindLabel}</span>
-          {card.badges.map((b) => (
-            <span
-              key={b.label}
-              title={b.title}
-              className={cn("rounded-full border px-2 py-0.5 text-[11px] font-semibold", BADGE_TONES[b.tone])}
-            >
-              {b.label}
-            </span>
-          ))}
+        <div className="flex min-w-0 items-center gap-3">
+          {!card.img && <CardMark card={card} />}
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+            <span className="text-xs font-medium text-[hsl(var(--v-ink2))]">{card.kindLabel}</span>
+            {card.badges.map((b) => (
+              <span
+                key={b.label}
+                title={b.title}
+                className={cn("rounded-full border px-2 py-0.5 text-[11px] font-semibold", BADGE_TONES[b.tone])}
+              >
+                {b.label}
+              </span>
+            ))}
+          </div>
         </div>
 
         <h3
