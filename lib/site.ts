@@ -22,12 +22,14 @@ export const SITE_MONOGRAM = SITE_NAME.split(/\s+/)
 
 /** Фирменные цвета для растровых картинок (ImageResponse не читает CSS-переменные). */
 export const BRAND_COLORS = {
-  ink: "#0b0f13",
-  inkSoft: "#16202a",
-  primary: "#0c7d70",
-  primaryBright: "#29d6b8",
-  paper: "#f6f8fa",
-  muted: "#9aa7b3",
+  ink: "#0d1110",
+  inkSoft: "#161d1b",
+  primary: "#176347",
+  primaryBright: "#a0e637",
+  brand: "#92db24",
+  brandForeground: "#0c1d17",
+  paper: "#f4f6f5",
+  muted: "#9caba4",
 } as const;
 
 /**

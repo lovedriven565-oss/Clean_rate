@@ -4,7 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import { ExternalAnalytics } from "@/components/analytics/ExternalAnalytics";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { RegionProvider } from "@/components/providers/RegionProvider";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { BRAND_COLORS, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const description =
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f8fa" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b0f13" },
+    { media: "(prefers-color-scheme: light)", color: BRAND_COLORS.paper },
+    { media: "(prefers-color-scheme: dark)", color: BRAND_COLORS.ink },
   ],
   width: "device-width",
   initialScale: 1,

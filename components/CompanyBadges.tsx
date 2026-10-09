@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const rankClass: Record<number, string> = {
   1: "bg-sponsor text-sponsor-foreground",
   2: "bg-muted text-foreground border border-border/80",
-  3: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  3: "bg-star/15 text-ad",
 };
 
 /** Медаль позиции в органическом рейтинге. `onlyTop` скрывает места ниже третьего. */
@@ -33,10 +33,10 @@ export function hasVerifiedRating(company: Company) {
 export function RatingBadge({ company, className }: { company: Company; className?: string }) {
   if (hasVerifiedRating(company)) {
     return (
-      <span className={cn("font-data inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-950/70 dark:text-amber-200", className)}>
-        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+      <span className={cn("font-data inline-flex items-center gap-1 rounded-full bg-star/10 px-2.5 py-1 text-xs font-medium text-ad", className)}>
+        <Star className="h-3.5 w-3.5 fill-star text-star" />
         {formatRating(company.baseRating)}
-        <span className="text-amber-700/80 dark:text-amber-300/80">({formatNumber(company.reviewCount)})</span>
+        <span className="text-ad/80">({formatNumber(company.reviewCount)})</span>
       </span>
     );
   }

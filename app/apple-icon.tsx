@@ -15,7 +15,7 @@ export default async function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: BRAND_COLORS.primary,
+          background: BRAND_COLORS.ink,
           fontFamily: "Geist",
         }}
       >

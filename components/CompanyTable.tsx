@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 const rankTone: Record<number, string> = {
   1: "bg-sponsor text-sponsor-foreground",
   2: "bg-muted text-foreground border border-border/80",
-  3: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  3: "bg-star/15 text-ad",
 };
 
 const ROW_GRID = "lg:grid-cols-[2.5rem_3rem_minmax(0,1fr)_5.5rem_8.5rem_auto]";

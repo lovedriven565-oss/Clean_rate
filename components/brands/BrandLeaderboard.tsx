@@ -23,7 +23,7 @@ const filters: Array<{ key: Filter; label: string }> = [
 const rankTone: Record<number, string> = {
   1: "bg-sponsor text-sponsor-foreground",
   2: "bg-muted text-foreground border border-border/80",
-  3: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  3: "bg-star/15 text-ad",
 };
 
 /**

@@ -135,8 +135,8 @@ function CompanyRow({ company }: { company: Company }) {
           </span>
           <span className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
             {hasRating ? (
-              <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300">
-                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <span className="inline-flex items-center gap-1 text-ad">
+                <Star className="h-3 w-3 fill-star text-star" />
                 {formatRating(company.baseRating)} · {company.reviewCount}
               </span>
             ) : (
