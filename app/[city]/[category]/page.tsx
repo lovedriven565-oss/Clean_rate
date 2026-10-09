@@ -6,7 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ShareButton } from "@/components/ShareButton";
-import { CompanyListItem } from "@/components/CompanyListItem";
+import { CompanyTable } from "@/components/CompanyTable";
 import { SolutionCard } from "@/components/solution/SolutionCard";
 import { AdCreative } from "@/components/ads/AdCreative";
 import { getEligibleAd } from "@/lib/ads/queries";
@@ -159,11 +159,7 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
           {categoryAd && <AdCreative ad={categoryAd} className="mb-6" />}
 
           {organic.length > 0 ? (
-            <div className="flex flex-col gap-4">
-              {organic.map((company, index) => (
-                <CompanyListItem key={company.id} company={company} index={index} rank={index + 1} />
-              ))}
-            </div>
+            <CompanyTable companies={organic} />
           ) : (
             <div className="rounded-panel border border-dashed border-border bg-card/60 p-8 text-sm leading-6 text-muted-foreground">
               Пока здесь нет компаний. Если вы оказываете «{category.name.toLowerCase()}» в {city.nameIn},{" "}
@@ -176,11 +172,7 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
               <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Рекламное размещение — не участвует в рейтинге
               </span>
-              <div className="flex flex-col gap-4">
-                {sponsors.map((company, index) => (
-                  <CompanyListItem key={company.id} company={company} index={index} />
-                ))}
-              </div>
+              <CompanyTable companies={sponsors} ranked={false} />
             </div>
           )}
 

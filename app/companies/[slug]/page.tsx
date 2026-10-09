@@ -112,7 +112,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 </div>
               </div>
 
-              <aside className="data-surface rounded-panel border border-border p-6">
+              <aside className="data-surface rounded-panel p-6">
                 <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Органический балл</span>
                 <div className="mt-3 flex items-end gap-2">
                   <strong className="font-data text-5xl font-medium text-foreground">{organicScore ?? "—"}</strong>
@@ -141,7 +141,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
         <section className="container grid gap-6 py-14 lg:grid-cols-[1fr_340px] lg:py-20">
           <div className="space-y-6">
-            <article className="rounded-panel border border-border bg-card p-7 sm:p-9">
+            <article className="data-surface rounded-panel p-7 sm:p-9">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-control bg-primary/10 text-primary"><BriefcaseBusiness className="h-5 w-5" /></span>
                 <h2 className="font-display text-2xl font-bold text-foreground">Услуги и специализация</h2>
@@ -171,7 +171,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               )}
             </article>
 
-            <article className="rounded-panel border border-border bg-card p-7 sm:p-9">
+            <article className="data-surface rounded-panel p-7 sm:p-9">
               <h2 className="font-display text-2xl font-bold text-foreground">Техника и профессиональные решения</h2>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
                 Связи публикуются только как данные профиля и требуют подтверждения представителем компании.
@@ -186,7 +186,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             </article>
 
             {company.recentReview && publishedRating && (
-              <article className="data-surface rounded-panel border border-border p-7 sm:p-9">
+              <article className="data-surface rounded-panel p-7 sm:p-9">
                 <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Отзыв в профиле</span>
                 <blockquote className="mt-4 font-display text-xl leading-8 text-foreground">“{company.recentReview.text}”</blockquote>
                 <p className="mt-5 text-sm font-semibold text-muted-foreground">{company.recentReview.author}</p>
@@ -195,22 +195,22 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
           </div>
 
           <aside className="space-y-5">
-            <div className="rounded-panel border border-border bg-card p-6">
+            <div className="data-surface rounded-panel p-6">
               <h2 className="font-display text-lg font-bold text-foreground">Основные условия</h2>
               <dl className="mt-5 space-y-4 text-sm">
                 <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
                   <dt className="text-muted-foreground">Стоимость</dt>
-                  <dd className="font-semibold text-foreground">
+                  <dd className="font-data font-semibold text-foreground">
                     {company.priceFrom !== undefined ? `от ${formatCompanyPriceFrom(company.priceFrom, company)}` : "По запросу"}
                   </dd>
                 </div>
                 <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
                   <dt className="text-muted-foreground">Опыт</dt>
-                  <dd className="font-semibold text-foreground">{company.experienceYears ? `${company.experienceYears} лет` : "Не указан"}</dd>
+                  <dd className="font-data font-semibold text-foreground">{company.experienceYears ? `${company.experienceYears} лет` : "Не указан"}</dd>
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-muted-foreground">Категорий</dt>
-                  <dd className="font-semibold text-foreground">{company.categories.length}</dd>
+                  <dd className="font-data font-semibold text-foreground">{company.categories.length}</dd>
                 </div>
               </dl>
             </div>
@@ -225,7 +225,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             </div>
 
             {company.verified && (
-              <div className="rounded-panel border border-border bg-card p-6">
+              <div className="data-surface rounded-panel p-6">
                 <h2 className="font-display text-lg font-bold text-foreground">Бейдж для сайта</h2>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
                   Покажите проверенный профиль — бейдж обновляется автоматически.

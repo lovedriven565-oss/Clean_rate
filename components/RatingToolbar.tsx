@@ -104,7 +104,7 @@ export function RatingToolbar({
               className={cn(
                 "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors",
                 viewMode === "list"
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-foreground text-background"
                   : "text-muted-foreground hover:text-foreground"
               )}
               aria-label="Список"
@@ -117,7 +117,7 @@ export function RatingToolbar({
               className={cn(
                 "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors",
                 viewMode === "grid"
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-foreground text-background"
                   : "text-muted-foreground hover:text-foreground"
               )}
               aria-label="Плитка"
@@ -182,7 +182,7 @@ export function RatingToolbar({
             className={cn(
               "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
               activeCategory === "all"
-                ? "border-primary bg-primary text-primary-foreground"
+                ? "border-foreground bg-foreground text-background"
                 : "border-border bg-card text-muted-foreground hover:text-foreground"
             )}
           >
@@ -197,7 +197,7 @@ export function RatingToolbar({
                 className={cn(
                   "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
                   activeCategory === category.id
-                    ? "border-primary bg-primary text-primary-foreground"
+                    ? "border-foreground bg-foreground text-background"
                     : "border-border bg-card text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -215,7 +215,7 @@ export function RatingToolbar({
             className={cn(
               "inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
               verifiedOnly
-                ? "border-primary bg-primary text-primary-foreground"
+                ? "border-foreground bg-foreground text-background"
                 : "border-border bg-card text-muted-foreground hover:text-foreground"
             )}
           >

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CompanyCard } from "@/components/CompanyCard";
-import { CompanyListItem } from "@/components/CompanyListItem";
+import { CompanyTable } from "@/components/CompanyTable";
 import { RatingToolbar, type SortKey, type ViewMode } from "@/components/RatingToolbar";
 import { RatingEmptyState } from "@/components/RatingEmptyState";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -184,16 +184,7 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
               regionName={market.name}
             />
           ) : viewMode === "list" ? (
-            <div className="flex flex-col gap-4">
-              {filtered.map((company, i) => (
-                <CompanyListItem
-                  key={company.id}
-                  company={company}
-                  index={i}
-                  rank={sortKey === "relevance" ? i + 1 : undefined}
-                />
-              ))}
-            </div>
+            <CompanyTable companies={filtered} ranked={sortKey === "relevance"} />
           ) : (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((company, i) => (
