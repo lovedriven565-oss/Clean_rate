@@ -1,6 +1,5 @@
 import Script from "next/script";
 import { YM_ID } from "@/lib/analytics";
-import { DevDesignAnalyticsGate } from "./DevDesignAnalyticsGate";
 
 const CF_BEACON_TOKEN = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
 
@@ -10,7 +9,7 @@ const CF_BEACON_TOKEN = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
  * defer:true → автопросмотр выключен, хиты отправляет PageViewTracker.
  */
 export function ExternalAnalytics() {
-  const scripts = (
+  return (
     <>
       {YM_ID ? (
         <Script
@@ -31,8 +30,4 @@ export function ExternalAnalytics() {
       ) : null}
     </>
   );
-  // Production — прежнее поведение (Script напрямую). Вне production
-  // счётчики не монтируются на /dev/design/* (дизайн-прототипы без аналитики).
-  if (process.env.NODE_ENV === "production") return scripts;
-  return <DevDesignAnalyticsGate>{scripts}</DevDesignAnalyticsGate>;
 }

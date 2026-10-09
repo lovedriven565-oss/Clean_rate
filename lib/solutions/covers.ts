@@ -4,7 +4,7 @@ import type { Solution } from "@/lib/types";
  * Уникальная обложка на опубликованное решение; новые решения получают фолбэк по поверхности/типу.
  * Фото: Pexels License — kofe-na-tekstile №4097999, krov-na-matrase №9497355,
  * poslestroy-okna-skotch №8811390, zapah-syrosti-posle-potopa №4570108;
- * остальные — из public/dev/a-tasks (stains 5659651, odors 13450868, renovation 9908376,
+ * остальные — из public/shelves (stains 5659651, odors 13450868, renovation 9908376,
  * kitchen 4850197, bathroom 7587870, office 12526862).
  */
 const SLUG_COVERS: Record<string, string> = {

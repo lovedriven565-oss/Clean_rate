@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildTaskShelves } from "../components/dev/task-shelves.js";
+import { buildTaskShelves } from "../lib/solutions/shelves.js";
 import { getFallbackSolutions } from "../lib/db/fallback.js";
 import type { Solution } from "../lib/types.js";
 
@@ -23,7 +23,7 @@ const draftSolution: Solution = {
 
 const ALLOWED_FILTERS = /^\/solutions(\?((type|surface)=[a-z]+)(&[a-z]+=[a-z]+)*)?$/;
 
-describe("dev task shelves", () => {
+describe("solution shelves", () => {
   it("builds covers only for shelves with real published matches", () => {
     const shelves = buildTaskShelves(solutions);
     assert.ok(shelves.length >= 4 && shelves.length <= 6);
@@ -78,7 +78,7 @@ describe("dev task shelves", () => {
     const imgs = shelves.map((s) => s.img);
     assert.equal(new Set(imgs).size, imgs.length);
     for (const cover of shelves) {
-      assert.match(cover.img, /^\/dev\/a-tasks\/[a-z-]+\.jpg$/);
+      assert.match(cover.img, /^\/shelves\/[a-z-]+\.jpg$/);
       assert.ok(cover.imgAlt.length > 10);
     }
   });

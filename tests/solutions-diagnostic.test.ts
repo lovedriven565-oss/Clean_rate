@@ -15,7 +15,7 @@ import {
   rankOrganicCompanies,
   resolveSelection,
   telHref,
-} from "../components/dev/diagnostic-model.js";
+} from "../lib/solutions/diagnostic.js";
 import { getFallbackCompanies, getFallbackPriceEstimates, getFallbackSolutions } from "../lib/db/fallback.js";
 import type { Solution } from "../lib/types.js";
 

@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CompanyCard } from "@/components/CompanyCard";
 import { CompanyTable } from "@/components/CompanyTable";
-import { RatingToolbar, type SortKey, type ViewMode } from "@/components/RatingToolbar";
+import { RatingToolbar, type SortKey } from "@/components/RatingToolbar";
 import { RatingEmptyState } from "@/components/RatingEmptyState";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AdCreative } from "@/components/ads/AdCreative";
@@ -54,7 +53,6 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
     sortParam && SORT_KEYS.includes(sortParam as SortKey) ? (sortParam as SortKey) : "relevance"
   );
   const [verifiedOnly, setVerifiedOnly] = useState(searchParams.get("verified") === "1");
-  const [viewMode, setViewMode] = useState<ViewMode>(searchParams.get("view") === "grid" ? "grid" : "list");
   const [priceMax, setPriceMax] = useState<number | "all">("all");
 
   // Компании только рынка текущего региона (BY/RU/KZ) — так /rating остаётся согласован
@@ -84,10 +82,9 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
     if (activeCity !== "all") params.set("city", activeCity);
     if (sortKey !== "relevance") params.set("sort", sortKey);
     if (verifiedOnly) params.set("verified", "1");
-    if (viewMode !== "list") params.set("view", viewMode);
     const search = params.toString();
     router.replace(search ? `${pathname}?${search}` : pathname, { scroll: false });
-  }, [query, activeCategory, activeCity, sortKey, verifiedOnly, viewMode, pathname, router]);
+  }, [query, activeCategory, activeCity, sortKey, verifiedOnly, pathname, router]);
 
   const hasActiveFilters =
     activeCategory !== "all" || activeCity !== "all" || verifiedOnly || query.length > 0 || priceMax !== "all";
@@ -164,8 +161,6 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
           onSortChange={setSortKey}
           verifiedOnly={verifiedOnly}
           onVerifiedChange={setVerifiedOnly}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
           priceMax={priceMax}
           onPriceMaxChange={setPriceMax}
           priceOptions={priceOptions}
@@ -183,19 +178,8 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
               noCompaniesInRegion={marketCompanies.length === 0}
               regionName={market.name}
             />
-          ) : viewMode === "list" ? (
-            <CompanyTable companies={filtered} ranked={sortKey === "relevance"} />
           ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((company, i) => (
-                <CompanyCard
-                  key={company.id}
-                  company={company}
-                  index={i}
-                  rank={sortKey === "relevance" ? i + 1 : undefined}
-                />
-              ))}
-            </div>
+            <CompanyTable companies={filtered} ranked={sortKey === "relevance"} />
           )}
         </section>
       </main>

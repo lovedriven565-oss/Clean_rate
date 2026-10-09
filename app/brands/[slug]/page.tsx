@@ -6,7 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { BrandHero } from "@/components/brands/BrandHero";
 import { ProductCard } from "@/components/gear/ProductCard";
-import { CompanyCard } from "@/components/CompanyCard";
+import { CompanyTable } from "@/components/CompanyTable";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getAllCompanies, getAllSolutions, getBrandSlugs, getBrandsByScore } from "@/lib/db/queries";
 import { prosChoiceIds } from "@/lib/brand-score";
@@ -138,11 +138,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
             </div>
 
             {partnerCompanies.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {partnerCompanies.map((company, i) => (
-                  <CompanyCard key={company.id} company={company} index={i} />
-                ))}
-              </div>
+              <CompanyTable companies={partnerCompanies} ranked={false} />
             ) : (
               <p className="text-center text-sm text-muted-foreground">
                 Пока ни одна компания в рейтинге не отметила этот бренд.

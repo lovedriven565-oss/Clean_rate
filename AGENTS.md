@@ -10,7 +10,7 @@
 ## Команды
 - `npm run typecheck` — проверка типов
 - `npm run lint` — ESLint
-- `npm run test` — 60 тестов: `rating`, `solutions`, `intent-router`, `structured-data`, `brand-score`, `ads`, `ads-ui`
+- `npm run test` — 126 тестов (`tests/*.test.ts`)
 - Локальная проверка: `npm run dev -- --port 3111`, затем `Invoke-WebRequest` по маршрутам (PowerShell). Перед `npm run build` остановить dev-сервер (общий `.next`)
 - `npm run build` — Next.js build
 - `npm run db:generate` — генерация D1-миграций
@@ -66,7 +66,7 @@
 ## Следующее (вне Спринта 1)
 - Применить миграцию `0002` в проде: `wrangler d1 migrations apply cleaning-rating-db --remote`, засеять `solutions`/`intent_keywords`/`price_estimates`.
 - Задать `NEXT_PUBLIC_SITE_URL` в `wrangler.jsonc` (`vars`) под реальный домен.
-- `CompanyCard` до сих пор форматирует цену через `formatPriceFrom` (BYN) — перевести на `formatMarketPriceFrom` при появлении компаний RU/KZ.
+- `CompanyTable` форматирует цену по городу компании; при появлении компаний RU/KZ проверить `formatMarketPriceFrom`.
 - OG-изображение (`opengraph-image.tsx`) — не сделано.
 
 ### Проверки после Шага 3 (пройдены)
@@ -140,43 +140,12 @@
 - Playwright (системный Chrome, 390×844 @2x и 1440×900): все три слота отрендерены в SSR-HTML, CLS от рекламы = 0 на `/` и `/solutions/*`; тап-зоны CTA 44–48px; impression приходит один раз на кампанию с `countryCode`, `path`, `metadata.placement`; клик по CTA → `/api/analytics/click` с `ctaType`. На решениях без допущенной кампании (`zapah-syrosti-posle-potopa`) слота в HTML нет.
 - **Известная проблема вне Блока 3:** на `/rating` CLS ≈ 0.42 из-за футера — `RatingContent` в `<Suspense>` без fallback (`useSearchParams`) рендерится на клиенте, футер прыгает вниз. Не связано с рекламой (без категории и без слота значение то же). Лечится fallback-скелетом (ранее был `RatingSkeleton.tsx`, удалён) или `min-h` у секции списка.
 
-## Полный план
-- `C:/Users/gushc/.devin/plans/plan-37033ecb36053b1b.md`
-
-## Дизайн-этап 1.3 — первый экран прототипа A (сделано, на приёмке)
-- `app/dev/design/a-vitrina/page.tsx` — guard notFound в production до данных → `getFallbackSolutions()` → props в `VitrinaDemo`.
-- `components/dev/VitrinaHero.tsx` + `HeroSearch.tsx` + `hero-search.ts` + `VitrinaHero.module.css` — шапка (реальные ссылки, регион «Минск · BY» без cookie, локальная тема без ch_theme/html.dark), hero «Пятно, запах, налёт?», локальный combobox-поиск по published решениям (без API/D1/аналитики), pro → честная граница + /brands.
-- `PageViewTracker`/`ExternalAnalytics` + `DevDesignAnalyticsGate` — /dev/design исключён из трекинга только при NODE_ENV≠production; production-ветка неизменна.
-- Фото `public/dev/a-hero/hero-main.jpg` — Pexels №28576627, свободная лицензия, атрибуция в figcaption.
-- Тесты: `tests/dev-hero-search.test.ts` (10 unit), `tests/browser/dev-hero.spec.ts` (12 Playwright, запуск: `npx playwright test tests/browser/dev-hero.spec.ts` при dev-сервере на 3111).
-- Уроки: `grid` без `grid-cols-*` на мобильном → implicit-колонка ширится до max-content (overflow); лечится `grid-cols-1` + `min-w-0`. `body.style.zoom` не эмулирует браузерный zoom — reflow проверять узким viewport (400 CSS px ≈ zoom 200% @800). Маркер `data-hydrated` через ref-колбэк (setState-in-effect запрещён линтером). Playwright: ждать `[data-hydrated]` до интеракций в dev (иначе fill/click теряются до гидрации).
-- Стандарт рисков (одобрен): «справочный характер, не оферта, ответственность за пользователем» + проверка на незаметном участке — применять во всех фазах.
-
-## Дизайн-этап 1.4 — тематические полки прототипа A (сделано, на приёмке)
-- `components/dev/task-shelves.ts` — чистый `buildTaskShelves(solutions)`: 6 дескрипторов (stains/odors/renovation/kitchen/bathroom/office), count/‌slugs вычисляются предикатом из published-решений, полка без совпадений исключается. href → реальные фильтры `/solutions?type=|surface=` (читаются SolutionsExplorer).
-- `components/dev/TaskShelf.tsx` — CSS scroll-snap лента: стрелки size-11 с disabled по scrollLeft (ResizeObserver + rAF, не set-state-in-effect), ArrowLeft/Right на focusable `<ul>`, свайп нативный, «Все решения» → /solutions (десктоп в шапке, мобилка под лентой).
-- `components/dev/TaskCover.tsx` — обложка-ссылка с photo+gradient, счётчик `pluralize` (он уже возвращает число!), featured «Пятна» шире и выше.
-- `public/dev/a-tasks/` — 6 Pexels-фото (Pexels License): stains 5659651, odors 13450868, renovation 9908376, kitchen 4850197, bathroom 7587870, office 12526862.
-- Тесты: `tests/dev-task-shelves.test.ts` (8 unit), `tests/browser/dev-shelf.spec.ts` (7 Playwright). Урок: клик по кнопке которая станет disabled → scrollTo instant + expect(disabled), цикл слепых click виснет.
-
-## Дизайн-этап 1.5 — карточки и быстрый просмотр прототипа A (сделано, на приёмке)
-- `components/dev/card-models.ts` — чистые модели `CardModel` (kind: task/product/company/ad). Задачи и компании строятся из реальных published-решений и seed-компаний. Продукт — явный демо-образец без выдуманных цен, рейтингов и ссылок (все поля «не указано», изображение недоступно). Реклама — явный образец с маркировкой «Реклама», без ссылок, в отдельной секции.
-- Рейтинг и доверие компании: если есть подтверждённые отзывы (Google/Яндекс) — показывается честный балл; для спонсоров и верифицированных компаний без внешних отзывов вместо «не публикуется» выводится подтверждённый редакцией статус доверия («Спонсор показа · Профиль проверен» / «Профиль проверен редакцией»); спонсоры стоят первыми в блоке.
-- `components/dev/ProtoCard.tsx` — единая карточка с быстрым просмотром (quick view): открывается по hover, по фокусу Tab и по явной кнопке (≥44px на touch); Escape закрывает без потери фокуса; оверлей внутри карточки (без сдвига раскладки/CLS=0); предупреждение видно на лицевой стороне без открытия просмотра; внизу просмотра закреплён стандарт рисков. Состояния: skeleton (`role="status"`), empty, error (`role="alert"`), image unavailable, long-content.
-- `components/dev/CardsShowcase.tsx` — сборка витрины карточек по секциям (задачи, средства, компании со спонсором во главе, реклама, состояния).
-- Тесты: `tests/dev-card-models.test.ts` (8 unit), `tests/browser/dev-cards.spec.ts` (11 Playwright).
-- Проверки: typecheck 0; unit-тесты 122/122; Playwright 11/11; build 114 страниц (SSG); production smoke :3210 отдаёт 404 для /dev/design/a-vitrina и 200 для публичных страниц.
-
-## Дизайн-этап 1.6 — интерактивная диагностика и «Два пути» прототипа A (сделано)
-- `components/dev/diagnostic-model.ts` — чистая модель: поверхности/проблемы только из published-решений, выбор варианта протокола, смета BY/Минск (никогда category-only), форматирование min–max+валюта+единица, warnings первыми, keyboard helpers (стрелки с wrap, Home/End), ранжирование компаний (organic по доверию независимо от promoted, спонсор отдельным слотом, дедуп, релевантность категории, честный empty-state), реальный `tel:` из seed-телефона, внешний рейтинг только при Google/Yandex с числом отзывов, цена «по запросу» без выдумывания.
-- `components/dev/DiagnosticStage.tsx` + `Diagnostic.module.css` — светлый spatial-блок в правой колонке hero вместо фото (атрибуция фото убрана): radiogroup поверхностей → radiogroup проблем → результат на месте («Не делайте» до путей, ≤2 видимых шага DIY с честным скрытым числом, смета «ориентир, не оферта», вкладки DIY/PRO, стандарт рисков, ссылка «Полный протокол»). Автовыбор первой поверхности/проблемы; roving tabindex; reduced-motion рендерит результат без spring.
-- `components/dev/TwoPaths.tsx` — секция после hero: чеклист DIY (локальный state, сброс при смене решения, без localStorage) + PRO-компании Минска (organics ≤3 по доверию, спонсор в отдельном слоте с «вне органического порядка», tel: ≥44px). Следует выбору диагностики.
-- `components/dev/{CompanyRow,EstimateCard,AdStrip,IndependenceBlock}.tsx` — строка компании, карточка сметы, образец рекламы (метка, без ссылок/событий/выдуманных данных), блок независимости (4 факта + /rating/methodology).
-- `components/dev/ProtoCard.module.css` — визуальный ретрофит карточек 1.5 (глубина, spotlight, типографика) без изменения поведения quick view.
-- Тесты: `tests/dev-diagnostic-model.test.ts` (22 unit), `tests/browser/dev-diagnostic.spec.ts` (16 Playwright: мышь/клавиатура, reflow 320–1440 ×2 темы, reduced-motion, нет запросов к API/аналитике). `dev-hero.spec.ts` обновлён: регресс «диагностика вместо фото», прогрев `/solutions/[slug]` + таймаут 240с — каждый dev-рендер открывает remote-коннекты getCloudflareContext (известный артефакт OpenNext), SPA-коммит ждёт RSC-рендер.
-- Уроки: декоративные ambient-слои — только внутри контейнера с clip, иначе scrollWidth-метрика overflow ловит их вынос; читать заголовок результата после стабилизации анимации, не во время exit.
-
-## Дизайн-этап 1.3 v2 — первый экран прототипа A переделан (на приёмке)
-- `VitrinaHero.tsx`: шапка logo/nav по центру/регион+тема; hero в сетке 2 колонки: слева текст+поиск, под ним фото `public/dev/a-hero/hero-scene.jpg` (Pexels №10566514, Ron Lach, Pexels License), справа диагностика 1.6. Мобильный порядок: текст, фото, диагностика.
-- Урок: переключатель аудитории на 320px требует `min-w-0 px-1.5 text-[13px]`, иначе overflow.
-- Известное: `tests/browser/dev-diagnostic.spec.ts` устарел (вкладки заменены на nav в незакоммиченном DiagnosticStage). `next build` под нагрузкой может упасть по таймауту 60с на SSG; повтор помогает.
+## Визуальный язык C в проде (Стадии 1–4, сделано)
+- Палитра — токены `app/globals.css` (лайм `--brand` только заливки, тёмная мята `--primary`/`--link` для текста, золото `--sponsor`, звёзды `--star`/`--ad`). Цвета вне CSS (OG, favicon, `manifest`, `themeColor`, SVG-бейдж `/badge/[slug]`) берутся из `BRAND_COLORS` в `lib/site.ts` — при смене токенов менять оба места. Хардкод `amber-*`/hex в компонентах запрещён.
+- Shape lock: интерактив — `rounded-full`, панели — `rounded-panel`, поля — `rounded-control`; поверхности — `.data-surface`, стекло `.glass` только для поиска, ИИ-панели и навбара.
+- `components/CompanyTable.tsx` — единственный список компаний (`/rating`, `/[city]/[category]`, `/brands/[slug]` c `ranked={false}`). Режим «плитка» и `CompanyCard` удалены; старый `?view=grid` игнорируется.
+- Главная: `components/home/*` (`HomeHero`, `SolutionShelves`, `TaskTicker`, `TwoPathsSection`, `PriceTable`, `Marquee`, `Reveal`); логика — `lib/solutions/{covers,diagnostic,shelves}.ts`; эффекты — `components/ui/fx`. На экране допустим только один `Marquee`.
+- Картинки полок — `public/shelves/*.jpg` (Pexels License: stains 5659651, odors 13450868, renovation 9908376, kitchen 4850197, bathroom 7587870, office 12526862). Прототипы `/dev/design/*` и `components/dev*` удалены.
+- Сборка: `next.config` — `staticPageGenerationTimeout: 180`, `staticGenerationMaxConcurrency: 1` (иначе SSG падает по таймауту). Dev-сервер перед `npm run build` остановить; после удаления роутов чистить `.next/types`.
+- Тесты: `npm run test` — 126 тестов (добавлены `solutions-diagnostic`, `solutions-shelves`, `semantic-search`, `launch-guards`, `ph`, `assistant`).
+- Политика рекламы: не больше одного рекламного блока на экран; ничего в hero, таблицах, поп-апах; живые слоты — `home.editorial_partner`, `rating.category_partner`, `solution.sponsored_product` + платная компания в списках; видимое слово «Реклама»/`AdBadge` обязательно; демо-метрики seed публично не показывать. Остальные плейсменты схемы — без шаблонов, пока нет спроса. Спонсор на `/rating` (ранг + «Спонсор» при органическом #1) не менять без решения владельца.

@@ -4,8 +4,6 @@ import * as LucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
   Check,
-  Grid3X3,
-  List,
   ListFilter,
   MapPin,
   Search,
@@ -19,7 +17,6 @@ import { cn } from "@/lib/utils";
 import type { Category, CategoryId } from "@/lib/types";
 
 export type SortKey = "relevance" | "rating" | "reviews" | "price" | "experience";
-export type ViewMode = "list" | "grid";
 
 const sortOptions: { key: SortKey; label: string }[] = [
   { key: "relevance", label: "По релевантности" },
@@ -46,8 +43,6 @@ interface RatingToolbarProps {
   onSortChange: (value: SortKey) => void;
   verifiedOnly: boolean;
   onVerifiedChange: (value: boolean) => void;
-  viewMode: ViewMode;
-  onViewModeChange: (value: ViewMode) => void;
   priceMax: number | "all";
   onPriceMaxChange: (value: number | "all") => void;
   priceOptions: { value: number; label: string }[];
@@ -69,8 +64,6 @@ export function RatingToolbar({
   onSortChange,
   verifiedOnly,
   onVerifiedChange,
-  viewMode,
-  onViewModeChange,
   priceMax,
   onPriceMaxChange,
   priceOptions,
@@ -81,7 +74,7 @@ export function RatingToolbar({
   return (
     <div className="flex flex-col gap-4 border-b border-border bg-card/50 py-4 backdrop-blur-sm sm:py-5">
       <div className="container">
-        {/* Top: count + view toggle */}
+        {/* Top: count */}
         <div className="mb-3 flex items-center justify-between">
           <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
             <ListFilter className="h-4 w-4 text-primary" />
@@ -96,35 +89,6 @@ export function RatingToolbar({
                 : "ий"}
             </span>
           </span>
-
-          <div className="inline-flex items-center rounded-full border border-border bg-card p-1">
-            <button
-              type="button"
-              onClick={() => onViewModeChange("list")}
-              className={cn(
-                "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors",
-                viewMode === "list"
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-label="Список"
-            >
-              <List className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onViewModeChange("grid")}
-              className={cn(
-                "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors",
-                viewMode === "grid"
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-label="Плитка"
-            >
-              <Grid3X3 className="h-4 w-4" />
-            </button>
-          </div>
         </div>
 
         {/* Row 1: search + city + sort */}
