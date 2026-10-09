@@ -44,7 +44,7 @@ export function PriceRange({
   }
 
   return (
-    <div className={cn("rounded-panel border border-border bg-card p-5", className)}>
+    <div className={cn("data-surface rounded-panel p-5", className)}>
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
           Ориентир цены · {estimate.city ?? market.name}

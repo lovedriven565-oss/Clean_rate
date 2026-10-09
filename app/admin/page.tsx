@@ -81,7 +81,7 @@ export default async function AdminPage() {
             value: `${campaigns.reduce((s, c) => s + c.currentImpressions, 0)} / ${campaigns.reduce((s, c) => s + c.currentClicks, 0)}`,
           },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-panel border border-border bg-card p-4">
+          <div key={stat.label} className="data-surface rounded-panel p-4">
             <div className="font-mono text-2xl font-semibold tabular-nums">{stat.value}</div>
             <div className="mt-1 text-xs text-muted-foreground">{stat.label}</div>
           </div>

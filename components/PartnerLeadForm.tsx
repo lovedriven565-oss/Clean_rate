@@ -87,7 +87,7 @@ export function PartnerLeadForm() {
 
   if (status === "success") {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-panel border border-border bg-card p-10 text-center">
+      <div className="flex flex-col items-center gap-3 data-surface rounded-panel p-10 text-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
           <CheckCircle2 className="h-7 w-7" />
         </span>

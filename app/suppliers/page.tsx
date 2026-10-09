@@ -48,7 +48,7 @@ export default async function SuppliersPage() {
             ))}
           </div>
 
-          <div className="mt-10 grid gap-6 rounded-panel border border-border bg-card p-8 sm:p-12 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="mt-10 grid gap-6 data-surface rounded-panel p-8 sm:p-12 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
               <BadgeCheck className="h-7 w-7 text-primary" />
               <h2 className="mt-5 font-display text-3xl font-bold tracking-[-0.04em] text-foreground">Представляете поставщика?</h2>

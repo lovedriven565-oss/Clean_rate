@@ -177,7 +177,7 @@ export default function ForPartnersPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="rounded-panel border border-border bg-card p-8 sm:p-10">
+              <div className="data-surface rounded-panel p-8 sm:p-10">
                 <h3 className="font-display text-2xl font-bold text-foreground">Базовое размещение</h3>
                 <p className="mt-1 font-semibold text-primary">Бесплатно навсегда</p>
                 <ul className="mt-7 flex flex-col gap-3.5">

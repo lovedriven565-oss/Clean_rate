@@ -18,7 +18,7 @@ export function SponsoredProductCard({ ad, surface }: { ad: EligibleAd; surface?
   return (
     <article
       aria-label={`Реклама: ${ad.title}`}
-      className="relative overflow-hidden rounded-panel border border-border bg-card"
+      className="data-surface rounded-panel"
     >
       <div
         aria-hidden
@@ -54,7 +54,7 @@ export function SponsoredProductCard({ ad, surface }: { ad: EligibleAd; surface?
               <AdCta ad={ad} />
               <Link
                 href={`/brands/${ad.brandSlug}`}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-semibold text-link transition-colors hover:underline"
               >
                 О бренде
                 <ArrowRight className="h-4 w-4" />

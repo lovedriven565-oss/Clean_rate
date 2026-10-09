@@ -212,7 +212,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
                 Ответы собраны из протокола выше, без маркетинга и невыполнимых обещаний.
               </p>
             </div>
-            <div className="divide-y divide-border rounded-panel border border-border bg-card">
+            <div className="divide-y divide-border data-surface rounded-panel">
               {faq.map((item) => (
                 <details key={item.question} className="group px-5 sm:px-6">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[15px] font-semibold text-foreground [&::-webkit-details-marker]:hidden">

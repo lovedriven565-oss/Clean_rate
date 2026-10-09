@@ -19,7 +19,7 @@ export function EditorialPartnerBlock({ ad }: { ad: EligibleAd }) {
   return (
     <section
       aria-label={`Реклама: партнёр сезона ${ad.brandName}`}
-      className="relative overflow-hidden rounded-panel border border-border bg-card"
+      className="data-surface rounded-panel"
     >
       <div
         aria-hidden
@@ -45,7 +45,7 @@ export function EditorialPartnerBlock({ ad }: { ad: EligibleAd }) {
             <AdCta ad={ad} size="lg" />
             <Link
               href={`/brands/${ad.brandSlug}`}
-              className="inline-flex h-12 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+              className="inline-flex h-12 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-semibold text-link transition-colors hover:underline"
             >
               Профиль бренда
               <ArrowRight className="h-4 w-4" />

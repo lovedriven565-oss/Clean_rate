@@ -3,6 +3,7 @@
 import { Suspense, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SearchX } from "lucide-react";
+import { PillTabs } from "@/components/ui/fx";
 import type { Solution, SolutionProblemType, SolutionSurface } from "@/lib/types";
 import {
   PROBLEM_TYPES,
@@ -12,26 +13,9 @@ import {
   isProblemType,
   isSurface,
 } from "@/lib/solutions/meta";
-import { cn } from "@/lib/utils";
 import { SolutionCard } from "./SolutionCard";
 
-function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors",
-        active
-          ? "border-foreground bg-foreground text-background"
-          : "border-border bg-card text-muted-foreground hover:border-primary/35 hover:text-foreground"
-      )}
-    >
-      {children}
-    </button>
-  );
-}
+const TABS_CLASS = "no-scrollbar -mx-4 flex-nowrap overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0";
 
 function ExplorerInner({ solutions }: { solutions: Solution[] }) {
   const router = useRouter();
@@ -65,30 +49,34 @@ function ExplorerInner({ solutions }: { solutions: Solution[] }) {
   return (
     <div>
       <div className="space-y-3">
-        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
-          <FilterChip active={activeType === "all"} onClick={() => update("type", null)}>
-            Все задачи
-          </FilterChip>
-          {availableTypes.map((type) => (
-            <FilterChip key={type} active={activeType === type} onClick={() => update("type", activeType === type ? null : type)}>
-              {PROBLEM_TYPE_LABELS[type]}
-            </FilterChip>
-          ))}
-        </div>
-        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
-          <FilterChip active={activeSurface === "all"} onClick={() => update("surface", null)}>
-            Любая поверхность
-          </FilterChip>
-          {availableSurfaces.map((surface) => (
-            <FilterChip
-              key={surface}
-              active={activeSurface === surface}
-              onClick={() => update("surface", activeSurface === surface ? null : surface)}
-            >
-              {SURFACE_LABELS[surface]}
-            </FilterChip>
-          ))}
-        </div>
+        <PillTabs
+          label="Тип задачи"
+          className={TABS_CLASS}
+          value={activeType}
+          onChange={(id) => update("type", id === "all" ? null : id)}
+          options={[
+            { id: "all", label: "Все задачи", meta: String(solutions.length) },
+            ...availableTypes.map((type) => ({
+              id: type,
+              label: PROBLEM_TYPE_LABELS[type],
+              meta: String(solutions.filter((s) => s.problemType === type).length),
+            })),
+          ]}
+        />
+        <PillTabs
+          label="Поверхность"
+          className={TABS_CLASS}
+          value={activeSurface}
+          onChange={(id) => update("surface", id === "all" ? null : id)}
+          options={[
+            { id: "all", label: "Любая поверхность" },
+            ...availableSurfaces.map((surface) => ({
+              id: surface,
+              label: SURFACE_LABELS[surface],
+              meta: String(solutions.filter((s) => s.surface === surface).length),
+            })),
+          ]}
+        />
       </div>
 
       <p className="mt-6 text-sm text-muted-foreground" aria-live="polite">
@@ -102,13 +90,13 @@ function ExplorerInner({ solutions }: { solutions: Solution[] }) {
           ))}
         </div>
       ) : (
-        <div className="mt-4 flex flex-col items-center gap-3 rounded-panel border border-dashed border-border p-12 text-center">
+        <div className="mt-4 flex flex-col items-center gap-3 rounded-panel border border-dashed border-border bg-card/50 p-12 text-center">
           <SearchX className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">Для этой комбинации решений пока нет.</p>
           <button
             type="button"
             onClick={() => router.replace(pathname, { scroll: false })}
-            className="text-sm font-semibold text-primary"
+            className="text-sm font-semibold text-link hover:underline"
           >
             Сбросить фильтры
           </button>

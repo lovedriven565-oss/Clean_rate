@@ -70,7 +70,7 @@ export function BrandLeaderboard({ brands }: { brands: RankedBrand[] }) {
         </details>
       </div>
 
-      <ol className="mt-6 divide-y divide-border overflow-hidden rounded-panel border border-border bg-card">
+      <ol className="mt-6 divide-y divide-border overflow-hidden data-surface rounded-panel">
         {visible.map((brand, index) => (
           <LeaderboardRow
             key={brand.id}

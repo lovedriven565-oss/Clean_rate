@@ -68,7 +68,7 @@ export default function RatingMethodologyPage() {
             ))}
           </div>
 
-          <div className="mt-8 rounded-panel border border-border bg-card p-7 sm:p-10">
+          <div className="mt-8 data-surface rounded-panel p-7 sm:p-10">
             <div className="flex items-start gap-4">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-primary/10 text-primary">
                 <CircleDollarSign className="h-5 w-5" />
