@@ -7,7 +7,7 @@ import { formatEstimate, pickEstimate, type DiagnosticSelection } from "@/compon
 import { SURFACE_LABELS } from "@/lib/solutions/meta";
 import type { PriceEstimate, Solution } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { PillTabs } from "./Fx";
+import { PillTabs } from "@/components/ui/fx";
 
 type SortKey = "price" | "name" | "steps";
 

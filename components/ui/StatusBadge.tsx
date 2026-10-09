@@ -23,7 +23,7 @@ const variants: Record<
     label: "Выбор профессионалов",
     title: "Лидер индекса доверия профи в своей категории.",
     icon: Award,
-    className: "bg-primary text-primary-foreground",
+    className: "bg-brand text-brand-foreground",
   },
   testWinner: {
     label: "Победитель теста",

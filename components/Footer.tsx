@@ -43,7 +43,10 @@ export function Footer() {
           <p className="max-w-sm text-sm leading-6 text-contrast-foreground/70">
             Профессиональная платформа индустрии чистоты: компании, бренды, поставщики и знания в единой структуре рынка.
           </p>
-          <Link href="/for-partners" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+          <Link
+            href="/for-partners"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground transition-transform hover:-translate-y-0.5"
+          >
             Стать частью платформы
             <ArrowUpRight className="h-4 w-4" />
           </Link>
@@ -55,7 +58,7 @@ export function Footer() {
             <ul className="flex flex-col gap-3 text-sm text-contrast-foreground/75">
               {column.links.map((link) => (
                 <li key={`${link.href}-${link.label}`}>
-                  <Link href={link.href} className="transition-colors hover:text-primary">
+                  <Link href={link.href} className="transition-colors hover:text-contrast-foreground">
                     {link.label}
                   </Link>
                 </li>

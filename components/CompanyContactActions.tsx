@@ -15,11 +15,11 @@ export function CompanyContactActions({ company, compact = false, className }: {
   const track = (clickType: "phone" | "website" | "telegram") => () => trackClick({ companyId: company.id, categoryId, clickType });
 
   const primaryClass = cn(
-    "inline-flex items-center justify-center gap-2 rounded-full bg-primary font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-transform hover:-translate-y-0.5",
+    "inline-flex items-center justify-center gap-2 rounded-full bg-brand font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5",
     compact ? "h-10 flex-1 px-4 text-xs sm:flex-none" : "h-11 px-5 text-sm"
   );
   const secondaryClass = cn(
-    "inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card font-semibold text-foreground transition-colors hover:border-primary/35 hover:text-primary",
+    "inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card font-semibold text-foreground transition-colors hover:border-brand/60 hover:text-primary",
     compact ? "h-10 w-10" : "h-11 px-4 text-sm"
   );
   const iconClass = compact ? "h-3.5 w-3.5" : "h-4 w-4";

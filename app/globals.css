@@ -3,9 +3,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Дизайн-система «Clinical Future»: светлая лаборатория / точный прибор.
- * Один акцент (teal --primary) на весь сайт. pH-цвета — шкала данных, не акценты.
- * Shape lock: интерактив = pill (rounded-full), панели = rounded-panel (16px),
+ * Дизайн-система: визуальный язык прототипа C (лайм + тёмная мята на зеленовато-нейтральной базе).
+ * --brand (лайм) — только заливки (bg-brand). Текстовый акцент — --primary/--link (тёмная мята, AA).
+ * pH-цвета — шкала данных, не акценты.
+ * Shape lock: интерактив = pill (rounded-full), панели = rounded-panel (14px),
  * мелкие элементы и поля = rounded-control (10px).
  */
 @theme inline {
@@ -20,6 +21,11 @@
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-brand: hsl(var(--brand));
+  --color-brand-foreground: hsl(var(--brand-foreground));
+  --color-link: hsl(var(--link));
+  --color-mint: hsl(var(--mint));
+  --color-ad: hsl(var(--ad));
   --color-success: hsl(var(--success));
   --color-danger: hsl(var(--danger));
   --color-star: hsl(var(--star));
@@ -36,69 +42,83 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
-  --radius-panel: 1rem;
+  --radius-panel: 0.875rem;
   --radius-control: 0.625rem;
 }
 
 :root {
   color-scheme: light;
-  /* лёд: холодный off-white, не чистый #fff */
-  --background: 204 28% 97.6%;
-  --foreground: 210 32% 10%;
-  --card: 200 33% 99.6%;
-  --card-foreground: 210 32% 10%;
-  --muted: 206 22% 94%;
-  --muted-foreground: 210 13% 37%;
-  --border: 206 18% 87%;
-  --primary: 173 82% 27%;
-  --primary-foreground: 180 30% 99%;
-  /* accent = тот же teal, только для focus-ring (color lock) */
-  --accent: 173 70% 34%;
-  --accent-foreground: 180 30% 99%;
+  --background: 150 12% 96%;
+  --foreground: 160 24% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 160 24% 8%;
+  --muted: 150 14% 94%;
+  --muted-foreground: 160 8% 36%;
+  --border: 150 10% 86%;
+  /* текстовый акцент и кнопки: тёмная мята (AA на светлом) */
+  --primary: 158 62% 24%;
+  --primary-foreground: 158 30% 98%;
+  --link: 158 62% 24%;
+  /* лайм — только заливки, никогда текст на светлом */
+  --brand: 84 72% 50%;
+  --brand-foreground: 160 40% 8%;
+  --mint: 158 60% 45%;
+  --aurora: 0.22;
+  --ad: 38 92% 38%;
+  /* accent = focus-ring (color lock) */
+  --accent: 158 62% 30%;
+  --accent-foreground: 158 30% 98%;
   --star: 39 94% 46%;
   --success: 152 62% 33%;
   --danger: 356 72% 48%;
   --sponsor: 43 96% 56%;
   --sponsor-foreground: 30 60% 12%;
-  --contrast: 210 32% 10%;
-  --contrast-foreground: 200 30% 98%;
+  --contrast: 160 24% 8%;
+  --contrast-foreground: 150 16% 96%;
   --ph-acid: 356 72% 52%;
   --ph-mild-acid: 32 92% 52%;
   --ph-neutral: 152 55% 40%;
   --ph-mild-alkali: 190 70% 42%;
   --ph-alkali: 222 72% 54%;
-  --shadow-tint: 208 40% 28%;
+  --shadow-tint: 160 30% 20%;
   --highlight: 0 0% 100%;
-  --radius: 1rem;
+  --radius: 0.875rem;
 }
 
 .dark {
   color-scheme: dark;
-  --background: 210 26% 6%;
-  --foreground: 200 22% 94%;
-  --card: 210 22% 9%;
-  --card-foreground: 200 22% 94%;
-  --muted: 210 18% 13%;
-  --muted-foreground: 205 12% 65%;
-  --border: 210 16% 19%;
-  --primary: 170 68% 50%;
-  --primary-foreground: 210 26% 6%;
-  --accent: 170 60% 56%;
-  --accent-foreground: 210 26% 6%;
+  --background: 160 14% 6%;
+  --foreground: 150 16% 94%;
+  --card: 160 12% 10%;
+  --card-foreground: 150 16% 94%;
+  --muted: 160 12% 14%;
+  --muted-foreground: 155 8% 64%;
+  --border: 160 10% 19%;
+  /* на тёмном лайм читается и текстом, и заливкой */
+  --primary: 84 70% 62%;
+  --primary-foreground: 160 40% 8%;
+  --link: 84 70% 62%;
+  --brand: 84 78% 56%;
+  --brand-foreground: 160 40% 8%;
+  --mint: 158 60% 40%;
+  --aurora: 0.16;
+  --ad: 40 90% 60%;
+  --accent: 84 70% 62%;
+  --accent-foreground: 160 40% 8%;
   --star: 43 96% 58%;
   --success: 156 60% 48%;
   --danger: 354 76% 64%;
   --sponsor: 43 96% 60%;
   --sponsor-foreground: 30 60% 10%;
-  --contrast: 210 22% 12%;
-  --contrast-foreground: 200 30% 98%;
+  --contrast: 150 16% 94%;
+  --contrast-foreground: 160 14% 8%;
   --ph-acid: 356 78% 62%;
   --ph-mild-acid: 32 92% 58%;
   --ph-neutral: 152 55% 50%;
   --ph-mild-alkali: 190 70% 52%;
   --ph-alkali: 222 80% 66%;
-  --shadow-tint: 210 40% 2%;
-  --highlight: 200 30% 100%;
+  --shadow-tint: 160 40% 2%;
+  --highlight: 150 16% 100%;
 }
 
 * {
@@ -119,7 +139,7 @@ body {
 }
 
 ::selection {
-  background: hsl(var(--primary) / 0.18);
+  background: hsl(var(--brand) / 0.35);
   color: hsl(var(--foreground));
 }
 
@@ -167,22 +187,23 @@ svg.lucide {
     linear-gradient(180deg, hsl(var(--card)), hsl(var(--background)));
 }
 
-/* Поверхность прибора: хромированный градиент, волосяная граница, внутренний блик, тонированная тень. */
+/* Поверхность C: плоская карточка, волосяная граница, внутренний блик, тонированная тень. */
 .data-surface {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: linear-gradient(160deg, hsl(var(--card)), hsl(var(--muted) / 0.55));
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
   box-shadow:
-    inset 0 1px 0 hsl(var(--highlight) / 0.7),
+    inset 0 1px 0 hsl(var(--highlight) / 0.06),
     0 1px 2px hsl(var(--shadow-tint) / 0.06),
-    0 18px 48px -24px hsl(var(--shadow-tint) / 0.18);
+    0 20px 40px -28px hsl(var(--shadow-tint) / 0.28);
 }
 
 .dark .data-surface {
   box-shadow:
     inset 0 1px 0 hsl(var(--highlight) / 0.06),
-    0 18px 48px -24px hsl(var(--shadow-tint) / 0.6);
+    0 20px 40px -28px hsl(var(--shadow-tint) / 0.8);
 }
 
 /* Матовое стекло — только ИИ-панель, поиск и навигация. */
@@ -232,9 +253,65 @@ svg.lucide {
   }
 }
 
+/* Fx: бегущая рамка GlowLink, дрейф Aurora, зерно, маска края SpotlightCard. */
+.fx-spin {
+  animation: fx-spin 4.5s linear infinite;
+}
+
+.fx-drift {
+  animation: fx-drift 18s ease-in-out infinite;
+}
+
+.fx-drift2 {
+  animation: fx-drift 24s ease-in-out infinite reverse;
+}
+
+.fx-edge {
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.fx-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.dark .fx-grain::after {
+  mix-blend-mode: screen;
+  opacity: 0.04;
+}
+
+@keyframes fx-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes fx-drift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(5%, 4%, 0) scale(1.1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .fx-spin, .fx-drift, .fx-drift2 {
+    animation: none;
   }
 
   *, *::before, *::after {

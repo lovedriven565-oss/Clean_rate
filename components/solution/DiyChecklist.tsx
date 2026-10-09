@@ -21,13 +21,18 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      if (raw) setDone(JSON.parse(raw));
-    } catch {
-      // Повреждённое хранилище — начинаем с чистого листа
-    }
-    setHydrated(true);
+    // Чтение localStorage отложено за гидрацию: синхронный setState в теле
+    // эффекта запрещён правилом react-hooks/set-state-in-effect.
+    const id = setTimeout(() => {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (raw) setDone(JSON.parse(raw));
+      } catch {
+        // Повреждённое хранилище — начинаем с чистого листа
+      }
+      setHydrated(true);
+    }, 0);
+    return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 

@@ -40,7 +40,7 @@ export function PhoneButton({ phone, companyId, categoryId, compact = false, cla
   }
 
   const primaryClass = cn(
-    "inline-flex items-center justify-center gap-2 rounded-full bg-primary font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5",
+    "inline-flex items-center justify-center gap-2 rounded-full bg-brand font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5",
     compact ? "h-10 flex-1 px-4 text-xs sm:flex-none" : "h-11 px-5 text-sm",
     className
   );

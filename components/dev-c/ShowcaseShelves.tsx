@@ -9,7 +9,7 @@ import { buildTaskShelves } from "@/components/dev/task-shelves";
 import { pluralize } from "@/lib/format";
 import { SURFACE_LABELS } from "@/lib/solutions/meta";
 import type { PriceEstimate, Solution } from "@/lib/types";
-import { PillTabs, Tilt } from "./Fx";
+import { PillTabs, Tilt } from "@/components/ui/fx";
 import { coverFor } from "./cover";
 
 function SolutionTile({ solution, estimates }: { solution: Solution; estimates: PriceEstimate[] }) {

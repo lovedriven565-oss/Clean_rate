@@ -16,7 +16,7 @@ import {
 import { heroSubmitTarget, searchHeroSolutions } from "@/components/dev/hero-search";
 import { pluralize } from "@/lib/format";
 import type { PriceEstimate, Solution, SolutionProblemType, SolutionSurface } from "@/lib/types";
-import { Aurora, GlowLink, PillTabs, RevealText, SpotlightCard } from "./Fx";
+import { Aurora, GlowLink, PillTabs, RevealText, SpotlightCard } from "@/components/ui/fx";
 import { coverFor } from "./cover";
 
 interface ShowcaseHeroProps {

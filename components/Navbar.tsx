@@ -64,7 +64,7 @@ export function Navbar() {
           <ThemeToggle className="hidden sm:inline-flex" />
           <Link
             href="/for-partners"
-            className="hidden h-10 items-center gap-2 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-transform hover:-translate-y-0.5 xl:inline-flex"
+            className="hidden h-10 items-center gap-2 rounded-full bg-brand px-4 text-xs font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5 xl:inline-flex"
           >
             Разместить бизнес
             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -109,7 +109,7 @@ export function Navbar() {
             <Link
               href="/for-partners"
               onClick={() => setOpen(false)}
-              className="mt-3 inline-flex h-13 items-center justify-center gap-2 rounded-full bg-primary px-4 text-base font-semibold text-primary-foreground"
+              className="mt-3 inline-flex h-13 items-center justify-center gap-2 rounded-full bg-brand px-4 text-base font-semibold text-brand-foreground"
             >
               Разместить бизнес
               <ArrowUpRight className="h-4 w-4" />

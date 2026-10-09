@@ -3,15 +3,14 @@
 import { useId, useRef, type PointerEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring } from "motion/react";
-import { cn } from "@/lib/utils";
-import { nextRadioIndex } from "@/components/dev/diagnostic-model";
+import { cn, nextRadioIndex } from "@/lib/utils";
 
 /** Карточка с подсветкой фона и границы под курсором (позиция в motion values, без ререндеров). */
 export function SpotlightCard({ children, className }: { children: ReactNode; className?: string }) {
   const x = useMotionValue(-999);
   const y = useMotionValue(-999);
-  const fill = useMotionTemplate`radial-gradient(380px circle at ${x}px ${y}px, hsl(var(--c-accent) / 0.13), transparent 70%)`;
-  const edge = useMotionTemplate`radial-gradient(220px circle at ${x}px ${y}px, hsl(var(--c-accent) / 0.95), transparent 70%)`;
+  const fill = useMotionTemplate`radial-gradient(380px circle at ${x}px ${y}px, hsl(var(--brand) / 0.13), transparent 70%)`;
+  const edge = useMotionTemplate`radial-gradient(220px circle at ${x}px ${y}px, hsl(var(--brand) / 0.95), transparent 70%)`;
 
   function onMove(e: PointerEvent<HTMLElement>) {
     const r = e.currentTarget.getBoundingClientRect();
@@ -20,7 +19,7 @@ export function SpotlightCard({ children, className }: { children: ReactNode; cl
   }
 
   return (
-    <div onPointerMove={onMove} className={cn("c-card group/spot relative isolate overflow-hidden rounded-[14px]", className)}>
+    <div onPointerMove={onMove} className={cn("data-surface group/spot relative isolate overflow-hidden rounded-panel", className)}>
       <motion.div
         aria-hidden
         style={{ background: fill }}
@@ -29,7 +28,7 @@ export function SpotlightCard({ children, className }: { children: ReactNode; cl
       <motion.div
         aria-hidden
         style={{ background: edge }}
-        className="c-edge pointer-events-none absolute inset-0 z-20 rounded-[inherit] p-px opacity-0 transition-opacity duration-300 group-hover/spot:opacity-100"
+        className="fx-edge pointer-events-none absolute inset-0 z-20 rounded-[inherit] p-px opacity-0 transition-opacity duration-300 group-hover/spot:opacity-100"
       />
       {children}
     </div>
@@ -73,16 +72,16 @@ export function GlowLink({ href, children, className }: { href: string; children
     <Link
       href={href}
       className={cn(
-        "relative inline-flex overflow-hidden rounded-full bg-[hsl(var(--c-accent)/0.35)] p-[1.5px] transition-transform active:scale-[0.98]",
+        "relative inline-flex overflow-hidden rounded-full bg-brand/35 p-[1.5px] transition-transform active:scale-[0.98]",
         className,
       )}
     >
       <span
         aria-hidden
-        className="vc-spin absolute left-1/2 top-1/2 aspect-square w-[300%]"
-        style={{ background: "conic-gradient(from 0deg, transparent 0 62%, hsl(var(--c-ink)) 88%, transparent 100%)" }}
+        className="fx-spin absolute left-1/2 top-1/2 aspect-square w-[300%]"
+        style={{ background: "conic-gradient(from 0deg, transparent 0 62%, hsl(var(--foreground)) 88%, transparent 100%)" }}
       />
-      <span className="c-accent-bg relative inline-flex min-h-11 items-center gap-2 rounded-full px-6 text-sm font-semibold">
+      <span className="relative inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground">
         {children}
       </span>
     </Link>
@@ -110,7 +109,7 @@ export function RevealText({
             initial={reduce ? false : { opacity: 0, y: 18, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ type: "spring", stiffness: 130, damping: 20, delay: index++ * 0.05 }}
-            className={cn("mr-[0.24em] inline-block", part.accent && "c-link")}
+            className={cn("mr-[0.24em] inline-block", part.accent && "text-link")}
           >
             {word}
           </motion.span>
@@ -125,14 +124,14 @@ export function Aurora() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       <div
-        className="vc-drift absolute -left-[8%] -top-[30%] h-[75%] w-[52%] rounded-full blur-3xl"
-        style={{ background: "hsl(var(--c-accent) / var(--c-aurora))" }}
+        className="fx-drift absolute -left-[8%] -top-[30%] h-[75%] w-[52%] rounded-full blur-3xl"
+        style={{ background: "hsl(var(--brand) / var(--aurora))" }}
       />
       <div
-        className="vc-drift2 absolute -right-[10%] top-[5%] h-[65%] w-[44%] rounded-full blur-3xl"
-        style={{ background: "hsl(var(--c-mint) / var(--c-aurora))" }}
+        className="fx-drift2 absolute -right-[10%] top-[5%] h-[65%] w-[44%] rounded-full blur-3xl"
+        style={{ background: "hsl(var(--mint) / var(--aurora))" }}
       />
-      <div className="vc-grain absolute inset-0" />
+      <div className="fx-grain absolute inset-0" />
     </div>
   );
 }
@@ -189,8 +188,8 @@ export function PillTabs({
             className={cn(
               "relative inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition-colors active:scale-[0.98]",
               selected
-                ? "border-transparent text-[hsl(var(--c-accent-ink))]"
-                : "c-line c-surface hover:border-[hsl(var(--c-accent)/0.6)]",
+                ? "border-transparent text-brand-foreground"
+                : "border-border bg-card hover:border-brand/60",
             )}
           >
             {selected && (
@@ -198,12 +197,12 @@ export function PillTabs({
                 layoutId={`${uid}-pill`}
                 transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }}
                 aria-hidden
-                className="c-accent-bg absolute inset-0 rounded-full shadow-[0_8px_22px_-10px_hsl(var(--c-accent)/0.8)]"
+                className="absolute inset-0 rounded-full bg-brand shadow-[0_8px_22px_-10px_hsl(var(--brand)/0.8)]"
               />
             )}
             <span className="relative">{option.label}</span>
             {option.meta && (
-              <span className={cn("relative font-mono text-xs tabular-nums", !selected && "c-ink2")}>{option.meta}</span>
+              <span className={cn("relative font-mono text-xs tabular-nums", !selected && "text-muted-foreground")}>{option.meta}</span>
             )}
           </button>
         );

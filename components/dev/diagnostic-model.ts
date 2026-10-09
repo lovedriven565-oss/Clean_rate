@@ -83,24 +83,7 @@ export function resolveSelection(solutions: Solution[], selection: DiagnosticSel
   return { surface, problem, protocols, solution };
 }
 
-/** Roving-tabindex для radiogroup: индекс следующего элемента или null, если клавиша не навигационная. */
-export function nextRadioIndex(key: string, current: number, length: number): number | null {
-  if (length <= 0) return null;
-  switch (key) {
-    case "ArrowRight":
-    case "ArrowDown":
-      return (current + 1) % length;
-    case "ArrowLeft":
-    case "ArrowUp":
-      return (current - 1 + length) % length;
-    case "Home":
-      return 0;
-    case "End":
-      return length - 1;
-    default:
-      return null;
-  }
-}
+export { nextRadioIndex } from "@/lib/utils";
 
 // --- Смета ---
 
@@ -194,15 +177,16 @@ export function externalRating(
   return { value: baseRating, count: reviewCount, source: source === "google" ? "Google" : "Яндекс" };
 }
 
-const covers = (company: Company, solution: Solution) =>
-  !solution.relatedCategory || company.categories.includes(solution.relatedCategory);
+const covers = (company: Company, solution?: Pick<Solution, "relatedCategory">) =>
+  !solution?.relatedCategory || company.categories.includes(solution.relatedCategory);
 
 /**
  * Органический порядок «по доверию»: релевантность категории, проверенный профиль,
  * подтверждённая внешняя оценка (балл, число отзывов), опыт, название.
  * Поле promoted здесь намеренно не читается: оплата на порядок не влияет.
+ * Без решения релевантность категории не учитывается (общая подборка компаний).
  */
-export function rankOrganicCompanies(list: Company[], solution: Solution): Company[] {
+export function rankOrganicCompanies(list: Company[], solution?: Pick<Solution, "relatedCategory">): Company[] {
   const key = (c: Company) => {
     const rating = externalRating(c);
     return [

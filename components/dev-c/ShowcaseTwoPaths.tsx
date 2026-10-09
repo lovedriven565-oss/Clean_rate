@@ -9,7 +9,7 @@ import {
   telHref,
 } from "@/components/dev/diagnostic-model";
 import type { Company, Solution } from "@/lib/types";
-import { SpotlightCard } from "./Fx";
+import { SpotlightCard } from "@/components/ui/fx";
 
 function CompanyRow({ company, sponsor }: { company: Company; sponsor?: boolean }) {
   const rating = externalRating(company);

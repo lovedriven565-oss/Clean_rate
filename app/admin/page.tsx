@@ -62,6 +62,7 @@ export default async function AdminPage() {
             Лиды, протоколы и рекламные кампании. Раздел закрыт Cloudflare Access.
           </p>
         </div>
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- ответ API: CSV-файл на скачивание, а не страница */}
         <a
           href="/api/admin/report"
           className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"

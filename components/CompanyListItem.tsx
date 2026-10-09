@@ -27,7 +27,7 @@ export function CompanyListItem({
   );
 
   return (
-    <article className="group relative rounded-control border border-border bg-card p-4 transition-[border-color,box-shadow] duration-200 hover:border-primary/20 hover:shadow-lg sm:p-5">
+    <article className="group data-surface relative rounded-panel p-4 transition-[border-color,box-shadow] duration-200 hover:border-brand/50 hover:shadow-[0_24px_48px_-24px_hsl(var(--brand)/0.4)] sm:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
         {/* Left: rank + avatar */}
         <div className="flex items-start gap-3 sm:flex-col sm:items-center sm:gap-2">
