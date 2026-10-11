@@ -29,7 +29,8 @@ export function getGradientForId(id: string) {
 export function getInitials(name: string): string {
   const cleaned = name.trim();
   if (!cleaned) return "?";
-  const parts = cleaned.split(/\s+/).filter(Boolean);
+  const parts = cleaned.split(/\s+/).filter((word) => /^[\p{L}\p{N}]/u.test(word));
+  if (parts.length === 0) return cleaned.slice(0, 2).toUpperCase();
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }

@@ -121,8 +121,11 @@
   --highlight: 150 16% 100%;
 }
 
-* {
-  border-color: hsl(var(--border));
+/* В @layer base: иначе безслойное правило перебивает все border-* утилиты (hover:border-brand, border-primary и т.д.). */
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
 }
 
 html {
@@ -187,23 +190,26 @@ svg.lucide {
     linear-gradient(180deg, hsl(var(--card)), hsl(var(--background)));
 }
 
-/* Поверхность C: плоская карточка, волосяная граница, внутренний блик, тонированная тень. */
-.data-surface {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  box-shadow:
-    inset 0 1px 0 hsl(var(--highlight) / 0.06),
-    0 1px 2px hsl(var(--shadow-tint) / 0.06),
-    0 20px 40px -28px hsl(var(--shadow-tint) / 0.28);
-}
+/* В @layer components: утилиты Tailwind (hover:border-*, hover:shadow-*, bg-*) должны перебивать поверхность. */
+@layer components {
+  /* Поверхность C: плоская карточка, волосяная граница, внутренний блик, тонированная тень. */
+  .data-surface {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow:
+      inset 0 1px 0 hsl(var(--highlight) / 0.06),
+      0 1px 2px hsl(var(--shadow-tint) / 0.06),
+      0 20px 40px -28px hsl(var(--shadow-tint) / 0.28);
+  }
 
-.dark .data-surface {
-  box-shadow:
-    inset 0 1px 0 hsl(var(--highlight) / 0.06),
-    0 20px 40px -28px hsl(var(--shadow-tint) / 0.8);
+  .dark .data-surface {
+    box-shadow:
+      inset 0 1px 0 hsl(var(--highlight) / 0.06),
+      0 20px 40px -28px hsl(var(--shadow-tint) / 0.8);
+  }
 }
 
 /* Матовое стекло — только ИИ-панель, поиск и навигация. */

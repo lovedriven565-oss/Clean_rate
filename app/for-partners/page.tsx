@@ -11,6 +11,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { seedCompanies } from "@/db/seed-data";
 import { ENABLED_MARKETS } from "@/lib/markets";
 import { pluralize } from "@/lib/format";
+import { scrollBehavior } from "@/lib/utils";
 
 const enabledCities = ENABLED_MARKETS.flatMap((market) => market.cities.map((city) => city.name));
 
@@ -50,7 +51,7 @@ export default function ForPartnersPage() {
   const reduce = useReducedMotion();
 
   function scrollToForm() {
-    document.getElementById("partner-form")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("partner-form")?.scrollIntoView({ behavior: scrollBehavior() });
   }
 
   return (
@@ -67,7 +68,7 @@ export default function ForPartnersPage() {
               transition={{ duration: 0.5 }}
               className="flex flex-col items-start"
             >
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-primary shadow-sm backdrop-blur">
+              <span className="inline-flex items-center gap-2 data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-primary">
                 <Building2 className="h-3.5 w-3.5" />
                 Клининговым компаниям
               </span>
@@ -94,7 +95,7 @@ export default function ForPartnersPage() {
               initial={reduce ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.1 }}
-              className="data-surface rounded-panel border border-border p-7 sm:p-9"
+              className="data-surface rounded-panel p-7 sm:p-9"
             >
               <span className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
                 <ShieldCheck className="h-4 w-4" />
@@ -154,7 +155,7 @@ export default function ForPartnersPage() {
           <ol className="grid gap-8 md:grid-cols-3">
             {steps.map((step) => (
               <li key={step.order} className="relative border-t border-border pt-6">
-                <span className="font-display text-5xl font-bold leading-none tracking-[-0.05em] text-muted sm:text-6xl">
+                <span className="font-data text-5xl font-medium leading-none text-muted-foreground/40 sm:text-6xl">
                   {step.order}
                 </span>
                 <h3 className="mt-4 font-display text-xl font-bold tracking-[-0.02em] text-foreground">{step.title}</h3>
@@ -190,13 +191,13 @@ export default function ForPartnersPage() {
                 </ul>
               </div>
 
-              <div className="rounded-panel border-2 border-primary bg-card p-8 sm:p-10 shadow-lg shadow-primary/5">
+              <div className="data-surface rounded-panel border-2 border-primary p-8 sm:p-10">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h3 className="font-display text-2xl font-bold text-foreground">Партнёр платформы</h3>
                     <p className="mt-1 font-semibold text-muted-foreground">Индивидуальный расчёт</p>
                   </div>
-                  <span className="rounded-full bg-primary px-3.5 py-1 text-xs font-bold text-primary-foreground">
+                  <span className="rounded-full bg-brand px-3.5 py-1 text-xs font-bold text-brand-foreground">
                     Максимум охвата
                   </span>
                 </div>

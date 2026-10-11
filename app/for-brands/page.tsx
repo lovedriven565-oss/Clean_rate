@@ -31,7 +31,7 @@ export default function ForBrandsPage() {
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative grid gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-primary shadow-sm backdrop-blur">
+              <span className="inline-flex items-center gap-2 data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-primary">
                 <Boxes className="h-3.5 w-3.5" />
                 Брендам и поставщикам
               </span>
@@ -43,12 +43,12 @@ export default function ForBrandsPage() {
                 дилером и измеримым действием: отдельно от органического рейтинга компаний.
               </p>
               <div className="mt-8 flex flex-wrap gap-2.5">
-                <span className="rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-foreground">{seedCompanies.length} компаний в каталоге</span>
-                <span className="rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-foreground">{seedBrands.length} профилей решений</span>
-                <span className="rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-semibold text-primary">Пилотная стадия</span>
+                <span className="data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-foreground">{seedCompanies.length} компаний в каталоге</span>
+                <span className="data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-foreground">{seedBrands.length} профилей решений</span>
+                <span className="data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-primary">Пилотная стадия</span>
               </div>
             </div>
-            <div className="data-surface rounded-panel border border-border p-7 sm:p-9">
+            <div className="data-surface rounded-panel p-7 sm:p-9">
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-control bg-primary/10 text-primary">
                 <Users className="h-6 w-6" />
               </span>
@@ -90,7 +90,7 @@ export default function ForBrandsPage() {
               {formats.map((format) => (
                 <article
                   key={format.title}
-                  className="rounded-panel border border-border bg-card p-7 transition-[border-color,box-shadow] hover:border-primary/30"
+                  className="data-surface rounded-panel p-7 transition-[border-color,box-shadow] hover:border-brand/50"
                 >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-primary/10 text-primary">
                     <format.icon className="h-5 w-5" />
