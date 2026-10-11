@@ -137,6 +137,16 @@ describe("admin surface", () => {
     );
   });
 
+  it("stays closed when the environment is not configured in a production build", async () => {
+    const { isAdminAllowed } = await import("../lib/admin/guard.js");
+    const env = process.env as Record<string, string | undefined>;
+    delete env.NEXTJS_ENV;
+    env.NODE_ENV = "production";
+    assert.equal(isAdminAllowed(new Headers()), false);
+    env.NODE_ENV = "development";
+    assert.equal(isAdminAllowed(new Headers()), true);
+  });
+
   it("returns 404 for the CSV report without admin access", async () => {
     const { GET } = await import("../app/api/admin/report/route.js");
     process.env.NEXTJS_ENV = "production";
@@ -154,5 +164,45 @@ describe("admin surface", () => {
     assert.deepEqual([...buf.slice(0, 3)], [0xef, 0xbb, 0xbf]);
     const text = new TextDecoder().decode(buf.slice(3));
     assert.match(text.split("\r\n")[0], /Кампания.*CTR/);
+  });
+});
+
+describe("input hardening", () => {
+  const brand = {
+    brandName: "Grass",
+    website: "",
+    contactName: "Анна",
+    contact: "anna@example.by",
+    role: "dealer",
+    goal: "",
+    consent: true,
+  };
+
+  it("accepts only http(s) brand websites", async () => {
+    const bad = await brandLeadPOST(jsonRequest("http://localhost/api/brand-lead", { ...brand, website: "javascript:alert(1)" }));
+    assert.equal(bad.status, 400);
+    const ok = await brandLeadPOST(jsonRequest("http://localhost/api/brand-lead", { ...brand, website: "https://grass.by" }));
+    assert.equal(ok.status, 200);
+  });
+
+  it("survives a malformed region cookie and a very long query", async () => {
+    const res = await searchGET(
+      new Request(`http://localhost/api/search?q=${"а".repeat(5000)}`, { headers: { cookie: "ch_region=%E0%A4%A" } })
+    );
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as { query: string };
+    assert.ok(body.query.length <= 200);
+  });
+
+  it("rejects an oversized assistant payload before parsing it", async () => {
+    const { POST } = await import("../app/api/assistant/route.js");
+    const res = await POST(
+      new Request("http://localhost/api/assistant", {
+        method: "POST",
+        headers: { "content-type": "application/json", "content-length": "9000000" },
+        body: JSON.stringify({ message: "диван" }),
+      })
+    );
+    assert.equal(res.status, 413);
   });
 });

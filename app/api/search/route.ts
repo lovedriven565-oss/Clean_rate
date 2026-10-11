@@ -19,6 +19,7 @@ import type { Brand, Company, Solution } from "@/lib/types";
 
 const REGION_COOKIE = "ch_region";
 const RESULT_LIMIT = 6;
+const MAX_QUERY_LENGTH = 200;
 
 export interface SearchResultSolution {
   slug: string;
@@ -55,7 +56,12 @@ export interface SearchResponse {
 function readCookieValue(cookieHeader: string | null, name: string): string | undefined {
   if (!cookieHeader) return undefined;
   const match = cookieHeader.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : undefined;
+  if (!match) return undefined;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return undefined;
+  }
 }
 
 function countryFromRegionCookie(raw: string | undefined): string | undefined {
@@ -84,7 +90,7 @@ function rankCompanies(companies: Company[], normalizedQuery: string, cityNames:
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const query = (url.searchParams.get("q") ?? "").trim();
+  const query = (url.searchParams.get("q") ?? "").trim().slice(0, MAX_QUERY_LENGTH);
 
   const countryCode = countryFromRegionCookie(
     readCookieValue(request.headers.get("cookie"), REGION_COOKIE)

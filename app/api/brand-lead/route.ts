@@ -7,7 +7,12 @@ import { PRIVACY_CONSENT_VERSION } from "@/lib/site";
 
 const payloadSchema = z.object({
   brandName: z.string().trim().min(2).max(120),
-  website: z.string().trim().url().max(300).or(z.literal("")),
+  website: z
+    .string()
+    .trim()
+    .max(300)
+    .refine((value) => /^https?:\/\/[^\s]+$/i.test(value) && URL.canParse(value))
+    .or(z.literal("")),
   contactName: z.string().trim().min(2).max(120),
   contact: z.string().trim().min(5).max(200),
   role: z.enum(["brand", "dealer", "service", "other"]),

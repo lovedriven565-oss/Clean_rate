@@ -24,7 +24,10 @@ export async function checkRateLimit(request: Request, limiter: LimiterName, sco
   try {
     const ctx = await getCloudflareContext({ async: true });
     const binding = (ctx.env as Partial<Record<LimiterName, RateLimit>>)[limiter];
-    if (!binding) return true;
+    if (!binding) {
+      if (process.env.NODE_ENV === "production") console.warn(`[guard] биндинг ${limiter} не найден, лимит не применён`);
+      return true;
+    }
     const { success } = await binding.limit({ key: `${scope}:${clientIp(request)}` });
     return success;
   } catch {
@@ -47,7 +50,10 @@ const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/sit
  */
 export async function verifyTurnstile(token: string | undefined, request: Request): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") console.warn("[guard] TURNSTILE_SECRET_KEY не задан, проверка бота отключена");
+    return true;
+  }
   if (!token) return false;
   try {
     const body = new FormData();

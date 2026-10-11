@@ -11,6 +11,8 @@ import { getSearchBindings } from "@/lib/search/semantic";
 
 export const dynamic = "force-dynamic";
 
+const MAX_BODY_BYTES = 2_400_000;
+
 const bodySchema = z.object({
   message: z.string().trim().min(2).max(500),
   // data-url без префикса или чистый base64; ~1.5 МБ фото максимум
@@ -29,13 +31,17 @@ function stripDataUrl(image: string): string {
  * проходят гейт безопасности. Фото обрабатывается в памяти и не сохраняется.
  */
 export async function POST(request: Request): Promise<Response> {
+  if (!(await checkRateLimit(request, "ASSISTANT_LIMITER", "assistant"))) {
+    return tooManyRequests();
+  }
+
+  if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+  }
+
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
-  }
-
-  if (!(await checkRateLimit(request, "ASSISTANT_LIMITER", "assistant"))) {
-    return tooManyRequests();
   }
 
   const env = await getSearchBindings();
