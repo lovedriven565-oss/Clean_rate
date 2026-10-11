@@ -5,6 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Плавный скролл из JS: CSS scroll-behavior не перекрывает явный behavior, поэтому prefers-reduced-motion проверяем здесь. */
+export function scrollBehavior(): ScrollBehavior {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+}
+
 /** Roving-tabindex для radiogroup: индекс следующего элемента или null, если клавиша не навигационная. */
 export function nextRadioIndex(key: string, current: number, length: number): number | null {
   if (length <= 0) return null;

@@ -3,6 +3,7 @@ import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { ExternalAnalytics } from "@/components/analytics/ExternalAnalytics";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
+import { MotionProvider } from "@/components/providers/MotionProvider";
 import { RegionProvider } from "@/components/providers/RegionProvider";
 import { BRAND_COLORS, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
@@ -54,7 +55,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <RegionProvider>{children}</RegionProvider>
+        <MotionProvider>
+          <RegionProvider>{children}</RegionProvider>
+        </MotionProvider>
         <PageViewTracker />
         <ExternalAnalytics />
       </body>

@@ -11,6 +11,7 @@ import { solutionCover } from "@/lib/solutions/covers";
 import { buildTaskShelves } from "@/lib/solutions/shelves";
 import { pluralize } from "@/lib/format";
 import { SURFACE_LABELS } from "@/lib/solutions/meta";
+import { scrollBehavior } from "@/lib/utils";
 import type { PriceEstimate, Solution } from "@/lib/types";
 
 function SolutionTile({
@@ -71,7 +72,7 @@ export function SolutionShelves({ solutions, estimates }: { solutions: Solution[
   const shelves = buildTaskShelves(solutions);
   const active = shelves.find((s) => s.id === tab);
   const items = active ? published.filter((s) => active.slugs.includes(s.slug)) : published;
-  const scrollBy = (dir: 1 | -1) => scroller.current?.scrollBy({ left: dir * 300, behavior: "smooth" });
+  const scrollBy = (dir: 1 | -1) => scroller.current?.scrollBy({ left: dir * 300, behavior: scrollBehavior() });
 
   return (
     <section id="shelves" aria-labelledby="shelves-title" className="scroll-mt-24">
