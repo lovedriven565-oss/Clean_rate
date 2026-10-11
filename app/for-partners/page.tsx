@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { BadgeCheck, Building2, Check, Phone, ShieldCheck, Users } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { PartnerLeadForm } from "@/components/PartnerLeadForm";
+import { PartnerLeadForm, type PartnerPlan } from "@/components/PartnerLeadForm";
 import { StatCounter } from "@/components/StatCounter";
 import { Button } from "@/components/ui/primitives";
 import { CATEGORIES } from "@/lib/categories";
@@ -44,12 +45,19 @@ const features = [
 const partnerFeatures = [
   "Бейдж «Спонсор» с открытой маркировкой",
   "Приоритетная видимость в каталоге и категориях",
-  "Спецразмещение в протоколах решений",
-  "Помощь редакции в наполнении профиля",
+  "Спецразмещение в протоколах решений (блок мастера после DIY-чеклиста)",
+  "Спонсорский блок на главной и в выдаче категории",
+  "Отчёт по фактическим действиям: показы, звонки, переходы",
 ];
 
 export default function ForPartnersPage() {
   const reduce = useReducedMotion();
+  const [plan, setPlan] = useState<PartnerPlan>("base");
+
+  function choosePlan(next: PartnerPlan) {
+    setPlan(next);
+    document.getElementById("partner-form")?.scrollIntoView({ behavior: scrollBehavior() });
+  }
 
   function scrollToForm() {
     document.getElementById("partner-form")?.scrollIntoView({ behavior: scrollBehavior() });
@@ -179,10 +187,10 @@ export default function ForPartnersPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="data-surface rounded-panel p-8 sm:p-10">
+              <div className="data-surface flex flex-col rounded-panel p-8 sm:p-10">
                 <h3 className="font-display text-2xl font-bold text-foreground">Базовое размещение</h3>
                 <p className="mt-1 font-semibold text-primary">Бесплатно навсегда</p>
-                <ul className="mt-7 flex flex-col gap-3.5">
+                <ul className="mt-7 flex flex-1 flex-col gap-3.5">
                   {features.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-foreground">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -190,19 +198,30 @@ export default function ForPartnersPage() {
                     </li>
                   ))}
                 </ul>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="mt-8 w-full"
+                  onClick={() => choosePlan("base")}
+                >
+                  Разместить бесплатно
+                </Button>
               </div>
 
-              <div className="data-surface rounded-panel border-2 border-primary p-8 sm:p-10">
+              <div className="data-surface flex flex-col rounded-panel border-2 border-primary p-8 sm:p-10">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <h3 className="font-display text-2xl font-bold text-foreground">Партнёр платформы</h3>
-                    <p className="mt-1 font-semibold text-muted-foreground">Индивидуальный расчёт</p>
+                    <h3 className="font-display text-2xl font-bold text-foreground">PRO Спонсор</h3>
+                    <p className="mt-1 font-semibold text-primary">
+                      от 149 Br/мес
+                      <span className="font-normal text-muted-foreground"> · индивидуальный расчёт по городу</span>
+                    </p>
                   </div>
-                  <span className="rounded-full bg-brand px-3.5 py-1 text-xs font-bold text-brand-foreground">
+                  <span className="shrink-0 rounded-full bg-brand px-3.5 py-1 text-xs font-bold text-brand-foreground">
                     Максимум охвата
                   </span>
                 </div>
-                <ul className="mt-7 flex flex-col gap-3.5">
+                <ul className="mt-7 flex flex-1 flex-col gap-3.5">
                   {partnerFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-foreground">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -210,7 +229,10 @@ export default function ForPartnersPage() {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-7 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
+                <Button size="lg" className="mt-8 w-full" onClick={() => choosePlan("pro")}>
+                  Подключить PRO
+                </Button>
+                <p className="mt-4 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
                   Стоимость зависит от города и категорий. Не влияет на органический рейтинг: только охват и позиция в спонсорском блоке.
                 </p>
               </div>
@@ -243,7 +265,7 @@ export default function ForPartnersPage() {
                 </div>
               </div>
             </div>
-            <PartnerLeadForm />
+            <PartnerLeadForm plan={plan} onPlanChange={setPlan} />
           </div>
         </section>
       </main>

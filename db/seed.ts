@@ -25,6 +25,7 @@ import {
   seedSolutions,
   seedTimestamp,
 } from "./seed-data";
+import { getMarketByCity } from "../lib/markets";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const migrationsDir = join(__dirname, "..", "migrations");
@@ -76,8 +77,10 @@ for (const brand of seedBrands) {
 
 // --- Компании ---
 for (const company of seedCompanies) {
+  const market = getMarketByCity(company.city);
+  const region = company.city === "Минск" ? "Минская" : company.city === "Москва" ? "Московская" : null;
   statements.push(
-    `INSERT INTO \`cleaning_companies\` (\`id\`, \`slug\`, \`name\`, \`legal_name\`, \`country_code\`, \`region\`, \`city\`, \`address\`, \`description\`, \`website_url\`, \`phone\`, \`email\`, \`telegram_url\`, \`price_from\`, \`price_unit\`, \`experience_years\`, \`cover_image\`, \`tags\`, \`guarantees\`, \`verified\`, \`promoted\`, \`status\`, \`created_at\`, \`updated_at\`) VALUES (${esc(company.id)}, ${esc(company.slug)}, ${esc(company.name)}, ${esc(company.legalName)}, 'BY', ${esc(company.city === "Минск" ? "Минская" : null)}, ${esc(company.city)}, ${esc(company.address)}, ${esc(company.description)}, ${esc(company.websiteUrl)}, ${esc(company.phone)}, ${esc(company.email)}, ${esc(company.telegramUrl)}, ${num(company.priceFrom)}, ${esc(company.priceUnit)}, ${num(company.experienceYears)}, ${esc(company.coverImage)}, ${jsonArray(company.tags)}, ${jsonArray(company.guarantees)}, ${bool(company.verified)}, ${bool(company.promoted)}, 'published', ${num(seedTimestamp)}, ${num(seedTimestamp)});`
+    `INSERT INTO \`cleaning_companies\` (\`id\`, \`slug\`, \`name\`, \`legal_name\`, \`country_code\`, \`region\`, \`city\`, \`address\`, \`description\`, \`website_url\`, \`phone\`, \`email\`, \`telegram_url\`, \`price_from\`, \`price_unit\`, \`experience_years\`, \`cover_image\`, \`tags\`, \`guarantees\`, \`verified\`, \`promoted\`, \`status\`, \`created_at\`, \`updated_at\`) VALUES (${esc(company.id)}, ${esc(company.slug)}, ${esc(company.name)}, ${esc(company.legalName)}, '${market.countryCode}', ${esc(region)}, ${esc(company.city)}, ${esc(company.address)}, ${esc(company.description)}, ${esc(company.websiteUrl)}, ${esc(company.phone)}, ${esc(company.email)}, ${esc(company.telegramUrl)}, ${num(company.priceFrom)}, ${esc(company.priceUnit)}, ${num(company.experienceYears)}, ${esc(company.coverImage)}, ${jsonArray(company.tags)}, ${jsonArray(company.guarantees)}, ${bool(company.verified)}, ${bool(company.promoted)}, 'published', ${num(seedTimestamp)}, ${num(seedTimestamp)});`
   );
 }
 
@@ -130,7 +133,7 @@ for (const camp of seedCampaigns) {
 // --- Продуктовый граф решений (Solutions) ---
 for (const sol of seedSolutions) {
   statements.push(
-    `INSERT INTO \`solutions\` (\`id\`, \`slug\`, \`title\`, \`problem_type\`, \`surface\`, \`material\`, \`severity\`, \`audience\`, \`diy_steps\`, \`warnings\`, \`when_to_call_pro\`, \`diy_cost_note\`, \`pro_time_note\`, \`search_keywords\`, \`related_category\`, \`status\`, \`created_at\`, \`updated_at\`) VALUES (${esc(sol.id)}, ${esc(sol.slug)}, ${esc(sol.title)}, '${sol.problemType}', '${sol.surface}', ${esc(sol.material)}, '${sol.severity}', '${sol.audience}', ${esc(JSON.stringify(sol.diySteps))}, ${jsonArray(sol.warnings)}, ${esc(sol.whenToCallPro)}, ${esc(sol.diyCostNote)}, ${esc(sol.proTimeNote)}, ${jsonArray(sol.searchKeywords)}, ${esc(sol.relatedCategory)}, '${sol.status}', ${num(seedTimestamp)}, ${num(seedTimestamp)});`
+    `INSERT INTO \`solutions\` (\`id\`, \`slug\`, \`title\`, \`problem_type\`, \`surface\`, \`material\`, \`severity\`, \`audience\`, \`diy_steps\`, \`warnings\`, \`when_to_call_pro\`, \`diy_cost_note\`, \`pro_time_note\`, \`search_keywords\`, \`related_category\`, \`video_url\`, \`status\`, \`created_at\`, \`updated_at\`) VALUES (${esc(sol.id)}, ${esc(sol.slug)}, ${esc(sol.title)}, '${sol.problemType}', '${sol.surface}', ${esc(sol.material)}, '${sol.severity}', '${sol.audience}', ${esc(JSON.stringify(sol.diySteps))}, ${jsonArray(sol.warnings)}, ${esc(sol.whenToCallPro)}, ${esc(sol.diyCostNote)}, ${esc(sol.proTimeNote)}, ${jsonArray(sol.searchKeywords)}, ${esc(sol.relatedCategory)}, ${esc(sol.videoUrl)}, '${sol.status}', ${num(seedTimestamp)}, ${num(seedTimestamp)});`
   );
 }
 

@@ -280,6 +280,8 @@ export const partnerLeads = sqliteTable(
     phone: text("phone").notNull(),
     city: text("city"),
     categoryIds: text("category_ids"),
+    /** Выбранный тариф заявки: base (бесплатный) или pro (спонсорское размещение) */
+    plan: text("plan", { enum: ["base", "pro"] }),
     message: text("message"),
     status: text("status", { enum: ["new", "contacted", "closed"] }).notNull().default("new"),
     consentAcceptedAt: integer("consent_accepted_at", { mode: "timestamp_ms" }),
@@ -317,6 +319,8 @@ export const solutions = sqliteTable(
     /** JSON-массив синонимов и ключевых слов для поиска */
     searchKeywords: text("search_keywords"),
     relatedCategory: text("related_category"),
+    /** Ссылка на короткий видеоразбор протокола (YouTube Shorts / VK Клипы / Rutube / mp4) */
+    videoUrl: text("video_url"),
     status: text("status", { enum: ["draft", "published", "archived"] }).notNull().default("draft"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),

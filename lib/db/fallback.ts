@@ -106,6 +106,7 @@ function seedSolutionToSolution(seed: (typeof seedSolutions)[number]): Solution 
     proTimeNote: seed.proTimeNote,
     searchKeywords: seed.searchKeywords,
     relatedCategory: seed.relatedCategory,
+    videoUrl: seed.videoUrl,
     status: seed.status,
     recommendedProducts: products,
   };

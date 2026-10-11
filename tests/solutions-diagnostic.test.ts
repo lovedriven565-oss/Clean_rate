@@ -181,9 +181,11 @@ describe("pro companies", () => {
     });
   });
 
-  it("seed has no paid placements without a contract", () => {
-    assert.deepEqual(companies.filter((c) => c.promoted).map((c) => c.slug), []);
-    assert.equal(buildProCompanies(companies, wine).sponsor, null);
+  it("demo sponsor stays in its own marked slot, organic list stays clean", () => {
+    assert.deepEqual(companies.filter((c) => c.promoted).map((c) => c.slug), ["spectrclean"]);
+    const { sponsor, organic } = buildProCompanies(companies, wine);
+    assert.equal(sponsor?.slug, "spectrclean");
+    assert.ok(!organic.some((c) => c.promoted), "promoted companies never enter the organic list");
   });
 
   it("organic ranking ignores payment: flipping promoted never changes the order", () => {
@@ -258,11 +260,14 @@ describe("pro companies", () => {
     assert.equal(offer.company!.id, buildProCompanies(withSponsor, wine).organic.find((c) => c.phone || c.telegramUrl)!.id);
   });
 
-  it("escalation bridge stays honest in a market without companies (Moscow)", () => {
+  it("escalation bridge finds a Moscow master with RUB pricing; stays honest where the base is empty", () => {
     const ru = getFallbackPriceEstimates({ countryCode: "RU" });
     const offer = buildEscalation(wine, ru, companies, { countryCode: "RU", city: "Москва", cities: ["Москва"] });
-    assert.equal(offer.company, null);
+    assert.equal(offer.company?.city, "Москва");
+    assert.ok(offer.company!.phone || offer.company!.telegramUrl, "master must have a direct contact");
     assert.match(offer.priceFrom ?? "", /2\s?500/);
+    const kz = buildEscalation(wine, [], companies, { countryCode: "KZ", city: "Алматы", cities: ["Алматы"] });
+    assert.equal(kz.company, null);
     assert.equal(buildEscalation(wine, [], []).priceFrom, null);
   });
 

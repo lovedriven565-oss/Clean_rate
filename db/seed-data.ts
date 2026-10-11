@@ -217,8 +217,8 @@ export const seedCompanies: SeedCompany[] = [
     tags: ["Работает по договору", "7+ лет на рынке", "350+ клиентов"],
     guarantees: ["Фиксированная цена по договору"],
     verified: true,
-    // Спонсорство только по договору: без оплаченного размещения плашка «Спонсор» не ставится.
-    promoted: false,
+    // Витрина платного размещения: «Спонсор» помечен открыто и не влияет на органический рейтинг.
+    promoted: true,
     categories: ["offices", "post-renovation", "deep-cleaning", "windows", "upholstery", "apartments"],
     equipment: ["karcher"],
     ratingSource: "google",
@@ -458,6 +458,170 @@ export const seedCompanies: SeedCompany[] = [
     equipment: [],
     ratingSource: "unverified",
   },
+  // --- Москва: реальные компании из открытых рейтингов (Ведомости ТОП-10, Klerk ТОП-10).
+  // Рейтинги намеренно "unverified": платформа не публикует балл без проверяемого источника.
+  {
+    id: "cleanon",
+    slug: "cleanon",
+    name: "CleanOn",
+    city: "Москва",
+    address: "ул. Островитянова, 7",
+    description:
+      "Клининговая компания в Москве: уборка квартир и офисов, генеральная и послестроительная уборка, химчистка мебели и мытьё окон. Лидер открытых рейтингов 2025 года.",
+    websiteUrl: "https://cleanon.ru",
+    phone: "+7 495 132-32-31",
+    tags: ["Топ открытых рейтингов Москвы", "Квартиры и офисы"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "offices", "post-renovation", "deep-cleaning", "upholstery", "windows"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
+  {
+    id: "colibri-cleaning",
+    slug: "colibri-cleaning",
+    name: "Колибри Клининг",
+    city: "Москва",
+    address: "ул. Островитянова, 7",
+    description:
+      "Уборка квартир, домов и офисов в Москве: поддерживающая и генеральная уборка, уборка после ремонта, химчистка мягкой мебели.",
+    websiteUrl: "https://colibri-cleaning.ru",
+    phone: "+7 495 021-18-15",
+    tags: ["Регулярная уборка", "Химчистка мебели"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "offices", "deep-cleaning", "post-renovation", "upholstery"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
+  {
+    id: "klining24",
+    slug: "klining24",
+    name: "Клининг24",
+    city: "Москва",
+    address: "ул. Лесная, 61, стр. 2",
+    description:
+      "Клининговые услуги в Москве круглосуточно: уборка квартир и коммерческих помещений, мойка окон, послестроительная уборка.",
+    websiteUrl: "https://klining24.ru",
+    phone: "+7 495 135-24-34",
+    tags: ["Круглосуточно", "Коммерческие объекты"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "offices", "post-renovation", "windows", "deep-cleaning"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
+  {
+    id: "domovenok",
+    slug: "domovenok",
+    name: "Домовёнок",
+    city: "Москва",
+    address: "пр-т Мира, 102, стр. 38",
+    description:
+      "Служба домашнего персонала и клининга в Москве: регулярная уборка квартир и домов, генеральная уборка, мойка окон.",
+    websiteUrl: "https://www.domovenok.ru",
+    phone: "+7 495 419-30-15",
+    tags: ["Домашний персонал", "Регулярная уборка"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "deep-cleaning", "windows"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
+  {
+    id: "qlean",
+    slug: "qlean",
+    name: "Qlean",
+    city: "Москва",
+    description:
+      "Онлайн-сервис уборки в Москве: заказ клинера через приложение с фиксированной ценой. Уборка квартир, домов и химчистка мебели.",
+    websiteUrl: "https://qlean.ru",
+    tags: ["Онлайн-бронирование", "Фиксированная цена"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "deep-cleaning", "upholstery"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
+  {
+    id: "uborka24",
+    slug: "uborka24",
+    name: "Уборка 24",
+    city: "Москва",
+    address: "ул. Бутлерова, 17",
+    description:
+      "Клининговая компания в Москве: уборка квартир и офисов 24/7, генеральная уборка, уборка после ремонта, химчистка.",
+    websiteUrl: "https://uborka24.ru",
+    phone: "+7 495 431-30-21",
+    tags: ["Работаем 24/7", "Послестроительная уборка"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "offices", "post-renovation", "deep-cleaning", "upholstery"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
+  {
+    id: "siriusclean",
+    slug: "siriusclean",
+    name: "Сириус",
+    city: "Москва",
+    address: "ул. Каховка, 18, корп. 1",
+    description:
+      "Клининговые услуги в Москве: уборка квартир, коттеджей и коммерческих помещений, мытьё окон, химчистка мягкой мебели.",
+    websiteUrl: "https://siriusclean.ru",
+    phone: "+7 495 135-48-61",
+    tags: ["Коттеджи", "Химчистка мебели"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "deep-cleaning", "windows", "upholstery"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
+  {
+    id: "annushka",
+    slug: "annushka",
+    name: "Аннушка",
+    city: "Москва",
+    description:
+      "Клининговая компания в Москве для квартир и домов: поддерживающая и генеральная уборка, уборка после ремонта, мойка окон.",
+    websiteUrl: "https://annushka.su",
+    tags: ["Квартиры и дома", "Мойка окон"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "deep-cleaning", "post-renovation", "windows"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
+  {
+    id: "chistyulya",
+    slug: "chistyulya",
+    name: "Чистюля",
+    city: "Москва",
+    description:
+      "Уборка квартир, домов и офисов в Москве: разовая и регулярная уборка, генеральная уборка, химчистка мягкой мебели.",
+    websiteUrl: "https://chistyulya.com",
+    tags: ["Разовая и регулярная уборка", "Офисы"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "offices", "deep-cleaning", "upholstery"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
+  {
+    id: "cleanyou",
+    slug: "cleanyou",
+    name: "Clean You",
+    city: "Москва",
+    description:
+      "Клининговая компания в Москве: уборка квартир и коммерческой недвижимости, уборка после ремонта, химчистка и мойка окон.",
+    websiteUrl: "https://cleanyou.ru",
+    tags: ["Коммерческая недвижимость", "Уборка после ремонта"],
+    verified: false,
+    promoted: false,
+    categories: ["apartments", "offices", "post-renovation", "upholstery", "windows"],
+    equipment: [],
+    ratingSource: "unverified",
+  },
 ];
 
 export const seedTimestamp = now;
@@ -482,6 +646,8 @@ export interface SeedSolution {
   proTimeNote?: string;
   searchKeywords: string[];
   relatedCategory?: CategoryId;
+  /** Короткий видеоразбор протокола (YouTube Shorts / VK Клипы / Rutube / mp4) */
+  videoUrl?: string;
   status: "draft" | "published" | "archived";
 }
 

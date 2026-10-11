@@ -284,6 +284,7 @@ export async function getAllSolutions(): Promise<Solution[]> {
         proTimeNote: row.proTimeNote ?? undefined,
         searchKeywords: parseJsonArray(row.searchKeywords),
         relatedCategory: (row.relatedCategory as CategoryId) ?? undefined,
+        videoUrl: row.videoUrl ?? undefined,
         status: row.status as Solution["status"],
         recommendedProducts: products,
       };
@@ -340,6 +341,7 @@ export async function getSolutionBySlug(slug: string): Promise<Solution | null> 
       proTimeNote: row.proTimeNote ?? undefined,
       searchKeywords: parseJsonArray(row.searchKeywords),
       relatedCategory: (row.relatedCategory as CategoryId) ?? undefined,
+      videoUrl: row.videoUrl ?? undefined,
       status: row.status as Solution["status"],
       recommendedProducts: products,
     };
@@ -594,6 +596,7 @@ export async function savePartnerLead(lead: {
   phone: string;
   city?: string;
   categoryIds?: string[];
+  plan?: "base" | "pro";
   message?: string;
   consentAcceptedAt: Date;
   consentVersion: string;
@@ -614,6 +617,7 @@ export async function savePartnerLead(lead: {
       phone: lead.phone,
       city: lead.city || null,
       categoryIds: lead.categoryIds ? JSON.stringify(lead.categoryIds) : null,
+      plan: lead.plan ?? null,
       message: lead.message || null,
       status: "new",
       consentAcceptedAt: lead.consentAcceptedAt,

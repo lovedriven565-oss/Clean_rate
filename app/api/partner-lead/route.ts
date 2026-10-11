@@ -11,6 +11,7 @@ const payloadSchema = z.object({
   phone: z.string().trim().max(40).refine(isValidPhone),
   city: z.string().trim().max(80).optional(),
   categoryIds: z.array(z.string().max(40)).max(20).optional(),
+  plan: z.enum(["base", "pro"]).optional(),
   message: z.string().trim().max(1200).optional(),
   /** Сервер требует явное согласие — клиентский чекбокс не доказательство. */
   consent: z.literal(true),
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
     phone: payload.phone,
     city: payload.city || undefined,
     categoryIds,
+    plan: payload.plan,
     message: payload.message || undefined,
     consentAcceptedAt: new Date(),
     consentVersion: PRIVACY_CONSENT_VERSION,
@@ -73,6 +75,7 @@ export async function POST(request: Request) {
     payload.contactName ? `Контакт: ${escapeHtml(payload.contactName)}` : null,
     `Телефон: ${escapeHtml(payload.phone)}`,
     payload.city ? `Город: ${escapeHtml(payload.city)}` : null,
+    payload.plan ? `Тариф: ${payload.plan === "pro" ? "PRO Спонсор" : "Базовый"}` : null,
     categoryNames ? `Услуги: ${escapeHtml(categoryNames)}` : null,
     payload.message ? `Комментарий: ${escapeHtml(payload.message)}` : null,
     `ID заявки: <code>${lead.id}</code>`,

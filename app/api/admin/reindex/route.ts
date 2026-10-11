@@ -16,7 +16,7 @@ export async function POST(request: Request): Promise<Response> {
     return new Response("Not found", { status: 404 });
   }
   const env = await getSearchBindings();
-  if (!env) {
+  if (!env?.AI || !env.VECTORIZE) {
     return NextResponse.json(
       { ok: false, error: "AI/VECTORIZE bindings are not configured" },
       { status: 503 }

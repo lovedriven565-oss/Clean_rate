@@ -14,10 +14,14 @@ import { parseApiResult } from "@/lib/api-result";
 import { cn } from "@/lib/utils";
 
 type Status = "idle" | "submitting" | "success" | "error";
+export type PartnerPlan = "base" | "pro";
 
-export function PartnerLeadForm() {
+export function PartnerLeadForm({ plan, onPlanChange }: { plan?: PartnerPlan; onPlanChange?: (plan: PartnerPlan) => void }) {
   const { city: userCity } = useRegion();
   const formId = useId();
+  const [internalPlan, setInternalPlan] = useState<PartnerPlan>("base");
+  const selectedPlan = plan ?? internalPlan;
+  const selectPlan = onPlanChange ?? setInternalPlan;
   const [companyName, setCompanyName] = useState("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
@@ -67,6 +71,7 @@ export function PartnerLeadForm() {
           phone,
           city,
           categoryIds: selectedCategories,
+          plan: selectedPlan,
           message: message || undefined,
           consent,
           turnstileToken: turnstileToken ?? undefined,
@@ -109,6 +114,42 @@ export function PartnerLeadForm() {
         <p className="mt-1 text-sm text-muted-foreground">
           Расскажите о компании: мы свяжемся, поможем с карточкой и ответим на вопросы.
         </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <span className="text-xs font-medium text-muted-foreground">Тариф размещения</span>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Тариф размещения">
+          {([
+            { value: "base", title: "Базовый", note: "Бесплатно навсегда" },
+            { value: "pro", title: "PRO Спонсор", note: "от 149 Br/мес — бейдж «Спонсор» и приоритетный охват" },
+          ] as const).map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={selectedPlan === option.value}
+              onClick={() => selectPlan(option.value)}
+              className={cn(
+                "rounded-control border px-4 py-3 text-left transition-colors",
+                selectedPlan === option.value
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-card hover:border-primary/40"
+              )}
+            >
+              <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <span
+                  className={cn(
+                    "h-3.5 w-3.5 rounded-full border-2",
+                    selectedPlan === option.value ? "border-primary bg-primary" : "border-muted-foreground/40"
+                  )}
+                  aria-hidden
+                />
+                {option.title}
+              </span>
+              <span className="mt-1 block text-xs leading-5 text-muted-foreground">{option.note}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

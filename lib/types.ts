@@ -187,6 +187,8 @@ export interface Solution {
   proTimeNote?: string;
   searchKeywords: string[];
   relatedCategory?: CategoryId;
+  /** Короткий видеоразбор протокола (YouTube Shorts / VK Клипы / Rutube / mp4) — слот в DiyPanel. */
+  videoUrl?: string;
   status: "draft" | "published" | "archived";
   recommendedProducts?: SolutionProduct[];
 }
