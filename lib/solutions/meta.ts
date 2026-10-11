@@ -22,6 +22,19 @@ export const SURFACE_LABELS: Record<SolutionSurface, string> = {
   other: "Другое",
 };
 
+/** Что боится испортить человек (винительный падеж) — для мостика «сделать самому → мастер». */
+export const SURFACE_RISK_LABELS: Record<SolutionSurface, string> = {
+  upholstery: "обивку",
+  mattress: "матрас",
+  carpet: "ковёр",
+  floor: "покрытие пола",
+  window: "стекло или раму",
+  facade: "фасад",
+  kitchen: "поверхность",
+  bathroom: "плитку или сантехнику",
+  other: "поверхность",
+};
+
 export const SEVERITY_LABELS: Record<SolutionSeverity, string> = {
   fresh: "Свежее",
   set: "Застарелое",

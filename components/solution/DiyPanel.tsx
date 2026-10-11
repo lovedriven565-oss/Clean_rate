@@ -1,10 +1,21 @@
 import Link from "next/link";
 import { ArrowUpRight, Hand, Wallet } from "lucide-react";
-import type { Brand, Solution } from "@/lib/types";
+import type { Brand, Company, PriceEstimate, Solution } from "@/lib/types";
 import { DiyChecklist } from "./DiyChecklist";
+import { DiyEscalation } from "./DiyEscalation";
 import { WarningList } from "./WarningList";
 
-export function DiyPanel({ solution, brands }: { solution: Solution; brands: Brand[] }) {
+export function DiyPanel({
+  solution,
+  brands,
+  estimates,
+  companies,
+}: {
+  solution: Solution;
+  brands: Brand[];
+  estimates: PriceEstimate[];
+  companies: Company[];
+}) {
   const products = solution.recommendedProducts ?? [];
   const recommended = products.filter((p) => p.role === "recommended");
   const alternatives = products.filter((p) => p.role === "alternative");
@@ -38,6 +49,9 @@ export function DiyPanel({ solution, brands }: { solution: Solution; brands: Bra
       <WarningList warnings={solution.warnings} className="mt-6" />
 
       <DiyChecklist slug={solution.slug} steps={solution.diySteps} />
+
+      {/* Мостик к мастеру сразу после шагов: момент, когда читатель решает, справится ли сам */}
+      <DiyEscalation solution={solution} estimates={estimates} companies={companies} />
 
       {solution.diyCostNote && (
         <p className="mt-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground sm:hidden">

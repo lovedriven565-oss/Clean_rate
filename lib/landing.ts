@@ -1,5 +1,5 @@
 import { CATEGORIES, getCategoryBySlug, getCategorySlug } from "@/lib/categories";
-import { ENABLED_MARKETS, getCityBySlug, type City, type Market } from "@/lib/markets";
+import { ENABLED_MARKETS, getCityBySlug, openCities, type City, type Market } from "@/lib/markets";
 import { calculateRelevanceScore } from "@/lib/rating";
 import { getAllCompanies } from "@/lib/db/queries";
 import type { Category, CategoryId, Company } from "@/lib/types";
@@ -25,7 +25,7 @@ export function resolveLandingParams(citySlug: string, categorySlug: string): Re
 /** Все комбинации «город × категория» для SSG (URL использует читаемый slug категории). */
 export function landingStaticParams(): { city: string; category: string }[] {
   return ENABLED_MARKETS.flatMap((market) =>
-    market.cities.flatMap((city) => CATEGORIES.map((category) => ({ city: city.slug, category: getCategorySlug(category.id) })))
+    openCities(market).flatMap((city) => CATEGORIES.map((category) => ({ city: city.slug, category: getCategorySlug(category.id) })))
   );
 }
 

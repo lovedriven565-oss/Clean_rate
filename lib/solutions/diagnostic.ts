@@ -250,6 +250,34 @@ export function buildProCompanies(
   return { sponsor, organic };
 }
 
+export interface EscalationOffer {
+  /** Нижняя граница сметы мастера в валюте рынка («60 Br»), null — сметы для рынка нет. */
+  priceFrom: string | null;
+  unit?: string;
+  /** Первая органическая компания региона с прямым контактом; спонсор сюда не попадает. */
+  company: Company | null;
+}
+
+/**
+ * Мостик в конце DIY-протокола: смета «от» и мастер для быстрого звонка.
+ * Компания берётся из органического порядка (как в блоке «Вызвать мастера»), без учёта оплаты.
+ */
+export function buildEscalation(
+  solution: Solution,
+  estimates: PriceEstimate[],
+  companies: Company[],
+  ctx: DiagnosticContext & { cities?: readonly string[] } = DIAGNOSTIC_CONTEXT,
+): EscalationOffer {
+  const estimate = pickEstimate(estimates, solution, ctx);
+  const { organic } = buildProCompanies(companies, solution, { cities: ctx.cities ?? [ctx.city], limit: companies.length });
+  const company = organic.find((c) => covers(c, solution) && (c.phone || c.telegramUrl)) ?? null;
+  return {
+    priceFrom: estimate ? formatMarketCurrency(estimate.priceMin, estimate.currency as "BYN" | "RUB" | "KZT") : null,
+    unit: estimate?.unit,
+    company,
+  };
+}
+
 /** Цена «от» без выдуманных значений; валюта в единице измерения (например «BYN/мес») убирается. */
 export function companyPriceLabel(company: Pick<Company, "priceFrom" | "priceUnit" | "city">): string {
   if (!company.priceFrom) return "Цена по запросу";

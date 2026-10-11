@@ -7,7 +7,7 @@ import { Button, Input } from "@/components/ui/primitives";
 import { Select } from "@/components/ui/Select";
 import { TurnstileWidget, turnstileEnabled } from "@/components/TurnstileWidget";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { ENABLED_MARKETS } from "@/lib/markets";
+import { ENABLED_MARKETS, openCities } from "@/lib/markets";
 import { CATEGORIES } from "@/lib/categories";
 import type { CategoryId } from "@/lib/types";
 import { parseApiResult } from "@/lib/api-result";
@@ -30,7 +30,7 @@ export function PartnerLeadForm() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const cities = useMemo(() => {
-    const list = ENABLED_MARKETS.flatMap((m) => m.cities.map((c) => c.name));
+    const list = ENABLED_MARKETS.flatMap((m) => openCities(m).map((c) => c.name));
     return Array.from(new Set(list)).sort();
   }, []);
 

@@ -3,12 +3,22 @@ import { BarChart3, Boxes, FileText, MousePointerClick, Network, Presentation, T
 import { BrandLeadForm } from "@/components/BrandLeadForm";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { seedBrands, seedCompanies } from "@/db/seed-data";
+import { absoluteUrl, pageAlternates } from "@/lib/site";
+import { cn } from "@/lib/utils";
+
+const title = "Брендам и поставщикам";
+const description =
+  "Пилотные интеграции для производителей, импортёров и дилеров индустрии чистоты: размещение рядом с задачей, открытая маркировка и отчёт по фактическим действиям.";
 
 export const metadata: Metadata = {
-  title: "Брендам и поставщикам | Клининг Рейтинг",
-  description: "Пилотные интеграции для производителей, импортёров и дилеров индустрии чистоты с прозрачной аналитикой.",
+  title,
+  description,
+  alternates: pageAlternates("/for-brands"),
+  openGraph: { title, description, url: absoluteUrl("/for-brands"), type: "website" },
 };
+
+/** Принципы вместо счётчиков каталога: на пилотной стадии цифры охвата ещё не аргумент. */
+const principles = ["Маркировка «Реклама» на каждом размещении", "Отчёт только по фактическим действиям", "Пилотная стадия"];
 
 const outcomes = [
   { icon: Target, title: "Профессиональный контекст", text: "Размещение рядом с релевантной услугой, технологией и аудиторией, а не случайный массовый показ." },
@@ -43,9 +53,17 @@ export default function ForBrandsPage() {
                 дилером и измеримым действием: отдельно от органического рейтинга компаний.
               </p>
               <div className="mt-8 flex flex-wrap gap-2.5">
-                <span className="data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-foreground">{seedCompanies.length} компаний в каталоге</span>
-                <span className="data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-foreground">{seedBrands.length} профилей решений</span>
-                <span className="data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-primary">Пилотная стадия</span>
+                {principles.map((item, index) => (
+                  <span
+                    key={item}
+                    className={cn(
+                      "data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold",
+                      index === principles.length - 1 ? "text-primary" : "text-foreground"
+                    )}
+                  >
+                    {item}
+                  </span>
+                ))}
               </div>
             </div>
             <div className="data-surface rounded-panel p-7 sm:p-9">

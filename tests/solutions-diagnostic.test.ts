@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   DIAGNOSTIC_CONTEXT,
   buildDiagnosticResult,
+  buildEscalation,
   buildProCompanies,
   companyPriceLabel,
   externalRating,
@@ -23,6 +24,8 @@ const solutions = getFallbackSolutions();
 const companies = getFallbackCompanies();
 const estimates = getFallbackPriceEstimates({ countryCode: "BY" });
 const wine = solutions.find((s) => s.slug === "vino-na-divane")!;
+// В seed спонсоров нет (размещение только по договору) — спонсорский слот проверяем на фикстуре.
+const withSponsor = companies.map((c) => (c.slug === "spectrclean" ? { ...c, promoted: true } : c));
 
 describe("diagnostic: surfaces and problems", () => {
   it("surfaces come only from published solutions and counts are honest", () => {
@@ -178,13 +181,18 @@ describe("pro companies", () => {
     });
   });
 
+  it("seed has no paid placements without a contract", () => {
+    assert.deepEqual(companies.filter((c) => c.promoted).map((c) => c.slug), []);
+    assert.equal(buildProCompanies(companies, wine).sponsor, null);
+  });
+
   it("organic ranking ignores payment: flipping promoted never changes the order", () => {
     const order = (list: typeof companies) => rankOrganicCompanies(list, wine).map((c) => c.id);
-    const base = order(companies);
-    assert.deepEqual(order(companies.map((c) => ({ ...c, promoted: false }))), base);
-    assert.deepEqual(order(companies.map((c) => ({ ...c, promoted: true }))), base);
-    const sponsorId = companies.find((c) => c.promoted)!.id;
-    assert.deepEqual(order(companies.map((c) => (c.id === sponsorId ? { ...c, promoted: false } : { ...c, promoted: !c.promoted }))), base);
+    const base = order(withSponsor);
+    assert.deepEqual(order(withSponsor.map((c) => ({ ...c, promoted: false }))), base);
+    assert.deepEqual(order(withSponsor.map((c) => ({ ...c, promoted: true }))), base);
+    const sponsorId = withSponsor.find((c) => c.promoted)!.id;
+    assert.deepEqual(order(withSponsor.map((c) => (c.id === sponsorId ? { ...c, promoted: false } : { ...c, promoted: !c.promoted }))), base);
   });
 
   it("organic order is trust-based: relevance, verified, confirmed external rating, experience", () => {
@@ -206,8 +214,8 @@ describe("pro companies", () => {
   });
 
   it("sponsor goes to a separate slot and is not duplicated in the organic list", () => {
-    const { sponsor, organic } = buildProCompanies(companies, wine);
-    assert.ok(sponsor, "demo sponsor covers upholstery");
+    const { sponsor, organic } = buildProCompanies(withSponsor, wine);
+    assert.ok(sponsor, "fixture sponsor covers upholstery");
     assert.ok(sponsor!.promoted);
     assert.ok(!organic.some((c) => c.id === sponsor!.id));
     assert.ok(organic.length <= 3 && organic.length > 0);
@@ -216,18 +224,18 @@ describe("pro companies", () => {
 
   it("organic list is identical with and without a sponsor (minus the sponsor himself)", () => {
     const without = buildProCompanies(
-      companies.map((c) => ({ ...c, promoted: false })),
+      withSponsor.map((c) => ({ ...c, promoted: false })),
       wine,
       { limit: 20 },
     );
-    const withSponsor = buildProCompanies(companies, wine, { limit: 20 });
+    const sponsored = buildProCompanies(withSponsor, wine, { limit: 20 });
     assert.equal(without.sponsor, null);
-    const expected = without.organic.filter((c) => c.id !== withSponsor.sponsor!.id).map((c) => c.id);
-    assert.deepEqual(withSponsor.organic.map((c) => c.id), expected);
+    const expected = without.organic.filter((c) => c.id !== sponsored.sponsor!.id).map((c) => c.id);
+    assert.deepEqual(sponsored.organic.map((c) => c.id), expected);
   });
 
   it("sponsor must be relevant to the solution category, otherwise no slot", () => {
-    const sponsorOnly = companies.map((c) => (c.promoted ? { ...c, categories: ["apartments" as const] } : c));
+    const sponsorOnly = withSponsor.map((c) => (c.promoted ? { ...c, categories: ["apartments" as const] } : c));
     assert.equal(buildProCompanies(sponsorOnly, wine).sponsor, null);
   });
 
@@ -235,9 +243,27 @@ describe("pro companies", () => {
     const empty = buildProCompanies([], wine);
     assert.equal(empty.sponsor, null);
     assert.deepEqual(empty.organic, []);
-    const foreign = buildProCompanies(companies.map((c) => ({ ...c, city: "Брест" })), wine);
+    const foreign = buildProCompanies(withSponsor.map((c) => ({ ...c, city: "Брест" })), wine);
     assert.equal(foreign.sponsor, null);
     assert.deepEqual(foreign.organic, []);
+  });
+
+  it("escalation bridge offers the city price and the first organic master with a contact, never the sponsor", () => {
+    const offer = buildEscalation(wine, estimates, withSponsor);
+    assert.match(offer.priceFrom ?? "", /60/);
+    assert.equal(offer.unit, "диван");
+    assert.ok(offer.company, "Minsk has masters for upholstery");
+    assert.ok(offer.company!.phone || offer.company!.telegramUrl);
+    assert.notEqual(offer.company!.id, buildProCompanies(withSponsor, wine).sponsor!.id);
+    assert.equal(offer.company!.id, buildProCompanies(withSponsor, wine).organic.find((c) => c.phone || c.telegramUrl)!.id);
+  });
+
+  it("escalation bridge stays honest in a market without companies (Moscow)", () => {
+    const ru = getFallbackPriceEstimates({ countryCode: "RU" });
+    const offer = buildEscalation(wine, ru, companies, { countryCode: "RU", city: "Москва", cities: ["Москва"] });
+    assert.equal(offer.company, null);
+    assert.match(offer.priceFrom ?? "", /2\s?500/);
+    assert.equal(buildEscalation(wine, [], []).priceFrom, null);
   });
 
   it("price label never invents a price and removes currency from the unit", () => {

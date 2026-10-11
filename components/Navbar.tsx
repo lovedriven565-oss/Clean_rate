@@ -10,12 +10,14 @@ import { RegionSelector } from "@/components/RegionSelector";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
+/**
+ * Шапка держит только два пути пользователя и один бизнес-CTA. Консультант живёт в поиске
+ * (подсказка «Спросить ИИ-консультанта»), бренды и страница для брендов — в протоколах и футере.
+ * `match` — разделы, которые подсвечивают пункт (профиль компании относится к рейтингу).
+ */
 const navLinks = [
-  { href: "/assistant", label: "Консультант" },
-  { href: "/solutions", label: "Решения" },
-  { href: "/rating", label: "Рейтинг" },
-  { href: "/brands", label: "Бренды" },
-  { href: "/for-brands", label: "Для брендов" },
+  { href: "/solutions", label: "Решения", match: ["/solutions"] },
+  { href: "/rating", label: "Рейтинг компаний", match: ["/rating", "/companies"] },
 ];
 
 export function Navbar() {
@@ -31,9 +33,8 @@ export function Navbar() {
     };
   }, [open]);
 
-  function isActive(href: string) {
-    if (href.startsWith("/#")) return false;
-    return pathname.startsWith(href);
+  function isActive(match: string[]) {
+    return match.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   }
 
   return (
@@ -44,18 +45,22 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-1 rounded-full border border-border/80 bg-card/65 p-1 text-sm lg:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "rounded-full px-4 py-2 font-medium text-muted-foreground transition-colors hover:bg-muted/75 hover:text-foreground",
-                isActive(link.href) && "bg-foreground text-background hover:bg-foreground hover:text-background"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const active = isActive(link.match);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "rounded-full px-4 py-2 font-medium text-muted-foreground transition-colors hover:bg-muted/75 hover:text-foreground",
+                  active && "bg-foreground text-background hover:bg-foreground hover:text-background"
+                )}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -64,7 +69,8 @@ export function Navbar() {
           <ThemeToggle className="hidden sm:inline-flex" />
           <Link
             href="/for-partners"
-            className="hidden h-10 items-center gap-2 rounded-full bg-brand px-4 text-xs font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5 xl:inline-flex"
+            aria-current={pathname === "/for-partners" ? "page" : undefined}
+            className="hidden h-10 items-center gap-2 rounded-full bg-brand px-4 text-xs font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5 active:scale-[0.98] lg:inline-flex"
           >
             Разместить бизнес
             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -93,19 +99,23 @@ export function Navbar() {
                 <ThemeToggle className="h-12 w-12" />
               </div>
             </div>
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "rounded-control px-4 py-3.5 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                  isActive(link.href) && "bg-primary/10 font-semibold text-primary"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = isActive(link.match);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-control px-4 py-3.5 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                    active && "bg-primary/10 font-semibold text-primary"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <Link
               href="/for-partners"
               onClick={() => setOpen(false)}

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Ban } from "lucide-react";
+import { ArrowRight, Ban, PhoneCall, Star, type LucideIcon } from "lucide-react";
 import { MarketBadge } from "@/components/MarketBadge";
 import { SmartSearch } from "@/components/SmartSearch";
 import { useRegion } from "@/components/providers/RegionProvider";
@@ -22,14 +22,23 @@ import type { PriceEstimate, Solution, SolutionProblemType, SolutionSurface } fr
 interface HomeHeroProps {
   solutions: Solution[];
   estimates: PriceEstimate[];
-  stats: { label: string; value: number }[];
 }
+
+/**
+ * Знаки качества вместо счётчиков каталога: маленькие числа на старте говорят «сайт пустой»,
+ * а принципы работы проверяемы с первого визита.
+ */
+const QUALITY_MARKS: { icon: LucideIcon; text: string }[] = [
+  { icon: PhoneCall, text: "Прямые телефоны без комиссии и посредников" },
+  { icon: Star, text: "Оценка по открытым отзывам Google и Яндекса" },
+  { icon: Ban, text: "Пошаговые протоколы с предупреждениями «Не делайте»" },
+];
 
 /**
  * Hero главной в языке C: Aurora-фон, каскадный заголовок, прод-SmartSearch
  * и карточка «Решение дня» с реальным выбором протокола по поверхности/проблеме.
  */
-export function HomeHero({ solutions, estimates, stats }: HomeHeroProps) {
+export function HomeHero({ solutions, estimates }: HomeHeroProps) {
   const reduce = useReducedMotion() ?? false;
   const { market, city } = useRegion();
   const [selection, setSelection] = useState<DiagnosticSelection>({});
@@ -58,14 +67,22 @@ export function HomeHero({ solutions, estimates, stats }: HomeHeroProps) {
           <div className="mt-7">
             <SmartSearch />
           </div>
-          <dl className="mt-9 grid max-w-md grid-cols-3 gap-4 border-t border-border pt-5">
-            {stats.map((s) => (
-              <div key={s.label}>
-                <dd className="font-data text-2xl font-semibold text-foreground">{s.value}</dd>
-                <dt className="mt-0.5 text-xs text-muted-foreground">{s.label}</dt>
-              </div>
+          <ul aria-label="Принципы платформы" className="mt-9 grid max-w-xl gap-3 border-t border-border pt-5 sm:grid-cols-3 sm:gap-4">
+            {QUALITY_MARKS.map(({ icon: Icon, text }, index) => (
+              <motion.li
+                key={text}
+                initial={reduce ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 160, damping: 22, delay: reduce ? 0 : 0.35 + index * 0.08 }}
+                className="flex items-start gap-2.5 sm:flex-col sm:gap-2"
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-control bg-primary/10 text-link ring-1 ring-inset ring-primary/15">
+                  <Icon className="size-4" aria-hidden />
+                </span>
+                <span className="text-pretty pt-1.5 text-[13px] font-medium leading-snug text-foreground/80 sm:pt-0">{text}</span>
+              </motion.li>
             ))}
-          </dl>
+          </ul>
         </div>
 
         <div className="min-w-0">

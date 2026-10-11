@@ -12,6 +12,11 @@ export interface City {
   name: string;
   /** Предложный падеж для заголовков посадочных: «в Минске». */
   nameIn: string;
+  /**
+   * false — город остаётся в конфиге (сметы, адреса компаний), но скрыт из селектора региона
+   * и посадочных, пока в нём не собрана база компаний. По умолчанию город открыт.
+   */
+  enabled?: boolean;
 }
 
 export interface Market {
@@ -53,10 +58,10 @@ export const MARKETS: Record<CountryCode, Market> = {
     currency: "RUB",
     phoneCode: "+7",
     mapsHost: "yandex.ru",
-    enabled: false,
+    enabled: true,
     cities: [
       { slug: "moscow", name: "Москва", nameIn: "Москве" },
-      { slug: "spb", name: "Санкт-Петербург", nameIn: "Санкт-Петербурге" },
+      { slug: "spb", name: "Санкт-Петербург", nameIn: "Санкт-Петербурге", enabled: false },
     ],
   },
   KZ: {
@@ -90,8 +95,8 @@ export function isEnabledCountry(value: string): value is CountryCode {
 }
 
 /**
- * Всегда возвращает валидный открытый рынок: незнакомый или выключенный код (например, старая
- * cookie RU) откатывается на дефолтный (BY).
+ * Всегда возвращает валидный открытый рынок: незнакомый или выключенный код (например, cookie KZ
+ * до запуска рынка) откатывается на дефолтный (BY).
  */
 export function getMarket(countryCode?: string | null): Market {
   if (countryCode && isEnabledCountry(countryCode)) return MARKETS[countryCode];
@@ -103,19 +108,25 @@ export function getMarketByCity(cityName: string): Market {
   return MARKET_LIST.find((market) => market.cities.some((city) => city.name === cityName)) ?? MARKETS[DEFAULT_COUNTRY_CODE];
 }
 
+/** Открытые города рынка — для селектора региона, посадочных и форм. */
+export function openCities(market: Market): City[] {
+  return market.cities.filter((city) => city.enabled !== false);
+}
+
 export function getDefaultCity(countryCode: CountryCode = DEFAULT_COUNTRY_CODE): City {
-  return MARKETS[countryCode].cities[0];
+  return openCities(MARKETS[countryCode])[0];
 }
 
+/** Открытый город рынка по slug; скрытый или неизвестный slug (старая cookie) — первый открытый город. */
 export function getCity(countryCode: CountryCode, citySlug?: string | null): City {
-  const market = MARKETS[countryCode];
-  return market.cities.find((city) => city.slug === citySlug) ?? market.cities[0];
+  const cities = openCities(MARKETS[countryCode]);
+  return cities.find((city) => city.slug === citySlug) ?? cities[0];
 }
 
-/** Город по slug среди открытых рынков — для посадочных /[city]/[category]. */
+/** Город по slug среди открытых рынков и городов — для посадочных /[city]/[category]. */
 export function getCityBySlug(slug: string): { market: Market; city: City } | undefined {
   for (const market of ENABLED_MARKETS) {
-    const city = market.cities.find((c) => c.slug === slug);
+    const city = openCities(market).find((c) => c.slug === slug);
     if (city) return { market, city };
   }
   return undefined;

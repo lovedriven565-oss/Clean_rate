@@ -9,7 +9,7 @@ const columns = [
     links: [
       { href: "/solutions", label: "Решения задач" },
       { href: "/rating", label: "Рейтинг компаний" },
-      { href: "/assistant", label: "AI-консультант" },
+      { href: "/assistant", label: "ИИ-консультант" },
       { href: "/brands", label: "Бренды и решения" },
     ],
   },
@@ -18,7 +18,7 @@ const columns = [
     links: [
       { href: "/for-partners", label: "Разместить компанию" },
       { href: "/for-partners", label: "Подтвердить профиль" },
-      { href: "/suppliers", label: "Каталог поставщиков" },
+      { href: "/for-brands", label: "Брендам и поставщикам" },
     ],
   },
   {
@@ -27,7 +27,6 @@ const columns = [
       { href: "/rating", label: "Открытый рейтинг" },
       { href: "/rating/methodology", label: "Методология оценки" },
       { href: "/privacy", label: "Конфиденциальность" },
-      { href: "/for-brands", label: "Брендам и реклама" },
     ],
   },
 ];

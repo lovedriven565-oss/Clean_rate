@@ -3,8 +3,9 @@ import { afterEach, describe, it } from "node:test";
 import { GET as searchGET } from "../app/api/search/route.js";
 import { POST as partnerLeadPOST } from "../app/api/partner-lead/route.js";
 import { POST as brandLeadPOST } from "../app/api/brand-lead/route.js";
-import { ENABLED_MARKETS, getMarket, getMarketByCity } from "../lib/markets.js";
-import { formatCompanyPriceFrom } from "../lib/format.js";
+import { ENABLED_MARKETS, MARKETS, getCity, getCityBySlug, getMarket, getMarketByCity, openCities } from "../lib/markets.js";
+import { formatCompanyPriceFrom, formatMarketCurrency } from "../lib/format.js";
+import { landingStaticParams } from "../lib/landing.js";
 import { pageAlternates } from "../lib/site.js";
 import { isValidPhone } from "../lib/telegram.js";
 import { verifyTurnstile } from "../lib/security/guard.js";
@@ -92,22 +93,40 @@ describe("turnstile verification", () => {
 });
 
 describe("market focus", () => {
-  it("opens only Belarus until other markets have companies", () => {
+  it("opens Belarus and Russia (Moscow only); Kazakhstan stays closed until it has companies", () => {
     assert.deepEqual(
       ENABLED_MARKETS.map((m) => m.countryCode),
-      ["BY"]
+      ["BY", "RU"]
+    );
+    assert.deepEqual(
+      openCities(MARKETS.RU).map((c) => c.slug),
+      ["moscow"]
     );
   });
 
   it("falls back to the default market for a disabled country (old cookie)", () => {
-    assert.equal(getMarket("RU").countryCode, "BY");
+    assert.equal(getMarket("RU").countryCode, "RU");
     assert.equal(getMarket("KZ").countryCode, "BY");
+  });
+
+  it("hides cities that are not launched yet from the region selector and landings", () => {
+    assert.equal(getCity("RU", "spb").slug, "moscow");
+    assert.equal(getCityBySlug("spb"), undefined);
+    assert.equal(getCityBySlug("moscow")?.market.countryCode, "RU");
+    const cities = new Set(landingStaticParams().map((p) => p.city));
+    assert.ok(cities.has("moscow"));
+    assert.ok(!cities.has("spb"));
+    assert.ok(!cities.has("almaty"));
+  });
+
+  it("shows Moscow prices in rubles", () => {
+    assert.match(formatMarketCurrency(2500, getMarket("RU")), /₽|RUB/);
   });
 
   it("emits hreflang only for enabled markets", () => {
     const languages = Object.keys(pageAlternates("/").languages ?? {});
     assert.ok(languages.includes("ru-BY"));
-    assert.ok(!languages.includes("ru-RU"));
+    assert.ok(languages.includes("ru-RU"));
     assert.ok(!languages.includes("ru-KZ"));
   });
 

@@ -217,8 +217,8 @@ export const seedCompanies: SeedCompany[] = [
     tags: ["Работает по договору", "7+ лет на рынке", "350+ клиентов"],
     guarantees: ["Фиксированная цена по договору"],
     verified: true,
-    // Демо-спонсор: показывает золотую плашку «Спонсор» в каталоге. На оценку не влияет.
-    promoted: true,
+    // Спонсорство только по договору: без оплаченного размещения плашка «Спонсор» не ставится.
+    promoted: false,
     categories: ["offices", "post-renovation", "deep-cleaning", "windows", "upholstery", "apartments"],
     equipment: ["karcher"],
     ratingSource: "google",
@@ -1158,6 +1158,10 @@ export interface SeedCampaign {
   priority: number;
 }
 
+/**
+ * Шаблоны кампаний для разработки рекламных слотов. Все в статусе draft: реальные бренды
+ * с маркировкой «Реклама» и внешними ссылками публикуются только после подписанного договора.
+ */
 export const seedCampaigns: SeedCampaign[] = [
   {
     id: "camp-kiehl-upholstery",
@@ -1165,7 +1169,7 @@ export const seedCampaigns: SeedCampaign[] = [
     productId: "prod-kiehl-arenas",
     name: "Kiehl Arenas-exet 3 (Решения / Текстиль)",
     placement: "solution.sponsored_product",
-    status: "active",
+    status: "draft",
     startsAt: 1767225600000, // 2026-01-01
     endsAt: 1798761599000,   // 2026-12-31
     targetCountries: ["BY", "RU", "KZ"],
@@ -1186,7 +1190,7 @@ export const seedCampaigns: SeedCampaign[] = [
     brandId: "grass",
     name: "GRASS Professional — генеральный партнёр категории офисов",
     placement: "rating.category_partner",
-    status: "active",
+    status: "draft",
     startsAt: 1767225600000, // 2026-01-01
     endsAt: 1798761599000,   // 2026-12-31
     targetCategories: ["offices"],
@@ -1206,7 +1210,7 @@ export const seedCampaigns: SeedCampaign[] = [
     brandId: "karcher",
     name: "Kärcher — партнёр сезона чистоты CLEANHUB",
     placement: "home.editorial_partner",
-    status: "active",
+    status: "draft",
     startsAt: 1767225600000, // 2026-01-01
     endsAt: 1798761599000,   // 2026-12-31
     targetCountries: ["BY", "RU", "KZ"],

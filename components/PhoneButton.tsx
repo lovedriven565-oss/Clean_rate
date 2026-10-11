@@ -11,6 +11,8 @@ interface PhoneButtonProps {
   categoryId?: string;
   /** compact — для карточек: меньше высота, короткая подпись */
   compact?: boolean;
+  /** Подпись кнопки звонка на мобильных (по умолчанию номер или «Позвонить» в compact) */
+  label?: string;
   className?: string;
 }
 
@@ -23,7 +25,7 @@ function telHref(phone: string) {
  * На десктопе tel: не работает, поэтому кнопка показывает сам номер,
  * а клик копирует его в буфер — клик учитывается как событие phone.
  */
-export function PhoneButton({ phone, companyId, categoryId, compact = false, className }: PhoneButtonProps) {
+export function PhoneButton({ phone, companyId, categoryId, compact = false, label, className }: PhoneButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const track = () => companyId && trackClick({ companyId, categoryId, clickType: "phone" });
@@ -50,7 +52,7 @@ export function PhoneButton({ phone, companyId, categoryId, compact = false, cla
     <>
       <a href={telHref(phone)} onClick={track} className={cn(primaryClass, "md:hidden")}>
         <Phone className={iconClass} />
-        {compact ? "Позвонить" : phone}
+        {label ?? (compact ? "Позвонить" : phone)}
       </a>
       <button
         type="button"

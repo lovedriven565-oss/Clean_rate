@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { after, before, describe, it } from "node:test";
 import {
   checkCampaignEligibility,
   checkProductRelevance,
@@ -18,6 +18,7 @@ import type {
   ProductSafetyProfile,
   Solution,
 } from "../lib/types.js";
+import { activateDemoCampaigns } from "./helpers/demo-campaigns.js";
 
 const NOW = new Date("2026-09-01T12:00:00Z");
 
@@ -377,6 +378,12 @@ describe("Ad Engine & Eligibility Gate", () => {
   });
 
   describe("серверные запросы getEligibleAd (возврат null при отсутствии)", () => {
+    let restore: () => void;
+    before(() => {
+      restore = activateDemoCampaigns();
+    });
+    after(() => restore());
+
     it("возвращает null, если подходящих кампаний нет (нет пустых дыр)", async () => {
       // Ищем плейсмент без подходящих кампаний (например, несуществующая страна или неизвестная категория)
       const ad = await getEligibleAd(

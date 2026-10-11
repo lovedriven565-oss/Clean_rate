@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { after, before, describe, it } from "node:test";
 import {
   AD_CTA_META,
   AD_MARK_LABEL,
@@ -11,6 +11,7 @@ import {
 } from "../lib/ads/presentation.js";
 import { getEligibleAd, getEligibleAdsForCategories } from "../lib/ads/queries.js";
 import type { AdCtaType } from "../lib/types.js";
+import { activateDemoCampaigns } from "./helpers/demo-campaigns.js";
 
 const NOW = new Date("2026-09-01T12:00:00Z");
 
@@ -90,7 +91,26 @@ describe("Блок 3 — презентационный слой рекламы"
     });
   });
 
+  describe("без договора рекламы нет", () => {
+    it("seed-кампании реальных брендов не выходят в слоты, пока не активированы", async () => {
+      const [solutionAd, homeAd, categoryAds] = await Promise.all([
+        getEligibleAd("solution.sponsored_product", { solutionSlug: "vino-na-divane", surface: "upholstery", countryCode: "BY" }, { now: NOW }),
+        getEligibleAd("home.editorial_partner", { countryCode: "BY" }, { now: NOW }),
+        getEligibleAdsForCategories("rating.category_partner", ["offices"], { countryCode: "BY" }, { now: NOW }),
+      ]);
+      assert.equal(solutionAd, null);
+      assert.equal(homeAd, null);
+      assert.equal(categoryAds.offices, null);
+    });
+  });
+
   describe("серверная выборка для шаблонов", () => {
+    let restore: () => void;
+    before(() => {
+      restore = activateDemoCampaigns();
+    });
+    after(() => restore());
+
     it("спонсорский состав получает причину допуска и факты паспорта для блока «Почему подходит»", async () => {
       const ad = await getEligibleAd(
         "solution.sponsored_product",

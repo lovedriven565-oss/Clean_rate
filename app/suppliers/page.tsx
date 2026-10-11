@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   title: "Поставщики оборудования и химии",
   description: "Формирующийся каталог производителей, импортёров, дилеров и сервисных центров индустрии чистоты.",
   alternates: pageAlternates("/suppliers"),
+  // Заглушка без базы поставщиков: не индексируем и не ссылаемся из футера/sitemap, пока каталог пуст.
+  robots: { index: false, follow: true },
 };
 
 const supplierTypes = [

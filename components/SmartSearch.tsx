@@ -36,6 +36,11 @@ export function routeForTarget(target: SearchResponse["target"], intent: SearchI
   return routeForIntent(intent, query);
 }
 
+export function assistantHrefFor(query: string): string {
+  const trimmed = query.trim();
+  return trimmed ? `/assistant?q=${encodeURIComponent(trimmed)}` : "/assistant";
+}
+
 /** Общая логика умного поиска — используется полноразмерным SmartSearch и компактным NavSearch */
 export function useSmartSearch() {
   const router = useRouter();
@@ -85,10 +90,13 @@ export function useSmartSearch() {
   const showSolutions = (result?.solutions.length ?? 0) > 0;
   const hasResults = showCompanies || showBrands || showSolutions;
 
+  const assistantHref = assistantHrefFor(query);
   const flatItems = [
     ...(showSolutions ? result!.solutions.map((s) => ({ href: `/solutions/${s.slug}` })) : []),
     ...(showCompanies ? result!.companies.map((c) => ({ href: `/companies/${c.slug}` })) : []),
     ...(showBrands ? result!.brands.map((b) => ({ href: `/brands/${b.slug}` })) : []),
+    // Консультант — всегда последний пункт подсказок: доступен с клавиатуры и без выдачи
+    ...(query.trim() ? [{ href: assistantHref }] : []),
   ];
 
   function handleQueryChange(value: string) {
@@ -141,6 +149,8 @@ export function useSmartSearch() {
     showSolutions,
     hasResults,
     highlightedIndex,
+    assistantIndex: flatItems.length - 1,
+    assistantHref,
     handleQueryChange,
     handleSubmit,
     handleKeyDown,
@@ -240,7 +250,19 @@ export function SmartSearch() {
 
 /** Общая выпадающая панель подсказок — переиспользуется полноразмерным и компактным поиском */
 export function SearchSuggestions({ search, className }: { search: ReturnType<typeof useSmartSearch>; className?: string }) {
-  const { result, loading, hasResults, showSolutions, showCompanies, showBrands, navigate, highlightedIndex } = search;
+  const {
+    result,
+    loading,
+    hasResults,
+    showSolutions,
+    showCompanies,
+    showBrands,
+    navigate,
+    highlightedIndex,
+    assistantIndex,
+    assistantHref,
+    query,
+  } = search;
 
   let cursor = 0;
   return (
@@ -251,17 +273,9 @@ export function SearchSuggestions({ search, className }: { search: ReturnType<ty
       )}
     >
       {!hasResults && !loading && (
-        <div className="px-4 py-5 text-center text-sm text-muted-foreground">
-          <p>Ничего не нашли. Нажмите «Enter», чтобы посмотреть все результаты.</p>
-          <button
-            type="button"
-            onClick={() => navigate(`/assistant?q=${encodeURIComponent(search.query.trim())}`)}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            Спросить консультанта
-          </button>
-        </div>
+        <p className="px-4 pb-2 pt-4 text-center text-sm text-muted-foreground">
+          Готового протокола не нашли. Нажмите «Enter», чтобы посмотреть все результаты, или спросите консультанта.
+        </p>
       )}
 
       {showSolutions && (
@@ -317,6 +331,29 @@ export function SearchSuggestions({ search, className }: { search: ReturnType<ty
           })}
         </SuggestionGroup>
       )}
+
+      <button
+        type="button"
+        onClick={() => navigate(assistantHref)}
+        className={cn(
+          "group mt-1 flex w-full items-center gap-3 rounded-control border border-primary/20 bg-primary/[0.05] px-3 py-2.5 text-left text-sm transition-colors hover:border-primary/35 hover:bg-primary/10",
+          highlightedIndex === assistantIndex && "border-primary/35 bg-primary/10"
+        )}
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-brand text-brand-foreground">
+          <Sparkles className="h-4 w-4" aria-hidden />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold text-foreground">Спросить ИИ-консультанта</span>
+          <span className="block truncate text-xs text-muted-foreground">
+            «{query.trim()}»: ответ строго по проверенным протоколам
+          </span>
+        </span>
+        <ArrowRight
+          className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5"
+          aria-hidden
+        />
+      </button>
     </div>
   );
 }

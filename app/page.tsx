@@ -11,7 +11,7 @@ import { TaskTicker } from "@/components/home/TaskTicker";
 import { TwoPathsSection } from "@/components/home/TwoPathsSection";
 import { AdCreative } from "@/components/ads/AdCreative";
 import { getEligibleAd } from "@/lib/ads/queries";
-import { getAllBrands, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
+import { getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
 import { resolveSelection } from "@/lib/solutions/diagnostic";
 import { SITE_NAME, SITE_URL, absoluteUrl, pageAlternates } from "@/lib/site";
 
@@ -23,9 +23,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [companies, brands, solutions, estimates, editorialAd] = await Promise.all([
+  const [companies, solutions, estimates, editorialAd] = await Promise.all([
     getAllCompanies(),
-    getAllBrands(),
     getAllSolutions(),
     getPriceEstimates(),
     // Единственный коммерческий блок главной — ниже полезного контента, не в hero.
@@ -60,15 +59,7 @@ export default async function Home() {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
           />
 
-          <HomeHero
-            solutions={solutions}
-            estimates={estimates}
-            stats={[
-              { label: "протоколов", value: published.length },
-              { label: "компаний", value: companies.length },
-              { label: "брендов", value: brands.length },
-            ]}
-          />
+          <HomeHero solutions={solutions} estimates={estimates} />
 
           {/* Живая лента задач — единственный marquee на странице */}
           <TaskTicker solutions={published} estimates={estimates} />

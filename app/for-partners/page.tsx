@@ -9,11 +9,12 @@ import { StatCounter } from "@/components/StatCounter";
 import { Button } from "@/components/ui/primitives";
 import { CATEGORIES } from "@/lib/categories";
 import { seedCompanies } from "@/db/seed-data";
-import { ENABLED_MARKETS } from "@/lib/markets";
+import { ENABLED_MARKETS, openCities } from "@/lib/markets";
 import { pluralize } from "@/lib/format";
 import { scrollBehavior } from "@/lib/utils";
 
-const enabledCities = ENABLED_MARKETS.flatMap((market) => market.cities.map((city) => city.name));
+const enabledCities = ENABLED_MARKETS.flatMap((market) => openCities(market).map((city) => city.name));
+const enabledCitiesLabel = new Intl.ListFormat("ru", { type: "conjunction" }).format(enabledCities);
 
 const steps = [
   {
@@ -136,7 +137,7 @@ export default function ForPartnersPage() {
             <StatCounter
               value={enabledCities.length}
               suffix={` ${pluralize(enabledCities.length, ["город", "города", "городов"]).split(" ")[1]}`}
-              label={enabledCities.join(" и ")}
+              label={enabledCitiesLabel}
             />
           </div>
         </section>

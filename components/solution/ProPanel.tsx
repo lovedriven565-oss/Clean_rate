@@ -10,20 +10,9 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { trackClick } from "@/lib/analytics";
 import { categoryLandingHref } from "@/lib/categories";
 import { formatRating } from "@/lib/format";
+import { buildProCompanies } from "@/lib/solutions/diagnostic";
 import type { Company, PriceEstimate, Solution } from "@/lib/types";
 import { PriceRange } from "./PriceRange";
-
-const COMPANY_LIMIT = 3;
-
-function pickCompanies(companies: Company[], cityNames: string[], solution: Solution): Company[] {
-  const inMarket = companies.filter((c) => cityNames.includes(c.city));
-  const score = (c: Company) =>
-    (solution.relatedCategory && c.categories.includes(solution.relatedCategory) ? 4 : 0) +
-    (c.promoted ? 2 : 0) +
-    (c.verified ? 1 : 0) +
-    (c.reviewCount > 0 ? Math.min(c.baseRating / 5, 1) : 0);
-  return [...inMarket].sort((a, b) => score(b) - score(a)).slice(0, COMPANY_LIMIT);
-}
 
 export function ProPanel({
   solution,
@@ -35,8 +24,10 @@ export function ProPanel({
   estimates: PriceEstimate[];
 }) {
   const { market, city } = useRegion();
-  const cityNames = market.cities.map((c) => c.name);
-  const picked = pickCompanies(companies, cityNames, solution);
+  // Органический порядок по доверию (как на главной); спонсор — отдельной помеченной строкой сверху.
+  const { sponsor, organic } = buildProCompanies(companies, solution, { cities: market.cities.map((c) => c.name) });
+  const picked = sponsor ? [sponsor, ...organic] : organic;
+  const primary = organic[0] ?? sponsor;
   const ratingHref = solution.relatedCategory ? categoryLandingHref(city.slug, solution.relatedCategory) : "/rating";
 
   return (
@@ -88,13 +79,13 @@ export function ProPanel({
         <ul className="mt-3 space-y-2">
           {picked.map((company) => (
             <li key={company.id}>
-              <CompanyRow company={company} />
+              <CompanyRow company={company} sponsor={company.id === sponsor?.id} />
             </li>
           ))}
         </ul>
       ) : (
         <div className="mt-3 rounded-control border border-dashed border-border bg-card/60 p-5 text-sm leading-6 text-muted-foreground">
-          В городе {city.name} компании ещё подключаются к платформе.{" "}
+          В {city.nameIn} компании ещё подключаются к платформе.{" "}
           <Link href="/for-partners" className="font-semibold text-primary">
             Разместить компанию
           </Link>
@@ -106,11 +97,11 @@ export function ProPanel({
       </p>
 
       <StickyCallBar
-        label={picked[0] ? picked[0].name : `Мастера · ${city.name}`}
-        phone={picked[0]?.phone}
-        telegramUrl={picked[0]?.telegramUrl}
-        companyId={picked[0]?.id}
-        categoryId={picked[0]?.categories[0]}
+        label={primary ? primary.name : `Мастера · ${city.name}`}
+        phone={primary?.phone}
+        telegramUrl={primary?.telegramUrl}
+        companyId={primary?.id}
+        categoryId={primary?.categories[0]}
         fallbackHref={ratingHref}
         fallbackLabel="Смотреть рейтинг"
       />
@@ -118,7 +109,7 @@ export function ProPanel({
   );
 }
 
-function CompanyRow({ company }: { company: Company }) {
+function CompanyRow({ company, sponsor = false }: { company: Company; sponsor?: boolean }) {
   const hasRating =
     company.reviewCount > 0 && (company.ratingSource === "google" || company.ratingSource === "yandex");
   const categoryId = company.categories[0];
@@ -131,7 +122,7 @@ function CompanyRow({ company }: { company: Company }) {
           <span className="flex items-center gap-1.5">
             <span className="truncate text-sm font-semibold text-foreground">{company.name}</span>
             {company.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-primary" />}
-            {company.promoted && <StatusBadge variant="sponsor" />}
+            {sponsor && <StatusBadge variant="sponsor" />}
           </span>
           <span className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
             {hasRating ? (

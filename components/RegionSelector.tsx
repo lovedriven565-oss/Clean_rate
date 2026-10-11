@@ -3,13 +3,15 @@
 import { Select as BaseSelect } from "@base-ui/react/select";
 import { Check, ChevronDown, MapPin } from "lucide-react";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { ENABLED_MARKETS, isEnabledCountry, type CountryCode } from "@/lib/markets";
+import { ENABLED_MARKETS, isEnabledCountry, openCities, type CountryCode } from "@/lib/markets";
 import { cn } from "@/lib/utils";
 
 type RegionValue = `${CountryCode}:${string}`;
 
-const items = ENABLED_MARKETS.flatMap((market) =>
-  market.cities.map((city) => ({ value: `${market.countryCode}:${city.slug}` as RegionValue, label: city.name }))
+const groups = ENABLED_MARKETS.map((market) => ({ market, cities: openCities(market) }));
+
+const items = groups.flatMap(({ market, cities }) =>
+  cities.map((city) => ({ value: `${market.countryCode}:${city.slug}` as RegionValue, label: city.name }))
 );
 
 /**
@@ -50,12 +52,12 @@ export function RegionSelector({ className, variant = "pill" }: { className?: st
         <BaseSelect.Positioner sideOffset={8} align="end" alignItemWithTrigger={false} className="z-50 outline-none">
           <BaseSelect.Popup className="min-w-56 origin-[var(--transform-origin)] rounded-control border border-border bg-card p-1.5 text-foreground shadow-2xl shadow-tint/10 outline-none transition-[transform,opacity] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
             <BaseSelect.List className="max-h-80 overflow-y-auto outline-none">
-              {ENABLED_MARKETS.map((m) => (
+              {groups.map(({ market: m, cities }) => (
                 <BaseSelect.Group key={m.countryCode} className="mb-1 last:mb-0">
                   <BaseSelect.GroupLabel className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/80">
                     {m.name} · {m.currency}
                   </BaseSelect.GroupLabel>
-                  {m.cities.map((c) => (
+                  {cities.map((c) => (
                     <BaseSelect.Item
                       key={c.slug}
                       value={`${m.countryCode}:${c.slug}`}
