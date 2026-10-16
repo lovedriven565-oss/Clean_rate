@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ViewTransition } from "react";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { ExternalAnalytics } from "@/components/analytics/ExternalAnalytics";
@@ -56,7 +57,9 @@ export default function RootLayout({
       </head>
       <body>
         <MotionProvider>
-          <RegionProvider>{children}</RegionProvider>
+          <RegionProvider>
+            <ViewTransition>{children}</ViewTransition>
+          </RegionProvider>
         </MotionProvider>
         <PageViewTracker />
         <ExternalAnalytics />

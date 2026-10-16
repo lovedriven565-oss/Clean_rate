@@ -66,9 +66,7 @@ export function ProPanel({
       <PriceRange estimates={estimates} className="mt-6" />
 
       <div className="mt-8 flex items-baseline justify-between gap-3">
-        <span className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-          Компании · {city.name}
-        </span>
+        <h3 className="text-base font-semibold text-foreground">Компании · {city.name}</h3>
         <Link href={ratingHref} className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
           Весь рейтинг
           <ArrowRight className="h-3.5 w-3.5" />

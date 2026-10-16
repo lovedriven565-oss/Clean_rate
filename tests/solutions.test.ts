@@ -9,9 +9,9 @@ import {
 } from "../lib/db/queries.js";
 
 describe("solutions graph and data layer", () => {
-  it("loads 10 published solutions with complete protocol data", async () => {
+  it("loads 16 published solutions with complete protocol data", async () => {
     const solutions = await getAllSolutions();
-    assert.equal(solutions.length, 10);
+    assert.equal(solutions.length, 16);
 
     for (const sol of solutions) {
       assert.ok(sol.id, "solution must have an id");
@@ -36,7 +36,7 @@ describe("solutions graph and data layer", () => {
 
   it("returns unique solution slugs for SSG generateStaticParams", async () => {
     const slugs = await getSolutionSlugs();
-    assert.equal(slugs.length, 10);
+    assert.equal(slugs.length, 16);
     assert.ok(slugs.includes("vino-na-divane"));
     assert.ok(slugs.includes("poslestroy-zatirka-plitka"));
   });

@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
   // SSG-страницы открывают remote-коннект OpenNext; на медленной сети дефолтные
   // 60с не хватает и сборка падает на случайной странице.
   staticPageGenerationTimeout: 180,

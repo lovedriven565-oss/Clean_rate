@@ -1,7 +1,10 @@
 import type { PriceEstimate, Solution } from "@/lib/types";
 import { formatMarketCurrency } from "@/lib/format";
 import { isCountryCode, getMarket } from "@/lib/markets";
-import { SEVERITY_LABELS, SURFACE_LABELS } from "./meta";
+import { absoluteUrl } from "@/lib/site";
+import { solutionCover } from "./covers";
+import { SEVERITY_LABELS, SURFACE_LABELS, solutionSummary } from "./meta";
+import { parseVideoSource } from "./video";
 
 export interface FaqItem {
   question: string;
@@ -106,9 +109,26 @@ export function buildSolutionJsonLd(
     })),
   };
 
+  const graph: Record<string, unknown>[] = [howTo, faqPage, breadcrumbList];
+
+  const videoSource = parseVideoSource(solution.videoUrl);
+  if (videoSource) {
+    const videoNode: Record<string, unknown> = {
+      "@type": "VideoObject",
+      "@id": `${url}#video`,
+      name: `Видеоразбор: ${solution.title}`,
+      description: solutionSummary(solution, 160),
+      thumbnailUrl: [absoluteUrl(solutionCover(solution))],
+      ...(videoSource.kind === "iframe"
+        ? { embedUrl: videoSource.embedUrl }
+        : { contentUrl: videoSource.url }),
+    };
+    graph.push(videoNode);
+  }
+
   return {
     "@context": "https://schema.org",
-    "@graph": [howTo, faqPage, breadcrumbList],
+    "@graph": graph,
   };
 }
 

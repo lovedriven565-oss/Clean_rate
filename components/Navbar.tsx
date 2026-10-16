@@ -11,12 +11,14 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 /**
- * Шапка держит только два пути пользователя и один бизнес-CTA. Консультант живёт в поиске
- * (подсказка «Спросить ИИ-консультанта»), бренды и страница для брендов — в протоколах и футере.
- * `match` — разделы, которые подсвечивают пункт (профиль компании относится к рейтингу).
+ * Шапка держит три основных раздела и бизнес-CTA. Консультант живёт в поиске
+ * (подсказка «Спросить ИИ-консультанта»).
+ * `match` — разделы, которые подсвечивают пункт (профиль компании относится к рейтингу,
+ * а `/for-brands` — к брендам).
  */
 const navLinks = [
   { href: "/solutions", label: "Решения", match: ["/solutions"] },
+  { href: "/brands", label: "Бренды", match: ["/brands", "/for-brands"] },
   { href: "/rating", label: "Рейтинг компаний", match: ["/rating", "/companies"] },
 ];
 
@@ -72,7 +74,7 @@ export function Navbar() {
             aria-current={pathname === "/for-partners" ? "page" : undefined}
             className="hidden h-10 items-center gap-2 rounded-full bg-brand px-4 text-xs font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5 active:scale-[0.98] lg:inline-flex"
           >
-            Разместить бизнес
+            Подключить компанию
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
           <button
@@ -121,7 +123,7 @@ export function Navbar() {
               onClick={() => setOpen(false)}
               className="mt-3 inline-flex h-13 items-center justify-center gap-2 rounded-full bg-brand px-4 text-base font-semibold text-brand-foreground"
             >
-              Разместить бизнес
+              Подключить компанию
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>

@@ -11,14 +11,14 @@ export function Breadcrumbs({ items, className }: { items: BreadcrumbItem[]; cla
     <nav aria-label="Хлебные крошки" className={className ?? "text-xs text-muted-foreground"}>
       <ol className="flex flex-wrap items-center gap-2">
         {items.map((item, index) => (
-          <li key={`${item.label}-${index}`} className="flex items-center gap-2">
+          <li key={`${item.label}-${index}`} className="flex min-w-0 items-center gap-2">
             {index > 0 && <span aria-hidden>/</span>}
             {item.href ? (
               <Link href={item.href} className="hover:text-foreground">
                 {item.label}
               </Link>
             ) : (
-              <span aria-current="page" className="text-foreground">
+              <span aria-current="page" className="max-w-[52vw] truncate text-foreground sm:max-w-none">
                 {item.label}
               </span>
             )}

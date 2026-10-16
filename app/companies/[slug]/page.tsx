@@ -215,10 +215,10 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               </dl>
             </div>
 
-            <div className="rounded-panel bg-contrast p-6 text-contrast-foreground">
+            <div className="rounded-panel bg-cta p-6 text-cta-foreground">
               <ShieldCheck className="h-6 w-6 text-primary" />
               <h2 className="mt-5 font-display text-xl font-bold">Вы представитель компании?</h2>
-              <p className="mt-3 text-sm leading-6 text-contrast-foreground/70">Подтвердите профиль, исправьте данные и добавьте доказательства компетенций.</p>
+              <p className="mt-3 text-sm leading-6 text-cta-foreground/70">Подтвердите профиль, исправьте данные и добавьте доказательства компетенций.</p>
               <Link href={`/for-partners?company=${company.slug}`} className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground">
                 Подтвердить профиль
               </Link>

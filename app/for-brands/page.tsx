@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { BarChart3, Boxes, FileText, MousePointerClick, Network, Presentation, Target, Users } from "lucide-react";
 import { BrandLeadForm } from "@/components/BrandLeadForm";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { getSolutionBySlug } from "@/lib/db/queries";
 import { absoluteUrl, pageAlternates } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +35,16 @@ const formats = [
   { icon: Network, title: "Исследование рынка", text: "Спонсорство отраслевого отчёта без влияния на его выводы и рейтинг компаний." },
 ];
 
-export default function ForBrandsPage() {
+export default async function ForBrandsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ solution?: string; surface?: string }>;
+}) {
+  const resolvedParams = searchParams ? await searchParams : undefined;
+  const solutionSlug = typeof resolvedParams?.solution === "string" ? resolvedParams.solution.trim() : undefined;
+  const surface = typeof resolvedParams?.surface === "string" ? resolvedParams.surface.trim() : undefined;
+  const matchedSolution = solutionSlug ? await getSolutionBySlug(solutionSlug) : null;
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
@@ -122,7 +133,7 @@ export default function ForBrandsPage() {
         </section>
 
         {/* Lead Form */}
-        <section className="container grid gap-10 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:py-24">
+        <section id="brand-lead-form" className="container grid gap-10 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:py-24">
           <div>
             <h2 className="font-display text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
               Соберём формат под один проверяемый результат
@@ -131,7 +142,13 @@ export default function ForBrandsPage() {
               Не публикуем выдуманный медиакит и не продаём место в рейтинге. Определим аудиторию, действие и отчёт до запуска пилота.
             </p>
           </div>
-          <BrandLeadForm />
+          <Suspense fallback={<div className="min-h-96 rounded-panel border border-border bg-card p-6 sm:p-8" />}>
+            <BrandLeadForm
+              initialSolutionSlug={solutionSlug}
+              initialSolutionTitle={matchedSolution?.title}
+              initialSurface={surface ?? matchedSolution?.surface}
+            />
+          </Suspense>
         </section>
       </main>
       <Footer />

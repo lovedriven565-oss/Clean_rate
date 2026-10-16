@@ -6,7 +6,9 @@ import {
   adCtaMeta,
   adTrackingEntity,
   buildAdReasons,
+  buildEmptySlotPitch,
   describePh,
+  formatBrandLeadGoalPrefill,
   isAdVisibleInCountry,
 } from "../lib/ads/presentation.js";
 import { getEligibleAd, getEligibleAdsForCategories } from "../lib/ads/queries.js";
@@ -149,6 +151,43 @@ describe("Блок 3 — презентационный слой рекламы"
       );
 
       assert.equal(ads.offices, null);
+    });
+  });
+
+  describe("самопродающийся пустой слот (EmptySlotPitch) и предзаполнение формы бренда", () => {
+    it("формирует карточку свободного слота с поверхностью и ссылкой /for-brands?solution=...&surface=...", () => {
+      const pitch = buildEmptySlotPitch({ solutionSlug: "vino-na-divane", surface: "upholstery" });
+      assert.equal(pitch.eyebrow, "Свободный слот для бренда · Совместимость: Мебель");
+      assert.equal(pitch.surfaceLabel, "Мебель");
+      assert.equal(pitch.ctaLabel, "Занять слот в этом протоколе");
+      assert.equal(pitch.href, "/for-brands?solution=vino-na-divane&surface=upholstery");
+    });
+
+    it("корректно отрабатывает пустой слот без параметров или с неизвестной поверхностью", () => {
+      const pitch = buildEmptySlotPitch({});
+      assert.equal(pitch.eyebrow, "Свободный слот для бренда · Совместимость: Любое покрытие");
+      assert.equal(pitch.href, "/for-brands");
+    });
+
+    it("предзаполняет поле задачи в BrandLeadForm по query-параметрам solution и surface", () => {
+      const prefillWithTitle = formatBrandLeadGoalPrefill({
+        solutionSlug: "vino-na-divane",
+        solutionTitle: "Красное вино на диване",
+        surface: "upholstery",
+      });
+      assert.equal(
+        prefillWithTitle,
+        "Размещение состава в протоколе. «Красное вино на диване» (vino-na-divane). Совместимость с поверхностью: Мебель."
+      );
+
+      const prefillSlugOnly = formatBrandLeadGoalPrefill({
+        solutionSlug: "vino-na-divane",
+        surface: "upholstery",
+      });
+      assert.match(prefillSlugOnly, /«vino-na-divane»/);
+      assert.match(prefillSlugOnly, /Совместимость с поверхностью: Мебель/);
+
+      assert.equal(formatBrandLeadGoalPrefill({}), "");
     });
   });
 });

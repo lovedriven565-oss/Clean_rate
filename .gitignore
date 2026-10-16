@@ -35,3 +35,6 @@ next-env.d.ts
 .open-next/
 .dev.vars
 .vercel
+
+# visual regression snapshots
+/.shots/

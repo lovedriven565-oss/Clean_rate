@@ -50,7 +50,7 @@ function SolutionTile({
           </span>
         </span>
         <span className="flex flex-1 flex-col gap-2 p-3.5">
-          <span className="text-balance text-[15px] font-semibold leading-snug text-foreground">{solution.title}</span>
+          <span className="line-clamp-2 min-h-10 text-balance text-[15px] font-semibold leading-snug text-foreground">{solution.title}</span>
           <span className="mt-auto flex items-center justify-between gap-2 font-data text-xs text-muted-foreground">
             <span>{pluralize(solution.diySteps.length, ["шаг", "шага", "шагов"])}</span>
             <span className="font-semibold text-foreground">{view ? `${view.min}–${view.max}` : "цена по запросу"}</span>

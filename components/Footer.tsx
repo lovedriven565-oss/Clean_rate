@@ -33,13 +33,13 @@ const columns = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-contrast text-contrast-foreground">
+    <footer className="border-t border-border bg-cta text-cta-foreground">
       <div className="container grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)] lg:py-18">
         <div className="flex flex-col items-start gap-5">
-          <Link href="/" className="font-display font-bold tracking-tight text-contrast-foreground">
+          <Link href="/" className="font-display font-bold tracking-tight text-cta-foreground">
             <BrandLogo />
           </Link>
-          <p className="max-w-sm text-sm leading-6 text-contrast-foreground/70">
+          <p className="max-w-sm text-sm leading-6 text-cta-foreground/70">
             Профессиональная платформа индустрии чистоты: компании, бренды, поставщики и знания в единой структуре рынка.
           </p>
           <Link
@@ -53,11 +53,11 @@ export function Footer() {
 
         {columns.map((column) => (
           <div key={column.title} className="flex flex-col gap-4">
-            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-contrast-foreground/50">{column.title}</h3>
-            <ul className="flex flex-col gap-3 text-sm text-contrast-foreground/75">
+            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-cta-foreground/50">{column.title}</h3>
+            <ul className="flex flex-col gap-3 text-sm text-cta-foreground/75">
               {column.links.map((link) => (
                 <li key={`${link.href}-${link.label}`}>
-                  <Link href={link.href} className="transition-colors hover:text-contrast-foreground">
+                  <Link href={link.href} className="transition-colors hover:text-cta-foreground">
                     {link.label}
                   </Link>
                 </li>
@@ -67,8 +67,8 @@ export function Footer() {
         ))}
       </div>
 
-      <div className="border-t border-contrast-foreground/15">
-        <div className="container flex flex-col gap-2 py-6 text-xs text-contrast-foreground/50 md:flex-row md:items-center md:justify-between">
+      <div className="border-t border-cta-foreground/15">
+        <div className="container flex flex-col gap-2 py-6 text-xs text-cta-foreground/50 md:flex-row md:items-center md:justify-between">
           <p>© 2026 {SITE_NAME}. Информация носит справочный характер: услуги оказывают компании, платформа не является стороной договора.</p>
           <p>Оценка и рекламное размещение разделены</p>
         </div>

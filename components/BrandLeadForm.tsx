@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Loader2, Send } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { CheckCircle2, FlaskConical, Loader2, Send } from "lucide-react";
 import { Button, Input } from "@/components/ui/primitives";
 import { Select } from "@/components/ui/Select";
 import { TurnstileWidget, turnstileEnabled } from "@/components/TurnstileWidget";
+import { formatBrandLeadGoalPrefill } from "@/lib/ads/presentation";
 import { parseApiResult } from "@/lib/api-result";
+import { SURFACE_LABELS, isSurface } from "@/lib/solutions/meta";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -17,17 +20,40 @@ const roles = [
   { value: "other", label: "Другая роль" },
 ];
 
-export function BrandLeadForm() {
+export function BrandLeadForm({
+  initialSolutionSlug,
+  initialSolutionTitle,
+  initialSurface,
+}: {
+  initialSolutionSlug?: string;
+  initialSolutionTitle?: string;
+  initialSurface?: string;
+} = {}) {
+  const searchParams = useSearchParams();
+  const querySolution = searchParams.get("solution") ?? initialSolutionSlug ?? "";
+  const querySurface = searchParams.get("surface") ?? initialSurface ?? "";
+  const resolvedSolutionTitle =
+    querySolution && querySolution === initialSolutionSlug ? initialSolutionTitle : undefined;
+  const prefilledGoal = formatBrandLeadGoalPrefill({
+    solutionSlug: querySolution,
+    solutionTitle: resolvedSolutionTitle,
+    surface: querySurface,
+  });
+
   const [brandName, setBrandName] = useState("");
   const [website, setWebsite] = useState("");
   const [contactName, setContactName] = useState("");
   const [contact, setContact] = useState("");
   const [role, setRole] = useState("brand");
-  const [goal, setGoal] = useState("");
+  const [customGoal, setCustomGoal] = useState<string | null>(null);
+  const goal = customGoal ?? prefilledGoal;
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  const surfaceBadge = isSurface(querySurface) ? SURFACE_LABELS[querySurface] : null;
+  const contextLabel = resolvedSolutionTitle || querySolution;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -91,6 +117,19 @@ export function BrandLeadForm() {
       <h3 className="font-display text-2xl font-bold text-foreground">Обсудить пилот</h3>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">Расскажите, какую задачу бренда должна решить платформа.</p>
 
+      {(contextLabel || surfaceBadge) && (
+        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-control border border-primary/25 bg-primary/[0.06] px-3.5 py-2.5 text-xs text-foreground">
+          <FlaskConical className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+          <span className="font-semibold">Выбранный слот:</span>
+          {contextLabel && <span className="font-medium text-foreground">протокол «{contextLabel}»</span>}
+          {surfaceBadge && (
+            <span className="rounded-full bg-card px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+              Совместимость: {surfaceBadge}
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-xs font-semibold text-foreground">
           Бренд или компания
@@ -119,7 +158,7 @@ export function BrandLeadForm() {
         Задача и желаемый результат
         <textarea
           value={goal}
-          onChange={(event) => setGoal(event.target.value)}
+          onChange={(event) => setCustomGoal(event.target.value)}
           rows={4}
           placeholder="Например: представить новую линейку профессиональным компаниям и получить запросы на демонстрацию"
           className="rounded-control border border-border bg-card px-4 py-3 text-sm font-normal text-foreground outline-none placeholder:text-muted-foreground focus:border-primary/45 focus:ring-2 focus:ring-primary/15"

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowUpRight, Hand, ShoppingCart, Wallet } from "lucide-react";
+import { ArrowUpRight, Hand, ShieldCheck, ShoppingCart, Wallet } from "lucide-react";
 import type { Brand, Company, PriceEstimate, Solution } from "@/lib/types";
+import { SURFACE_LABELS, SURFACE_RISK_LABELS } from "@/lib/solutions/meta";
 import { DiyChecklist } from "./DiyChecklist";
 import { DiyEscalation } from "./DiyEscalation";
 import { SolutionVideo } from "./SolutionVideo";
@@ -21,6 +22,7 @@ export function DiyPanel({
   const recommended = products.filter((p) => p.role === "recommended");
   const alternatives = products.filter((p) => p.role === "alternative");
   const brandBySlugOrId = (id?: string) => brands.find((b) => b.id === id || b.slug === id);
+  const surfaceTarget = solution.material ?? SURFACE_LABELS[solution.surface].toLowerCase();
 
   return (
     <section
@@ -49,8 +51,8 @@ export function DiyPanel({
       {/* «Не делайте» первым: предупреждения важнее самих шагов протокола */}
       <WarningList warnings={solution.warnings} className="mt-6" />
 
-      {/* Короткий видеоразбор до чек-листа — слот пуст, пока у протокола нет видео */}
-      <SolutionVideo videoUrl={solution.videoUrl} title={solution.title} />
+      {/* Видеоразбор или интерактивный Сторис-разбор протокола */}
+      <SolutionVideo solution={solution} brands={brands} />
 
       <DiyChecklist slug={solution.slug} steps={solution.diySteps} />
 
@@ -66,52 +68,95 @@ export function DiyPanel({
 
       {products.length > 0 && (
         <div className="mt-8 border-t border-border/70 pt-6">
-          <span className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">Профессиональные средства</span>
-          <ul className="mt-3 space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="font-display text-lg font-bold tracking-[-0.02em] text-foreground">
+                Чем вывести и не испортить покрытие
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                Подобранные составы бережно удаляют загрязнение и не повреждают {SURFACE_RISK_LABELS[solution.surface]}.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-3 py-1 text-xs font-semibold text-success">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+              Безопасно для: {surfaceTarget}
+            </span>
+          </div>
+
+          <ul className="mt-4 space-y-2.5">
             {[...recommended, ...alternatives].map((product) => {
               const brand = brandBySlugOrId(product.brandId);
               const label = product.note ?? product.productName ?? brand?.name ?? "Средство";
               const buyUrl = brand && brand.affiliateUrl !== "#" ? brand.affiliateUrl : null;
-              const className =
-                "group flex items-center gap-3 rounded-control border border-border/80 bg-muted/30 px-4 py-3 transition-colors hover:border-primary/30 hover:bg-card";
+              const isPrimary = product.role === "recommended";
+              const roleLabel = isPrimary ? "Основной состав" : "Альтернатива";
+
               return (
-                <li key={product.id ?? label} className={className}>
-                  {brand ? (
-                    <Link href={`/brands/${brand.slug}`} className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-foreground transition-colors group-hover:text-primary">{label}</span>
-                      <span className="block text-xs text-muted-foreground">
-                        {product.role === "recommended" ? "Рекомендуем" : "Альтернатива"}
-                        {` · ${brand.name}`}
+                <li
+                  key={product.id ?? label}
+                  className="group flex flex-col gap-3 rounded-control border border-border/80 bg-muted/30 p-4 transition-colors hover:border-primary/30 hover:bg-card sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={
+                          isPrimary
+                            ? "inline-flex items-center rounded-full bg-primary/12 px-2.5 py-0.5 text-[11px] font-semibold text-primary"
+                            : "inline-flex items-center rounded-full border border-border bg-card px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
+                        }
+                      >
+                        {roleLabel}
                       </span>
-                    </Link>
-                  ) : (
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-foreground">{label}</span>
-                      <span className="block text-xs text-muted-foreground">
-                        {product.role === "recommended" ? "Рекомендуем" : "Альтернатива"}
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-success">
+                        <ShieldCheck className="h-3 w-3 shrink-0" />
+                        Совместимо: {SURFACE_LABELS[solution.surface]}
                       </span>
-                    </span>
-                  )}
-                  {buyUrl && (
-                    <a
-                      href={buyUrl}
-                      target="_blank"
-                      rel="sponsored nofollow noopener"
-                      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
-                    >
-                      <ShoppingCart className="h-3.5 w-3.5" />
-                      Купить
-                    </a>
-                  )}
-                  {brand && !buyUrl && (
-                    <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
-                  )}
+                    </div>
+
+                    {brand ? (
+                      <Link href={`/brands/${brand.slug}`} className="mt-2 block">
+                        <span className="block text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
+                          {label}
+                        </span>
+                        <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground group-hover:text-foreground">
+                          Профиль бренда {brand.name}
+                          <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </span>
+                      </Link>
+                    ) : (
+                      <div className="mt-2">
+                        <span className="block text-sm font-semibold text-foreground">{label}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-2">
+                    {brand && (
+                      <Link
+                        href={`/brands/${brand.slug}`}
+                        className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-card/70 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+                      >
+                        О бренде
+                      </Link>
+                    )}
+                    {buyUrl && (
+                      <a
+                        href={buyUrl}
+                        target="_blank"
+                        rel="sponsored nofollow noopener"
+                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3.5 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground active:scale-[0.98]"
+                      >
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                        Купить
+                      </a>
+                    )}
+                  </div>
                 </li>
               );
             })}
           </ul>
           <p className="mt-3 text-xs leading-5 text-muted-foreground">
-            Кнопки «Купить» ведут на сайты брендов и маркетплейсы — по ним платформа может получать партнёрское вознаграждение. Дилеров и наличие в вашем городе смотрите на странице бренда.
+            Кнопки «Купить» ведут на официальные сайты брендов и маркетплейсы. По ним платформа может получать партнёрское вознаграждение. Дилеров и наличие в вашем городе смотрите на странице бренда.
           </p>
         </div>
       )}

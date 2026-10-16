@@ -46,6 +46,40 @@ describe("solution structured data", () => {
     assert.doesNotThrow(() => JSON.parse(serialized));
   });
 
+  it("includes VideoObject in @graph when solution has a valid videoUrl", async () => {
+    const solution = await getSolutionBySlug("vino-na-divane");
+    assert.ok(solution);
+    const faq = buildSolutionFaq(solution);
+    const url = "https://example.test/solutions/vino-na-divane";
+    const breadcrumbs = [
+      { name: "Главная", url: "https://example.test/" },
+      { name: "Решения", url: "https://example.test/solutions" },
+      { name: solution.title, url },
+    ];
+
+    const withYoutube = buildSolutionJsonLd(
+      { ...solution, videoUrl: "https://www.youtube.com/shorts/AbC123XyZ" },
+      url,
+      faq,
+      breadcrumbs
+    );
+    const ytTypes = withYoutube["@graph"].map((node) => node["@type"]);
+    assert.deepEqual(ytTypes, ["HowTo", "FAQPage", "BreadcrumbList", "VideoObject"]);
+    const ytVideo = withYoutube["@graph"][3] as Record<string, unknown>;
+    assert.equal(ytVideo.embedUrl, "https://www.youtube-nocookie.com/embed/AbC123XyZ");
+    assert.ok(Array.isArray(ytVideo.thumbnailUrl) && ytVideo.thumbnailUrl.length > 0);
+
+    const withMp4 = buildSolutionJsonLd(
+      { ...solution, videoUrl: "https://cdn.example.com/guides/wine.mp4" },
+      url,
+      faq,
+      breadcrumbs
+    );
+    const mp4Video = withMp4["@graph"][3] as Record<string, unknown>;
+    assert.equal(mp4Video["@type"], "VideoObject");
+    assert.equal(mp4Video.contentUrl, "https://cdn.example.com/guides/wine.mp4");
+  });
+
   it("ranks related solutions by surface, then problem type", async () => {
     const all = await getAllSolutions();
     const wine = all.find((s) => s.slug === "vino-na-divane")!;

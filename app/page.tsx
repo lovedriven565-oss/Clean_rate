@@ -93,7 +93,7 @@ export default async function Home() {
                 <ShieldCheck className="size-6 shrink-0 text-link" aria-hidden />
                 <p className="min-w-0 flex-1 basis-72 text-[15px] leading-relaxed text-foreground">
                   Платный охват возможен, покупка оценки нет: размещение маркируется «Реклама» и не меняет порядок
-                  рейтинга. Контакт с компанией прямой — без лид-форм и комиссии платформы.
+                  рейтинга. Контакт с компанией прямой, без лид-форм и комиссии платформы.
                 </p>
                 <Link
                   href="/rating"
@@ -107,7 +107,7 @@ export default async function Home() {
 
             {/* B2B */}
             <Reveal>
-              <section className="relative overflow-hidden rounded-panel bg-contrast p-7 text-contrast-foreground sm:p-12">
+              <section className="relative overflow-hidden rounded-panel bg-cta p-7 text-cta-foreground sm:p-12">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-brand/30 blur-3xl"
@@ -115,19 +115,28 @@ export default async function Home() {
                 <div className="relative flex flex-wrap items-end justify-between gap-6">
                   <div className="max-w-2xl">
                     <h2 className="text-balance font-display text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
-                      Вы клининговая компания или бренд? Займите место на карте рынка.
+                      Вы бренд химии или клининговая компания? Займите место в протоколах и рейтинге.
                     </h2>
-                    <p className="mt-4 max-w-xl text-contrast-foreground/75">
-                      Подтвердите данные компании или обсудите пилотное размещение бренда с прозрачной аналитикой.
+                    <p className="mt-4 max-w-xl text-cta-foreground/75">
+                      Разместите безопасные составы прямо в пошаговых решениях по поверхностям или подтвердите профиль
+                      клининговой компании с прямым телефоном.
                     </p>
                   </div>
-                  <Link
-                    href="/for-partners"
-                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition-transform active:scale-[0.98]"
-                  >
-                    Разместить бизнес
-                    <ArrowRight className="size-4" aria-hidden />
-                  </Link>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      href="/for-brands"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition-transform active:scale-[0.98]"
+                    >
+                      Интеграция для брендов
+                      <ArrowRight className="size-4" aria-hidden />
+                    </Link>
+                    <Link
+                      href="/for-partners"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-full border border-cta-foreground/25 bg-cta-foreground/10 px-6 text-sm font-semibold text-cta-foreground transition-colors hover:bg-cta-foreground/15 active:scale-[0.98]"
+                    >
+                      Тарифы для клининга
+                    </Link>
+                  </div>
                 </div>
               </section>
             </Reveal>

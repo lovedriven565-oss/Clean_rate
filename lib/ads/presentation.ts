@@ -84,3 +84,62 @@ export function isAdVisibleInCountry(ad: Pick<EligibleAd, "targetCountries">, co
   if (!ad.targetCountries || ad.targetCountries.length === 0 || !countryCode) return true;
   return ad.targetCountries.includes(countryCode.toUpperCase());
 }
+
+export interface EmptySlotPitchMeta {
+  eyebrow: string;
+  surfaceLabel: string;
+  ctaLabel: string;
+  href: string;
+}
+
+/**
+ * Паспорт свободного слота `solution.sponsored_product`: формирует ссылку на `/for-brands`
+ * с предзаполненным протоколом и поверхностью и подпись совместимости.
+ */
+export function buildEmptySlotPitch(input: { solutionSlug?: string; surface?: SolutionSurface | string }): EmptySlotPitchMeta {
+  const surfaceText = (input.surface ? surfaceLabel(input.surface) : null) ?? "Любое покрытие";
+  const params = new URLSearchParams();
+  if (input.solutionSlug) params.set("solution", input.solutionSlug);
+  if (input.surface) params.set("surface", input.surface);
+  const query = params.toString();
+
+  return {
+    eyebrow: `Свободный слот для бренда · Совместимость: ${surfaceText}`,
+    surfaceLabel: surfaceText,
+    ctaLabel: "Занять слот в этом протоколе",
+    href: query ? `/for-brands?${query}` : "/for-brands",
+  };
+}
+
+/**
+ * Автозаполнение поля задачи в форме бренда (`BrandLeadForm`) при переходе из протокола
+ * по ссылке `/for-brands?solution=...&surface=...`.
+ */
+export function formatBrandLeadGoalPrefill(input: {
+  solutionSlug?: string | null;
+  solutionTitle?: string | null;
+  surface?: string | null;
+}): string {
+  const slug = input.solutionSlug?.trim() || "";
+  const title = input.solutionTitle?.trim() || "";
+  const surfaceKey = input.surface?.trim() || "";
+  const resolvedSurface = surfaceKey ? (surfaceLabel(surfaceKey) ?? surfaceKey) : "";
+
+  if (!slug && !title && !resolvedSurface) return "";
+
+  const parts: string[] = ["Размещение состава в протоколе"];
+  if (title && slug) {
+    parts.push(`«${title}» (${slug})`);
+  } else if (title) {
+    parts.push(`«${title}»`);
+  } else if (slug) {
+    parts.push(`«${slug}»`);
+  }
+
+  if (resolvedSurface) {
+    parts.push(`Совместимость с поверхностью: ${resolvedSurface}`);
+  }
+
+  return `${parts.join(". ")}.`;
+}
+

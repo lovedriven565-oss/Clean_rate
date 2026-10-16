@@ -167,3 +167,13 @@
 - **AI без Vectorize:** `getSearchBindings` больше не требует VECTORIZE — LLM-ответы и vision-фото консультанта работают при одном `AI`-биндинге, семантика откатывается на словарь. Для полного семантического поиска: `wrangler vectorize create cleanhub-solutions --dimensions=1024 --metric=cosine`, раскомментировать `vectorize` в `wrangler.jsonc`, деплой, `POST /api/admin/reindex` (требует AI+VECTORIZE).
 - **Проверки:** typecheck 0, lint чисто, test 140/140, build — 123 страницы. Ручная проверка dev: `/solutions/vino-na-divane` — мостик в SSR, реклама/спонсор отсутствуют; `/moscow/uborka-kvartir` — 200 + `noindex`; `/suppliers` — `noindex`; шапка без лишних пунктов.
 - **Осторожно с dev-сервером:** `kill` shell-сессии не убивает процесс Next на порту (старый инстанс отдавал 404 на всех вложенных роутах). Освобождать: `netstat -ano | grep :3111` → `taskkill //PID`.
+
+## Этап 3.5 + Этап 4 — полировка дизайна и 16 SEO-протоколов (сделано)
+- `SolutionVideo.tsx` — сторис-плеер на токенах (`data-surface`, `bg-danger/10`, `bg-primary/10`, `bg-success/10`, `text-star`), без `zinc/white/red/sky/emerald/amber`; кнопки `h-10`; кадр 8000 мс; автопауза по `onPointerDown`/`onFocusCapture` (кнопка с `data-pause-toggle` не перехватывается, иначе клик снимал бы паузу).
+- `HomeHero` — подзаголовок ≤18 слов без «—», подписи шагов `01/02/03` обычным регистром (`font-data`), «Открыть протокол» — pill `bg-brand` (`GlowLink` в `components/ui/fx` теперь не используется).
+- CTA разведены: шапка «Подключить компанию», B2B-блок главной «Интеграция для брендов» / «Тарифы для клининга».
+- `/solutions/[slug]` — без капса у «Частые вопросы»/«Похожие задачи», «Компании · Город» в ProPanel — `h3`. `AdPlacement` получил проп `pitchOnly`: активная кампания — под «Двумя путями», `EmptySlotPitch` — после FAQ.
+- **View Transitions:** в Next 16.3 флага `experimental.viewTransition` нет (работает без конфигурации, React canary в App Router). Корень обёрнут в `<ViewTransition>` в `app/layout.tsx` (кросс-фейд при навигации); при `prefers-reduced-motion` анимации `::view-transition-*` отключены в `globals.css`.
+- Seed: 16 опубликованных решений (+ flomaster-ruchka-na-divane, vosk-zhvachka-na-kovre, zapah-zhivotnyh-kover, chernaya-plesen-shvy-vannaya, nalet-chernaya-santehnika, sledy-reziny-kleya-laminat), sp-21…32, ik-69…81, pe-31…48. Новых фото нет — обложки из `public/shelves` и фолбэк по поверхности (`carpet`, `floor` в `covers.ts`).
+- Проверки: typecheck 0, lint чисто, test 150/150, build 155 страниц (`/solutions/[slug]` ● ×16).
+- **Прод:** новые решения/сметы/ключи надо засеять в D1 (иначе прод покажет 10 протоколов, если D1 не пуст).

@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Ban, PhoneCall, Star, type LucideIcon } from "lucide-react";
 import { MarketBadge } from "@/components/MarketBadge";
 import { SmartSearch } from "@/components/SmartSearch";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { Aurora, GlowLink, PillTabs, RevealText, SpotlightCard } from "@/components/ui/fx";
+import Link from "next/link";
+import { Aurora, PillTabs, RevealText, SpotlightCard } from "@/components/ui/fx";
+import { BeforeAfter } from "@/components/ui/BeforeAfter";
 import {
   buildDiagnosticResult,
   listProblems,
@@ -61,8 +62,8 @@ export function HomeHero({ solutions, estimates }: HomeHeroProps) {
             parts={[{ text: "Любая задача чистоты" }, { text: "решается за минуту", accent: true }]}
           />
           <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-            Протоколы с «не делайте» на первом месте, ориентиры цен и проверенные компании города — без посредников и
-            скрытых комиссий.
+            Пошаговые протоколы с блоком «Не делайте», ориентиры цен и проверенные компании города. Прямые контакты без
+            посредников и комиссий.
           </p>
           <div className="mt-7">
             <SmartSearch />
@@ -96,26 +97,23 @@ export function HomeHero({ solutions, estimates }: HomeHeroProps) {
                 transition={{ duration: reduce ? 0 : 0.5 }}
                 className="absolute inset-0 -z-10"
               >
-                <Image
+                <BeforeAfter
                   src={cover}
-                  alt=""
-                  fill
                   priority
                   sizes="(min-width: 1024px) 640px, 100vw"
-                  className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
+                <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
               </motion.div>
             </AnimatePresence>
 
-            <div className="relative flex min-h-[380px] flex-col justify-end gap-4 p-5 text-white sm:min-h-[430px] sm:p-7">
+            <div className="pointer-events-none relative flex min-h-[380px] flex-col justify-end gap-4 p-5 text-white sm:min-h-[430px] sm:p-7">
               {result ? (
                 <motion.div
                   key={result.slug}
                   initial={reduce ? false : { opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 200, damping: 24 }}
-                  className="space-y-4"
+                  className="pointer-events-auto space-y-4"
                 >
                   <p className="text-xs font-medium uppercase tracking-wider text-white/70">Решение дня</p>
                   <h2 className="max-w-md text-balance font-display text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
@@ -131,10 +129,13 @@ export function HomeHero({ solutions, estimates }: HomeHeroProps) {
                     </p>
                   )}
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                    <GlowLink href={result.href}>
+                    <Link
+                      href={result.href}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+                    >
                       Открыть протокол
                       <ArrowRight className="size-4" aria-hidden />
-                    </GlowLink>
+                    </Link>
                     <p className="font-data text-sm text-white/85">
                       {pluralize(result.totalSteps, ["шаг", "шага", "шагов"])}
                       {result.estimate && ` · ${result.estimate.min}–${result.estimate.max}`}
@@ -147,22 +148,51 @@ export function HomeHero({ solutions, estimates }: HomeHeroProps) {
             </div>
           </SpotlightCard>
 
-          <div className="mt-4 space-y-2">
-            <PillTabs
-              label="Поверхность"
-              options={surfaces.map((s) => ({ id: s.id, label: s.label, meta: String(s.count) }))}
-              value={resolved.surface}
-              onChange={(id) => setSelection({ surface: id as SolutionSurface })}
-            />
-            {problems.length > 1 && (
+          <div className="mt-4 space-y-2.5">
+            <div className="space-y-1">
+              <span className="block px-1 text-xs font-semibold text-muted-foreground">
+                <span className="font-data">01</span> Поверхность
+              </span>
               <PillTabs
-                label="Тип проблемы"
-                options={problems.map((p) => ({ id: p.id, label: p.label }))}
-                value={resolved.problem}
-                onChange={(id) =>
-                  setSelection({ surface: resolved.surface ?? undefined, problem: id as SolutionProblemType })
-                }
+                label="Поверхность"
+                options={surfaces.map((s) => ({ id: s.id, label: s.label, meta: String(s.count) }))}
+                value={resolved.surface}
+                onChange={(id) => setSelection({ surface: id as SolutionSurface })}
               />
+            </div>
+            {problems.length > 1 && (
+              <div className="space-y-1">
+                <span className="block px-1 text-xs font-semibold text-muted-foreground">
+                  <span className="font-data">02</span> Тип задачи
+                </span>
+                <PillTabs
+                  label="Тип проблемы"
+                  options={problems.map((p) => ({ id: p.id, label: p.label, meta: String(p.count) }))}
+                  value={resolved.problem}
+                  onChange={(id) =>
+                    setSelection({ surface: resolved.surface ?? undefined, problem: id as SolutionProblemType })
+                  }
+                />
+              </div>
+            )}
+            {resolved.protocols.length > 1 && (
+              <div className="space-y-1">
+                <span className="block px-1 text-xs font-semibold text-muted-foreground">
+                  <span className="font-data">{problems.length > 1 ? "03" : "02"}</span> Ситуация
+                </span>
+                <PillTabs
+                  label="Конкретный случай"
+                  options={resolved.protocols.map((protocol) => ({ id: protocol.slug, label: protocol.title }))}
+                  value={resolved.solution?.slug ?? null}
+                  onChange={(slug) =>
+                    setSelection({
+                      surface: resolved.surface ?? undefined,
+                      problem: resolved.problem ?? undefined,
+                      variant: slug,
+                    })
+                  }
+                />
+              </div>
             )}
           </div>
         </div>

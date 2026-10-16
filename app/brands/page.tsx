@@ -47,13 +47,13 @@ export default async function BrandsPage() {
         </section>
 
         <section className="container pb-16 sm:pb-24">
-          <div className="grid gap-6 rounded-panel bg-contrast p-8 text-contrast-foreground sm:p-12 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="grid gap-6 rounded-panel bg-cta p-8 text-cta-foreground sm:p-12 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-2xl">
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Брендам</span>
               <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] sm:text-4xl">
                 Место в индексе не продаётся. Его зарабатывают компании, которые на вас работают.
               </h2>
-              <p className="mt-4 text-sm leading-6 text-contrast-foreground/75">
+              <p className="mt-4 text-sm leading-6 text-cta-foreground/75">
                 Подтвердите связи с компаниями, добавьте продукты в протоколы и поднимайтесь в лидерборде открыто.
               </p>
             </div>

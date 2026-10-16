@@ -170,7 +170,14 @@ export function PillTabs({
   }
 
   return (
-    <div role="radiogroup" aria-label={label} className={cn("flex flex-wrap gap-1.5", className)}>
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className={cn(
+        "no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0",
+        className,
+      )}
+    >
       {options.map((option, index) => {
         const selected = index === selectedIndex;
         return (
@@ -186,7 +193,7 @@ export function PillTabs({
             onClick={() => onChange(option.id)}
             onKeyDown={(e) => onKeyDown(e, index)}
             className={cn(
-              "relative inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition-colors active:scale-[0.98]",
+              "relative inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition-colors active:scale-[0.98]",
               selected
                 ? "border-transparent text-brand-foreground"
                 : "border-border bg-card hover:border-brand/60",

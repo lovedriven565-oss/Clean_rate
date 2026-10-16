@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Ban, ChevronDown, Hand, ShieldAlert, Sparkles } from "lucide-react";
@@ -9,6 +8,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ShareButton } from "@/components/ShareButton";
 import { AdPlacement } from "@/components/ads/AdPlacement";
 import { DiyPanel } from "@/components/solution/DiyPanel";
+import { BeforeAfter } from "@/components/ui/BeforeAfter";
 import { ProPanel } from "@/components/solution/ProPanel";
 import { SolutionCard } from "@/components/solution/SolutionCard";
 import {
@@ -66,6 +66,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
   const related = relatedSolutions(solution, allSolutions);
   const faq = buildSolutionFaq(solution, estimates);
   const url = absoluteUrl(`/solutions/${solution.slug}`);
+  const adContext = { solutionSlug: solution.slug, surface: solution.surface, categoryId: solution.relatedCategory };
   const jsonLd = buildSolutionJsonLd(solution, url, faq, [
     { name: "Главная", url: absoluteUrl("/") },
     { name: "Решения", url: absoluteUrl("/solutions") },
@@ -130,17 +131,17 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               {/* Баннер с обложкой: первое «Не делайте» прямо на фото — предупреждение
                   до прокрутки к чек-листу и на любом экране */}
               <div className="data-surface relative min-h-[240px] overflow-hidden rounded-panel sm:min-h-[300px] lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:min-h-full">
-                <Image
+                <BeforeAfter
                   src={solutionCover(solution)}
-                  alt=""
-                  fill
                   priority
                   sizes="(min-width: 1024px) 560px, 100vw"
-                  className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+                <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+                <span className="pointer-events-none absolute bottom-2.5 right-3 z-10 text-[10px] font-medium text-white/60">
+                  до/после: стилизация
+                </span>
                 {solution.warnings[0] && (
-                  <p className="absolute inset-x-0 bottom-0 flex items-start gap-2.5 p-5 text-[13px] leading-snug text-white sm:p-6">
+                  <p className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-start gap-2.5 p-5 pb-7 text-[13px] leading-snug text-white sm:p-6 sm:pb-8">
                     <Ban className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
                     <span>
                       <span className="font-semibold">Не делайте: </span>
@@ -151,19 +152,10 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               </div>
 
               <div className="min-w-0 lg:col-start-1">
-                <ShareButton url={url} title={solution.title} text={`${solution.title} — протокол «два пути»`} />
+                <ShareButton url={url} title={solution.title} text={`${solution.title}: протокол «два пути»`} />
 
-                <div className="mt-5 flex gap-3 rounded-panel border border-border bg-card/80 p-4 text-sm leading-6 text-muted-foreground backdrop-blur">
-                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-star" />
-                  <p>
-                    Протокол проверен на типовых материалах, но реакция конкретной обивки или покрытия может отличаться.
-                    Тестируйте средство на незаметном участке. Действуя по протоколу, вы принимаете риск на себя:
-                    площадка не отвечает за результат. Если сомневаетесь, начните со второго пути.
-                  </p>
-                </div>
-
-                {/* Mobile path switcher */}
-                <div className="mt-6 grid grid-cols-2 gap-2 lg:hidden">
+                {/* Mobile path switcher — выше длинного дисклеймера, чтобы не тянуться вниз */}
+                <div className="mt-5 grid grid-cols-2 gap-2 lg:hidden">
                   <a
                     href="#diy"
                     className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border bg-card text-sm font-semibold text-foreground"
@@ -179,6 +171,15 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
                     Вызвать мастера
                   </a>
                 </div>
+
+                <div className="mt-5 flex gap-3 rounded-panel border border-border bg-card/80 p-4 text-sm leading-6 text-muted-foreground backdrop-blur">
+                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-star" />
+                  <p>
+                    Протокол проверен на типовых материалах, но реакция конкретной обивки или покрытия может отличаться.
+                    Тестируйте средство на незаметном участке. Действуя по протоколу, вы принимаете риск на себя:
+                    площадка не отвечает за результат. Если сомневаетесь, начните со второго пути.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -191,20 +192,16 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
             <ProPanel solution={solution} companies={companies} estimates={estimates} />
           </div>
 
-          {/* Спонсорский состав — строго после независимого протокола; рендерится на сервере (CLS=0),
-              при отсутствии допущенной кампании слот отсутствует в HTML целиком */}
-          <AdPlacement
-            placement="solution.sponsored_product"
-            context={{ solutionSlug: solution.slug, surface: solution.surface, categoryId: solution.relatedCategory }}
-            className="mt-6"
-          />
+          {/* Спонсорский состав — строго после независимого протокола; рендерится на сервере (CLS=0).
+              Паспорт свободного слота для брендов (без кампании) вынесен ниже FAQ, чтобы не перебивать читателя */}
+          <AdPlacement placement="solution.sponsored_product" context={adContext} className="mt-6" />
         </section>
 
         {/* FAQ */}
         <section id="faq" className="scroll-mt-32 border-y border-border bg-muted/35 py-14 sm:py-20">
           <div className="container grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
             <div>
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Частые вопросы</span>
+              <span className="text-sm font-semibold text-primary">Частые вопросы</span>
               <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
                 Коротко о главном
               </h2>
@@ -226,12 +223,16 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
           </div>
         </section>
 
+        <div className="container pt-10 sm:pt-14">
+          <AdPlacement placement="solution.sponsored_product" context={adContext} pitchOnly />
+        </div>
+
         {/* Related */}
         {related.length > 0 && (
           <section id="related" className="container scroll-mt-32 py-14 sm:py-20">
             <div className="mb-8 flex items-end justify-between gap-4">
               <div>
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Похожие задачи</span>
+                <span className="text-sm font-semibold text-primary">Похожие задачи</span>
                 <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
                   Ещё решения
                 </h2>
