@@ -174,6 +174,12 @@
 - CTA разведены: шапка «Подключить компанию», B2B-блок главной «Интеграция для брендов» / «Тарифы для клининга».
 - `/solutions/[slug]` — без капса у «Частые вопросы»/«Похожие задачи», «Компании · Город» в ProPanel — `h3`. `AdPlacement` получил проп `pitchOnly`: активная кампания — под «Двумя путями», `EmptySlotPitch` — после FAQ.
 - **View Transitions:** в Next 16.3 флага `experimental.viewTransition` нет (работает без конфигурации, React canary в App Router). Корень обёрнут в `<ViewTransition>` в `app/layout.tsx` (кросс-фейд при навигации); при `prefers-reduced-motion` анимации `::view-transition-*` отключены в `globals.css`.
-- Seed: 16 опубликованных решений (+ flomaster-ruchka-na-divane, vosk-zhvachka-na-kovre, zapah-zhivotnyh-kover, chernaya-plesen-shvy-vannaya, nalet-chernaya-santehnika, sledy-reziny-kleya-laminat), sp-21…32, ik-69…81, pe-31…48. Новых фото нет — обложки из `public/shelves` и фолбэк по поверхности (`carpet`, `floor` в `covers.ts`).
-- Проверки: typecheck 0, lint чисто, test 150/150, build 155 страниц (`/solutions/[slug]` ● ×16).
+- Seed: 16 опубликованных решений (+ flomaster-ruchka-na-divane, vosk-zhvachka-na-kovre, zapah-zhivotnyh-kover, chernaya-plesen-shvy-vannaya, nalet-chernaya-santehnika, sledy-reziny-kleya-laminat), sp-21…32, ik-69…81 (вес 10 у узких запросов с общим корнем «диван»/«ковёр», чтобы не проигрывать категории `ik-1`), pe-31…48, синхронизирован `migrations/seed.sql`. Новых фото нет — обложки из `public/shelves` и фолбэк по поверхности (`carpet`, `floor` в `covers.ts`).
+- Проверки: typecheck 0, lint чисто, test 152/152, build 155 страниц (`/solutions/[slug]` ● ×16).
 - **Прод:** новые решения/сметы/ключи надо засеять в D1 (иначе прод покажет 10 протоколов, если D1 не пуст).
+
+## Прод выведен в онлайн (2026-10-16)
+- **Живой URL:** https://clean-rate.happydayera.workers.dev (workers.dev поддомен аккаунта `happydayera`; воркер в проде называется `clean-rate` — НЕ `cleaning-rating` из wrangler.jsonc: Workers Builds управляет своим именем, `npm run deploy`/`wrangler deploy` создали бы второго воркера).
+- Прод-D1 `cleaning-rating-db` впервые проинициализирована: применены миграции 0000–0005 + `seed.sql` (16 решений, 23 компании, 81 ключ, 66 смет). `all_in_one_init.sql` — дублирующий дамп схемы, помечен applied в `d1_migrations` вручную (иначе `migrations apply` падал бы каждый раз).
+- Токен Cloudflare работал из env `CLOUDFLARE_API_TOKEN` (из файла, файл удалён). В сейф Devin не загружен — `devin.exe auth login` требует интерактива; загрузить можно командой `devin.exe cloud drs secret-create --key CLOUDFLARE_API_TOKEN --from-file <path>` после логина.
+- Домен `cleaning-rating.by` не подключён (NXDOMAIN) — пока живём на workers.dev.

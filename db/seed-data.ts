@@ -1402,19 +1402,19 @@ export const seedIntentKeywords: SeedIntentKeyword[] = [
   { id: "ik-68", keyword: "поломоечная машина", intent: "pro", weight: 9, targetKind: "brand", targetSlug: "karcher" },
 
   // Этап 4: новые протоколы
-  { id: "ik-69", keyword: "фломастер на диване", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "flomaster-ruchka-na-divane" },
-  { id: "ik-70", keyword: "ручка на диване", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "flomaster-ruchka-na-divane" },
-  { id: "ik-71", keyword: "маркер на обивке", intent: "b2c", weight: 8, targetKind: "solution", targetSlug: "flomaster-ruchka-na-divane" },
-  { id: "ik-72", keyword: "жвачка на ковре", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "vosk-zhvachka-na-kovre" },
-  { id: "ik-73", keyword: "воск на ковре", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "vosk-zhvachka-na-kovre" },
-  { id: "ik-74", keyword: "моча на ковре", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "zapah-zhivotnyh-kover" },
-  { id: "ik-75", keyword: "кошка пометила ковер", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "zapah-zhivotnyh-kover" },
-  { id: "ik-76", keyword: "плесень в ванной", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "chernaya-plesen-shvy-vannaya" },
-  { id: "ik-77", keyword: "черные швы плитки", intent: "b2c", weight: 8, targetKind: "solution", targetSlug: "chernaya-plesen-shvy-vannaya" },
-  { id: "ik-78", keyword: "черный смеситель", intent: "b2c", weight: 8, targetKind: "solution", targetSlug: "nalet-chernaya-santehnika" },
-  { id: "ik-79", keyword: "налет на смесителе", intent: "b2c", weight: 8, targetKind: "solution", targetSlug: "nalet-chernaya-santehnika" },
-  { id: "ik-80", keyword: "клей на ламинате", intent: "b2c", weight: 8, targetKind: "solution", targetSlug: "sledy-reziny-kleya-laminat" },
-  { id: "ik-81", keyword: "черные полосы на полу", intent: "b2c", weight: 8, targetKind: "solution", targetSlug: "sledy-reziny-kleya-laminat" },
+  { id: "ik-69", keyword: "фломастер на диване", intent: "b2c", weight: 10, targetKind: "solution", targetSlug: "flomaster-ruchka-na-divane" },
+  { id: "ik-70", keyword: "ручка на диване", intent: "b2c", weight: 10, targetKind: "solution", targetSlug: "flomaster-ruchka-na-divane" },
+  { id: "ik-71", keyword: "маркер на обивке", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "flomaster-ruchka-na-divane" },
+  { id: "ik-72", keyword: "жвачка на ковре", intent: "b2c", weight: 10, targetKind: "solution", targetSlug: "vosk-zhvachka-na-kovre" },
+  { id: "ik-73", keyword: "воск на ковре", intent: "b2c", weight: 10, targetKind: "solution", targetSlug: "vosk-zhvachka-na-kovre" },
+  { id: "ik-74", keyword: "моча на ковре", intent: "b2c", weight: 10, targetKind: "solution", targetSlug: "zapah-zhivotnyh-kover" },
+  { id: "ik-75", keyword: "кошка пометила ковер", intent: "b2c", weight: 10, targetKind: "solution", targetSlug: "zapah-zhivotnyh-kover" },
+  { id: "ik-76", keyword: "плесень в ванной", intent: "b2c", weight: 10, targetKind: "solution", targetSlug: "chernaya-plesen-shvy-vannaya" },
+  { id: "ik-77", keyword: "черные швы плитки", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "chernaya-plesen-shvy-vannaya" },
+  { id: "ik-78", keyword: "черный смеситель", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "nalet-chernaya-santehnika" },
+  { id: "ik-79", keyword: "налет на смесителе", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "nalet-chernaya-santehnika" },
+  { id: "ik-80", keyword: "клей на ламинате", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "sledy-reziny-kleya-laminat" },
+  { id: "ik-81", keyword: "черные полосы на полу", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "sledy-reziny-kleya-laminat" },
 ];
 
 export const seedPriceEstimates: SeedPriceEstimate[] = [

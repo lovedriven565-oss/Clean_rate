@@ -7,6 +7,23 @@ import {
   getSolutionBySlug,
   getSolutionSlugs,
 } from "../lib/db/queries.js";
+import { classifyIntent } from "../lib/search/intent-router.js";
+import { buildSolutionFaq, buildSolutionJsonLd } from "../lib/solutions/structured-data.js";
+import type { SolutionProblemType, SolutionSurface } from "../lib/types.js";
+
+const STAGE4_PROTOCOLS: {
+  slug: string;
+  surface: SolutionSurface;
+  problemType: SolutionProblemType;
+  sampleKeyword: string;
+}[] = [
+  { slug: "flomaster-ruchka-na-divane", surface: "upholstery", problemType: "stain", sampleKeyword: "фломастер на диване" },
+  { slug: "vosk-zhvachka-na-kovre", surface: "carpet", problemType: "stain", sampleKeyword: "жвачка на ковре" },
+  { slug: "zapah-zhivotnyh-kover", surface: "carpet", problemType: "odor", sampleKeyword: "моча на ковре" },
+  { slug: "chernaya-plesen-shvy-vannaya", surface: "bathroom", problemType: "scale", sampleKeyword: "плесень в ванной" },
+  { slug: "nalet-chernaya-santehnika", surface: "bathroom", problemType: "scale", sampleKeyword: "черный смеситель" },
+  { slug: "sledy-reziny-kleya-laminat", surface: "floor", problemType: "postrenovation", sampleKeyword: "клей на ламинате" },
+];
 
 describe("solutions graph and data layer", () => {
   it("loads 16 published solutions with complete protocol data", async () => {
@@ -25,6 +42,33 @@ describe("solutions graph and data layer", () => {
     }
   });
 
+  it("includes all 6 new high-frequency SEO protocols with surfaces, products and BY/RU/KZ estimates", async () => {
+    const keywords = await getIntentKeywords();
+
+    for (const expected of STAGE4_PROTOCOLS) {
+      const solution = await getSolutionBySlug(expected.slug);
+      assert.ok(solution, `missing protocol ${expected.slug}`);
+      assert.equal(solution.surface, expected.surface);
+      assert.equal(solution.problemType, expected.problemType);
+      assert.ok(
+        solution.recommendedProducts?.some((p) => p.role === "recommended"),
+        `${expected.slug} must have a primary recommended product`
+      );
+      assert.ok(
+        solution.recommendedProducts?.some((p) => p.role === "alternative"),
+        `${expected.slug} must have an alternative product`
+      );
+
+      const estimates = await getPriceEstimates({ solutionId: expected.slug });
+      const countries = estimates.map((e) => e.countryCode).sort();
+      assert.deepEqual(countries, ["BY", "KZ", "RU"], `${expected.slug} must have BY, RU, KZ estimates`);
+
+      const classified = classifyIntent(expected.sampleKeyword, keywords);
+      assert.equal(classified.target?.kind, "solution");
+      assert.equal(classified.target?.slug, expected.slug);
+    }
+  });
+
   it("finds a specific solution by slug with resolved brand recommendations", async () => {
     const solution = await getSolutionBySlug("vino-na-divane");
     assert.ok(solution);
@@ -39,6 +83,9 @@ describe("solutions graph and data layer", () => {
     assert.equal(slugs.length, 16);
     assert.ok(slugs.includes("vino-na-divane"));
     assert.ok(slugs.includes("poslestroy-zatirka-plitka"));
+    for (const { slug } of STAGE4_PROTOCOLS) {
+      assert.ok(slugs.includes(slug), `slugs must include ${slug}`);
+    }
   });
 
   it("returns regional price estimates for BY, RU and KZ", async () => {
@@ -56,14 +103,39 @@ describe("solutions graph and data layer", () => {
 
   it("returns classified intent keywords covering b2c, b2b and pro", async () => {
     const keywords = await getIntentKeywords();
-    assert.ok(keywords.length >= 60, `expected >= 60 keywords, got ${keywords.length}`);
+    assert.ok(keywords.length >= 80, `expected >= 80 keywords, got ${keywords.length}`);
 
     const b2c = keywords.filter((k) => k.intent === "b2c");
     const b2b = keywords.filter((k) => k.intent === "b2b");
     const pro = keywords.filter((k) => k.intent === "pro");
 
-    assert.ok(b2c.length >= 20, "expected >= 20 b2c keywords");
+    assert.ok(b2c.length >= 30, "expected >= 30 b2c keywords");
     assert.ok(b2b.length >= 15, "expected >= 15 b2b keywords");
     assert.ok(pro.length >= 15, "expected >= 15 pro keywords");
+  });
+
+  it("emits VideoObject in solution JSON-LD only when videoUrl is provided", async () => {
+    const solution = await getSolutionBySlug("flomaster-ruchka-na-divane");
+    assert.ok(solution);
+    const faq = buildSolutionFaq(solution);
+    const url = "https://example.test/solutions/flomaster-ruchka-na-divane";
+    const breadcrumbs = [
+      { name: "Главная", url: "https://example.test/" },
+      { name: "Решения", url: "https://example.test/solutions" },
+      { name: solution.title, url },
+    ];
+
+    const withoutVideo = buildSolutionJsonLd(solution, url, faq, breadcrumbs);
+    assert.ok(!withoutVideo["@graph"].some((n) => n["@type"] === "VideoObject"));
+
+    const withVideo = buildSolutionJsonLd(
+      { ...solution, videoUrl: "https://www.youtube.com/shorts/dQw4w9WgXcQ" },
+      url,
+      faq,
+      breadcrumbs
+    );
+    const videoNode = withVideo["@graph"].find((n) => n["@type"] === "VideoObject") as Record<string, unknown> | undefined;
+    assert.ok(videoNode, "VideoObject node must be present when videoUrl is set");
+    assert.equal(videoNode.embedUrl, "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
   });
 });

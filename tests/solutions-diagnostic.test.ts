@@ -62,6 +62,21 @@ describe("diagnostic: surfaces and problems", () => {
       listProblems(solutions, "mattress").map((p) => p.id),
       ["stain", "odor"],
     );
+    assert.deepEqual(
+      listProblems(solutions, "carpet").map((p) => p.id),
+      ["stain", "odor"],
+    );
+    const bathroomProblems = listProblems(solutions, "bathroom");
+    assert.deepEqual(
+      bathroomProblems.map((p) => p.id),
+      ["scale"],
+    );
+    assert.equal(bathroomProblems[0].count, 3);
+    const floorProblems = listProblems(solutions, "floor");
+    assert.deepEqual(
+      floorProblems.map((p) => p.id),
+      ["odor", "postrenovation"],
+    );
     assert.deepEqual(listProblems(solutions, "facade"), []);
   });
 });
