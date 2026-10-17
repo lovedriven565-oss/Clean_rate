@@ -181,5 +181,5 @@
 ## Прод выведен в онлайн (2026-10-16)
 - **Живой URL:** https://clean-rate.happydayera.workers.dev (workers.dev поддомен аккаунта `happydayera`; воркер в проде называется `clean-rate` — НЕ `cleaning-rating` из wrangler.jsonc: Workers Builds управляет своим именем, `npm run deploy`/`wrangler deploy` создали бы второго воркера).
 - Прод-D1 `cleaning-rating-db` впервые проинициализирована: применены миграции 0000–0005 + `seed.sql` (16 решений, 23 компании, 81 ключ, 66 смет). `all_in_one_init.sql` — дублирующий дамп схемы, помечен applied в `d1_migrations` вручную (иначе `migrations apply` падал бы каждый раз).
-- Токен Cloudflare работал из env `CLOUDFLARE_API_TOKEN` (из файла, файл удалён). В сейф Devin не загружен — `devin.exe auth login` требует интерактива; загрузить можно командой `devin.exe cloud drs secret-create --key CLOUDFLARE_API_TOKEN --from-file <path>` после логина.
+- Токен Cloudflare настроен локально в `.dev.vars` (в `.gitignore`) через связку `CLOUDFLARE_API_KEY`, `CLOUDFLARE_EMAIL` и `CLOUDFLARE_ACCOUNT_ID`. Удалённая прод-D1 `cleaning-rating-db` успешно обновлена (веса ключей ik-69…81 синхронизированы с кодом, точный роутинг подтверждён на проде).
 - Домен `cleaning-rating.by` не подключён (NXDOMAIN) — пока живём на workers.dev.
