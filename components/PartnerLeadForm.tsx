@@ -2,31 +2,45 @@
 
 import { useId, useMemo, useState } from "react";
 import Link from "next/link";
-import { Building2, CheckCircle2, Loader2, MapPin, Send } from "lucide-react";
+import { BadgeCheck, Building2, CheckCircle2, Loader2, MapPin, Send } from "lucide-react";
 import { Button, Input } from "@/components/ui/primitives";
 import { Select } from "@/components/ui/Select";
 import { TurnstileWidget, turnstileEnabled } from "@/components/TurnstileWidget";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { ENABLED_MARKETS, openCities } from "@/lib/markets";
 import { CATEGORIES } from "@/lib/categories";
+import { NON_OFFER_DISCLAIMER, formatProBudget, type PartnerPlan, type PartnerPrefill } from "@/lib/partners";
 import type { CategoryId } from "@/lib/types";
 import { parseApiResult } from "@/lib/api-result";
 import { cn } from "@/lib/utils";
 
 type Status = "idle" | "submitting" | "success" | "error";
-export type PartnerPlan = "base" | "pro";
+export type { PartnerPlan };
 
-export function PartnerLeadForm({ plan, onPlanChange }: { plan?: PartnerPlan; onPlanChange?: (plan: PartnerPlan) => void }) {
-  const { city: userCity } = useRegion();
+export function PartnerLeadForm({
+  plan,
+  onPlanChange,
+  prefill,
+  budgetLabel,
+}: {
+  plan?: PartnerPlan;
+  onPlanChange?: (plan: PartnerPlan) => void;
+  /** Данные из ссылки профиля компании — читаются только при монтировании (форму перемонтируют по key). */
+  prefill?: PartnerPrefill | null;
+  /** Ориентир бюджета PRO в валюте рынка; по умолчанию — по региону посетителя. */
+  budgetLabel?: string;
+}) {
+  const { city: userCity, countryCode } = useRegion();
   const formId = useId();
-  const [internalPlan, setInternalPlan] = useState<PartnerPlan>("base");
+  const [internalPlan, setInternalPlan] = useState<PartnerPlan>(prefill?.plan ?? "base");
   const selectedPlan = plan ?? internalPlan;
   const selectPlan = onPlanChange ?? setInternalPlan;
-  const [companyName, setCompanyName] = useState("");
+  const proBudget = budgetLabel ?? formatProBudget(countryCode);
+  const [companyName, setCompanyName] = useState(prefill?.companyName ?? "");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
-  const [city, setCity] = useState(userCity.name);
-  const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
+  const [city, setCity] = useState(prefill?.city ?? userCity.name);
+  const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>(prefill?.categoryIds ?? []);
   const [message, setMessage] = useState("");
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
@@ -116,12 +130,21 @@ export function PartnerLeadForm({ plan, onPlanChange }: { plan?: PartnerPlan; on
         </p>
       </div>
 
+      {prefill?.companyName && (
+        <div role="status" className="flex items-start gap-3 rounded-control border border-success/30 bg-success/10 px-4 py-3 text-sm">
+          <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
+          <span className="text-foreground">
+            Профиль «{prefill.companyName}» найден — укажите телефон для быстрой верификации
+          </span>
+        </div>
+      )}
+
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium text-muted-foreground">Тариф размещения</span>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Тариф размещения">
           {([
             { value: "base", title: "Базовый", note: "Бесплатно навсегда" },
-            { value: "pro", title: "PRO Спонсор", note: "от 149 Br/мес — бейдж «Спонсор» и приоритетный охват" },
+            { value: "pro", title: "PRO Спонсор", note: `${proBudget} — бейдж «Спонсор» и приоритетный охват` },
           ] as const).map((option) => (
             <button
               key={option.value}
@@ -269,6 +292,7 @@ export function PartnerLeadForm({ plan, onPlanChange }: { plan?: PartnerPlan; on
         <Building2 className="h-3.5 w-3.5" />
         Базовое размещение в каталоге бесплатно. Платные опции обсуждаются после заявки.
       </p>
+      <p className="text-center text-[11px] leading-5 text-muted-foreground/80">{NON_OFFER_DISCLAIMER}</p>
     </form>
   );
 }

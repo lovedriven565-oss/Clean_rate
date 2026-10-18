@@ -17,6 +17,7 @@ import { calculateOrganicScore, hasPublishedRating, ratingSourceLabel } from "@/
 import { formatCompanyPriceFrom, formatNumber, formatRating } from "@/lib/format";
 import { getCityByName, getMarketByCity } from "@/lib/markets";
 import { categoryLandingHref } from "@/lib/categories";
+import { partnerClaimHref } from "@/lib/partners";
 import { absoluteUrl, pageAlternates } from "@/lib/site";
 
 export async function generateStaticParams() {
@@ -215,13 +216,33 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               </dl>
             </div>
 
-            <div className="rounded-panel bg-cta p-6 text-cta-foreground">
-              <ShieldCheck className="h-6 w-6 text-primary" />
-              <h2 className="mt-5 font-display text-xl font-bold">Вы представитель компании?</h2>
-              <p className="mt-3 text-sm leading-6 text-cta-foreground/70">Подтвердите профиль, исправьте данные и добавьте доказательства компетенций.</p>
-              <Link href={`/for-partners?company=${company.slug}`} className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground">
-                Подтвердить профиль
-              </Link>
+            <div className="linear-beam data-surface rounded-panel p-6">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+                <ShieldCheck className="h-4 w-4" aria-hidden />
+                Для владельца бизнеса
+              </span>
+              <h2 className="mt-4 font-display text-xl font-bold tracking-[-0.02em] text-foreground">
+                Представляете «{company.name}»?
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Подтвердите профиль, исправьте данные и добавьте доказательства компетенций. Форма заполнится за вас.
+              </p>
+              <div className="mt-5 flex flex-col gap-2">
+                <Link
+                  href={partnerClaimHref(company, "base")}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-foreground px-5 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+                >
+                  <Check className="h-4 w-4" aria-hidden />
+                  Подтвердить профиль бесплатно
+                </Link>
+                <Link
+                  href={partnerClaimHref(company, "pro")}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 text-center text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
+                >
+                  <BriefcaseBusiness className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                  Занять PRO-слот в г. {company.city}
+                </Link>
+              </div>
             </div>
 
             {company.verified && (

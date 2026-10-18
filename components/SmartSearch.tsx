@@ -4,9 +4,50 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Briefcase, Camera, Home, Loader2, Search, Sparkles, Wrench } from "lucide-react";
 import { Input } from "@/components/ui/primitives";
+import { useRegion } from "@/components/providers/RegionProvider";
 import { cn } from "@/lib/utils";
+import { isEditableTarget, isSearchHotkey } from "@/lib/search/hotkey";
 import type { SearchIntent } from "@/lib/types";
 import type { SearchResponse } from "@/app/api/search/route";
+
+export const SEARCH_KEYSHORTCUTS = "/ Control+K Meta+K";
+
+/**
+ * Глобальный хоткей поиска (`/`, `⌘K`, `Ctrl+K`). Поиск на hero (`primary`) слушает в capture-фазе
+ * и забирает событие, только пока он в кадре (onTrigger → true); иначе событие доходит до NavSearch.
+ */
+export function useSearchHotkey(onTrigger: () => boolean, primary = false) {
+  const triggerRef = useRef(onTrigger);
+  useEffect(() => {
+    triggerRef.current = onTrigger;
+  });
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.repeat) return;
+      if (!isSearchHotkey(event, isEditableTarget(event.target))) return;
+      if (triggerRef.current()) event.preventDefault();
+    }
+    const target: Window | Document = primary ? window : document;
+    target.addEventListener("keydown", onKeyDown as EventListener, primary);
+    return () => target.removeEventListener("keydown", onKeyDown as EventListener, primary);
+  }, [primary]);
+}
+
+/** Клавиша-подсказка в стиле Linear. */
+export function Kbd({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <kbd
+      aria-hidden
+      className={cn(
+        "inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-[6px] border border-border bg-muted/70 px-1.5 font-data text-[11px] font-medium text-muted-foreground shadow-[inset_0_-1px_0_hsl(var(--border))]",
+        className
+      )}
+    >
+      {children}
+    </kbd>
+  );
+}
 
 export type Segment = "auto" | SearchIntent;
 
@@ -44,6 +85,7 @@ export function assistantHrefFor(query: string): string {
 /** Общая логика умного поиска — используется полноразмерным SmartSearch и компактным NavSearch */
 export function useSmartSearch() {
   const router = useRouter();
+  const { countryCode } = useRegion();
   const [query, setQuery] = useState("");
   const [segment, setSegment] = useState<Segment>("auto");
   const [result, setResult] = useState<SearchResponse | null>(null);
@@ -58,7 +100,9 @@ export function useSmartSearch() {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`);
+        const response = await fetch(
+          `/api/search?q=${encodeURIComponent(trimmed)}&country=${encodeURIComponent(countryCode)}`
+        );
         if (!response.ok) throw new Error("search failed");
         const data: SearchResponse = await response.json();
         setResult(data);
@@ -72,7 +116,7 @@ export function useSmartSearch() {
     }, DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, countryCode]);
 
   const effectiveIntent: SearchIntent = segment === "auto" ? result?.intent ?? "b2c" : segment;
 
@@ -159,8 +203,26 @@ export function useSmartSearch() {
 
 export function SmartSearch() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [flash, setFlash] = useState(false);
   const search = useSmartSearch();
   const { query, segment, setSegment, loading, open, setOpen, handleQueryChange, handleSubmit, handleKeyDown } = search;
+
+  useSearchHotkey(() => {
+    const input = inputRef.current;
+    const rect = input?.getBoundingClientRect();
+    if (!input || !rect || rect.width === 0 || rect.bottom < 0 || rect.top > window.innerHeight) return false;
+    input.focus();
+    input.select();
+    setFlash(true);
+    return true;
+  }, true);
+
+  useEffect(() => {
+    if (!flash) return;
+    const id = setTimeout(() => setFlash(false), 700);
+    return () => clearTimeout(id);
+  }, [flash]);
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
@@ -181,10 +243,15 @@ export function SmartSearch() {
       <form
         onSubmit={handleSubmit}
         role="search"
-        className="glass flex w-full items-center gap-2 rounded-full p-1.5 pl-5 transition-shadow focus-within:border-brand focus-within:shadow-[0_0_0_4px_hsl(var(--brand)/0.18)]"
+        className={cn(
+          "glass flex w-full items-center gap-2 rounded-full p-1.5 pl-5 transition-shadow duration-300 focus-within:border-brand focus-within:shadow-[0_0_0_4px_hsl(var(--brand)/0.18)]",
+          flash && "focus-within:shadow-[0_0_0_6px_hsl(var(--brand)/0.32)]"
+        )}
       >
         <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         <Input
+          ref={inputRef}
+          aria-keyshortcuts={SEARCH_KEYSHORTCUTS}
           value={query}
           onChange={(event) => handleQueryChange(event.target.value)}
           onFocus={() => query.trim() && setOpen(true)}
@@ -195,6 +262,7 @@ export function SmartSearch() {
           className="h-11 min-w-0 flex-1 border-transparent bg-transparent px-0 text-[15px] shadow-none focus:border-transparent"
         />
         {loading && <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />}
+        {!query && <Kbd className="hidden md:inline-flex">/</Kbd>}
         <button
           type="submit"
           className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground transition-transform active:scale-[0.98]"
@@ -349,11 +417,22 @@ export function SearchSuggestions({ search, className }: { search: ReturnType<ty
             «{query.trim()}»: ответ строго по проверенным протоколам
           </span>
         </span>
-        <ArrowRight
-          className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5"
-          aria-hidden
-        />
+        {highlightedIndex === assistantIndex ? (
+          <Kbd>↵</Kbd>
+        ) : (
+          <ArrowRight
+            className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5"
+            aria-hidden
+          />
+        )}
       </button>
+      <p aria-hidden className="hidden items-center justify-end gap-1.5 px-2 pb-0.5 pt-2 text-[11px] text-muted-foreground md:flex">
+        <Kbd className="h-5 min-w-5">↑</Kbd>
+        <Kbd className="h-5 min-w-5">↓</Kbd>
+        навигация
+        <Kbd className="ml-2 h-5 min-w-5">↵</Kbd>
+        открыть
+      </p>
     </div>
   );
 }
@@ -398,6 +477,7 @@ function SuggestionItem({
         <span className="block truncate font-medium text-foreground">{label}</span>
         {meta && <span className="block truncate text-xs text-muted-foreground">{meta}</span>}
       </span>
+      {highlighted && <Kbd>↵</Kbd>}
     </button>
   );
 }

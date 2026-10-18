@@ -91,10 +91,12 @@ function rankCompanies(companies: Company[], normalizedQuery: string, cityNames:
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const query = (url.searchParams.get("q") ?? "").trim().slice(0, MAX_QUERY_LENGTH);
+  const countryParam = url.searchParams.get("country")?.trim().toUpperCase();
+  const hasExplicitCountry = Boolean(countryParam && isCountryCode(countryParam));
 
-  const countryCode = countryFromRegionCookie(
-    readCookieValue(request.headers.get("cookie"), REGION_COOKIE)
-  );
+  const countryCode = hasExplicitCountry
+    ? countryParam
+    : countryFromRegionCookie(readCookieValue(request.headers.get("cookie"), REGION_COOKIE));
   const market = getMarket(countryCode);
   const cityNames = market.cities.map((c) => c.name);
 
@@ -178,8 +180,11 @@ export async function GET(request: Request) {
     });
   }
 
-  // Компании зависят от cookie региона: общий CDN-кеш отдал бы чужой рынок, поэтому только private.
-  return NextResponse.json(response, {
-    headers: { "Cache-Control": "private, max-age=60", Vary: "Cookie" },
-  });
+  // При явном ?country= в URL ответ одинаков для всех пользователей региона и кешируется на Edge Cloudflare;
+  // без параметра регион берётся из cookie, поэтому кеш остаётся приватным.
+  const headers: HeadersInit = hasExplicitCountry
+    ? { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600" }
+    : { "Cache-Control": "private, max-age=60", Vary: "Cookie" };
+
+  return NextResponse.json(response, { headers });
 }

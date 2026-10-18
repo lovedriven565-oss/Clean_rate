@@ -1,9 +1,12 @@
 import Link from "next/link";
-import { ArrowUpRight, Hand, ShieldCheck, ShoppingCart, Wallet } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, FlaskConical, Hand, ShieldCheck, ShoppingCart, Wallet } from "lucide-react";
+import { buildHumanSafetyBadge, findSeedProduct } from "@/lib/ph";
 import type { Brand, Company, PriceEstimate, Solution } from "@/lib/types";
 import { SURFACE_LABELS, SURFACE_RISK_LABELS } from "@/lib/solutions/meta";
+import { cn } from "@/lib/utils";
 import { DiyChecklist } from "./DiyChecklist";
 import { DiyEscalation } from "./DiyEscalation";
+import { RescueCalculator } from "./RescueCalculator";
 import { SolutionVideo } from "./SolutionVideo";
 import { WarningList } from "./WarningList";
 
@@ -51,10 +54,15 @@ export function DiyPanel({
       {/* «Не делайте» первым: предупреждения важнее самих шагов протокола */}
       <WarningList warnings={solution.warnings} className="mt-6" />
 
+      {/* Интерактивный калькулятор: Спасти самому или вызвать мастера за 10 секунд */}
+      <RescueCalculator solution={solution} estimates={estimates} companies={companies} />
+
       {/* Видеоразбор или интерактивный Сторис-разбор протокола */}
       <SolutionVideo solution={solution} brands={brands} />
 
-      <DiyChecklist slug={solution.slug} steps={solution.diySteps} />
+      <div id="diy-steps" className="scroll-mt-32">
+        <DiyChecklist slug={solution.slug} steps={solution.diySteps} />
+      </div>
 
       {/* Мостик к мастеру сразу после шагов: момент, когда читатель решает, справится ли сам */}
       <DiyEscalation solution={solution} estimates={estimates} companies={companies} />
@@ -67,7 +75,7 @@ export function DiyPanel({
       )}
 
       {products.length > 0 && (
-        <div className="mt-8 border-t border-border/70 pt-6">
+        <div id="diy-products" className="mt-8 scroll-mt-32 border-t border-border/70 pt-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 className="font-display text-lg font-bold tracking-[-0.02em] text-foreground">
@@ -83,10 +91,33 @@ export function DiyPanel({
             </span>
           </div>
 
+          {/* Человеческий светофор безопасности покрытий вместо сухих цифр pH */}
+          <div className="mt-3.5 flex flex-wrap gap-2" aria-label="Светофор безопасности для покрытия">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-3 py-1 text-[11px] font-semibold text-success">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              Не оставляет белых разводов · Безопасно для обивки и ворса
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-star/30 bg-star/15 px-3 py-1 text-[11px] font-semibold text-star">
+              <FlaskConical className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              Сначала тест на незаметном шве · Деликатное покрытие
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-danger/25 bg-danger/10 px-3 py-1 text-[11px] font-semibold text-danger">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              Бытовая щёлочь и хлор: риск смыть краску и оставить ореол
+            </span>
+          </div>
+
           <ul className="mt-4 space-y-2.5">
             {[...recommended, ...alternatives].map((product) => {
               const brand = brandBySlugOrId(product.brandId);
-              const label = product.note ?? product.productName ?? brand?.name ?? "Средство";
+              const seedProduct = findSeedProduct(product);
+              const safetyBadge = buildHumanSafetyBadge({
+                product: seedProduct,
+                surface: solution.surface,
+                solution,
+                note: product.note,
+              });
+              const label = product.note ?? product.productName ?? seedProduct?.name ?? brand?.name ?? "Средство";
               const buyUrl = brand && brand.affiliateUrl !== "#" ? brand.affiliateUrl : null;
               const isPrimary = product.role === "recommended";
               const roleLabel = isPrimary ? "Основной состав" : "Альтернатива";
@@ -107,10 +138,26 @@ export function DiyPanel({
                       >
                         {roleLabel}
                       </span>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-success">
-                        <ShieldCheck className="h-3 w-3 shrink-0" />
-                        Совместимо: {SURFACE_LABELS[solution.surface]}
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold",
+                          safetyBadge.className,
+                        )}
+                      >
+                        {safetyBadge.light === "red" ? (
+                          <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />
+                        ) : safetyBadge.light === "yellow" ? (
+                          <FlaskConical className="h-3 w-3 shrink-0" aria-hidden />
+                        ) : (
+                          <ShieldCheck className="h-3 w-3 shrink-0" aria-hidden />
+                        )}
+                        {safetyBadge.label}
                       </span>
+                      {safetyBadge.proPhLabel && (
+                        <span className="inline-flex items-center rounded-full border border-border bg-card/80 px-2 py-0.5 font-data text-[11px] font-medium text-muted-foreground">
+                          {safetyBadge.proPhLabel}
+                        </span>
+                      )}
                     </div>
 
                     {brand ? (
@@ -127,6 +174,12 @@ export function DiyPanel({
                       <div className="mt-2">
                         <span className="block text-sm font-semibold text-foreground">{label}</span>
                       </div>
+                    )}
+
+                    {safetyBadge.prohibitedLabels.length > 0 && (
+                      <p className="mt-1.5 text-[11px] text-muted-foreground">
+                        Не применять на: <span className="font-medium text-danger">{safetyBadge.prohibitedLabels.join(", ")}</span>
+                      </p>
                     )}
                   </div>
 
@@ -163,3 +216,4 @@ export function DiyPanel({
     </section>
   );
 }
+

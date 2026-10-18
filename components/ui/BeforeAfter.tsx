@@ -1,9 +1,13 @@
 "use client";
 
-import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import Image from "next/image";
+import { animate, useInView, useReducedMotion, type AnimationPlaybackControls } from "motion/react";
 import { MoveHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+/** Приглашающий микродвиг шторки при первом появлении в кадре: 66% → 56%. */
+const INVITE_KEYFRAMES = [66, 56];
 
 interface BeforeAfterProps {
   /** Кадр «до» — оригинал (на нём же видно загрязнение). */
@@ -28,6 +32,29 @@ export function BeforeAfter({ src, className, sizes = "100vw", priority, default
   const [pos, setPos] = useState(defaultPosition);
   const rootRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
+  const touched = useRef(false);
+  const invite = useRef<AnimationPlaybackControls | null>(null);
+  const reduce = useReducedMotion();
+  const inView = useInView(rootRef, { once: true, amount: 0.6 });
+
+  // «Лазерная шторка» сама показывает, что её можно двигать; любое касание пользователя её останавливает.
+  useEffect(() => {
+    if (!inView || reduce || touched.current) return;
+    const controls = animate(defaultPosition, [defaultPosition, ...INVITE_KEYFRAMES], {
+      duration: 1.5,
+      delay: 0.35,
+      times: [0, 0.45, 1],
+      ease: "easeInOut",
+      onUpdate: setPos,
+    });
+    invite.current = controls;
+    return () => controls.stop();
+  }, [inView, reduce, defaultPosition]);
+
+  function takeOver() {
+    touched.current = true;
+    invite.current?.stop();
+  }
 
   function updateFromClientX(clientX: number) {
     const rect = rootRef.current?.getBoundingClientRect();
@@ -37,6 +64,7 @@ export function BeforeAfter({ src, className, sizes = "100vw", priority, default
 
   function onPointerDown(e: PointerEvent<HTMLDivElement>) {
     if (e.button !== 0) return;
+    takeOver();
     dragging.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
     updateFromClientX(e.clientX);
@@ -50,6 +78,7 @@ export function BeforeAfter({ src, className, sizes = "100vw", priority, default
     e.currentTarget.releasePointerCapture(e.pointerId);
   }
   function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+    takeOver();
     if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
       e.preventDefault();
       setPos((p) => clamp(p - 6));
@@ -101,10 +130,12 @@ export function BeforeAfter({ src, className, sizes = "100vw", priority, default
         <Image src={src} alt="" fill priority={priority} sizes={sizes} draggable={false} className="object-cover" />
       </div>
 
-      {/* Разделитель и ручка */}
-      <div aria-hidden className="absolute inset-y-0 z-10 w-px bg-white/80" style={{ left: `${pos}%` }}>
-        <span className="absolute left-1/2 top-1/2 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-black/45 text-white shadow-lg backdrop-blur-sm">
-          <MoveHorizontal className="size-4" aria-hidden />
+      {/* Лазерный разделитель: мягкое свечение + яркий луч + капсула-ручка */}
+      <div aria-hidden className="absolute inset-y-0 z-10 w-0" style={{ left: `${pos}%` }}>
+        <span className="absolute inset-y-0 -left-[4px] w-[8px] bg-gradient-to-b from-transparent via-brand/60 to-transparent blur-[3px]" />
+        <span className="absolute inset-y-0 -left-px w-[2px] bg-gradient-to-b from-transparent via-brand to-transparent" />
+        <span className="absolute left-0 top-1/2 flex h-12 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-brand/70 bg-black/55 text-white shadow-[0_0_20px_hsl(var(--brand)/0.5)] backdrop-blur-sm">
+          <MoveHorizontal className="size-3.5" aria-hidden />
         </span>
       </div>
 

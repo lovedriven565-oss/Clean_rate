@@ -183,3 +183,11 @@
 - Прод-D1 `cleaning-rating-db` впервые проинициализирована: применены миграции 0000–0005 + `seed.sql` (16 решений, 23 компании, 81 ключ, 66 смет). `all_in_one_init.sql` — дублирующий дамп схемы, помечен applied в `d1_migrations` вручную (иначе `migrations apply` падал бы каждый раз).
 - Токен Cloudflare настроен локально в `.dev.vars` (в `.gitignore`) через связку `CLOUDFLARE_API_KEY`, `CLOUDFLARE_EMAIL` и `CLOUDFLARE_ACCOUNT_ID`. Удалённая прод-D1 `cleaning-rating-db` успешно обновлена (веса ключей ik-69…81 синхронизированы с кодом, точный роутинг подтверждён на проде).
 - Домен `cleaning-rating.by` не подключён (NXDOMAIN) — пока живём на workers.dev.
+
+## Фазы 3–4 + Linear Precision UI (сделано)
+- **Скилл и поверхноcти:** `.devin/skills/linear-style-ui/SKILL.md`, `.linear-beam` (1px зеркальный луч в `@layer components` `app/globals.css`).
+- **4 микро-фишки:** хоткей `/` и `⌘K`/`Ctrl+K` (включая русскую раскладку) + `<Kbd>` и индикатор `↵` в `SmartSearch`/`NavSearch` (`lib/search/hotkey.ts`); лазерный разделитель и приглашающий микродвиг `66% → 56%` в `BeforeAfter.tsx`; плашка микро-триумфа 100% в `DiyChecklist.tsx`.
+- **Zero-PII в D1:** `lib/privacy/pii.ts` (`redactLeadPii`, `hashContactForAudit` → `tg-sha256:<16 hex>`, секрет `PII_HASH_PEPPER`). Лиды (`partner-lead`, `brand-lead`) сначала уходят транзитом в Telegram, а в D1 пишется `"Транзитно в Telegram"` вместо имени, SHA-256 хеш вместо контакта и `null` вместо текста заявки. В проде при падении доставки в Telegram — `503` (контакт не теряется). Текст `/privacy` и `PRIVACY_CONSENT_VERSION` обновлены.
+- **B2B-рост:** `lib/partners.ts` (`formatProBudget`: 149 Br / 4 500 ₽ / 24 000 ₸, `NON_OFFER_DISCLAIMER`, `parsePartnerPrefill`, `partnerClaimHref`); Bento-тарифы и авто-заполнение на `/for-partners`; виджет «Представляете «{company.name}»?» в `/companies/[slug]`; «Радар спроса» в `/admin` (`lib/admin/demand-radar.ts` + `getDemandSignals`).
+- **Проверки:** `npm run typecheck` — 0 ошибок, `npm run lint` — 0 предупреждений, `npm run test` — 183/183.
+

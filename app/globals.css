@@ -217,6 +217,22 @@ svg.lucide {
       inset 0 1px 0 hsl(var(--highlight) / 0.06),
       0 20px 40px -28px hsl(var(--shadow-tint) / 0.8);
   }
+
+  /* Linear Precision: зеркальный луч 1px по верхней кромке ключевых B2B-карточек. */
+  .linear-beam {
+    position: relative;
+  }
+
+  .linear-beam::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 1;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, hsl(var(--brand) / 0.7), hsl(var(--mint) / 0.6), transparent);
+  }
 }
 
 /* Матовое стекло — только ИИ-панель, поиск и навигация. */

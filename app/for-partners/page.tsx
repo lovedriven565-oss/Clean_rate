@@ -1,18 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { BadgeCheck, Building2, Check, Phone, ShieldCheck, Users } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { PartnerLeadForm, type PartnerPlan } from "@/components/PartnerLeadForm";
+import { PartnerLeadForm } from "@/components/PartnerLeadForm";
 import { StatCounter } from "@/components/StatCounter";
+import { useRegion } from "@/components/providers/RegionProvider";
+import { SpotlightCard } from "@/components/ui/fx";
 import { Button } from "@/components/ui/primitives";
 import { CATEGORIES } from "@/lib/categories";
 import { seedCompanies } from "@/db/seed-data";
-import { ENABLED_MARKETS, openCities } from "@/lib/markets";
+import { ENABLED_MARKETS, getCityByName, openCities } from "@/lib/markets";
 import { pluralize } from "@/lib/format";
+import {
+  NON_OFFER_DISCLAIMER,
+  formatProBudget,
+  parsePartnerPrefill,
+  type PartnerPlan,
+  type PartnerPrefill,
+} from "@/lib/partners";
 import { scrollBehavior } from "@/lib/utils";
+
+/** Читает ?company=&city=&plan=&categories= (ссылка из профиля компании). Отдельно — под Suspense для SSG. */
+function PartnerPrefillReader({ onPrefill }: { onPrefill: (prefill: PartnerPrefill) => void }) {
+  const query = useSearchParams().toString();
+  useEffect(() => {
+    const prefill = parsePartnerPrefill(new URLSearchParams(query));
+    if (prefill) onPrefill(prefill);
+  }, [query, onPrefill]);
+  return null;
+}
 
 const enabledCities = ENABLED_MARKETS.flatMap((market) => openCities(market).map((city) => city.name));
 const enabledCitiesLabel = new Intl.ListFormat("ru", { type: "conjunction" }).format(enabledCities);
@@ -52,7 +72,17 @@ const partnerFeatures = [
 
 export default function ForPartnersPage() {
   const reduce = useReducedMotion();
+  const { countryCode } = useRegion();
   const [plan, setPlan] = useState<PartnerPlan>("base");
+  const [prefill, setPrefill] = useState<PartnerPrefill | null>(null);
+  // Ориентир бюджета — в валюте рынка компании из ссылки, иначе — региона посетителя.
+  const budgetCountry = (prefill?.city && getCityByName(prefill.city)?.market.countryCode) || countryCode;
+  const proBudget = formatProBudget(budgetCountry);
+
+  const applyPrefill = useCallback((next: PartnerPrefill) => {
+    setPrefill(next);
+    if (next.plan) setPlan(next.plan);
+  }, []);
 
   function choosePlan(next: PartnerPlan) {
     setPlan(next);
@@ -186,10 +216,11 @@ export default function ForPartnersPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="data-surface flex flex-col rounded-panel p-8 sm:p-10">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+              <SpotlightCard className="flex flex-col p-8 sm:p-10 lg:col-span-2">
                 <h3 className="font-display text-2xl font-bold text-foreground">Базовое размещение</h3>
                 <p className="mt-1 font-semibold text-primary">Бесплатно навсегда</p>
+                <p className="mt-6 font-data text-4xl font-semibold tracking-tight text-foreground">0</p>
                 <ul className="mt-7 flex flex-1 flex-col gap-3.5">
                   {features.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-foreground">
@@ -206,21 +237,22 @@ export default function ForPartnersPage() {
                 >
                   Разместить бесплатно
                 </Button>
-              </div>
+              </SpotlightCard>
 
-              <div className="data-surface flex flex-col rounded-panel border-2 border-primary p-8 sm:p-10">
-                <div className="flex items-center justify-between gap-3">
+              <SpotlightCard className="linear-beam flex flex-col border-primary/50 p-8 sm:p-10 lg:col-span-3">
+                <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="font-display text-2xl font-bold text-foreground">PRO Спонсор</h3>
-                    <p className="mt-1 font-semibold text-primary">
-                      от 149 Br/мес
-                      <span className="font-normal text-muted-foreground"> · индивидуальный расчёт по городу</span>
-                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">Индивидуальный расчёт по городу и категориям</p>
                   </div>
                   <span className="shrink-0 rounded-full bg-brand px-3.5 py-1 text-xs font-bold text-brand-foreground">
                     Максимум охвата
                   </span>
                 </div>
+                <p className="mt-6 text-xs font-medium text-muted-foreground">ориентир бюджета:</p>
+                <p className="mt-1 font-data text-4xl font-semibold tracking-tight text-foreground" aria-live="polite">
+                  {proBudget}
+                </p>
                 <ul className="mt-7 flex flex-1 flex-col gap-3.5">
                   {partnerFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-foreground">
@@ -235,8 +267,9 @@ export default function ForPartnersPage() {
                 <p className="mt-4 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
                   Стоимость зависит от города и категорий. Не влияет на органический рейтинг: только охват и позиция в спонсорском блоке.
                 </p>
-              </div>
+              </SpotlightCard>
             </div>
+            <p className="mx-auto mt-6 max-w-2xl text-center text-xs leading-5 text-muted-foreground">{NON_OFFER_DISCLAIMER}</p>
           </div>
         </section>
 
@@ -265,7 +298,16 @@ export default function ForPartnersPage() {
                 </div>
               </div>
             </div>
-            <PartnerLeadForm plan={plan} onPlanChange={setPlan} />
+            <Suspense fallback={null}>
+              <PartnerPrefillReader onPrefill={applyPrefill} />
+            </Suspense>
+            <PartnerLeadForm
+              key={prefill ? "prefilled" : "blank"}
+              prefill={prefill}
+              plan={plan}
+              onPlanChange={setPlan}
+              budgetLabel={proBudget}
+            />
           </div>
         </section>
       </main>

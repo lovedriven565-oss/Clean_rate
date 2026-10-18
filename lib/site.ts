@@ -36,7 +36,7 @@ export const BRAND_COLORS = {
  * Версия политики конфиденциальности, под которую зафиксировано согласие
  * в B2B-формах. Менять при существенном обновлении текста /privacy.
  */
-export const PRIVACY_CONSENT_VERSION = "privacy-2026-09";
+export const PRIVACY_CONSENT_VERSION = "privacy-2026-10-zero-pii";
 
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://cleaning-rating.by").replace(/\/+$/, "");
 

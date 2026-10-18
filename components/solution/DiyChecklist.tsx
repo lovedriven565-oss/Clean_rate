@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Lightbulb, Printer, RotateCcw } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ArrowRight, Check, Lightbulb, Printer, RotateCcw, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DiyStep {
@@ -49,17 +50,28 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
     setDone((current) => (current.includes(order) ? current.filter((o) => o !== order) : [...current, order]));
   }
 
-  const progress = steps.length > 0 ? Math.round((done.length / steps.length) * 100) : 0;
+  const reduce = useReducedMotion();
+  const doneCount = steps.filter((step) => done.includes(step.order)).length;
+  const progress = steps.length > 0 ? Math.round((doneCount / steps.length) * 100) : 0;
+  const complete = hydrated && steps.length > 0 && doneCount === steps.length;
 
   return (
     <div className="mt-8">
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1">
-          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${progress}%` }} />
+          <div className="h-1.5 rounded-full bg-muted">
+            <div
+              className={cn(
+                "h-full rounded-full bg-brand transition-all duration-500",
+                progress > 0 && "shadow-[0_0_10px_hsl(var(--brand)/0.65)]",
+                complete && "shadow-[0_0_16px_hsl(var(--brand)/0.9)]"
+              )}
+              style={{ width: `${progress}%` }}
+            />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            {done.length} из {steps.length} шагов · прогресс сохраняется на этом устройстве
+            <span className="font-data text-foreground">{progress}%</span> · {doneCount} из {steps.length} шагов · прогресс
+            сохраняется на этом устройстве
           </p>
         </div>
         <div className="flex items-center gap-1">
@@ -83,6 +95,47 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
             Распечатать
           </button>
         </div>
+      </div>
+
+      <div aria-live="polite" className="no-print">
+        <AnimatePresence initial={false}>
+          {complete && (
+            <motion.div
+              key="triumph"
+              initial={reduce ? { opacity: 0 } : { opacity: 0, height: 0, y: -6 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
+              transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 30 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 flex flex-wrap items-center gap-3 rounded-panel border border-success/30 bg-success/10 px-4 py-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-[0_0_14px_hsl(var(--brand)/0.6)]">
+                  <ShieldCheck className="h-4 w-4" aria-hidden />
+                </span>
+                <p className="min-w-0 flex-1 text-sm font-semibold text-foreground">
+                  Протокол выполнен · <span className="text-success">Покрытие в безопасности</span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDone([])}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+                    Сбросить
+                  </button>
+                  <a
+                    href="#pro"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-xs font-semibold text-background transition-opacity hover:opacity-90"
+                  >
+                    Пятно глубже? К мастерам
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <ol className="mt-6 space-y-5">

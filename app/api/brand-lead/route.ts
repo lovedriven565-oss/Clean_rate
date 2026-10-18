@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { escapeHtml, forwardToTelegram } from "@/lib/telegram";
+import { escapeHtml, forwardToTelegram, leadDeliveryRequired } from "@/lib/telegram";
 import { recordAnalyticsEvent, saveBrandLead } from "@/lib/db/queries";
 import { checkRateLimit, tooManyRequests, verifyTurnstile } from "@/lib/security/guard";
 import { PRIVACY_CONSENT_VERSION } from "@/lib/site";
@@ -46,36 +46,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Не удалось подтвердить, что вы не робот." }, { status: 403 });
   }
 
-  // 1. Сохранение заявки в базу D1 — до уведомления: Telegram не источник истины.
-  const lead = await saveBrandLead({
-    brandName: payload.brandName,
-    website: payload.website || undefined,
-    contactName: payload.contactName,
-    contact: payload.contact,
-    role: payload.role,
-    goal: payload.goal || undefined,
-    consentAcceptedAt: new Date(),
-    consentVersion: PRIVACY_CONSENT_VERSION,
-  });
+  const leadId = crypto.randomUUID();
 
-  if (lead.status === "error") {
-    // Честный отказ: заявка не потеряна молча — форма покажет ошибку и сохранит ввод.
-    return NextResponse.json(
-      { ok: false, error: "Не удалось сохранить заявку. Попробуйте ещё раз." },
-      { status: 503 }
-    );
-  }
-
-  // 2. Фиксация события аналитики (lead)
-  await recordAnalyticsEvent({
-    entityType: "brand",
-    entityId: lead.id,
-    eventType: "lead",
-    path: "/for-brands",
-    metadata: { role: payload.role },
-  });
-
-  // 3. Уведомление в Telegram — только при фактически принятой заявке.
+  // 1. Zero-PII: полная заявка (контактное лицо, телефон/email, задача) — только транзитом в Telegram.
   const text = [
     "<b>Новая заявка бренда / поставщика</b>",
     `Компания: ${escapeHtml(payload.brandName)}`,
@@ -84,12 +57,43 @@ export async function POST(request: Request) {
     `Телефон или email: ${escapeHtml(payload.contact)}`,
     payload.website ? `Сайт: ${escapeHtml(payload.website)}` : null,
     payload.goal ? `Задача: ${escapeHtml(payload.goal)}` : null,
-    `ID заявки: <code>${lead.id}</code>`,
+    `ID заявки: <code>${leadId}</code>`,
   ]
     .filter(Boolean)
     .join("\n");
 
   const delivered = await forwardToTelegram(text);
-  if (!delivered) console.log("[brand-lead] Telegram не настроен");
-  return NextResponse.json({ ok: true, delivered, leadId: lead.id });
+  if (!delivered && leadDeliveryRequired()) {
+    // Честный отказ: заявка не потеряна молча — форма покажет ошибку и сохранит ввод.
+    console.error("[brand-lead] Telegram недоступен, заявка не принята", { leadId });
+    return NextResponse.json(
+      { ok: false, error: "Не удалось отправить заявку. Попробуйте ещё раз через минуту." },
+      { status: 503 }
+    );
+  }
+  if (!delivered) console.log("[brand-lead] Telegram не настроен (dev)");
+
+  // 2. В D1 — только бренд, сайт, роль и обезличенный хеш контакта (redactLeadPii в saveBrandLead).
+  const lead = await saveBrandLead({
+    id: leadId,
+    brandName: payload.brandName,
+    website: payload.website || undefined,
+    contactName: payload.contactName,
+    contact: payload.contact,
+    role: payload.role,
+    consentAcceptedAt: new Date(),
+    consentVersion: PRIVACY_CONSENT_VERSION,
+  });
+  if (lead.status === "error") console.error("[brand-lead] обезличенный след не записан в D1", { leadId });
+
+  // 3. Фиксация события аналитики (lead)
+  await recordAnalyticsEvent({
+    entityType: "brand",
+    entityId: leadId,
+    eventType: "lead",
+    path: "/for-brands",
+    metadata: { role: payload.role },
+  });
+
+  return NextResponse.json({ ok: true, delivered, leadId });
 }

@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { classifyIntent, KeywordProvider } from "../lib/search/intent-router.js";
-import { getIntentKeywords } from "../lib/db/queries.js";
+import { classifyIntent, KeywordProvider, stemRussian } from "../lib/search/intent-router.js";
+import { rankSolutionsByTokens } from "../lib/search/rank.js";
+import { getAllSolutions, getIntentKeywords } from "../lib/db/queries.js";
 
 describe("intent router", () => {
   it("classifies a stain query as b2c and targets the matching solution", async () => {
@@ -50,5 +51,37 @@ describe("intent router", () => {
     const provider = new KeywordProvider(keywords);
     const result = provider.classify("керхер для экстракции");
     assert.equal(result.intent, "pro");
+  });
+
+  it("handles Russian morphological cases and fleeting vowels across queries", async () => {
+    const [keywords, solutions] = await Promise.all([getIntentKeywords(), getAllSolutions()]);
+
+    // Стеммер приводит падежные формы и беглые гласные к единой основе
+    assert.equal(stemRussian("вина"), stemRussian("вино"));
+    assert.equal(stemRussian("матраса"), stemRussian("матрас"));
+    assert.equal(stemRussian("ковёр"), stemRussian("ковре"));
+    assert.equal(stemRussian("ремонтов"), stemRussian("ремонта"));
+
+    // «пятно от вина» / «пролил вина на диван» -> vino-na-divane
+    const wineCase = classifyIntent("чем вывести пятна от вина с дивана", keywords);
+    assert.equal(wineCase.target?.kind, "solution");
+    assert.equal(wineCase.target?.slug, "vino-na-divane");
+
+    // «почистить матраса» -> категория upholstery + решения для матраса в токен-ранкере
+    const mattressCase = classifyIntent("почистить матраса", keywords);
+    assert.equal(mattressCase.target?.slug, "upholstery");
+    const mattressRanked = rankSolutionsByTokens(solutions, "почистить матраса");
+    assert.ok(mattressRanked.some((s) => s.surface === "mattress"));
+
+    // «запах на ковре» / «запахи с ковра» -> zapah-zhivotnyh-kover
+    const carpetCase = classifyIntent("запах на ковре", keywords);
+    assert.equal(carpetCase.target?.kind, "solution");
+    assert.equal(carpetCase.target?.slug, "zapah-zhivotnyh-kover");
+    const carpetGenitive = classifyIntent("убрать запахи с ковра", keywords);
+    assert.equal(carpetGenitive.target?.slug, "zapah-zhivotnyh-kover");
+
+    // «после ремонтов» -> post-renovation
+    const renovationCase = classifyIntent("после ремонтов", keywords);
+    assert.equal(renovationCase.target?.slug, "post-renovation");
   });
 });

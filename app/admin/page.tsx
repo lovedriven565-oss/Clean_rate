@@ -2,13 +2,19 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getAllCampaigns } from "@/lib/ads/queries";
 import { isAdminAllowed } from "@/lib/admin/guard";
+import { DEMAND_WINDOW_DAYS, buildDemandRadar, percentDelta, type DemandRadar } from "@/lib/admin/demand-radar";
 import {
   getAllBrands,
+  getAllCategories,
+  getAllCompanies,
   getAllSolutions,
   getBrandLeads,
+  getDemandSignals,
+  getIntentKeywords,
   getPartnerLeads,
 } from "@/lib/db/queries";
 import { SURFACE_LABELS } from "@/lib/solutions/meta";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -41,14 +47,20 @@ function formatDate(date?: Date | null): string {
 export default async function AdminPage() {
   if (!isAdminAllowed(await headers())) notFound();
 
-  const [brandLeads, partnerLeads, solutions, campaigns, brands] = await Promise.all([
-    getBrandLeads(),
-    getPartnerLeads(),
-    getAllSolutions(),
-    getAllCampaigns(),
-    getAllBrands(),
-  ]);
+  const [brandLeads, partnerLeads, solutions, campaigns, brands, keywords, categories, companies, signals] =
+    await Promise.all([
+      getBrandLeads(),
+      getPartnerLeads(),
+      getAllSolutions(),
+      getAllCampaigns(),
+      getAllBrands(),
+      getIntentKeywords(),
+      getAllCategories(),
+      getAllCompanies(),
+      getDemandSignals(DEMAND_WINDOW_DAYS),
+    ]);
   const brandName = new Map(brands.map((b) => [b.id, b.name]));
+  const radar = buildDemandRadar({ keywords, solutions, categories, companies, ...signals });
   const newLeadsCount =
     brandLeads.filter((l) => l.status === "new").length +
     partnerLeads.filter((l) => l.status === "new").length;
@@ -81,12 +93,14 @@ export default async function AdminPage() {
             value: `${campaigns.reduce((s, c) => s + c.currentImpressions, 0)} / ${campaigns.reduce((s, c) => s + c.currentClicks, 0)}`,
           },
         ].map((stat) => (
-          <div key={stat.label} className="data-surface rounded-panel p-4">
-            <div className="font-mono text-2xl font-semibold tabular-nums">{stat.value}</div>
+          <div key={stat.label} className="linear-beam data-surface rounded-panel p-4">
+            <div className="font-data text-2xl font-semibold">{stat.value}</div>
             <div className="mt-1 text-xs text-muted-foreground">{stat.label}</div>
           </div>
         ))}
       </div>
+
+      <DemandRadarSection radar={radar} />
 
       <section className="mt-10">
         <h2 className="font-display text-lg font-semibold">Лиды брендов ({brandLeads.length})</h2>
@@ -96,7 +110,7 @@ export default async function AdminPage() {
               <tr>
                 <th className="px-3 py-2">Дата</th>
                 <th className="px-3 py-2">Бренд</th>
-                <th className="px-3 py-2">Контакт</th>
+                <th className="px-3 py-2">Контакт (Zero-PII)</th>
                 <th className="px-3 py-2">Роль</th>
                 <th className="px-3 py-2">Статус</th>
               </tr>
@@ -109,7 +123,7 @@ export default async function AdminPage() {
                 <tr key={lead.id}>
                   <td className="px-3 py-2 font-mono text-xs">{formatDate(lead.createdAt)}</td>
                   <td className="px-3 py-2 font-medium">{lead.brandName}</td>
-                  <td className="px-3 py-2">{lead.contactName} · {lead.contact}</td>
+                  <td className="px-3 py-2 font-mono text-xs">{lead.contact}</td>
                   <td className="px-3 py-2">{LEAD_ROLE_LABELS[lead.role] ?? lead.role}</td>
                   <td className="px-3 py-2">{LEAD_STATUS_LABELS[lead.status] ?? lead.status}</td>
                 </tr>
@@ -127,7 +141,7 @@ export default async function AdminPage() {
               <tr>
                 <th className="px-3 py-2">Дата</th>
                 <th className="px-3 py-2">Компания</th>
-                <th className="px-3 py-2">Телефон</th>
+                <th className="px-3 py-2">Контакт (Zero-PII)</th>
                 <th className="px-3 py-2">Город</th>
                 <th className="px-3 py-2">Статус</th>
               </tr>
@@ -224,5 +238,142 @@ export default async function AdminPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+function DeltaBadge({ current, delta }: { current: number; delta: number | null }) {
+  const label = delta === null ? (current > 0 ? "новое" : "—") : `${delta > 0 ? "+" : delta < 0 ? "−" : ""}${Math.abs(delta)}%`;
+  return (
+    <span
+      className={cn(
+        "inline-flex min-w-14 justify-center rounded-full px-2 py-0.5 font-data text-[11px] font-semibold",
+        delta !== null && delta > 0 && "bg-success/10 text-success",
+        delta !== null && delta < 0 && "bg-danger/10 text-danger",
+        (delta === null || delta === 0) && "bg-muted text-muted-foreground"
+      )}
+    >
+      {label}
+    </span>
+  );
+}
+
+/** «Радар спроса»: живая статистика для разговора с брендами и клининговыми компаниями. */
+function DemandRadarSection({ radar }: { radar: DemandRadar }) {
+  const maxWeight = Math.max(1, ...radar.topics.map((t) => t.weight));
+  return (
+    <section className="mt-10">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold">Радар спроса и поисковых интентов</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Последние <span className="font-data">{radar.windowDays}</span> дн. против предыдущих{" "}
+            <span className="font-data">{radar.windowDays}</span>: индекс интентов + обезличенные события.
+          </p>
+        </div>
+        {!radar.hasEvents && (
+          <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+            Событий пока нет — показан семантический вес ключей
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="linear-beam data-surface rounded-panel p-4 lg:col-span-2">
+          <h3 className="text-sm font-semibold">Топ тем и протоколов</h3>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[520px] text-left text-sm">
+              <thead className="text-xs text-muted-foreground">
+                <tr>
+                  <th className="py-2 pr-3 font-medium">Протокол</th>
+                  <th className="px-3 py-2 font-medium">Вес спроса</th>
+                  <th className="px-3 py-2 text-right font-medium">Просмотры</th>
+                  <th className="py-2 pl-3 text-right font-medium">Δ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {radar.topics.length === 0 && (
+                  <tr><td colSpan={4} className="py-6 text-center text-muted-foreground">Ключей интентов пока нет</td></tr>
+                )}
+                {radar.topics.map((topic) => (
+                  <tr key={topic.slug}>
+                    <td className="py-2 pr-3">
+                      <a href={`/solutions/${topic.slug}`} className="font-medium underline-offset-2 hover:underline">
+                        {topic.title}
+                      </a>
+                      <div className="font-data text-[11px] text-muted-foreground">{topic.keywords} ключ.</div>
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-24 rounded-full bg-muted">
+                          <div className="h-full rounded-full bg-brand" style={{ width: `${(topic.weight / maxWeight) * 100}%` }} />
+                        </div>
+                        <span className="font-data text-xs">{topic.weight}</span>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 text-right font-data text-xs">{topic.views}</td>
+                    <td className="py-2 pl-3 text-right">
+                      <DeltaBadge current={topic.views} delta={percentDelta(topic.views, topic.previousViews)} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="linear-beam data-surface rounded-panel p-4">
+          <h3 className="text-sm font-semibold">Распределение интентов</h3>
+          <ul className="mt-4 space-y-4">
+            {radar.intents.map((intent) => (
+              <li key={intent.intent}>
+                <div className="flex items-baseline justify-between gap-2 text-sm">
+                  <span>{intent.label}</span>
+                  <span className="font-data font-semibold">{intent.share}%</span>
+                </div>
+                <div className="mt-1.5 h-1.5 rounded-full bg-muted">
+                  <div className="h-full rounded-full bg-brand" style={{ width: `${intent.share}%` }} />
+                </div>
+                <div className="mt-1 font-data text-[11px] text-muted-foreground">
+                  вес {intent.weight} · пропусков {intent.missed}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="linear-beam data-surface rounded-panel p-4 lg:col-span-2">
+          <h3 className="text-sm font-semibold">Динамика интереса к категориям</h3>
+          <ul className="mt-3 divide-y divide-border">
+            {radar.categories.map((category) => (
+              <li key={category.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+                <span>{category.name}</span>
+                <span className="flex items-center gap-3">
+                  <span className="font-data text-xs text-muted-foreground">
+                    {category.current} <span className="opacity-60">/ {category.previous}</span>
+                  </span>
+                  <DeltaBadge current={category.current} delta={category.delta} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="linear-beam data-surface rounded-panel p-4">
+          <h3 className="text-sm font-semibold">Ищут и не находят</h3>
+          {radar.missedQueries.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">Пропущенных запросов за окно нет.</p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {radar.missedQueries.map((item) => (
+                <li key={item.query} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="min-w-0 truncate">«{item.query}»</span>
+                  <span className="font-data text-xs text-muted-foreground">×{item.count}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }

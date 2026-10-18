@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { escapeHtml, forwardToTelegram, isValidPhone } from "@/lib/telegram";
+import { escapeHtml, forwardToTelegram, isValidPhone, leadDeliveryRequired } from "@/lib/telegram";
 import { getAllCategories, recordAnalyticsEvent, savePartnerLead } from "@/lib/db/queries";
 import { checkRateLimit, tooManyRequests, verifyTurnstile } from "@/lib/security/guard";
 import { PRIVACY_CONSENT_VERSION } from "@/lib/site";
@@ -36,39 +36,15 @@ export async function POST(request: Request) {
 
   const categories = await getAllCategories();
   const categoryIds = (payload.categoryIds ?? []).filter((id) => categories.some((c) => c.id === id));
-
-  // 1. Сохранение в D1 — до уведомления: Telegram не источник истины.
-  const lead = await savePartnerLead({
-    companyName: payload.companyName,
-    contactName: payload.contactName || undefined,
-    phone: payload.phone,
-    city: payload.city || undefined,
-    categoryIds,
-    plan: payload.plan,
-    message: payload.message || undefined,
-    consentAcceptedAt: new Date(),
-    consentVersion: PRIVACY_CONSENT_VERSION,
-  });
-
-  if (lead.status === "error") {
-    return NextResponse.json({ ok: false, error: "Не удалось сохранить заявку. Попробуйте ещё раз." }, { status: 503 });
-  }
-
-  // 2. Аналитическое событие
-  await recordAnalyticsEvent({
-    entityType: "company",
-    entityId: lead.id,
-    eventType: "lead",
-    path: "/for-partners",
-    metadata: { city: payload.city },
-  });
+  const leadId = crypto.randomUUID();
 
   const categoryNames = categoryIds
     .map((id) => categories.find((c) => c.id === id)?.name)
     .filter(Boolean)
     .join(", ");
 
-  // 3. Всё пользовательское экранируется: сообщение уходит с parse_mode HTML.
+  // 1. Zero-PII: полная заявка уходит только транзитом в Telegram. Всё пользовательское
+  // экранируется: сообщение уходит с parse_mode HTML.
   const text = [
     "<b>Новая заявка от компании (партнёрство)</b>",
     `Компания: ${escapeHtml(payload.companyName)}`,
@@ -78,12 +54,44 @@ export async function POST(request: Request) {
     payload.plan ? `Тариф: ${payload.plan === "pro" ? "PRO Спонсор" : "Базовый"}` : null,
     categoryNames ? `Услуги: ${escapeHtml(categoryNames)}` : null,
     payload.message ? `Комментарий: ${escapeHtml(payload.message)}` : null,
-    `ID заявки: <code>${lead.id}</code>`,
+    `ID заявки: <code>${leadId}</code>`,
   ]
     .filter(Boolean)
     .join("\n");
 
   const delivered = await forwardToTelegram(text);
-  if (!delivered) console.log("[partner-lead] Telegram не настроен");
-  return NextResponse.json({ ok: true, delivered, leadId: lead.id });
+  if (!delivered && leadDeliveryRequired()) {
+    console.error("[partner-lead] Telegram недоступен, заявка не принята", { leadId });
+    return NextResponse.json(
+      { ok: false, error: "Не удалось отправить заявку. Попробуйте ещё раз через минуту." },
+      { status: 503 }
+    );
+  }
+  if (!delivered) console.log("[partner-lead] Telegram не настроен (dev)");
+
+  // 2. В D1 — только юрлицо, город, тариф и обезличенный хеш контакта (redactLeadPii в savePartnerLead).
+  const lead = await savePartnerLead({
+    id: leadId,
+    companyName: payload.companyName,
+    contactName: payload.contactName || undefined,
+    phone: payload.phone,
+    city: payload.city || undefined,
+    categoryIds,
+    plan: payload.plan,
+    consentAcceptedAt: new Date(),
+    consentVersion: PRIVACY_CONSENT_VERSION,
+  });
+  // Заявка уже у отдела партнёрств: сбой обезличенной записи не повод отказывать клиенту.
+  if (lead.status === "error") console.error("[partner-lead] обезличенный след не записан в D1", { leadId });
+
+  // 3. Аналитическое событие
+  await recordAnalyticsEvent({
+    entityType: "company",
+    entityId: leadId,
+    eventType: "lead",
+    path: "/for-partners",
+    metadata: { city: payload.city, plan: payload.plan },
+  });
+
+  return NextResponse.json({ ok: true, delivered, leadId });
 }

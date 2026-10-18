@@ -6,6 +6,7 @@ import { ExternalAnalytics } from "@/components/analytics/ExternalAnalytics";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { MotionProvider } from "@/components/providers/MotionProvider";
 import { RegionProvider } from "@/components/providers/RegionProvider";
+import { SpeculationRules } from "@/components/SpeculationRules";
 import { BRAND_COLORS, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -54,6 +55,7 @@ export default function RootLayout({
     <html lang="ru" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <SpeculationRules />
       </head>
       <body>
         <MotionProvider>

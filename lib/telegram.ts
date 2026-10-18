@@ -1,3 +1,15 @@
+export function isTelegramConfigured(): boolean {
+  return Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
+}
+
+/**
+ * Zero-PII: Telegram — единственное место, где живут контакты заявки. Недоставленную заявку
+ * нельзя считать принятой (в D1 только хеш), кроме локальной разработки без бота.
+ */
+export function leadDeliveryRequired(): boolean {
+  return isTelegramConfigured() || process.env.NODE_ENV === "production";
+}
+
 /** Пересылка текста заявки в Telegram-чат владельца платформы. */
 export async function forwardToTelegram(text: string): Promise<boolean> {
   const token = process.env.TELEGRAM_BOT_TOKEN;

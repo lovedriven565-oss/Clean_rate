@@ -39,6 +39,8 @@ import type {
   SolutionProduct,
 } from "@/lib/types";
 import { computeBrandScore, rankBrands } from "@/lib/brand-score";
+import { piiHashPepper, redactLeadPii, TRANSIT_CONTACT_LABEL } from "@/lib/privacy/pii";
+import type { DemandEventCount, MissedSearch } from "@/lib/admin/demand-radar";
 import { getDb } from "./client";
 import {
   getFallbackBrands,
@@ -79,12 +81,11 @@ export async function getAllCompanies(): Promise<Company[]> {
 
     if (companyRows.length === 0) return getFallbackCompanies();
 
-    // Категории
-    const categoryRows = await drizzleDb.select().from(companyCategories);
-    // Рейтинги
-    const ratingRows = await drizzleDb.select().from(ratingSources);
-    // Техника
-    const equipmentRows = await drizzleDb.select().from(companyBrands);
+    const [categoryRows, ratingRows, equipmentRows] = await Promise.all([
+      drizzleDb.select().from(companyCategories),
+      drizzleDb.select().from(ratingSources),
+      drizzleDb.select().from(companyBrands),
+    ]);
 
     return companyRows.map((row) => {
       const cats = categoryRows.filter((c) => c.companyId === row.id).map((c) => ({ category_id: c.categoryId }));
@@ -113,9 +114,11 @@ export async function getCompanyBySlug(slug: string): Promise<Company | null> {
     if (rows.length === 0) return null;
 
     const row = rows[0];
-    const cats = await drizzleDb.select().from(companyCategories).where(eq(companyCategories.companyId, row.id));
-    const ratings = await drizzleDb.select().from(ratingSources).where(eq(ratingSources.companyId, row.id));
-    const equip = await drizzleDb.select().from(companyBrands).where(eq(companyBrands.companyId, row.id));
+    const [cats, ratings, equip] = await Promise.all([
+      drizzleDb.select().from(companyCategories).where(eq(companyCategories.companyId, row.id)),
+      drizzleDb.select().from(ratingSources).where(eq(ratingSources.companyId, row.id)),
+      drizzleDb.select().from(companyBrands).where(eq(companyBrands.companyId, row.id)),
+    ]);
 
     return mapCompanyRow(
       row as unknown as CompanyRow,
@@ -251,9 +254,11 @@ export async function getAllSolutions(): Promise<Solution[]> {
     const rows = await drizzleDb.select().from(solutions).where(eq(solutions.status, "published"));
     if (rows.length === 0) return getFallbackSolutions();
 
-    const brandRows = await drizzleDb.select().from(brands);
+    const [brandRows, spRows] = await Promise.all([
+      drizzleDb.select().from(brands),
+      drizzleDb.select().from(solutionProducts),
+    ]);
     const brandMap = new Map(brandRows.map((b) => [b.id, b.name]));
-    const spRows = await drizzleDb.select().from(solutionProducts);
 
     return rows.map((row) => {
       const products: SolutionProduct[] = spRows
@@ -311,9 +316,11 @@ export async function getSolutionBySlug(slug: string): Promise<Solution | null> 
     }
 
     const row = rows[0];
-    const brandRows = await drizzleDb.select().from(brands);
+    const [brandRows, spRows] = await Promise.all([
+      drizzleDb.select().from(brands),
+      drizzleDb.select().from(solutionProducts).where(eq(solutionProducts.solutionId, row.id)),
+    ]);
     const brandMap = new Map(brandRows.map((b) => [b.id, b.name]));
-    const spRows = await drizzleDb.select().from(solutionProducts).where(eq(solutionProducts.solutionId, row.id));
 
     const products: SolutionProduct[] = spRows.map((sp) => ({
       id: sp.id,
@@ -551,20 +558,25 @@ export interface LeadSaveResult {
   status: "saved" | "unavailable" | "error";
 }
 
+/**
+ * Zero-PII: имя и контакт обезличиваются здесь, на единственном пути записи лида в D1,
+ * а свободный текст (goal/message) в D1 не пишется — он уходит только в Telegram.
+ */
 export async function saveBrandLead(lead: {
+  id?: string;
   brandName: string;
   website?: string;
   contactName: string;
   contact: string;
   role: "brand" | "dealer" | "service" | "other";
-  goal?: string;
   consentAcceptedAt: Date;
   consentVersion: string;
 }): Promise<LeadSaveResult> {
-  const id = crypto.randomUUID();
+  const id = lead.id ?? crypto.randomUUID();
+  const pii = await redactLeadPii(lead, piiHashPepper());
   const db = await getDb();
   if (!db) {
-    console.log("[brand-lead:saved_fallback]", { id, ...lead });
+    console.log("[brand-lead:saved_fallback]", { id, brandName: lead.brandName, role: lead.role, ...pii });
     return { id, status: "unavailable" };
   }
 
@@ -574,10 +586,10 @@ export async function saveBrandLead(lead: {
       id,
       brandName: lead.brandName,
       website: lead.website || null,
-      contactName: lead.contactName,
-      contact: lead.contact,
+      contactName: pii.contactName ?? TRANSIT_CONTACT_LABEL,
+      contact: pii.contactHash,
       role: lead.role,
-      goal: lead.goal || null,
+      goal: null,
       status: "new",
       consentAcceptedAt: lead.consentAcceptedAt,
       consentVersion: lead.consentVersion,
@@ -591,20 +603,21 @@ export async function saveBrandLead(lead: {
 }
 
 export async function savePartnerLead(lead: {
+  id?: string;
   companyName: string;
   contactName?: string;
   phone: string;
   city?: string;
   categoryIds?: string[];
   plan?: "base" | "pro";
-  message?: string;
   consentAcceptedAt: Date;
   consentVersion: string;
 }): Promise<LeadSaveResult> {
-  const id = crypto.randomUUID();
+  const id = lead.id ?? crypto.randomUUID();
+  const pii = await redactLeadPii({ contactName: lead.contactName, contact: lead.phone }, piiHashPepper());
   const db = await getDb();
   if (!db) {
-    console.log("[partner-lead:saved_fallback]", { id, ...lead });
+    console.log("[partner-lead:saved_fallback]", { id, companyName: lead.companyName, city: lead.city, plan: lead.plan, ...pii });
     return { id, status: "unavailable" };
   }
 
@@ -613,12 +626,12 @@ export async function savePartnerLead(lead: {
     await drizzleDb.insert(partnerLeads).values({
       id,
       companyName: lead.companyName,
-      contactName: lead.contactName || null,
-      phone: lead.phone,
+      contactName: pii.contactName,
+      phone: pii.contactHash,
       city: lead.city || null,
       categoryIds: lead.categoryIds ? JSON.stringify(lead.categoryIds) : null,
       plan: lead.plan ?? null,
-      message: lead.message || null,
+      message: null,
       status: "new",
       consentAcceptedAt: lead.consentAcceptedAt,
       consentVersion: lead.consentVersion,
@@ -680,5 +693,58 @@ export async function getPartnerLeads(): Promise<PartnerLead[]> {
   } catch (err) {
     reportDbError("[db:partner_leads_error]", err);
     return [];
+  }
+}
+
+const MISSED_SEARCH_LIMIT = 500;
+
+/**
+ * Сигналы «Радара спроса»: события страниц и карточек компаний за текущее и предыдущее окно
+ * (агрегат в SQL) и последние пропущенные поиски. Без D1 — пустые сигналы.
+ */
+export async function getDemandSignals(windowDays: number, now = Date.now()): Promise<{
+  events: DemandEventCount[];
+  missed: MissedSearch[];
+}> {
+  const db = await getDb();
+  if (!db) return { events: [], missed: [] };
+
+  const windowMs = windowDays * 24 * 60 * 60 * 1000;
+  const currentStart = now - windowMs;
+  const previousStart = now - 2 * windowMs;
+
+  try {
+    const [eventRows, missedRows] = await Promise.all([
+      db
+        .prepare(
+          `SELECT entity_type AS entityType, entity_id AS entityId, event_type AS eventType,
+                  CASE WHEN occurred_at >= ? THEN 'current' ELSE 'previous' END AS period,
+                  COUNT(*) AS count
+           FROM analytics_events
+           WHERE occurred_at >= ? AND entity_type IN ('page', 'company') AND entity_id != 'search'
+           GROUP BY entity_type, entity_id, event_type, period`
+        )
+        .bind(currentStart, previousStart)
+        .all<DemandEventCount>(),
+      db
+        .prepare(
+          `SELECT metadata FROM analytics_events
+           WHERE entity_type = 'page' AND entity_id = 'search' AND occurred_at >= ?
+           ORDER BY occurred_at DESC LIMIT ?`
+        )
+        .bind(currentStart, MISSED_SEARCH_LIMIT)
+        .all<{ metadata: string | null }>(),
+    ]);
+
+    const missed = missedRows.results.flatMap((row): MissedSearch[] => {
+      const meta = parseJsonGeneric<{ query?: unknown; intent?: unknown } | null>(row.metadata, null) ?? {};
+      if (typeof meta.query !== "string" || !meta.query.trim()) return [];
+      const intent = meta.intent === "b2c" || meta.intent === "b2b" || meta.intent === "pro" ? meta.intent : undefined;
+      return [{ query: meta.query, intent }];
+    });
+    return { events: eventRows.results.map((row) => ({ ...row, count: Number(row.count) })), missed };
+  } catch (err) {
+    reportDbError("[db:demand_signals_error]", err);
+    return { events: [], missed: [] };
   }
 }

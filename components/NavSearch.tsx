@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/primitives";
-import { SearchSuggestions, useSmartSearch } from "@/components/SmartSearch";
+import { SEARCH_KEYSHORTCUTS, SearchSuggestions, useSearchHotkey, useSmartSearch } from "@/components/SmartSearch";
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,6 +16,13 @@ export function NavSearch({ className }: { className?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const search = useSmartSearch();
   const { query, loading, open, setOpen, handleQueryChange, handleSubmit, handleKeyDown } = search;
+
+  // Вторичный обработчик: срабатывает, если поиск на hero не в кадре или его нет на странице.
+  useSearchHotkey(() => {
+    setPanelOpen(true);
+    inputRef.current?.focus();
+    return true;
+  });
 
   useEffect(() => {
     if (panelOpen) {
@@ -47,6 +54,8 @@ export function NavSearch({ className }: { className?: string }) {
         onClick={() => setPanelOpen((v) => !v)}
         aria-label={panelOpen ? "Закрыть поиск" : "Поиск по платформе"}
         aria-expanded={panelOpen}
+        aria-keyshortcuts={SEARCH_KEYSHORTCUTS}
+        title="Поиск: / или Ctrl+K"
         className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-primary/35 hover:text-primary"
       >
         {panelOpen ? <X className="h-4.5 w-4.5" /> : <Search className="h-4.5 w-4.5" />}
