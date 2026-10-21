@@ -9,6 +9,7 @@ import {
   getAllCompanies,
   getAllSolutions,
   getBrandLeads,
+  getCompanyEventStats,
   getDemandSignals,
   getIntentKeywords,
   getPartnerLeads,
@@ -47,7 +48,7 @@ function formatDate(date?: Date | null): string {
 export default async function AdminPage() {
   if (!isAdminAllowed(await headers())) notFound();
 
-  const [brandLeads, partnerLeads, solutions, campaigns, brands, keywords, categories, companies, signals] =
+  const [brandLeads, partnerLeads, solutions, campaigns, brands, keywords, categories, companies, signals, companyStats] =
     await Promise.all([
       getBrandLeads(),
       getPartnerLeads(),
@@ -58,9 +59,15 @@ export default async function AdminPage() {
       getAllCategories(),
       getAllCompanies(),
       getDemandSignals(DEMAND_WINDOW_DAYS),
+      getCompanyEventStats(DEMAND_WINDOW_DAYS),
     ]);
   const brandName = new Map(brands.map((b) => [b.id, b.name]));
   const radar = buildDemandRadar({ keywords, solutions, categories, companies, ...signals });
+  // entityId событий — id или slug компании; показываем только известные профили.
+  const companyByKey = new Map(companies.flatMap((c) => [[c.id, c] as const, [c.slug, c] as const]));
+  const companyRows = companyStats
+    .map((stat) => ({ stat, company: companyByKey.get(stat.companyId) }))
+    .filter((row): row is { stat: typeof row.stat; company: NonNullable<typeof row.company> } => Boolean(row.company));
   const newLeadsCount =
     brandLeads.filter((l) => l.status === "new").length +
     partnerLeads.filter((l) => l.status === "new").length;
@@ -233,6 +240,51 @@ export default async function AdminPage() {
                   </tr>
                 );
               })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="font-display text-lg font-semibold">Контакты компаний ({DEMAND_WINDOW_DAYS} дн)</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Внутренняя сводка для владельца: клиентам цифры не показываются — спонсорство продаётся за полку, а не за лид.
+        </p>
+        <div className="mt-3 overflow-x-auto rounded-panel border border-border">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2">Компания</th>
+                <th className="px-3 py-2">Город</th>
+                <th className="px-3 py-2 text-right">Просмотры</th>
+                <th className="px-3 py-2 text-right">Звонки</th>
+                <th className="px-3 py-2 text-right">Telegram</th>
+                <th className="px-3 py-2 text-right">Сайт</th>
+                <th className="px-3 py-2 text-right">Контакты</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {companyRows.length === 0 && (
+                <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">Событий по компаниям пока нет</td></tr>
+              )}
+              {companyRows.slice(0, 20).map(({ stat, company }) => (
+                <tr key={stat.companyId}>
+                  <td className="px-3 py-2">
+                    <a href={`/companies/${company.slug}`} className="font-medium underline-offset-2 hover:underline">
+                      {company.name}
+                    </a>
+                    {company.promoted && (
+                      <span className="ml-2 rounded-full bg-sponsor/15 px-2 py-0.5 text-[10px] font-semibold text-ad">Спонсор</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">{company.city}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs tabular-nums">{stat.views}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs tabular-nums">{stat.phone}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs tabular-nums">{stat.telegram}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs tabular-nums">{stat.website}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs font-semibold tabular-nums">{stat.contacts}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

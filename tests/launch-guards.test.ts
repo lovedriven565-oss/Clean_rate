@@ -5,7 +5,8 @@ import { POST as partnerLeadPOST } from "../app/api/partner-lead/route.js";
 import { POST as brandLeadPOST } from "../app/api/brand-lead/route.js";
 import { ENABLED_MARKETS, MARKETS, getCity, getCityBySlug, getMarket, getMarketByCity, openCities } from "../lib/markets.js";
 import { formatCompanyPriceFrom, formatMarketCurrency } from "../lib/format.js";
-import { landingStaticParams } from "../lib/landing.js";
+import { getFooterLandingLinks, getIndexableLandings, landingStaticParams } from "../lib/landing.js";
+import { getFallbackCompanies } from "../lib/db/fallback.js";
 import { pageAlternates } from "../lib/site.js";
 import { isValidPhone } from "../lib/telegram.js";
 import { verifyTurnstile } from "../lib/security/guard.js";
@@ -99,6 +100,10 @@ describe("market focus", () => {
       ["BY", "RU"]
     );
     assert.deepEqual(
+      openCities(MARKETS.BY).map((c) => c.slug),
+      ["minsk"]
+    );
+    assert.deepEqual(
       openCities(MARKETS.RU).map((c) => c.slug),
       ["moscow"]
     );
@@ -111,12 +116,30 @@ describe("market focus", () => {
 
   it("hides cities that are not launched yet from the region selector and landings", () => {
     assert.equal(getCity("RU", "spb").slug, "moscow");
+    assert.equal(getCity("BY", "brest").slug, "minsk");
     assert.equal(getCityBySlug("spb"), undefined);
+    assert.equal(getCityBySlug("brest"), undefined);
+    assert.equal(getCityBySlug("ekb"), undefined);
     assert.equal(getCityBySlug("moscow")?.market.countryCode, "RU");
     const cities = new Set(landingStaticParams().map((p) => p.city));
+    assert.ok(cities.has("minsk"));
     assert.ok(cities.has("moscow"));
+    assert.ok(!cities.has("brest"));
     assert.ok(!cities.has("spb"));
+    assert.ok(!cities.has("kazan"));
     assert.ok(!cities.has("almaty"));
+  });
+
+  it("synchronously builds footer SEO links only for open cities and filters indexable landings", () => {
+    const footerLinks = getFooterLandingLinks(3);
+    assert.equal(footerLinks.length, 6);
+    assert.ok(footerLinks.every((l) => l.href.startsWith("/minsk/") || l.href.startsWith("/moscow/")));
+    assert.ok(footerLinks.every((l) => !l.href.startsWith("/brest/") && !l.href.startsWith("/spb/") && !l.href.startsWith("/almaty/")));
+
+    const indexable = getIndexableLandings(getFallbackCompanies());
+    assert.ok(indexable.length > 0);
+    assert.ok(indexable.every((p) => p.city === "minsk" || p.city === "moscow"));
+    assert.deepEqual(getIndexableLandings([]), []);
   });
 
   it("shows Moscow prices in rubles", () => {

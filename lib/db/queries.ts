@@ -162,8 +162,38 @@ export async function getAllBrands(): Promise<Brand[]> {
 }
 
 export async function getBrandBySlug(slug: string): Promise<Brand | null> {
-  const all = await getAllBrands();
-  return all.find((b) => b.slug === slug) ?? null;
+  const db = await getDb();
+  if (!db) {
+    return getFallbackBrands().find((b) => b.slug === slug) ?? null;
+  }
+
+  try {
+    const drizzleDb = drizzle(db);
+    const rows = await drizzleDb
+      .select()
+      .from(brands)
+      .where(and(eq(brands.slug, slug), eq(brands.status, "published")))
+      .limit(1);
+    if (rows.length === 0) {
+      return getFallbackBrands().find((b) => b.slug === slug) ?? null;
+    }
+    const row = rows[0];
+    return mapBrandRow({
+      id: row.id,
+      slug: row.slug,
+      name: row.name,
+      tagline: row.tagline,
+      description: row.description,
+      focus: row.focus,
+      website_url: row.websiteUrl,
+      affiliate_url: row.affiliateUrl,
+      accent: row.accent,
+      is_sponsor: row.isSponsor ? 1 : 0,
+    });
+  } catch (err) {
+    reportDbError("[db:brand_by_slug_error]", err);
+    return getFallbackBrands().find((b) => b.slug === slug) ?? null;
+  }
 }
 
 export async function getBrandSlugs(): Promise<string[]> {
@@ -237,7 +267,11 @@ export async function getCompanySlugs(): Promise<string[]> {
 
   try {
     const drizzleDb = drizzle(db);
-    const rows = await drizzleDb.select({ slug: cleaningCompanies.slug }).from(cleaningCompanies);
+    const rows = await drizzleDb
+      .select({ slug: cleaningCompanies.slug })
+      .from(cleaningCompanies)
+      .where(eq(cleaningCompanies.status, "published"));
+    if (rows.length === 0) return getFallbackCompanies().map((c) => c.slug);
     return rows.map((r) => r.slug);
   } catch (err) {
     reportDbError("[db:company_slugs_error]", err);
@@ -746,5 +780,58 @@ export async function getDemandSignals(windowDays: number, now = Date.now()): Pr
   } catch (err) {
     reportDbError("[db:demand_signals_error]", err);
     return { events: [], missed: [] };
+  }
+}
+
+export interface CompanyEventStats {
+  companyId: string;
+  views: number;
+  phone: number;
+  telegram: number;
+  website: number;
+  /** phone + telegram + website — реальные контактные действия. */
+  contacts: number;
+}
+
+/**
+ * Внутренняя сводка контактов по компаниям за N дней — только для /admin владельца.
+ * Клиентам цифры не показываются: продажа идёт за полку спонсора, не за лид.
+ * Без D1 (dev/тесты) — пусто.
+ */
+export async function getCompanyEventStats(windowDays = 30, now = Date.now()): Promise<CompanyEventStats[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const start = now - windowDays * 24 * 60 * 60 * 1000;
+
+  try {
+    const rows = await db
+      .prepare(
+        `SELECT entity_id AS companyId, event_type AS eventType, COUNT(*) AS count
+         FROM analytics_events
+         WHERE entity_type = 'company' AND occurred_at >= ?
+         GROUP BY entity_id, event_type`
+      )
+      .bind(start)
+      .all<{ companyId: string; eventType: string; count: number }>();
+
+    const byCompany = new Map<string, CompanyEventStats>();
+    for (const row of rows.results) {
+      const entry =
+        byCompany.get(row.companyId) ??
+        { companyId: row.companyId, views: 0, phone: 0, telegram: 0, website: 0, contacts: 0 };
+      const count = Number(row.count);
+      if (row.eventType === "view" || row.eventType === "impression") entry.views += count;
+      else if (row.eventType === "phone") entry.phone += count;
+      else if (row.eventType === "telegram") entry.telegram += count;
+      else if (row.eventType === "website") entry.website += count;
+      byCompany.set(row.companyId, entry);
+    }
+    for (const entry of byCompany.values()) {
+      entry.contacts = entry.phone + entry.telegram + entry.website;
+    }
+    return [...byCompany.values()].sort((a, b) => b.contacts - a.contacts || b.views - a.views);
+  } catch (err) {
+    reportDbError("[db:company_stats_error]", err);
+    return [];
   }
 }

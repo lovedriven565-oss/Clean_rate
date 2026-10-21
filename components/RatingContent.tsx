@@ -9,7 +9,7 @@ import { RatingEmptyState } from "@/components/RatingEmptyState";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AdCreative } from "@/components/ads/AdCreative";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { calculateOrganicScore, calculateRelevanceScore } from "@/lib/rating";
+import { calculateOrganicScore, calculateRelevanceScore, splitSponsors } from "@/lib/rating";
 import { formatMarketCurrency } from "@/lib/format";
 import type { Market } from "@/lib/markets";
 import type { Category, CategoryId, Company, EligibleAd } from "@/lib/types";
@@ -125,6 +125,10 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
   // списка — органический порядок компаний остаётся нетронутым.
   const categoryAd = activeCategory !== "all" ? categoryAds?.[activeCategory] ?? null : null;
 
+  // Платные размещения выходят из органического списка в спонсорскую полку сверху:
+  // как в ProPanel и на посадочных — спонсор на первом экране, но без ранга #1.
+  const { sponsors, organic } = useMemo(() => splitSponsors(filtered), [filtered]);
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <main className="flex-1">
@@ -179,7 +183,19 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
               regionName={market.name}
             />
           ) : (
-            <CompanyTable companies={filtered} ranked={sortKey === "relevance"} />
+            <>
+              {sponsors.length > 0 && (
+                <div className="mb-6">
+                  <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    Рекламное размещение — не участвует в рейтинге
+                  </span>
+                  <CompanyTable companies={sponsors} ranked={false} />
+                </div>
+              )}
+              {organic.length > 0 && (
+                <CompanyTable companies={organic} ranked={sortKey === "relevance"} />
+              )}
+            </>
           )}
         </section>
       </main>

@@ -158,21 +158,23 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
         <section className="container py-10 sm:py-14">
           {categoryAd && <AdCreative ad={categoryAd} className="mb-6" />}
 
+          {/* Спонсорская полка — первой строкой над органикой (как в ProPanel решений),
+              но без ранга: место #1 остаётся честным органическим лидером */}
+          {sponsors.length > 0 && (
+            <div className="mb-6">
+              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Рекламное размещение — не участвует в рейтинге
+              </span>
+              <CompanyTable companies={sponsors} ranked={false} />
+            </div>
+          )}
+
           {organic.length > 0 ? (
             <CompanyTable companies={organic} />
           ) : (
             <div className="rounded-panel border border-dashed border-border bg-card/60 p-8 text-sm leading-6 text-muted-foreground">
               Пока здесь нет компаний. Если вы оказываете «{category.name.toLowerCase()}» в {city.nameIn},{" "}
               <Link href="/for-partners" className="font-semibold text-primary">разместите компанию</Link> — базовый профиль бесплатен.
-            </div>
-          )}
-
-          {sponsors.length > 0 && (
-            <div className="mt-6">
-              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Рекламное размещение — не участвует в рейтинге
-              </span>
-              <CompanyTable companies={sponsors} ranked={false} />
             </div>
           )}
 

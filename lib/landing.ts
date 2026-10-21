@@ -1,7 +1,6 @@
 import { CATEGORIES, getCategoryBySlug, getCategorySlug } from "@/lib/categories";
 import { ENABLED_MARKETS, getCityBySlug, openCities, type City, type Market } from "@/lib/markets";
 import { calculateRelevanceScore } from "@/lib/rating";
-import { getAllCompanies } from "@/lib/db/queries";
 import type { Category, CategoryId, Company } from "@/lib/types";
 
 /** Порог «тонкости» посадочной: меньше компаний → noindex и нет в sitemap. */
@@ -47,12 +46,35 @@ export function pickLandingCompanies(companies: Company[], cityName: string, cat
 }
 
 /** Посадочные для sitemap: только страницы с достаточным числом компаний. */
-export async function getIndexableLandings(): Promise<{ city: string; category: string }[]> {
-  const companies = await getAllCompanies();
+export function getIndexableLandings(companies: Company[]): { city: string; category: string }[] {
   return landingStaticParams().filter(({ city, category }) => {
     const resolved = resolveLandingParams(city, category);
     if (!resolved) return false;
     const { organic, sponsors } = pickLandingCompanies(companies, resolved.city.name, resolved.category.id);
     return organic.length + sponsors.length >= LANDING_INDEX_MIN_COMPANIES;
   });
+}
+
+export interface FooterLandingLink {
+  href: string;
+  label: string;
+}
+
+/**
+ * Прямые SEO-ссылки на посадочные для футера: до `perCityLimit`
+ * первых категорий на каждый открытый город — хаб перелинковки для роботов.
+ */
+export function getFooterLandingLinks(perCityLimit = 3): FooterLandingLink[] {
+  const topCategories = CATEGORIES.slice(0, perCityLimit);
+  return ENABLED_MARKETS.flatMap((market) =>
+    openCities(market).flatMap((city) =>
+      topCategories.map((category) => {
+        const categorySlug = getCategorySlug(category.id);
+        return {
+          href: `/${city.slug}/${categorySlug}`,
+          label: `${category.name} в ${city.nameIn}`,
+        };
+      })
+    )
+  );
 }

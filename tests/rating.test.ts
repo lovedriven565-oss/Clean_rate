@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { getFallbackCompanies } from "../lib/db/fallback.js";
-import { calculateOrganicScore, calculateRelevanceScore, hasPublishedRating, pickHomeCompanies } from "../lib/rating.js";
+import {
+  calculateOrganicScore,
+  calculateRelevanceScore,
+  hasPublishedRating,
+  pickHomeCompanies,
+  splitSponsors,
+} from "../lib/rating.js";
 
 const companies = getFallbackCompanies();
 
@@ -51,5 +57,24 @@ describe("home rating block", () => {
     for (let i = 1; i < organic.length; i++) {
       assert.ok(calculateRelevanceScore(organic[i - 1]) >= calculateRelevanceScore(organic[i]));
     }
+  });
+});
+
+describe("sponsor shelf split", () => {
+  it("moves promoted companies out of organic without reordering either group", () => {
+    const flagged = companies.map((c, i) => ({ ...c, promoted: i === 0 || i === 2 }));
+    const { sponsors, organic } = splitSponsors(flagged);
+    assert.deepEqual(sponsors.map((c) => c.id), [flagged[0].id, flagged[2].id]);
+    assert.equal(organic.every((c) => !c.promoted), true);
+    assert.deepEqual(
+      organic.map((c) => c.id),
+      flagged.filter((_, i) => i !== 0 && i !== 2).map((c) => c.id)
+    );
+  });
+
+  it("keeps everything organic when nobody pays", () => {
+    const { sponsors, organic } = splitSponsors(companies.map((c) => ({ ...c, promoted: false })));
+    assert.equal(sponsors.length, 0);
+    assert.equal(organic.length, companies.length);
   });
 });

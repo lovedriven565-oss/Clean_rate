@@ -46,6 +46,25 @@ export function ratingSourceLabel(source?: RatingSource) {
   return "Источник не подтверждён";
 }
 
+export interface SponsoredSplit {
+  /** Платные размещения — отдельным блоком над органикой, без ранга. */
+  sponsors: Company[];
+  /** Органический порядок — единственный, кто получает ранги. */
+  organic: Company[];
+}
+
+/**
+ * Разделяет уже отфильтрованный/отсортированный список: promoted-компании уходят
+ * в верхний спонсорский блок («Рекламное размещение»), органический порядок и ранги
+ * не трогаются. Порядок внутри каждой группы сохраняет сортировку входного списка.
+ */
+export function splitSponsors(companies: Company[]): SponsoredSplit {
+  return {
+    sponsors: companies.filter((c) => c.promoted),
+    organic: companies.filter((c) => !c.promoted),
+  };
+}
+
 export interface HomeCompanies {
   /** Топ по органическому баллу — единственные, кто получает ранг на главной. */
   organic: Company[];

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { getFooterLandingLinks } from "@/lib/landing";
 import { SITE_NAME } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
 const columns = [
   {
@@ -31,10 +33,23 @@ const columns = [
   },
 ];
 
+/** Колонка прямых ссылок на индексируемые посадочные «услуга × город» — хаб перелинковки. */
+const FOOTER_CITY_COLUMN_TITLE = "Города";
+
 export function Footer() {
+  const cityLinks = getFooterLandingLinks(3);
+  const allColumns = cityLinks.length
+    ? [...columns, { title: FOOTER_CITY_COLUMN_TITLE, links: cityLinks }]
+    : columns;
+
   return (
     <footer className="border-t border-border bg-cta text-cta-foreground">
-      <div className="container grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)] lg:py-18">
+      <div
+        className={cn(
+          "container grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 lg:py-18",
+          cityLinks.length > 0 ? "lg:grid-cols-[1.4fr_repeat(4,1fr)]" : "lg:grid-cols-[1.4fr_repeat(3,1fr)]"
+        )}
+      >
         <div className="flex flex-col items-start gap-5">
           <Link href="/" className="font-display font-bold tracking-tight text-cta-foreground">
             <BrandLogo />
@@ -51,7 +66,7 @@ export function Footer() {
           </Link>
         </div>
 
-        {columns.map((column) => (
+        {allColumns.map((column) => (
           <div key={column.title} className="flex flex-col gap-4">
             <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-cta-foreground/50">{column.title}</h3>
             <ul className="flex flex-col gap-3 text-sm text-cta-foreground/75">

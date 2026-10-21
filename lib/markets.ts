@@ -48,7 +48,8 @@ export const MARKETS: Record<CountryCode, Market> = {
     enabled: true,
     cities: [
       { slug: "minsk", name: "Минск", nameIn: "Минске" },
-      { slug: "brest", name: "Брест", nameIn: "Бресте" },
+      // Брест закрыт до появления компаний: пустой город ломает рейтинг и ProPanel
+      { slug: "brest", name: "Брест", nameIn: "Бресте", enabled: false },
     ],
   },
   RU: {
@@ -61,7 +62,13 @@ export const MARKETS: Record<CountryCode, Market> = {
     enabled: true,
     cities: [
       { slug: "moscow", name: "Москва", nameIn: "Москве" },
+      // Заготовки миллионников: enabled: false до наполнения базы компаниями
       { slug: "spb", name: "Санкт-Петербург", nameIn: "Санкт-Петербурге", enabled: false },
+      { slug: "novosibirsk", name: "Новосибирск", nameIn: "Новосибирске", enabled: false },
+      { slug: "ekb", name: "Екатеринбург", nameIn: "Екатеринбурге", enabled: false },
+      { slug: "kazan", name: "Казань", nameIn: "Казани", enabled: false },
+      { slug: "nn", name: "Нижний Новгород", nameIn: "Нижнем Новгороде", enabled: false },
+      { slug: "krasnodar", name: "Краснодар", nameIn: "Краснодаре", enabled: false },
     ],
   },
   KZ: {

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getAllBrands, getCompanySlugs, getSolutionSlugs } from "@/lib/db/queries";
+import { getAllBrands, getAllCompanies, getCompanySlugs, getSolutionSlugs } from "@/lib/db/queries";
 import { getIndexableLandings } from "@/lib/landing";
 import { absoluteUrl } from "@/lib/site";
 
@@ -8,12 +8,13 @@ import { absoluteUrl } from "@/lib/site";
  * и параметризованные URL отдавали бы одинаковый HTML — дубли для индексации.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [solutionSlugs, companySlugs, brands, landings] = await Promise.all([
+  const [solutionSlugs, companySlugs, brands, companies] = await Promise.all([
     getSolutionSlugs(),
     getCompanySlugs(),
     getAllBrands(),
-    getIndexableLandings(),
+    getAllCompanies(),
   ]);
+  const landings = getIndexableLandings(companies);
   const lastModified = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
