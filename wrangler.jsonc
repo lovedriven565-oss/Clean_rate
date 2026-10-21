@@ -22,6 +22,12 @@
     "STRICT_DB": "0",
     "NEXT_PUBLIC_SITE_URL": "https://chistolab.pro"
   },
+  // Публичный домен: Workers Builds при деплое привяжет его к воркеру
+  // (зона chistolab.pro должна быть активна на этом Cloudflare-аккаунте).
+  "routes": [
+    { "pattern": "chistolab.pro", "custom_domain": true },
+    { "pattern": "www.chistolab.pro", "custom_domain": true }
+  ],
   // Семантический поиск (lib/search/semantic.ts). AI-биндинг активен; Vectorize
   // подключается позже: wrangler vectorize create cleanhub-solutions --dimensions=1024 --metric=cosine
   "ai": { "binding": "AI" },

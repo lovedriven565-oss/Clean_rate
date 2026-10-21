@@ -201,7 +201,7 @@
 
 ## Адаптация под домен `chistolab.pro` и бренд `ChistoLab` (сделано)
 - `lib/site.ts` — `SITE_NAME = "ChistoLab"`, `SITE_DOMAIN = "chistolab.pro"`, `SITE_TLD = ".pro"`, `SITE_MONOGRAM = "CL"`, `SITE_URL = "https://chistolab.pro"`.
-- `wrangler.jsonc` — добавлен `"NEXT_PUBLIC_SITE_URL": "https://chistolab.pro"` в `vars`.
+- `wrangler.jsonc` — добавлен `"NEXT_PUBLIC_SITE_URL": "https://chistolab.pro"` в `vars` и `routes` с `custom_domain` для `chistolab.pro` + `www.chistolab.pro` (Workers Builds привязывает домен при деплое; зона должна быть на аккаунте).
 - `components/BrandLogo.tsx`, `lib/og/template.tsx`, `app/badge/[slug]/route.ts` — монограмма `CL` + `ChistoLab` с акцентным бейджем `.pro` (в SVG-бейдже `ChistoLab · chistolab.pro`).
 - Метаданные, OG-alt, политика конфиденциальности, методология, `StatusBadge`, системный промпт ИИ-консультанта переведены на `ChistoLab`.
 
