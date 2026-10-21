@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Briefcase, Camera, Home, Loader2, Search, Sparkles, Wrench } from "lucide-react";
+import { ArrowRight, Briefcase, Home, Loader2, Search, Sparkles, Wrench } from "lucide-react";
 import { Input } from "@/components/ui/primitives";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { cn } from "@/lib/utils";
@@ -303,11 +303,11 @@ export function SmartSearch() {
         ))}
         <button
           type="button"
-          onClick={() => search.navigate("/assistant?photo=1")}
+          onClick={() => search.navigate(search.assistantHref)}
           className="inline-flex h-9 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
         >
-          <Camera className="h-3.5 w-3.5" aria-hidden />
-          По фото пятна
+          <Sparkles className="h-3.5 w-3.5" aria-hidden />
+          ИИ-технолог
         </button>
       </div>
 

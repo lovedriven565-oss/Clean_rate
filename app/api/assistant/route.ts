@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
-import { consult, describeImage } from "@/lib/assistant/engine";
+import { consult } from "@/lib/assistant/engine";
 import {
   getAllSolutions,
   getIntentKeywords,
+  getPriceEstimates,
 } from "@/lib/db/queries";
 import { getProductsSafetyMap } from "@/lib/ads/queries";
 import { checkRateLimit, tooManyRequests } from "@/lib/security/guard";
@@ -11,24 +12,27 @@ import { getSearchBindings } from "@/lib/search/semantic";
 
 export const dynamic = "force-dynamic";
 
-const MAX_BODY_BYTES = 2_400_000;
+const MAX_BODY_BYTES = 16_000;
+
+const contextSchema = z
+  .object({
+    timing: z.enum(["fresh", "dried", "washed"]).optional(),
+    material: z.string().trim().max(120).optional(),
+    solutionSlug: z.string().trim().max(120).optional(),
+    countryCode: z.string().trim().max(8).optional(),
+  })
+  .optional();
 
 const bodySchema = z.object({
   message: z.string().trim().min(2).max(500),
-  // data-url без префикса или чистый base64; ~1.5 МБ фото максимум
-  image: z.string().max(2_200_000).optional(),
+  context: contextSchema,
 });
 
-function stripDataUrl(image: string): string {
-  const comma = image.indexOf(",");
-  return image.startsWith("data:") && comma > -1 ? image.slice(comma + 1) : image;
-}
-
 /**
- * POST /api/assistant — AI-консультант по чистке.
- * Отвечает только по проверенным протоколам: без LLM отдаёт детерминированную
- * выжимку протокола, с LLM — суммаризацию фактов. Продукты с паспортом
- * проходят гейт безопасности. Фото обрабатывается в памяти и не сохраняется.
+ * POST /api/assistant — AI-консультант ChistoLab по чистке.
+ * Отвечает строго по проверенным протоколам: без LLM отдаёт детерминированную
+ * выжимку протокола с учётом уточнений триажа, с LLM — персонализированный
+ * разбор технолога. Продукты с паспортом проходят гейт безопасности.
  */
 export async function POST(request: Request): Promise<Response> {
   if (!(await checkRateLimit(request, "ASSISTANT_LIMITER", "assistant"))) {
@@ -44,25 +48,22 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
 
-  const env = await getSearchBindings();
-  let imageDescription: string | null = null;
-  if (parsed.data.image && env?.AI) {
-    imageDescription = await describeImage(env.AI, stripDataUrl(parsed.data.image));
-  }
-
-  const [solutions, keywords, safetyMap] = await Promise.all([
+  const [env, solutions, keywords, safetyMap, estimates] = await Promise.all([
+    getSearchBindings(),
     getAllSolutions(),
     getIntentKeywords(),
     getProductsSafetyMap(),
+    getPriceEstimates(),
   ]);
 
   const answer = await consult({
     env,
     query: parsed.data.message,
-    imageDescription,
+    context: parsed.data.context,
     solutions,
     keywords,
     safetyMap,
+    estimates,
   });
 
   return NextResponse.json(answer, {

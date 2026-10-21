@@ -29,7 +29,7 @@ export interface SemanticEnv {
  * Биндинги поиска из Cloudflare-контекста. null вне Workers
  * (next dev, тесты, сборка) или без AI-биндинга — тогда работает KeywordProvider.
  * VECTORIZE опционален: без него семантика откатывается на словарь, но
- * LLM-ответы и vision-анализ фото консультанта продолжают работать.
+ * LLM-ответы и классификация консультанта продолжают работать.
  */
 export async function getSearchBindings(): Promise<SemanticEnv | null> {
   try {
