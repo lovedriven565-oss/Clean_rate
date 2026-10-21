@@ -11,7 +11,7 @@ import { BRAND_COLORS, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const description =
-  "Решения задач чистоты, честный рейтинг клининговых компаний и бренды для профи в Беларуси. Открытые источники оценки, прямые контакты.";
+  "Лаборатория решений чистоты ChistoLab: пошаговые протоколы выведения пятен и уборки, честный рейтинг клининговых компаний и бренды для профи в Беларуси и России.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description,
-  keywords: ["клининг", "уборка", "химчистка", "рейтинг клининговых компаний", "клининг Минск", "клининг Брест", "химчистка мебели Минск"],
+  keywords: ["ChistoLab", "клининг", "уборка", "химчистка", "рейтинг клининговых компаний", "клининг Минск", "клининг Москва", "химчистка мебели"],
   openGraph: {
     type: "website",
     siteName: SITE_NAME,

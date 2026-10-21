@@ -1,4 +1,4 @@
-# CLEANHUB — памятка для Devin
+# ChistoLab (`chistolab.pro`) — памятка для Devin
 
 ## Стек
 - Next.js 16.3.3 (App Router), React 19
@@ -198,4 +198,11 @@
 - **SEO-перелинковка и чистота DAL:** `lib/landing.ts` — чистый синхронный модуль без импорта D1 (`getFooterLandingLinks(perCityLimit=3)` строит топ-3 категории по открытым городам, `getIndexableLandings(companies)` принимает массив компаний параметром); `components/Footer.tsx` — синхронный компонент с колонкой «Города» (прямые ссылки на `/minsk/*`, `/moscow/*`, без запросов к D1 и без попадания серверного кода в клиентский бандл `/for-partners`). В `lib/db/queries.ts` `getCompanySlugs()` фильтрует `status = 'published'`, а `getBrandBySlug(slug)` делает точечный SQL-запрос `.limit(1)`.
 - **Внутренняя аналитика только для владельца:** `getCompanyEventStats(windowDays)` в `lib/db/queries.ts` агрегирует `analytics_events` (view/phone/telegram/website) по компаниям; таблица «Контакты компаний (30 дн)» в `/admin` с плашкой «Спонсор» у promoted.
 - **Проверки:** typecheck 0, lint чисто, test 186/186, build 143 страницы (посадочные: только minsk + moscow).
+
+## Адаптация под домен `chistolab.pro` и бренд `ChistoLab` (сделано)
+- `lib/site.ts` — `SITE_NAME = "ChistoLab"`, `SITE_DOMAIN = "chistolab.pro"`, `SITE_TLD = ".pro"`, `SITE_MONOGRAM = "CL"`, `SITE_URL = "https://chistolab.pro"`.
+- `wrangler.jsonc` — добавлен `"NEXT_PUBLIC_SITE_URL": "https://chistolab.pro"` в `vars`.
+- `components/BrandLogo.tsx`, `lib/og/template.tsx`, `app/badge/[slug]/route.ts` — монограмма `CL` + `ChistoLab` с акцентным бейджем `.pro` (в SVG-бейдже `ChistoLab · chistolab.pro`).
+- Метаданные, OG-alt, политика конфиденциальности, методология, `StatusBadge`, системный промпт ИИ-консультанта переведены на `ChistoLab`.
+
 

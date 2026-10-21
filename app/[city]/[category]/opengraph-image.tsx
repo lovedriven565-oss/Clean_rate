@@ -2,8 +2,9 @@ import { getAllCompanies } from "@/lib/db/queries";
 import { landingStaticParams, pickLandingCompanies, resolveLandingParams } from "@/lib/landing";
 import { OG_CONTENT_TYPE, OG_SIZE, renderOgCard } from "@/lib/og/template";
 import { pluralize } from "@/lib/format";
+import { SITE_NAME } from "@/lib/site";
 
-export const alt = "Услуга по городу — Клининг Рейтинг";
+export const alt = `Услуга по городу — ${SITE_NAME}`;
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 export const dynamicParams = false;

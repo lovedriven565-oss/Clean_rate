@@ -18,7 +18,7 @@ import { formatCompanyPriceFrom, formatNumber, formatRating } from "@/lib/format
 import { getCityByName, getMarketByCity } from "@/lib/markets";
 import { categoryLandingHref } from "@/lib/categories";
 import { partnerClaimHref } from "@/lib/partners";
-import { absoluteUrl, pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates, SITE_NAME } from "@/lib/site";
 
 export async function generateStaticParams() {
   const slugs = await getCompanySlugs();
@@ -254,7 +254,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/badge/${company.slug}`}
-                  alt={`Бейдж «${company.name}» в Клининг Рейтинге`}
+                  alt={`Бейдж «${company.name}» в ${SITE_NAME}`}
                   width={300}
                   height={72}
                   className="mt-4"

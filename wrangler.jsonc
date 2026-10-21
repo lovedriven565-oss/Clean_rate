@@ -19,7 +19,8 @@
   ],
   "vars": {
     // 0: мягкий откат на seed-данные если D1 ещё не засеяна или пуста
-    "STRICT_DB": "0"
+    "STRICT_DB": "0",
+    "NEXT_PUBLIC_SITE_URL": "https://chistolab.pro"
   },
   // Семантический поиск (lib/search/semantic.ts). AI-биндинг активен; Vectorize
   // подключается позже: wrangler vectorize create cleanhub-solutions --dimensions=1024 --metric=cosine

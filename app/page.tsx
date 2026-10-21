@@ -16,9 +16,9 @@ import { resolveSelection } from "@/lib/solutions/diagnostic";
 import { SITE_NAME, SITE_URL, absoluteUrl, pageAlternates } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Клининг Рейтинг — найдите решение любой задачи чистоты",
+  title: `${SITE_NAME} — найдите решение любой задачи чистоты`,
   description:
-    "Пятно на диване, офис после корпоратива или выбор химии — одна строка поиска. Пошаговые решения, честный рейтинг клининговых компаний и бренды для профи в Беларуси.",
+    "Пятно на диване, офис после корпоратива или выбор профессиональной химии — одна строка поиска. Пошаговые протоколы ChistoLab, честный рейтинг клининговых компаний и бренды для профи.",
   alternates: pageAlternates("/"),
 };
 

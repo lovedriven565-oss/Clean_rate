@@ -27,7 +27,7 @@ const variants: Record<
   },
   testWinner: {
     label: "Победитель теста",
-    title: "Лучший результат в открытом тесте CLEANHUB.",
+    title: "Лучший результат в открытом тесте ChistoLab.",
     icon: Trophy,
     className: "bg-foreground text-background",
   },

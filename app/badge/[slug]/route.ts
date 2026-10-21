@@ -1,6 +1,6 @@
 import { getCompanyBySlug } from "@/lib/db/queries";
 import { calculateOrganicScore } from "@/lib/rating";
-import { BRAND_COLORS, SITE_MONOGRAM, SITE_NAME } from "@/lib/site";
+import { BRAND_COLORS, SITE_DOMAIN, SITE_MONOGRAM, SITE_NAME } from "@/lib/site";
 
 /**
  * SVG-бейдж «{SITE_NAME} · профиль проверен» для сайтов компаний.
@@ -24,7 +24,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   <rect width="300" height="72" rx="14" fill="${BRAND_COLORS.ink}"/>
   <rect x="10" y="12" width="48" height="48" rx="11" fill="${BRAND_COLORS.brand}"/>
   <text x="34" y="45" font-family="system-ui, sans-serif" font-size="21" font-weight="700" fill="${BRAND_COLORS.brandForeground}" text-anchor="middle">${escape(SITE_MONOGRAM)}</text>
-  <text x="70" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="${BRAND_COLORS.paper}">${escape(SITE_NAME)}</text>
+  <text x="70" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="${BRAND_COLORS.paper}">${escape(`${SITE_NAME} · ${SITE_DOMAIN}`)}</text>
   <text x="70" y="49" font-family="system-ui, sans-serif" font-size="12" fill="${BRAND_COLORS.primaryBright}">${escape(`${status}${scoreText}`)}</text>
 </svg>`;
 

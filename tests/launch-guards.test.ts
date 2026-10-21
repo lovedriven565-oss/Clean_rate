@@ -7,7 +7,7 @@ import { ENABLED_MARKETS, MARKETS, getCity, getCityBySlug, getMarket, getMarketB
 import { formatCompanyPriceFrom, formatMarketCurrency } from "../lib/format.js";
 import { getFooterLandingLinks, getIndexableLandings, landingStaticParams } from "../lib/landing.js";
 import { getFallbackCompanies } from "../lib/db/fallback.js";
-import { pageAlternates } from "../lib/site.js";
+import { SITE_DOMAIN, SITE_MONOGRAM, SITE_NAME, SITE_TLD, SITE_URL, absoluteUrl, pageAlternates } from "../lib/site.js";
 import { isValidPhone } from "../lib/telegram.js";
 import { verifyTurnstile } from "../lib/security/guard.js";
 
@@ -147,10 +147,21 @@ describe("market focus", () => {
   });
 
   it("emits hreflang only for enabled markets", () => {
-    const languages = Object.keys(pageAlternates("/").languages ?? {});
+    const alternates = pageAlternates("/");
+    const languages = Object.keys(alternates.languages ?? {});
     assert.ok(languages.includes("ru-BY"));
     assert.ok(languages.includes("ru-RU"));
     assert.ok(!languages.includes("ru-KZ"));
+    assert.equal(alternates.canonical, "https://chistolab.pro/");
+  });
+
+  it("exposes ChistoLab brand identity and chistolab.pro canonical domain", () => {
+    assert.equal(SITE_NAME, "ChistoLab");
+    assert.equal(SITE_DOMAIN, "chistolab.pro");
+    assert.equal(SITE_TLD, ".pro");
+    assert.equal(SITE_MONOGRAM, "CL");
+    assert.equal(SITE_URL, "https://chistolab.pro");
+    assert.equal(absoluteUrl("/solutions"), "https://chistolab.pro/solutions");
   });
 
   it("formats company prices and map links by the company city", () => {
@@ -174,7 +185,7 @@ describe("admin surface", () => {
     process.env.NEXTJS_ENV = "production";
     assert.equal(isAdminAllowed(new Headers()), false);
     assert.equal(
-      isAdminAllowed(new Headers({ "cf-access-authenticated-user-email": "owner@cleanhub.by" })),
+      isAdminAllowed(new Headers({ "cf-access-authenticated-user-email": "owner@chistolab.pro" })),
       true
     );
   });

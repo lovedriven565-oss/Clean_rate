@@ -3,10 +3,12 @@ import Link from "next/link";
 import { ArrowLeft, BadgeCheck, BarChart3, CircleDollarSign, Database } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { pageAlternates } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Методология рейтинга | Клининг Рейтинг",
+  title: "Методология рейтинга",
   description: "Как рассчитывается органический рейтинг компаний и почему платное размещение не влияет на оценку.",
+  alternates: pageAlternates("/rating/methodology"),
 };
 
 const factors = [

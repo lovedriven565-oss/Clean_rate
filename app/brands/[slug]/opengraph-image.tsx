@@ -1,7 +1,8 @@
 import { getBrandSlugs, getBrandsByScore } from "@/lib/db/queries";
 import { OG_CONTENT_TYPE, OG_SIZE, renderOgCard } from "@/lib/og/template";
+import { SITE_NAME } from "@/lib/site";
 
-export const alt = "Бренд — Клининг Рейтинг";
+export const alt = `Бренд — ${SITE_NAME}`;
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 export const dynamicParams = false;

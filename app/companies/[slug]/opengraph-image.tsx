@@ -1,8 +1,9 @@
 import { getCompanyBySlug, getCompanySlugs } from "@/lib/db/queries";
 import { OG_CONTENT_TYPE, OG_SIZE, renderOgCard } from "@/lib/og/template";
 import { calculateOrganicScore } from "@/lib/rating";
+import { SITE_NAME } from "@/lib/site";
 
-export const alt = "Компания — Клининг Рейтинг";
+export const alt = `Компания — ${SITE_NAME}`;
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 export const dynamicParams = false;

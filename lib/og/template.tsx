@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
-import { BRAND_COLORS, SITE_MONOGRAM, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
+import { BRAND_COLORS, SITE_MONOGRAM, SITE_NAME, SITE_TAGLINE, SITE_TLD } from "@/lib/site";
 
 /**
  * Общий шаблон OG-картинок (1200×630). Картинки генерируются на этапе сборки (SSG),
@@ -84,7 +84,21 @@ export async function renderOgCard({ eyebrow, title, subtitle, metric }: OgCardP
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <Monogram size={64} />
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: "-0.02em" }}>{SITE_NAME}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: "-0.02em" }}>{SITE_NAME}</div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  padding: "3px 10px",
+                  borderRadius: 999,
+                  background: BRAND_COLORS.brand,
+                  color: BRAND_COLORS.brandForeground,
+                }}
+              >
+                {SITE_TLD}
+              </div>
+            </div>
             <div style={{ fontSize: 20, color: BRAND_COLORS.muted }}>{SITE_TAGLINE}</div>
           </div>
         </div>

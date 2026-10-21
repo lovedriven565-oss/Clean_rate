@@ -1743,7 +1743,7 @@ export const seedCampaigns: SeedCampaign[] = [
   {
     id: "camp-karcher-home",
     brandId: "karcher",
-    name: "Kärcher — партнёр сезона чистоты CLEANHUB",
+    name: "Kärcher — партнёр сезона чистоты ChistoLab",
     placement: "home.editorial_partner",
     status: "draft",
     startsAt: 1767225600000, // 2026-01-01

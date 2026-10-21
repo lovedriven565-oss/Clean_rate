@@ -5,20 +5,33 @@ import { ENABLED_MARKETS } from "@/lib/markets";
  * Публичный адрес сайта для canonical/sitemap/OpenGraph.
  * Задаётся через NEXT_PUBLIC_SITE_URL (wrangler vars / .env); fallback — рабочий домен платформы.
  */
-export const SITE_NAME = "Клининг Рейтинг";
+export const SITE_NAME = "ChistoLab";
+
+/** Домен платформы и доменная зона (используются в логотипе, OG и бейджах). */
+export const SITE_DOMAIN = "chistolab.pro";
+export const SITE_TLD = ".pro";
 
 /** Короткий слоган для OG-картинок, манифеста и подписи логотипа. */
-export const SITE_TAGLINE = "Решения задач чистоты и честный рейтинг компаний";
+export const SITE_TAGLINE = "Лаборатория решений чистоты и честный рейтинг компаний";
 
 /**
- * Монограмма знака (favicon, логотип, OG): первые буквы слов SITE_NAME.
- * При смене имени бренда меняется автоматически.
+ * Монограмма знака (favicon, логотип, OG, бейдж): первые буквы слов или CamelCase-частей SITE_NAME.
+ * Для "ChistoLab" даёт "CL", для двухсловного названия — первые буквы двух слов.
  */
-export const SITE_MONOGRAM = SITE_NAME.split(/\s+/)
-  .filter(Boolean)
-  .slice(0, 2)
-  .map((word) => word[0]!.toUpperCase())
-  .join("");
+export const SITE_MONOGRAM = (() => {
+  const words = SITE_NAME.trim().split(/\s+/).filter(Boolean);
+  if (words.length >= 2) {
+    return words
+      .slice(0, 2)
+      .map((word) => word[0]!.toUpperCase())
+      .join("");
+  }
+  const capitals = SITE_NAME.match(/[A-ZА-ЯЁ]/g);
+  if (capitals && capitals.length >= 2) {
+    return capitals.slice(0, 2).join("");
+  }
+  return SITE_NAME.slice(0, 2).toUpperCase();
+})();
 
 /** Фирменные цвета для растровых картинок (ImageResponse не читает CSS-переменные). */
 export const BRAND_COLORS = {
@@ -38,7 +51,7 @@ export const BRAND_COLORS = {
  */
 export const PRIVACY_CONSENT_VERSION = "privacy-2026-10-zero-pii";
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://cleaning-rating.by").replace(/\/+$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://chistolab.pro").replace(/\/+$/, "");
 
 export function absoluteUrl(path = "/"): string {
   return new URL(path, `${SITE_URL}/`).toString();

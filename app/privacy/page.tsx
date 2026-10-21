@@ -1,11 +1,13 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { pageAlternates, SITE_NAME } from "@/lib/site";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Политика конфиденциальности — Клининг Рейтинг",
+  title: "Политика конфиденциальности",
   description:
-    "Политика конфиденциальности платформы Клининг Рейтинг: какие данные собираются, как они хранятся и как мы защищаем персональную информацию.",
+    `Политика конфиденциальности платформы ${SITE_NAME}: какие данные собираются, как они хранятся и как мы защищаем персональную информацию.`,
+  alternates: pageAlternates("/privacy"),
 };
 
 export default function PrivacyPage() {
@@ -22,7 +24,7 @@ export default function PrivacyPage() {
 
             <div className="mt-8 flex flex-col gap-6 text-foreground/90">
               <p>
-                Платформа <strong>Клининг Рейтинг</strong> действует как честный каталог:
+                Платформа <strong>{SITE_NAME}</strong> действует как честный каталог:
                 мы показываем публичные контакты клининговых компаний и не выступаем
                 посредником между клиентом и исполнителем.
               </p>
