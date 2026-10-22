@@ -555,6 +555,10 @@ const VALID_CATEGORIES = new Set<CategoryId>([
   "apartments", "offices", "upholstery", "windows", "post-renovation", "deep-cleaning",
 ]);
 
+/** Минимальные маркеры клининговой темы — страховка от ложного isCleaningTopic:false. */
+const CLEANING_TOPIC_HINT_RE =
+  /чист|мыт|мойк|пятн|загрязн|оттер|отмы|вывест|вывод|налет|налёт|запах|кле|жир|пыль|уборк|развод|копоть|нагар|плесен|грибок|ржавчин|след|воня/i;
+
 interface OpenExpertJson {
   isCleaningTopic?: boolean;
   title?: string;
@@ -583,41 +587,56 @@ export async function generateOpenExpertAnswer(
   context: AssistantContext | undefined,
   pool: Solution[]
 ): Promise<AssistantAnswer | null> {
+  const contextLines = [
+    context?.material ? `Уточнённый материал пользователя: ${context.material}` : "",
+    context?.timing === "fresh"
+      ? "Состояние: свежее загрязнение"
+      : context?.timing === "dried"
+        ? "Состояние: уже высохло / застарелое"
+        : context?.timing === "washed"
+          ? "Состояние: уже пытались замывать мылом или бытовой химией"
+          : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const userPrompt = contextLines ? `${contextLines}\n\nВОПРОС: ${query}` : `ВОПРОС: ${query}`;
+
+  let raw: string | null = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const result = await ai.run(ANSWER_MODEL, {
+        messages: [
+          { role: "system", content: OPEN_EXPERT_SYSTEM_PROMPT },
+          {
+            role: "user",
+            content:
+              attempt === 0
+                ? userPrompt
+                : `${userPrompt}\n\n(Повтори ответ ТОЛЬКО одним валидным JSON-объектом по схеме из инструкции, без markdown и без текста вокруг.)`,
+          },
+        ],
+        max_tokens: 1500,
+        temperature: 0.2,
+      });
+      raw = (result as { response?: string }).response?.trim() ?? null;
+      if (raw) break;
+    } catch (err) {
+      console.error("[assistant:open_expert_error]", err);
+    }
+  }
+
+  if (!raw) return null;
+
   try {
-    const contextLines = [
-      context?.material ? `Уточнённый материал пользователя: ${context.material}` : "",
-      context?.timing === "fresh"
-        ? "Состояние: свежее загрязнение"
-        : context?.timing === "dried"
-          ? "Состояние: уже высохло / застарелое"
-          : context?.timing === "washed"
-            ? "Состояние: уже пытались замывать мылом или бытовой химией"
-            : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    const result = await ai.run(ANSWER_MODEL, {
-      messages: [
-        { role: "system", content: OPEN_EXPERT_SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: contextLines ? `${contextLines}\n\nВОПРОС: ${query}` : `ВОПРОС: ${query}`,
-        },
-      ],
-      max_tokens: 900,
-      temperature: 0.2,
-    });
-
-    const raw = (result as { response?: string }).response?.trim();
-    if (!raw) return null;
-
     // Пробуем извлечь JSON-объект из ответа модели
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {
         const parsed = JSON.parse(jsonMatch[0]) as OpenExpertJson;
-        if (parsed.isCleaningTopic === false) {
+        // Вопрос явно про чистку, но модель ошибочно вернула isCleaningTopic:false —
+        // не выбрасываем ответ, а собираем протокол из остальных полей.
+        if (parsed.isCleaningTopic === false && !CLEANING_TOPIC_HINT_RE.test(query)) {
           return null;
         }
         const surface: SolutionSurface = VALID_SURFACES.has(parsed.surface as SolutionSurface)
@@ -701,11 +720,59 @@ export async function generateOpenExpertAnswer(
           confidence: 0.78,
         };
       } catch {
-        // Если модель вернула обычный текст вместо JSON — отдаём его как текстовую консультацию ниже
+        // Модель ответила прозой без JSON — ниже отдадим текстовую консультацию
       }
     }
   } catch (err) {
     console.error("[assistant:open_expert_error]", err);
+  }
+
+  // Фолбэк: модель вернула содержательный текст без JSON —
+  // текстовая консультация технолога лучше тупикового «нет протокола».
+  const prose = raw.replace(/```(?:json)?/gi, "").trim();
+  const looksLikeJsonFragment = prose.startsWith("{") || prose.startsWith("[");
+  if (!looksLikeJsonFragment && prose.length >= 80) {
+    const closestAlternatives: AssistantAlternative[] = pool.slice(0, 3).map((s) => ({
+      id: s.id,
+      slug: s.slug,
+      title: s.title,
+      surface: s.surface,
+      problemType: s.problemType,
+    }));
+    return {
+      mode: "answer",
+      text: prose.slice(0, 3000),
+      verdict: {
+        recommendation: "caution",
+        badge: "Разбор ИИ-технолога · Сделайте тест на скрытом участке",
+        summary:
+          "Ответ составлен ИИ-технологом ChistoLab по правилам химической совместимости материалов. Перед применением любого средства проверьте его на незаметном участке.",
+      },
+      solution: {
+        id: "custom-ai-protocol",
+        slug: closestAlternatives[0]?.slug ?? "vino-na-divane",
+        title: `Разбор задачи: ${query}`,
+        surface: "other",
+        material: context?.material,
+        problemType: "general",
+        severity: context?.timing === "washed" ? "extreme" : "fresh",
+        relatedCategory: "apartments",
+        whenToCallPro:
+          "Если загрязнение не сходит после первой бережной попытки или покрытие деликатное — остановитесь и вызовите профильного мастера.",
+        isCustom: true,
+      },
+      steps: [],
+      products: [],
+      warnings: [],
+      alternatives: closestAlternatives,
+      materialOptions: getMaterialOptions("other"),
+      followUpQuestions: [
+        "Какое средство безопасно для деликатного покрытия?",
+        "Что делать, если загрязнение уже застарелое?",
+        "В каком случае лучше вызвать профессионала?",
+      ],
+      confidence: 0.7,
+    };
   }
   return null;
 }
