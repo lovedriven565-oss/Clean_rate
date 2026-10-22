@@ -718,7 +718,7 @@ export async function generateOpenExpertAnswer(
           firstAid: steps[0]?.instruction,
           solution: {
             id: "custom-ai-protocol",
-            slug: closestAlternatives[0]?.slug ?? "vino-na-divane",
+            slug: "custom-ai-protocol",
             title: parsed.title?.trim() || `Разбор задачи: ${query}`,
             surface,
             material: parsed.material?.trim() || context?.material,
@@ -775,7 +775,7 @@ export async function generateOpenExpertAnswer(
       },
       solution: {
         id: "custom-ai-protocol",
-        slug: closestAlternatives[0]?.slug ?? "vino-na-divane",
+        slug: "custom-ai-protocol",
         title: `Разбор задачи: ${query}`,
         surface: "other",
         material: context?.material,
