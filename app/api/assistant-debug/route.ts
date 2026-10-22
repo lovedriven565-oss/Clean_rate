@@ -65,6 +65,13 @@ export async function GET(request: Request): Promise<Response> {
       }
     }
 
+    let rawDump: string | null = null;
+    try {
+      rawDump = JSON.stringify(rawResponse)?.slice(0, 4000) ?? null;
+    } catch {
+      rawDump = `unserializable: ${String(rawResponse)?.slice(0, 500)}`;
+    }
+
     return NextResponse.json({
       q,
       envErr,
@@ -73,8 +80,9 @@ export async function GET(request: Request): Promise<Response> {
       poolCount: pool.length,
       hasAI: Boolean(env?.AI),
       rawErr,
+      rawCtor: rawResponse ? (rawResponse as object).constructor?.name : null,
       rawShape: rawResponse && typeof rawResponse === "object" ? Object.keys(rawResponse) : String(typeof rawResponse),
-      rawText: (rawResponse as { response?: string } | null)?.response?.slice(0, 4000) ?? null,
+      rawDump,
       genResult,
       genErr,
     });
