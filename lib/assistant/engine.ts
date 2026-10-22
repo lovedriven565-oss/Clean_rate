@@ -163,6 +163,31 @@ export function getFollowUpQuestions(solution: Solution): string[] {
 }
 
 /**
+ * Извлекает текст ответа модели из результата ai.run.
+ * Workers AI может вернуть как простую форму `{ response: "text" }`,
+ * так и OpenAI-совместимую `chat.completion`, где текст лежит в
+ * `choices[0].message.content`, а `response` — распарсенный объект.
+ */
+function extractAiText(result: unknown): string | null {
+  if (!result || typeof result !== "object") return null;
+  const r = result as {
+    response?: unknown;
+    choices?: { message?: { content?: unknown } }[];
+  };
+  if (typeof r.response === "string" && r.response.trim()) return r.response.trim();
+  const content = r.choices?.[0]?.message?.content;
+  if (typeof content === "string" && content.trim()) return content.trim();
+  if (r.response && typeof r.response === "object") {
+    try {
+      return JSON.stringify(r.response);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
  * LLM-классификатор запасного уровня: если ни векторный поиск, ни словарь,
  * ни морфологический токен-ранкер не нашли протокол (нестандартная бытовая формулировка),
  * просим модель сопоставить вопрос со списком проверенных протоколов.
@@ -192,7 +217,7 @@ async function matchSolutionWithLlm(
       max_tokens: 40,
       temperature: 0,
     });
-    const raw = (result as { response?: string }).response?.trim().toLowerCase() ?? "";
+    const raw = extractAiText(result)?.toLowerCase() ?? "";
     const cleaned = raw.replace(/[^a-z0-9-]/g, "");
     return solutions.find((s) => s.id === cleaned || s.slug === cleaned) ?? null;
   } catch {
@@ -619,7 +644,7 @@ export async function generateOpenExpertAnswer(
         max_tokens: 1500,
         temperature: 0.2,
       });
-      raw = (result as { response?: string }).response?.trim() ?? null;
+      raw = extractAiText(result);
       if (raw) break;
     } catch (err) {
       console.error("[assistant:open_expert_error]", err);
@@ -921,7 +946,7 @@ export async function consult(params: {
         max_tokens: 700,
         temperature: 0.2,
       });
-      const text = (result as { response?: string }).response?.trim();
+      const text = extractAiText(result);
       if (text) return { ...base, mode: "answer", text };
     } catch (err) {
       console.error("[assistant:answer_error]", err);
