@@ -12,7 +12,7 @@ import type { Solution } from "@/lib/types";
 export const ASSISTANT_GUIDES: Solution[] = [
   {
     id: "guide-moika-okon-bez-razvodov",
-    slug: "poslestroy-okna-skotch",
+    slug: "guide-moika-okon-bez-razvodov",
     title: "Мойка окон, стеклопакетов и рам без разводов",
     problemType: "general",
     surface: "window",
@@ -87,7 +87,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
   },
   {
     id: "guide-zapah-i-moika-holodilnika",
-    slug: "zhir-vytyazhka-kuhnya",
+    slug: "guide-zapah-i-moika-holodilnika",
     title: "Удаление запаха и гигиеническая мойка холодильника внутри",
     problemType: "odor",
     surface: "kitchen",
@@ -160,7 +160,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
   },
   {
     id: "guide-chistka-duhovki-mikrovolnovki",
-    slug: "zhir-vytyazhka-kuhnya",
+    slug: "guide-chistka-duhovki-mikrovolnovki",
     title: "Очистка духовки, противней и микроволновки от жира и нагара",
     problemType: "stain",
     surface: "kitchen",
@@ -232,7 +232,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
   },
   {
     id: "guide-moika-pola-bez-razvodov",
-    slug: "sledy-reziny-kleya-laminat",
+    slug: "guide-moika-pola-bez-razvodov",
     title: "Мойка ламината, паркета, кварцвинила и плитки без разводов",
     problemType: "general",
     surface: "floor",
@@ -301,7 +301,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
   },
   {
     id: "guide-obshchaya-chistka-divana",
-    slug: "kofe-na-tekstile",
+    slug: "guide-obshchaya-chistka-divana",
     title: "Общая чистка и освежение дивана от пыли и засаленности дома",
     problemType: "general",
     surface: "upholstery",
@@ -374,7 +374,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
   },
   {
     id: "guide-obshchaya-chistka-kovra",
-    slug: "zapah-zhivotnyh-kover",
+    slug: "guide-obshchaya-chistka-kovra",
     title: "Чистка и освежение ковра или ковролина в домашних условиях",
     problemType: "general",
     surface: "carpet",
@@ -439,7 +439,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
   },
   {
     id: "guide-chistka-matrasa-doma",
-    slug: "mocha-i-zapah-matras",
+    slug: "guide-chistka-matrasa-doma",
     title: "Гигиеническая чистка матраса от пыли, пота и жёлтых разводов",
     problemType: "general",
     surface: "mattress",
@@ -503,7 +503,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
   },
   {
     id: "guide-chistka-vanny-i-unitaza",
-    slug: "vodny-kamen-dushevaya",
+    slug: "guide-chistka-vanny-i-unitaza",
     title: "Чистка ванны, раковины и унитаза от налёта, желтизны и ржавчины",
     problemType: "scale",
     surface: "bathroom",
@@ -570,7 +570,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
   },
   {
     id: "guide-chistka-stiralnoi-mashiny",
-    slug: "chernaya-plesen-shvy-vannaya",
+    slug: "guide-chistka-stiralnoi-mashiny",
     title: "Очистка стиральной машины от запаха болота, плесени и накипи",
     problemType: "odor",
     surface: "bathroom",
@@ -621,7 +621,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
   },
   {
     id: "guide-generalnaya-uborka-kvartiry",
-    slug: "uborka-ofisa-posle-korporativa",
+    slug: "guide-generalnaya-uborka-kvartiry",
     title: "Технологический план генеральной и поддерживающей уборки квартиры",
     problemType: "general",
     surface: "other",

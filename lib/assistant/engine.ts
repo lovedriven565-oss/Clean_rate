@@ -87,6 +87,8 @@ export interface AssistantSolutionSummary {
   whenToCallPro: string;
   /** true — протокол собран ИИ-технологом индивидуально под нестандартный запрос вне статической базы */
   isCustom?: boolean;
+  /** true — базовая технологическая карта (гид) без отдельной страницы /solutions/[slug] */
+  isGuide?: boolean;
 }
 
 export interface AssistantAnswer {
@@ -825,6 +827,7 @@ export async function consult(params: {
       diyCostNote: primary.diyCostNote,
       proTimeNote: primary.proTimeNote,
       whenToCallPro: primary.whenToCallPro,
+      isGuide: primary.id.startsWith("guide-"),
     },
     steps: orderedSteps,
     products,

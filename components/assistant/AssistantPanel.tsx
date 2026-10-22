@@ -364,7 +364,7 @@ export function AssistantPanel({
                 </span>
               )}
 
-              {answer.solution && !answer.solution.isCustom && (
+              {answer.solution && !answer.solution.isCustom && !answer.solution.isGuide && (
                 <Link
                   href={`/solutions/${answer.solution.slug}`}
                   className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
