@@ -172,7 +172,7 @@ describe("assistant consultant", () => {
 
     const answer = await consult({
       env: { AI: ai },
-      query: "как помыть натяжной потолок",
+      query: "как почистить замшевые кроссовки от дорожной соли",
       solutions,
       keywords,
       safetyMap: emptySafety,

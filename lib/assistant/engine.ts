@@ -32,6 +32,8 @@ import { classifyIntent } from "@/lib/search/intent-router";
 
 /** LLM переформулирует и адаптирует строго факты протокола под ситуацию пользователя. */
 export const ANSWER_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+/** Быстрая резервная модель Workers AI на случай перегрузки или таймаута 70B. */
+export const FALLBACK_ANSWER_MODEL = "@cf/meta/llama-3.1-8b-instruct-fast";
 
 export type AssistantTiming = "fresh" | "dried" | "washed";
 
@@ -182,6 +184,33 @@ function extractAiText(result: unknown): string | null {
       return JSON.stringify(r.response);
     } catch {
       return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Вызывает Workers AI с каскадным переключением на быструю модель 8B,
+ * если основная модель 70B вернула ошибку или пустой ответ.
+ */
+async function runChatCompletionWithFallback(
+  ai: Ai,
+  messages: { role: "system" | "user" | "assistant"; content: string }[],
+  maxTokens: number,
+  temperature: number
+): Promise<string | null> {
+  const models = [ANSWER_MODEL, FALLBACK_ANSWER_MODEL];
+  for (const model of models) {
+    try {
+      const result = await ai.run(model as Parameters<Ai["run"]>[0], {
+        messages,
+        max_tokens: maxTokens,
+        temperature,
+      });
+      const text = extractAiText(result);
+      if (text) return text;
+    } catch (err) {
+      console.error(`[assistant:ai_model_error:${model}]`, err);
     }
   }
   return null;
@@ -627,29 +656,15 @@ export async function generateOpenExpertAnswer(
 
   const userPrompt = contextLines ? `${contextLines}\n\nВОПРОС: ${query}` : `ВОПРОС: ${query}`;
 
-  let raw: string | null = null;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    try {
-      const result = await ai.run(ANSWER_MODEL, {
-        messages: [
-          { role: "system", content: OPEN_EXPERT_SYSTEM_PROMPT },
-          {
-            role: "user",
-            content:
-              attempt === 0
-                ? userPrompt
-                : `${userPrompt}\n\n(Повтори ответ ТОЛЬКО одним валидным JSON-объектом по схеме из инструкции, без markdown и без текста вокруг.)`,
-          },
-        ],
-        max_tokens: 1500,
-        temperature: 0.2,
-      });
-      raw = extractAiText(result);
-      if (raw) break;
-    } catch (err) {
-      console.error("[assistant:open_expert_error]", err);
-    }
-  }
+  const raw = await runChatCompletionWithFallback(
+    ai,
+    [
+      { role: "system", content: OPEN_EXPERT_SYSTEM_PROMPT },
+      { role: "user", content: userPrompt },
+    ],
+    1400,
+    0.2
+  );
 
   if (!raw) return null;
 
@@ -938,15 +953,15 @@ export async function consult(params: {
         context?.countryCode ?? "BY"
       );
       const userPrompt = buildGroundedPrompt(query, primary, products, context, estimateSummary);
-      const result = await env.AI.run(ANSWER_MODEL, {
-        messages: [
+      const text = await runChatCompletionWithFallback(
+        env.AI,
+        [
           { role: "system", content: ASSISTANT_SYSTEM_PROMPT },
           { role: "user", content: userPrompt },
         ],
-        max_tokens: 700,
-        temperature: 0.2,
-      });
-      const text = extractAiText(result);
+        700,
+        0.2
+      );
       if (text) return { ...base, mode: "answer", text };
     } catch (err) {
       console.error("[assistant:answer_error]", err);
