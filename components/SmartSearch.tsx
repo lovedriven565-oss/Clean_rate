@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Briefcase, Home, Loader2, Search, Sparkles, Wrench } from "lucide-react";
+import { AdCreative } from "@/components/ads/AdCreative";
 import { Input } from "@/components/ui/primitives";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { cn } from "@/lib/utils";
@@ -398,6 +399,12 @@ export function SearchSuggestions({ search, className }: { search: ReturnType<ty
             );
           })}
         </SuggestionGroup>
+      )}
+
+      {result?.sponsoredAd && (
+        <div className="mt-1 px-1 pb-1">
+          <AdCreative ad={result.sponsoredAd} />
+        </div>
       )}
 
       <button

@@ -3,6 +3,7 @@ import { ArrowRight, Boxes } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { AdPlacement } from "@/components/ads/AdPlacement";
 import { BrandLeaderboard } from "@/components/brands/BrandLeaderboard";
 import { getBrandsByScore } from "@/lib/db/queries";
 
@@ -44,6 +45,7 @@ export default async function BrandsPage() {
 
         <section className="container py-10 sm:py-14">
           <BrandLeaderboard brands={brands} />
+          <AdPlacement placement="products.sponsored_slot" context={{}} className="mt-8" />
         </section>
 
         <section className="container pb-16 sm:pb-24">

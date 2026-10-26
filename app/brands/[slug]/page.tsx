@@ -5,6 +5,7 @@ import { AlertTriangle, ArrowRight, Ban, FlaskConical, ShieldCheck } from "lucid
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { BrandHero } from "@/components/brands/BrandHero";
+import { AdPlacement } from "@/components/ads/AdPlacement";
 import { ProductCard } from "@/components/gear/ProductCard";
 import { CompanyTable } from "@/components/CompanyTable";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -71,6 +72,12 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
             </dl>
           </div>
         </section>
+
+        <AdPlacement
+          placement="brand.profile_campaign"
+          context={{}}
+          className="container pt-8"
+        />
 
         {proProducts.length > 0 && (
           <section className="container pt-16">
@@ -220,6 +227,11 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
                 <ProductCard key={product.id} product={product} index={i} />
               ))}
             </div>
+            <AdPlacement
+              placement="dealer.local_partner"
+              context={{}}
+              className="mt-8"
+            />
           </section>
         )}
 

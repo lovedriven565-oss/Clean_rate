@@ -154,7 +154,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               <div className="min-w-0 lg:col-start-1">
                 <ShareButton url={url} title={solution.title} text={`${solution.title}: протокол «два пути»`} />
 
-                {/* Mobile path switcher — выше длинного дисклеймера, чтобы не тянуться вниз */}
+                {/* Mobile path switcher — сразу под заголовком для мгновенного перехода к ответу */}
                 <div className="mt-5 grid grid-cols-2 gap-2 lg:hidden">
                   <a
                     href="#diy"
@@ -171,15 +171,6 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
                     Вызвать мастера
                   </a>
                 </div>
-
-                <div className="mt-5 flex gap-3 rounded-panel border border-border bg-card/80 p-4 text-sm leading-6 text-muted-foreground backdrop-blur">
-                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-star" />
-                  <p>
-                    Протокол проверен на типовых материалах, но реакция конкретной обивки или покрытия может отличаться.
-                    Тестируйте средство на незаметном участке. Действуя по протоколу, вы принимаете риск на себя:
-                    площадка не отвечает за результат. Если сомневаетесь, начните со второго пути.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -190,6 +181,13 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
           <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
             <DiyPanel solution={solution} brands={brands} estimates={estimates} companies={companies} />
             <ProPanel solution={solution} companies={companies} estimates={estimates} />
+          </div>
+
+          <div className="mt-6 flex items-center gap-2.5 rounded-control border border-border/70 bg-muted/30 px-4 py-3 text-xs leading-5 text-muted-foreground">
+            <ShieldAlert className="h-4 w-4 shrink-0 text-star" aria-hidden />
+            <p>
+              Реакция конкретной обивки или покрытия может отличаться: тестируйте средство на незаметном участке. Если сомневаетесь — выберите вызов мастера.
+            </p>
           </div>
 
           {/* Спонсорский состав — строго после независимого протокола; рендерится на сервере (CLS=0).

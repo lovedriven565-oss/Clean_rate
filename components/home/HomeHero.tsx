@@ -11,14 +11,13 @@ import { Aurora, PillTabs, RevealText, SpotlightCard } from "@/components/ui/fx"
 import { BeforeAfter } from "@/components/ui/BeforeAfter";
 import {
   buildDiagnosticResult,
-  listProblems,
   listSurfaces,
   resolveSelection,
   type DiagnosticSelection,
 } from "@/lib/solutions/diagnostic";
 import { solutionCover } from "@/lib/solutions/covers";
 import { pluralize } from "@/lib/format";
-import type { PriceEstimate, Solution, SolutionProblemType, SolutionSurface } from "@/lib/types";
+import type { PriceEstimate, Solution, SolutionSurface } from "@/lib/types";
 
 interface HomeHeroProps {
   solutions: Solution[];
@@ -47,7 +46,6 @@ export function HomeHero({ solutions, estimates }: HomeHeroProps) {
   const ctx = useMemo(() => ({ countryCode: market.countryCode, city: city.name }), [market, city]);
   const resolved = resolveSelection(solutions, selection);
   const surfaces = listSurfaces(solutions);
-  const problems = resolved.surface ? listProblems(solutions, resolved.surface) : [];
   const result = resolved.solution ? buildDiagnosticResult(resolved.solution, estimates, 2, ctx) : null;
   const cover = resolved.solution ? solutionCover(resolved.solution) : "/covers/uborka-ofisa-posle-korporativa.jpg";
 
@@ -148,52 +146,13 @@ export function HomeHero({ solutions, estimates }: HomeHeroProps) {
             </div>
           </SpotlightCard>
 
-          <div className="mt-4 space-y-2.5">
-            <div className="space-y-1">
-              <span className="block px-1 text-xs font-semibold text-muted-foreground">
-                <span className="font-data">01</span> Поверхность
-              </span>
-              <PillTabs
-                label="Поверхность"
-                options={surfaces.map((s) => ({ id: s.id, label: s.label, meta: String(s.count) }))}
-                value={resolved.surface}
-                onChange={(id) => setSelection({ surface: id as SolutionSurface })}
-              />
-            </div>
-            {problems.length > 1 && (
-              <div className="space-y-1">
-                <span className="block px-1 text-xs font-semibold text-muted-foreground">
-                  <span className="font-data">02</span> Тип задачи
-                </span>
-                <PillTabs
-                  label="Тип проблемы"
-                  options={problems.map((p) => ({ id: p.id, label: p.label, meta: String(p.count) }))}
-                  value={resolved.problem}
-                  onChange={(id) =>
-                    setSelection({ surface: resolved.surface ?? undefined, problem: id as SolutionProblemType })
-                  }
-                />
-              </div>
-            )}
-            {resolved.protocols.length > 1 && (
-              <div className="space-y-1">
-                <span className="block px-1 text-xs font-semibold text-muted-foreground">
-                  <span className="font-data">{problems.length > 1 ? "03" : "02"}</span> Ситуация
-                </span>
-                <PillTabs
-                  label="Конкретный случай"
-                  options={resolved.protocols.map((protocol) => ({ id: protocol.slug, label: protocol.title }))}
-                  value={resolved.solution?.slug ?? null}
-                  onChange={(slug) =>
-                    setSelection({
-                      surface: resolved.surface ?? undefined,
-                      problem: resolved.problem ?? undefined,
-                      variant: slug,
-                    })
-                  }
-                />
-              </div>
-            )}
+          <div className="mt-3">
+            <PillTabs
+              label="Поверхность"
+              options={surfaces.map((s) => ({ id: s.id, label: s.label, meta: String(s.count) }))}
+              value={resolved.surface}
+              onChange={(id) => setSelection({ surface: id as SolutionSurface })}
+            />
           </div>
         </div>
       </div>

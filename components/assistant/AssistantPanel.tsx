@@ -26,7 +26,6 @@ import { PhoneButton } from "@/components/PhoneButton";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { PriceRange } from "@/components/solution/PriceRange";
 import { Panel } from "@/components/ui/Panel";
-import { PhScale } from "@/components/ui/PhScale";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Input } from "@/components/ui/primitives";
 import { trackClick } from "@/lib/analytics";
@@ -691,10 +690,6 @@ export function AssistantPanel({
                                 )}
                               </div>
                             </div>
-
-                            {p.ph !== undefined && (
-                              <PhScale compact className="mt-2.5" ph={p.ph} />
-                            )}
                           </li>
                         );
                       })}

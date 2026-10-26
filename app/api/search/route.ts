@@ -13,9 +13,10 @@ import {
   recordAnalyticsEvent,
 } from "@/lib/db/queries";
 import { matchesQuery, mergeRanked, rankSolutions, rankSolutionsByTokens } from "@/lib/search/rank";
+import { getEligibleAd } from "@/lib/ads/queries";
 import { getMarket, isCountryCode } from "@/lib/markets";
 import { checkRateLimit, tooManyRequests } from "@/lib/security/guard";
-import type { Brand, Company, Solution } from "@/lib/types";
+import type { Brand, Company, EligibleAd, Solution } from "@/lib/types";
 
 const REGION_COOKIE = "ch_region";
 const RESULT_LIMIT = 6;
@@ -51,6 +52,7 @@ export interface SearchResponse {
   solutions: SearchResultSolution[];
   companies: SearchResultCompany[];
   brands: SearchResultBrand[];
+  sponsoredAd?: EligibleAd | null;
 }
 
 function readCookieValue(cookieHeader: string | null, name: string): string | undefined {
@@ -141,6 +143,17 @@ export async function GET(request: Request) {
       ? []
       : rankCompanies(companies, normalizedQuery, cityNames).slice(0, RESULT_LIMIT);
 
+  const topSolution = solutionResults[0];
+  const sponsoredAd = await getEligibleAd("search.sponsored_result", {
+    countryCode,
+    solutionSlug: topSolution?.slug,
+    surface: topSolution?.surface,
+    categoryId:
+      classification.target?.kind === "category"
+        ? classification.target.slug
+        : topSolution?.relatedCategory,
+  });
+
   const response: SearchResponse = {
     query,
     intent: classification.intent,
@@ -165,6 +178,7 @@ export async function GET(request: Request) {
       tagline: b.tagline,
       focus: b.focus,
     })),
+    sponsoredAd,
   };
 
   // Пропуски поиска — будущий «индекс спроса»: какие проблемы ищут и не находят.
