@@ -3,17 +3,23 @@
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, FlaskConical, ShieldCheck } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Ban, ChevronLeft, ChevronRight, FlaskConical, ShieldCheck } from "lucide-react";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { PillTabs, Tilt } from "@/components/ui/fx";
 import { formatEstimate, pickEstimate, type DiagnosticContext } from "@/lib/solutions/diagnostic";
 import { solutionCover } from "@/lib/solutions/covers";
 import { buildTaskShelves } from "@/lib/solutions/shelves";
 import { pluralize } from "@/lib/format";
-import { SURFACE_LABELS } from "@/lib/solutions/meta";
+import { PROBLEM_TYPE_LABELS, SURFACE_LABELS } from "@/lib/solutions/meta";
 import { scrollBehavior } from "@/lib/utils";
 import type { PriceEstimate, Solution } from "@/lib/types";
 
+/**
+ * Карточка протокола в формате вертикального постера 3:4 (Epic Games Store):
+ * сверху на постере — бейдж поверхности, внизу постера — приборная плашка «КОНТРОЛЬ pH · N ШАГОВ»
+ * и всплывающее при наведении предупреждение «Не делайте»;
+ * под постером — чистая типографика заголовка и зелёный Steam-бейдж сметы региона.
+ */
 function SolutionTile({
   solution,
   estimates,
@@ -25,47 +31,75 @@ function SolutionTile({
 }) {
   const estimate = pickEstimate(estimates, solution, ctx);
   const view = estimate ? formatEstimate(estimate, ctx) : null;
+  const stepsLabel = pluralize(solution.diySteps.length, ["шаг", "шага", "шагов"]).toUpperCase();
+
   return (
-    <Tilt className="h-full w-[250px] shrink-0 snap-start sm:w-[270px]">
+    <Tilt className="h-full w-[228px] shrink-0 snap-start sm:w-[248px]">
       <Link
         href={`/solutions/${solution.slug}`}
-        className="data-surface group/tile relative flex h-full flex-col rounded-panel transition-shadow hover:shadow-[0_24px_48px_-24px_hsl(var(--brand)/0.5)]"
+        className="data-surface group/tile relative flex h-full flex-col overflow-hidden rounded-panel p-2.5 transition-shadow hover:shadow-[0_24px_48px_-24px_hsl(var(--brand)/0.5)]"
       >
-        <span className="relative block aspect-[16/10] overflow-hidden">
+        {/* Постер 3:4 в стиле Epic Games Store */}
+        <span className="relative block aspect-[3/4] w-full overflow-hidden rounded-control bg-muted">
           <Image
             src={solutionCover(solution)}
             alt=""
             fill
-            sizes="270px"
+            sizes="248px"
             className="object-cover transition-transform duration-500 group-hover/tile:scale-105 group-focus-visible/tile:scale-105"
           />
-          <span className="absolute left-2.5 top-2.5 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/10"
+          />
+
+          {/* Верхний бейдж поверхности */}
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-black/65 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm ring-1 ring-inset ring-white/15">
             {SURFACE_LABELS[solution.surface]}
           </span>
-          {view && (
-            <span className="absolute right-2.5 top-2.5 rounded-full bg-card/95 px-2.5 py-1 font-data text-[11px] font-semibold tabular-nums text-foreground shadow-sm ring-1 ring-inset ring-border">
-              {view.min}–{view.max}
+
+          {/* Нижняя контрастная приборная плашка на постере */}
+          <span className="absolute inset-x-2.5 bottom-2.5 flex items-center justify-between gap-1.5 rounded-control bg-black/75 px-2.5 py-1.5 font-data text-[10px] font-semibold uppercase tracking-wider text-white/95 backdrop-blur-sm ring-1 ring-inset ring-white/15 transition-opacity duration-200 group-hover/tile:opacity-0 group-focus-visible/tile:opacity-0">
+            <span className="inline-flex items-center gap-1 text-brand">
+              <FlaskConical className="size-3 shrink-0" aria-hidden />
+              КОНТРОЛЬ pH
             </span>
-          )}
-          <span className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-black/90 to-black/60 p-3 text-[12px] leading-snug text-white transition-transform duration-300 group-hover/tile:translate-y-0 group-focus-visible/tile:translate-y-0 motion-reduce:translate-y-0">
-            <span className="line-clamp-3">
-              <span className="font-semibold text-brand">Не делайте: </span>
-              {solution.warnings[0] ?? "Проверьте средство на незаметном участке."}
+            <span>{stepsLabel}</span>
+          </span>
+
+          {/* Всплывающее предупреждение «Не делайте» при наведении/фокусе */}
+          <span className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-black/95 via-black/90 to-black/70 p-3 text-[12px] leading-snug text-white transition-transform duration-300 group-hover/tile:translate-y-0 group-focus-visible/tile:translate-y-0 motion-reduce:translate-y-0">
+            <span className="flex items-start gap-1.5 line-clamp-4">
+              <Ban className="mt-0.5 size-3.5 shrink-0 text-brand" aria-hidden />
+              <span>
+                <span className="font-semibold text-brand">Не делайте: </span>
+                {solution.warnings[0] ?? "Проверьте средство на незаметном участке."}
+              </span>
             </span>
           </span>
         </span>
-        <span className="flex flex-1 flex-col gap-2 p-3.5">
-          <span className="line-clamp-2 min-h-10 text-balance text-[15px] font-semibold leading-snug text-foreground">{solution.title}</span>
-          <span className="mt-auto flex items-center justify-between gap-2 font-data text-xs text-muted-foreground">
-            <span>{pluralize(solution.diySteps.length, ["шаг", "шага", "шагов"])}</span>
+
+        {/* Чистая типографика и смета под постером */}
+        <span className="flex flex-1 flex-col gap-1.5 px-1 pb-1 pt-3">
+          <span className="font-data text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            {PROBLEM_TYPE_LABELS[solution.problemType]}
+            {solution.material ? ` · ${solution.material}` : ""}
+          </span>
+          <span className="line-clamp-2 min-h-10 text-balance text-[15px] font-semibold leading-snug text-foreground transition-colors group-hover/tile:text-link">
+            {solution.title}
+          </span>
+          <span className="mt-auto flex items-center justify-between gap-2 pt-2">
             {view ? (
-              <span className="inline-flex items-center gap-1 font-semibold text-link">
-                Протокол
-                <ArrowRight className="size-3.5 transition-transform group-hover/tile:translate-x-0.5" aria-hidden />
+              <span className="inline-flex items-center rounded-[6px] bg-success/15 px-2 py-0.5 font-data text-xs font-bold tabular-nums text-success">
+                {view.min}–{view.max}
               </span>
             ) : (
-              <span className="font-semibold text-foreground">цена по запросу</span>
+              <span className="font-data text-xs font-semibold text-muted-foreground">DIY-протокол</span>
             )}
+            <span className="inline-flex items-center gap-1 font-data text-xs font-semibold text-link">
+              Открыть
+              <ArrowRight className="size-3.5 transition-transform group-hover/tile:translate-x-0.5" aria-hidden />
+            </span>
           </span>
         </span>
       </Link>
@@ -75,7 +109,7 @@ function SolutionTile({
 
 function ShelfPartnerPitchTile({ activeCategoryLabel }: { activeCategoryLabel?: string }) {
   return (
-    <Tilt className="h-full w-[250px] shrink-0 snap-start sm:w-[270px]">
+    <Tilt className="h-full w-[228px] shrink-0 snap-start sm:w-[248px]">
       <Link
         href="/for-brands"
         className="data-surface linear-beam group/pitch relative flex h-full flex-col justify-between rounded-panel p-4 transition-shadow hover:shadow-[0_24px_48px_-24px_hsl(var(--brand)/0.45)]"
@@ -108,7 +142,7 @@ function ShelfPartnerPitchTile({ activeCategoryLabel }: { activeCategoryLabel?: 
   );
 }
 
-/** Полки протоколов: табы-категории с реальными счётчиками + горизонтальная полка карточек. */
+/** Полки постеров 3:4 в стиле Epic Games Store: табы-категории с реальными счётчиками + горизонтальная полка. */
 export function SolutionShelves({ solutions, estimates }: { solutions: Solution[]; estimates: PriceEstimate[] }) {
   const [tab, setTab] = useState("all");
   const scroller = useRef<HTMLDivElement>(null);
@@ -119,7 +153,7 @@ export function SolutionShelves({ solutions, estimates }: { solutions: Solution[
   const shelves = buildTaskShelves(solutions);
   const active = shelves.find((s) => s.id === tab);
   const items = active ? published.filter((s) => active.slugs.includes(s.slug)) : published;
-  const scrollBy = (dir: 1 | -1) => scroller.current?.scrollBy({ left: dir * 300, behavior: scrollBehavior() });
+  const scrollBy = (dir: 1 | -1) => scroller.current?.scrollBy({ left: dir * 280, behavior: scrollBehavior() });
 
   return (
     <section id="shelves" aria-labelledby="shelves-title" className="scroll-mt-24">
@@ -128,7 +162,7 @@ export function SolutionShelves({ solutions, estimates }: { solutions: Solution[
           <h2 id="shelves-title" className="text-balance font-display text-3xl font-bold tracking-[-0.03em] text-foreground sm:text-4xl">
             Что нужно почистить
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">{active ? active.note : "Все опубликованные протоколы"}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{active ? active.note : "Все опубликованные протоколы в формате лаб-постеров"}</p>
         </div>
         <div className="flex items-center gap-2">
           {active && (

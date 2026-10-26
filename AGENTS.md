@@ -222,6 +222,21 @@
 - Известное (не новое): при reduced-motion на `/` hydration-warning от `HomeHero`/`RevealText` (`useReducedMotion` на клиенте ≠ SSR).
 - **Проверки:** typecheck 0, lint чисто, test 191/191, build ок; Playwright 1440/390: шейдер только на десктопе, горизонтального скролла нет.
 
+## Epic Games + Steam + Textura Lab (`plan-d70d7461b3fe6706.md` — сделано)
+- **Скилл и нативный скролл:** создан `.devin/skills/epic-steam-lab/SKILL.md`; в `components/providers/MotionProvider.tsx` отключён перехват колеса мыши `Lenis` (оставлен чистый `<MotionConfig reducedMotion="user">`).
+- **Гибридный пульт поиска + экспресс-триаж ИИ-технолога:**
+  - `lib/assistant/engine.ts` — экспортированы `parseAssistantTiming(raw)` и `buildAssistantHref(query, timing)`.
+  - `components/SmartSearch.tsx` — добавлен ряд чипов экспресс-триажа состояния пятна (`TRIAGE_CHIPS`: `Свежее пятно`, `Уже высохло`, `Замывали мылом/Ванишем`) + `assistantHrefFor(query, timing)` → `/assistant?q=...&timing=fresh|dried|washed`.
+  - `components/assistant/AssistantPanel.tsx` — чтение `?timing=` из URL при инициализации и передача в авто-старт `runConsultation`, чтобы с главной за 1 клик запускался точный диагноз с учётом состояния пятна.
+- **Первый экран `HomeHero.tsx` (Epic Games / Steam Featured Capsule):**
+  - Правая капсула с `BeforeAfter`, верхним HUD-индикатором (`Поверхность`, `КОНТРОЛЬ pH · N шагов`), зелёным Steam-бейджем выгоды (`DIY −75% · мастер {min}–{max}`), 4 карточками-переключателями протоколов с 7-секундным авто-таймером прогресса (пауза при hover/focus, отключение при reduced-motion) и `PillTabs` поверхностей.
+- **Полка постеров 3:4 и неоновые Blueprint-карточки:**
+  - `components/home/SolutionShelves.tsx` — карточки протоколов переведены в формат вертикальных постеров `aspect-[3/4]` с `Tilt`, приборной плашкой `КОНТРОЛЬ pH · N ШАГОВ`, hover-предупреждением «Не делайте» и вынесенной под постер типографикой и зелёным бейджем сметы.
+  - `components/home/LabBlueprintCards.tsx` — 3 тёмные карточки с координатной сеткой и кастомными изометрическими пунктирными 3D-иллюстрациями (`SVG`): `ИИ-технолог и pH-анализ` (`/assistant`), `Своими руками: экономия до 75%` (`/solutions`), `Рейтинг мастеров и проф-химия` (`/rating`, `/brands`).
+- **Двухколоночный стенд `SteamShowcase.tsx` (Dual-Engine Video / Chemical Demo):**
+  - Табы категорий сверху, слева плотный Master-list с мини-обложками и зелёными Steam-бейджами сметы, справа — Sticky плеер (`parseVideoSource` для реального `videoUrl` или 3-фазный авто-симулятор работы средства со светофором `buildHumanSafetyBadge` и прямыми кнопками конверсии `[Купить средство / Средство бренда]` и `[Открыть протокол]`). Подключён в `app/page.tsx`.
+- **Проверки:** `npm run typecheck` — 0 ошибок, `npm run lint` — чисто, `npm run test` — 192/192, `npm run build` — ок.
+
 
 
 

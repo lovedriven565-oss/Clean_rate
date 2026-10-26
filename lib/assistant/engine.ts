@@ -37,6 +37,22 @@ export const FALLBACK_ANSWER_MODEL = "@cf/meta/llama-3.1-8b-instruct-fast";
 
 export type AssistantTiming = "fresh" | "dried" | "washed";
 
+/** Безопасный парсер параметра `?timing=` из URL (принимает только `fresh | dried | washed`). */
+export function parseAssistantTiming(raw: string | null | undefined): AssistantTiming | undefined {
+  if (raw === "fresh" || raw === "dried" || raw === "washed") return raw;
+  return undefined;
+}
+
+/** Строит ссылку на страницу ИИ-технолога `/assistant` с запросом `q` и состоянием пятна `timing`. */
+export function buildAssistantHref(query: string, timing?: AssistantTiming): string {
+  const trimmed = query.trim();
+  const params = new URLSearchParams();
+  if (trimmed) params.set("q", trimmed);
+  if (timing) params.set("timing", timing);
+  const qs = params.toString();
+  return qs ? `/assistant?${qs}` : "/assistant";
+}
+
 export interface AssistantContext {
   /** Давность пятна или факт предварительного замывания бытовой химией */
   timing?: AssistantTiming;

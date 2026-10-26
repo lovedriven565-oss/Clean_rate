@@ -5,13 +5,15 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { HomeHero } from "@/components/home/HomeHero";
 import { HomeMotion, Reveal } from "@/components/home/Reveal";
+import { LabBlueprintCards } from "@/components/home/LabBlueprintCards";
 import { SolutionShelves } from "@/components/home/SolutionShelves";
+import { SteamShowcase } from "@/components/home/SteamShowcase";
 import { PriceTable } from "@/components/home/PriceTable";
 import { TaskTicker } from "@/components/home/TaskTicker";
 import { TwoPathsSection } from "@/components/home/TwoPathsSection";
 import { AdCreative } from "@/components/ads/AdCreative";
 import { getEligibleAd } from "@/lib/ads/queries";
-import { getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
+import { getAllBrands, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
 import { resolveSelection } from "@/lib/solutions/diagnostic";
 import { SITE_NAME, SITE_URL, absoluteUrl, pageAlternates } from "@/lib/site";
 
@@ -29,10 +31,11 @@ const PRINCIPLES: { icon: LucideIcon; title: string; text: string }[] = [
 ];
 
 export default async function Home() {
-  const [companies, solutions, estimates, editorialAd] = await Promise.all([
+  const [companies, solutions, estimates, brands, editorialAd] = await Promise.all([
     getAllCompanies(),
     getAllSolutions(),
     getPriceEstimates(),
+    getAllBrands(),
     // Единственный коммерческий блок главной — ниже полезного контента, не в hero.
     // null → секция не рендерится вовсе (ни отступа, ни пустой рамки).
     getEligibleAd("home.editorial_partner", {}),
@@ -73,6 +76,14 @@ export default async function Home() {
           <div className="container space-y-20 py-14 sm:space-y-24 sm:py-20">
             <Reveal>
               <SolutionShelves solutions={solutions} estimates={estimates} />
+            </Reveal>
+
+            <Reveal>
+              <LabBlueprintCards />
+            </Reveal>
+
+            <Reveal>
+              <SteamShowcase solutions={solutions} estimates={estimates} brands={brands} />
             </Reveal>
 
             <Reveal>

@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  buildAssistantHref,
   buildGroundedPrompt,
   buildProtocolAnswer,
   buildVerdict,
   consult,
   filterSafeProducts,
+  parseAssistantTiming,
 } from "../lib/assistant/engine.js";
 import {
   getFallbackIntentKeywords,
@@ -274,5 +276,20 @@ describe("assistant consultant", () => {
     assert.match(text, /Шаги по протоколу:/);
     assert.match(text, /Совет технолога:/);
     assert.match(text, /Если не поможет:/);
+  });
+
+  it("parses timing query param and builds express triage links for SmartSearch", () => {
+    assert.equal(parseAssistantTiming("fresh"), "fresh");
+    assert.equal(parseAssistantTiming("dried"), "dried");
+    assert.equal(parseAssistantTiming("washed"), "washed");
+    assert.equal(parseAssistantTiming("invalid"), undefined);
+    assert.equal(parseAssistantTiming(null), undefined);
+
+    assert.equal(buildAssistantHref(""), "/assistant");
+    assert.equal(buildAssistantHref("вино на диване"), "/assistant?q=%D0%B2%D0%B8%D0%BD%D0%BE+%D0%BD%D0%B0+%D0%B4%D0%B8%D0%B2%D0%B0%D0%BD%D0%B5");
+    assert.equal(
+      buildAssistantHref("вино на диване", "washed"),
+      "/assistant?q=%D0%B2%D0%B8%D0%BD%D0%BE+%D0%BD%D0%B0+%D0%B4%D0%B8%D0%B2%D0%B0%D0%BD%D0%B5&timing=washed"
+    );
   });
 });

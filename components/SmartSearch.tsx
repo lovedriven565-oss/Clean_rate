@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/primitives";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { cn } from "@/lib/utils";
 import { isEditableTarget, isSearchHotkey } from "@/lib/search/hotkey";
+import { buildAssistantHref, type AssistantTiming } from "@/lib/assistant/engine";
 import type { SearchIntent } from "@/lib/types";
 import type { SearchResponse } from "@/app/api/search/route";
 
@@ -60,6 +61,12 @@ export const SEGMENTS: { value: Segment; label: string; icon: typeof Home }[] = 
 
 export const QUICK_CHIPS = ["Диван", "Матрас", "После ремонта", "Окна", "Химия"];
 
+export const TRIAGE_CHIPS: { value: AssistantTiming; label: string; defaultQuery: string }[] = [
+  { value: "fresh", label: "Свежее пятно", defaultQuery: "Свежее пятно на диване" },
+  { value: "dried", label: "Уже высохло", defaultQuery: "Засохшее пятно на обивке" },
+  { value: "washed", label: "Замывали мылом/Ванишем", defaultQuery: "Пятно замывали мылом, остался развод" },
+];
+
 const DEBOUNCE_MS = 200;
 
 export function routeForIntent(intent: SearchIntent, query: string): string {
@@ -78,9 +85,8 @@ export function routeForTarget(target: SearchResponse["target"], intent: SearchI
   return routeForIntent(intent, query);
 }
 
-export function assistantHrefFor(query: string): string {
-  const trimmed = query.trim();
-  return trimmed ? `/assistant?q=${encodeURIComponent(trimmed)}` : "/assistant";
+export function assistantHrefFor(query: string, timing?: AssistantTiming): string {
+  return buildAssistantHref(query, timing);
 }
 
 /** Общая логика умного поиска — используется полноразмерным SmartSearch и компактным NavSearch */
@@ -302,10 +308,29 @@ export function SmartSearch() {
             {chip}
           </button>
         ))}
+      </div>
+
+      {/* Экспресс-триаж состояния пятна для ИИ-технолога в 1 клик */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 px-1">
+        <span className="mr-0.5 font-data text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Триаж пятна:
+        </span>
+        {TRIAGE_CHIPS.map((item) => (
+          <button
+            key={item.value}
+            type="button"
+            onClick={() =>
+              search.navigate(assistantHrefFor(query.trim() || item.defaultQuery, item.value))
+            }
+            className="inline-flex h-8 items-center gap-1 rounded-full border border-border/80 bg-card/75 px-3 text-xs font-medium text-foreground/85 transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+          >
+            {item.label}
+          </button>
+        ))}
         <button
           type="button"
           onClick={() => search.navigate(search.assistantHref)}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-primary/35 bg-primary/10 px-3.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/15"
         >
           <Sparkles className="h-3.5 w-3.5" aria-hidden />
           ИИ-технолог

@@ -29,10 +29,11 @@ import { Panel } from "@/components/ui/Panel";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Input } from "@/components/ui/primitives";
 import { trackClick } from "@/lib/analytics";
-import type {
-  AssistantAnswer,
-  AssistantContext,
-  AssistantTiming,
+import {
+  parseAssistantTiming,
+  type AssistantAnswer,
+  type AssistantContext,
+  type AssistantTiming,
 } from "@/lib/assistant/engine";
 import { categoryLandingHref } from "@/lib/categories";
 import { formatRating } from "@/lib/format";
@@ -74,9 +75,10 @@ export function AssistantPanel({
   const params = useSearchParams();
   const { market, city, countryCode } = useRegion();
   const initialQuery = params.get("q")?.trim() ?? "";
+  const initialTiming = parseAssistantTiming(params.get("timing"));
 
   const [query, setQuery] = useState(initialQuery);
-  const [timing, setTiming] = useState<AssistantTiming | undefined>(undefined);
+  const [timing, setTiming] = useState<AssistantTiming | undefined>(initialTiming);
   const [material, setMaterial] = useState<string | undefined>(undefined);
   const [selectedSlug, setSelectedSlug] = useState<string | undefined>(undefined);
   const [checkedSteps, setCheckedSteps] = useState<Record<number, boolean>>({});
@@ -137,14 +139,20 @@ export function AssistantPanel({
     [countryCode]
   );
 
-  // Авто-запуск при переходе из умного поиска (/assistant?q=...)
+  // Авто-запуск при переходе из умного поиска или экспресс-триажа (/assistant?q=...&timing=...)
   useEffect(() => {
-    if (initialQuery && autoSubmittedRef.current !== initialQuery) {
-      autoSubmittedRef.current = initialQuery;
+    const autoKey = `${initialQuery}::${initialTiming ?? ""}`;
+    if (initialQuery && autoSubmittedRef.current !== autoKey) {
+      autoSubmittedRef.current = autoKey;
       setQuery(initialQuery);
-      void runConsultation(initialQuery, { timing, material, solutionSlug: selectedSlug });
+      setTiming(initialTiming);
+      void runConsultation(initialQuery, {
+        timing: initialTiming ?? timing,
+        material,
+        solutionSlug: selectedSlug,
+      });
     }
-  }, [initialQuery, material, runConsultation, selectedSlug, timing]);
+  }, [initialQuery, initialTiming, material, runConsultation, selectedSlug, timing]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
