@@ -1,8 +1,10 @@
 "use client";
 
-import { useId, useRef, type PointerEvent, type ReactNode } from "react";
+import { useId, useRef, useSyncExternalStore, type PointerEvent, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { BRAND_COLORS } from "@/lib/site";
 import { cn, nextRadioIndex } from "@/lib/utils";
 
 /** Карточка с подсветкой фона и границы под курсором (позиция в motion values, без ререндеров). */
@@ -119,8 +121,31 @@ export function RevealText({
   );
 }
 
-/** Фон hero: два мягких пятна одной цветовой семьи (лайм и мята) + зерно. */
+const MeshGradient = dynamic(() => import("@paper-design/shaders-react").then((m) => m.MeshGradient), {
+  ssr: false,
+});
+
+const MESH_COLORS = [BRAND_COLORS.brand, "#00000000", BRAND_COLORS.mint, "#00000000", BRAND_COLORS.primaryBright];
+const LIVE_SHADER_QUERY = "(min-width: 1024px) and (prefers-reduced-motion: no-preference)";
+
+function subscribeLiveShader(onChange: () => void) {
+  const mql = window.matchMedia(LIVE_SHADER_QUERY);
+  mql.addEventListener("change", onChange);
+  return () => mql.removeEventListener("change", onChange);
+}
+
+function liveShaderAllowed() {
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+  return window.matchMedia(LIVE_SHADER_QUERY).matches && !saveData;
+}
+
+/**
+ * Фон hero: два мягких CSS-пятна (лайм и мята) + зерно — SSR и фолбэк.
+ * На lg+ поверх лениво грузится живой MeshGradient; вне экрана и в фоновой вкладке
+ * библиотека сама останавливает рендер.
+ */
 export function Aurora() {
+  const live = useSyncExternalStore(subscribeLiveShader, liveShaderAllowed, () => false);
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       <div
@@ -131,6 +156,18 @@ export function Aurora() {
         className="fx-drift2 absolute -right-[10%] top-[5%] h-[65%] w-[44%] rounded-full blur-3xl"
         style={{ background: "hsl(var(--mint) / var(--aurora))" }}
       />
+      {live && (
+        <MeshGradient
+          colors={MESH_COLORS}
+          distortion={0.7}
+          swirl={0.25}
+          speed={0.18}
+          minPixelRatio={1}
+          maxPixelCount={1600 * 900}
+          className="fx-fade-in absolute inset-0"
+          style={{ opacity: "calc(var(--aurora) * 1.1)" }}
+        />
+      )}
       <div className="fx-grain absolute inset-0" />
     </div>
   );

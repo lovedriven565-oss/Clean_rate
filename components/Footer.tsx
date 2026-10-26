@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { getFooterLandingLinks } from "@/lib/landing";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const columns = [
@@ -87,6 +87,12 @@ export function Footer() {
           <p>© 2026 {SITE_NAME}. Информация носит справочный характер: услуги оказывают компании, платформа не является стороной договора.</p>
           <p>Оценка и рекламное размещение разделены</p>
         </div>
+      </div>
+
+      <div aria-hidden className="pointer-events-none select-none overflow-hidden">
+        <p className="container -mb-[0.18em] whitespace-nowrap text-center font-display text-[12.5vw] font-bold uppercase leading-none tracking-[-0.06em] text-transparent [-webkit-text-stroke:1px_hsl(var(--cta-foreground)/0.14)] xl:text-[10rem]">
+          {SITE_DOMAIN}
+        </p>
       </div>
     </footer>
   );

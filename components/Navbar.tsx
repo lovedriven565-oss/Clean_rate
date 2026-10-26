@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
+import { motion } from "motion/react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NavSearch } from "@/components/NavSearch";
@@ -22,9 +23,16 @@ const navLinks = [
   { href: "/rating", label: "Рейтинг компаний", match: ["/rating", "/companies"] },
 ];
 
+function subscribeScroll(onChange: () => void) {
+  window.addEventListener("scroll", onChange, { passive: true });
+  return () => window.removeEventListener("scroll", onChange);
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const scrolled = useSyncExternalStore(subscribeScroll, () => window.scrollY > 24, () => false);
 
   useEffect(() => {
     if (!open) return;
@@ -39,14 +47,30 @@ export function Navbar() {
     return match.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   }
 
+  const floating = scrolled && !open;
+
   return (
-    <header className="glass sticky top-0 z-40 border-x-0 border-t-0">
-      <div className="container flex h-17 items-center justify-between gap-3">
+    <header
+      className={cn(
+        "sticky top-0 z-40 transition-colors duration-300",
+        !floating && "glass border-x-0 border-t-0",
+        floating && "lg:pt-3"
+      )}
+    >
+      <div
+        className={cn(
+          "container flex h-17 items-center justify-between gap-3 transition-[max-width,height,border-radius] duration-300",
+          floating && "glass lg:h-14 lg:max-w-6xl! lg:rounded-full"
+        )}
+      >
         <Link href="/" className="group flex min-w-0 items-center text-foreground" onClick={() => setOpen(false)}>
           <BrandLogo markClassName="transition-transform group-hover:scale-105" />
         </Link>
 
-        <nav className="hidden items-center gap-1 rounded-full border border-border/80 bg-card/65 p-1 text-sm lg:flex">
+        <nav
+          onPointerLeave={() => setHovered(null)}
+          className="hidden items-center gap-1 rounded-full border border-border/80 bg-card/65 p-1 text-sm lg:flex"
+        >
           {navLinks.map((link) => {
             const active = isActive(link.match);
             return (
@@ -54,11 +78,22 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
+                onPointerEnter={() => setHovered(link.href)}
+                onFocus={() => setHovered(link.href)}
+                onBlur={() => setHovered(null)}
                 className={cn(
-                  "rounded-full px-4 py-2 font-medium text-muted-foreground transition-colors hover:bg-muted/75 hover:text-foreground",
-                  active && "bg-foreground text-background hover:bg-foreground hover:text-background"
+                  "relative isolate rounded-full px-4 py-2 font-medium text-muted-foreground transition-colors hover:text-foreground",
+                  active && "bg-foreground text-background hover:text-background"
                 )}
               >
+                {hovered === link.href && !active && (
+                  <motion.span
+                    layoutId="nav-hover-pill"
+                    aria-hidden
+                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                    className="absolute inset-0 -z-10 rounded-full bg-muted"
+                  />
+                )}
                 {link.label}
               </Link>
             );

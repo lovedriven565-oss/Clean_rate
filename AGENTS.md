@@ -212,5 +212,25 @@
 - **Полный дашборд ответа (`components/assistant/AssistantPanel.tsx`):** авто-запуск при переходе с `?q=`, светофор-вердикт (`diy` / `caution` / `pro`), чипы уточнения состояния и материала в 1 клик, интерактивный чек-лист шагов с `tip`, карточки средств с человеческим светофором pH (`buildHumanSafetyBadge`) и кнопками «Купить», региональная смета (`PriceRange`) и проверенные мастера города (`buildProCompanies`) с кнопками звонка и Telegram, быстрые вопросы для продолжения диалога.
 - **Проверки:** `npm run typecheck` — 0 ошибок, `npm run lint` — чисто, `npm run test` — 189/189.
 
+## Дизайн-апгрейд главной (сделано)
+- `Aurora` (`components/ui/fx`): CSS-пятна остаются SSR-фолбэком; на `lg+` без reduced-motion и `saveData` поверх лениво (`next/dynamic`, `ssr:false`) грузится `MeshGradient` из `@paper-design/shaders-react` (цвета из `BRAND_COLORS`, добавлен `mint`). Пауза вне экрана/в фоне — силами библиотеки. Интенсивность — `opacity: calc(var(--aurora) * 1.1)`.
+- `Navbar`: при скролле > 24px на `lg+` превращается в плавающую `.glass`-капсулу (`max-w-6xl!` — `.container`/`.glass` вне слоёв, перебиваем через `!`); hover-плашка пунктов через `motion layoutId="nav-hover-pill"`.
+- `TaskTicker`: слева статус (пульс `animate-ping`, «Страна · N протоколов», `sm+`), края `Marquee` — `.fx-mask-x` (mask-image) вместо плашек цвета фона. Рекламы в ленте нет (политика).
+- `SolutionShelves`: смета бейджем на обложке (сплошной `bg-card/95`, не `.glass`). `PriceTable`: `motion.li layout` при сортировке, маркер и подпись медианы ориентиров, единица измерения (`/ м²`), акцент строки при hover. Рекламы в таблице нет.
+- Главная: принципы — bento-манифест (координатная сетка, `.linear-beam`, 3 карточки `PRINCIPLES`); B2B-блок получил `.linear-beam`. Footer: контурный водяной знак `SITE_DOMAIN` (`aria-hidden`).
+- `next build` можно запускать при живом dev-сервере: Next 16 пишет dev в `.next/dev`. В PowerShell `npm` не в PATH — `$env:Path = "C:\Users\annab\AppData\Local\Programs\node;" + $env:Path` и `npm.cmd`. `git` в системе не установлен, а в папке проекта нет `.git`.
+- Известное (не новое): при reduced-motion на `/` hydration-warning от `HomeHero`/`RevealText` (`useReducedMotion` на клиенте ≠ SSR).
+- **Проверки:** typecheck 0, lint чисто, test 191/191, build ок; Playwright 1440/390: шейдер только на десктопе, горизонтального скролла нет.
 
 
+
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

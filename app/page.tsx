@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, Ban, PhoneCall, ShieldCheck, type LucideIcon } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { HomeHero } from "@/components/home/HomeHero";
@@ -21,6 +21,12 @@ export const metadata: Metadata = {
     "Пятно на диване, офис после корпоратива или выбор профессиональной химии — одна строка поиска. Пошаговые протоколы ChistoLab, честный рейтинг клининговых компаний и бренды для профи.",
   alternates: pageAlternates("/"),
 };
+
+const PRINCIPLES: { icon: LucideIcon; title: string; text: string }[] = [
+  { icon: ShieldCheck, title: "Реклама отделена", text: "Спонсоры стоят отдельной помеченной полкой, место #1 всегда органическое." },
+  { icon: PhoneCall, title: "Прямой контакт", text: "Телефон и Telegram компании без посредников и комиссии платформы." },
+  { icon: Ban, title: "Сначала безопасность", text: "В каждом протоколе блок «Не делайте» с рисками для поверхности." },
+];
 
 export default async function Home() {
   const [companies, solutions, estimates, editorialAd] = await Promise.all([
@@ -84,30 +90,56 @@ export default async function Home() {
               </Reveal>
             )}
 
-            {/* Принципы — компактная полоса */}
+            {/* Принципы — bento-манифест */}
             <Reveal>
-              <section
-                aria-label="Принципы"
-                className="data-surface flex flex-wrap items-center gap-x-8 gap-y-3 rounded-panel p-5 sm:p-6"
-              >
-                <ShieldCheck className="size-6 shrink-0 text-link" aria-hidden />
-                <p className="min-w-0 flex-1 basis-72 text-[15px] leading-relaxed text-foreground">
-                  Платный охват возможен, покупка оценки нет: размещение маркируется «Реклама» и не меняет порядок
-                  рейтинга. Контакт с компанией прямой, без лид-форм и комиссии платформы.
-                </p>
-                <Link
-                  href="/rating"
-                  className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-link"
-                >
-                  Как считаем рейтинг
-                  <ArrowRight className="size-4" aria-hidden />
-                </Link>
+              <section aria-labelledby="principles-title" className="relative isolate">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-x-4 -inset-y-8 -z-10 bg-[linear-gradient(to_right,hsl(var(--border)/0.7)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.7)_1px,transparent_1px)] bg-size-[40px_40px] mask-[radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
+                />
+                <div className="grid gap-4 lg:grid-cols-3 lg:grid-rows-3">
+                  <div className="data-surface linear-beam flex flex-col justify-between gap-8 rounded-panel p-6 sm:p-8 lg:col-span-2 lg:row-span-3">
+                    <div>
+                      <p className="font-data text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        Манифест {SITE_NAME}
+                      </p>
+                      <h2
+                        id="principles-title"
+                        className="mt-4 max-w-2xl text-balance font-display text-3xl font-bold leading-[1.08] tracking-[-0.035em] text-foreground sm:text-5xl"
+                      >
+                        Платный охват возможен. <span className="text-link">Покупка оценки — нет.</span>
+                      </h2>
+                      <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
+                        Размещение маркируется «Реклама» и не меняет порядок рейтинга. Контакт с компанией прямой, без
+                        лид-форм и комиссии платформы.
+                      </p>
+                    </div>
+                    <Link
+                      href="/rating/methodology"
+                      className="inline-flex min-h-11 items-center gap-1 self-start text-sm font-semibold text-link"
+                    >
+                      Как считаем рейтинг
+                      <ArrowRight className="size-4" aria-hidden />
+                    </Link>
+                  </div>
+                  {PRINCIPLES.map(({ icon: Icon, title, text }) => (
+                    <div key={title} className="data-surface flex items-start gap-4 rounded-panel p-5">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-control bg-primary/10 text-link ring-1 ring-inset ring-primary/15">
+                        <Icon className="size-5" aria-hidden />
+                      </span>
+                      <div className="min-w-0">
+                        <h3 className="font-display text-base font-bold tracking-tight text-foreground">{title}</h3>
+                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </section>
             </Reveal>
 
             {/* B2B */}
             <Reveal>
-              <section className="relative overflow-hidden rounded-panel bg-cta p-7 text-cta-foreground sm:p-12">
+              <section className="linear-beam relative overflow-hidden rounded-panel bg-cta p-7 text-cta-foreground sm:p-12">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-brand/30 blur-3xl"

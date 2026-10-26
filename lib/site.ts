@@ -41,6 +41,7 @@ export const BRAND_COLORS = {
   primaryBright: "#a0e637",
   brand: "#92db24",
   brandForeground: "#0c1d17",
+  mint: "#2eb885",
   paper: "#f4f6f5",
   muted: "#9caba4",
 } as const;

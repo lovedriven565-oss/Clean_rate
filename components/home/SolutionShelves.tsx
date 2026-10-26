@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, FlaskConical, ShieldCheck } from "lucide-react";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { PillTabs, Tilt } from "@/components/ui/fx";
 import { formatEstimate, pickEstimate, type DiagnosticContext } from "@/lib/solutions/diagnostic";
@@ -42,6 +42,11 @@ function SolutionTile({
           <span className="absolute left-2.5 top-2.5 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
             {SURFACE_LABELS[solution.surface]}
           </span>
+          {view && (
+            <span className="absolute right-2.5 top-2.5 rounded-full bg-card/95 px-2.5 py-1 font-data text-[11px] font-semibold tabular-nums text-foreground shadow-sm ring-1 ring-inset ring-border">
+              {view.min}–{view.max}
+            </span>
+          )}
           <span className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-black/90 to-black/60 p-3 text-[12px] leading-snug text-white transition-transform duration-300 group-hover/tile:translate-y-0 group-focus-visible/tile:translate-y-0 motion-reduce:translate-y-0">
             <span className="line-clamp-3">
               <span className="font-semibold text-brand">Не делайте: </span>
@@ -53,8 +58,50 @@ function SolutionTile({
           <span className="line-clamp-2 min-h-10 text-balance text-[15px] font-semibold leading-snug text-foreground">{solution.title}</span>
           <span className="mt-auto flex items-center justify-between gap-2 font-data text-xs text-muted-foreground">
             <span>{pluralize(solution.diySteps.length, ["шаг", "шага", "шагов"])}</span>
-            <span className="font-semibold text-foreground">{view ? `${view.min}–${view.max}` : "цена по запросу"}</span>
+            {view ? (
+              <span className="inline-flex items-center gap-1 font-semibold text-link">
+                Протокол
+                <ArrowRight className="size-3.5 transition-transform group-hover/tile:translate-x-0.5" aria-hidden />
+              </span>
+            ) : (
+              <span className="font-semibold text-foreground">цена по запросу</span>
+            )}
           </span>
+        </span>
+      </Link>
+    </Tilt>
+  );
+}
+
+function ShelfPartnerPitchTile({ activeCategoryLabel }: { activeCategoryLabel?: string }) {
+  return (
+    <Tilt className="h-full w-[250px] shrink-0 snap-start sm:w-[270px]">
+      <Link
+        href="/for-brands"
+        className="data-surface linear-beam group/pitch relative flex h-full flex-col justify-between rounded-panel p-4 transition-shadow hover:shadow-[0_24px_48px_-24px_hsl(var(--brand)/0.45)]"
+      >
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-2.5 py-1 text-[11px] font-semibold text-foreground">
+              <FlaskConical className="size-3.5 text-link" aria-hidden />
+              Слот для бренда
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success">
+              <ShieldCheck className="size-3 shrink-0" aria-hidden />
+              Safety Gate
+            </span>
+          </div>
+          <p className="mt-4 font-display text-base font-bold leading-snug tracking-tight text-foreground">
+            Производите или поставляете проверенную химию?
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            Интегрируйте безопасный состав в протоколы{activeCategoryLabel ? ` («${activeCategoryLabel}»)` : ""} с прямой кнопкой покупки у дилера.
+          </p>
+        </div>
+
+        <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-link group-hover/pitch:underline">
+          Занять слот в протоколах
+          <ArrowUpRight className="size-3.5 transition-transform group-hover/pitch:translate-x-0.5 group-hover/pitch:-translate-y-0.5" aria-hidden />
         </span>
       </Link>
     </Tilt>
@@ -123,6 +170,7 @@ export function SolutionShelves({ solutions, estimates }: { solutions: Solution[
         {items.map((solution) => (
           <SolutionTile key={solution.id} solution={solution} estimates={estimates} ctx={ctx} />
         ))}
+        <ShelfPartnerPitchTile activeCategoryLabel={active?.title} />
       </div>
     </section>
   );
