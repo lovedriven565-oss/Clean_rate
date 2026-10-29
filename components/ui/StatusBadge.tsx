@@ -8,7 +8,7 @@ const variants: Record<
   { label: string; title: string; icon: typeof Crown; className: string }
 > = {
   sponsor: {
-    label: "Спонсор",
+    label: "Реклама",
     title: "Платное размещение. Органический рейтинг не зависит от оплаты.",
     icon: Crown,
     className: "bg-sponsor text-sponsor-foreground",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -8,6 +8,7 @@ import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { ArrowRight, Ban, PlayCircle, Wrench } from "lucide-react";
 import { PillTabs } from "@/components/ui/fx";
 import { useRegion } from "@/components/providers/RegionProvider";
+import { useSelectedSolution } from "@/components/providers/SelectedSolutionProvider";
 import { Collections } from "@/components/home/Collections";
 import { solutionCover } from "@/lib/solutions/covers";
 import { buildTaskShelves } from "@/lib/solutions/shelves";
@@ -43,20 +44,48 @@ function DetailPanel({
   const estimate = pickEstimate(estimates, solution, ctx);
   const view = estimate ? formatEstimate(estimate, ctx) : null;
   const steps = [...solution.diySteps].sort((a, b) => a.order - b.order);
+  // Iframe-плеер грузится только по явному действию пользователя (приватность, скорость,
+  // а также защита от невалидных/несуществующих роликов — до клика виден фасад-обложка).
+  const [playing, setPlaying] = useState(false);
 
   return (
     <div className="data-surface overflow-hidden rounded-panel">
       {videoSource ? (
         <div className="relative aspect-video w-full overflow-hidden bg-cta">
           {videoSource.kind === "iframe" ? (
-            <iframe
-              src={videoSource.embedUrl}
-              title={`Видео-разбор: ${solution.title}`}
-              loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute inset-0 h-full w-full"
-            />
+            playing ? (
+              <iframe
+                src={videoSource.embedUrl}
+                title={`Видео-разбор: ${solution.title}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 h-full w-full"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setPlaying(true)}
+                className="group absolute inset-0 h-full w-full text-left"
+                aria-label={`Смотреть видео-разбор: ${solution.title}`}
+              >
+                <Image
+                  src={solutionCover(solution)}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 560px, 100vw"
+                  className="object-cover"
+                />
+                <span aria-hidden className="absolute inset-0 bg-black/40 transition-colors group-hover:bg-black/30" />
+                <span className="absolute inset-0 grid place-items-center">
+                  <span className="grid size-16 place-items-center rounded-full bg-brand text-brand-foreground shadow-lg transition-transform group-hover:scale-105">
+                    <PlayCircle className="size-8" aria-hidden />
+                  </span>
+                </span>
+                <span className="absolute inset-x-4 bottom-3 font-data text-xs font-semibold uppercase tracking-wider text-white/90">
+                  Видео-разбор · {solution.title}
+                </span>
+              </button>
+            )
           ) : (
             <video
               src={videoSource.url}
@@ -210,7 +239,31 @@ export function SolutionShowcase({
     return hovered ?? selected;
   }, [hoverSlug, filteredList, selected]);
 
-  if (!selected || !displayed) return null;
+  // Явный выбор задачи становится контекстом блоков ниже по странице (мастера города).
+  const { select: reportSelection } = useSelectedSolution();
+  useEffect(() => {
+    if (selected) reportSelection(selected);
+  }, [selected, reportSelection]);
+
+  if (!selected || !displayed) {
+    return (
+      <section id="shelf" ref={sectionRef} aria-labelledby="shelf-title" className="scroll-mt-24">
+        <p className="font-data text-xs font-semibold uppercase tracking-[0.16em] text-link">Витрина решений</p>
+        <h2
+          id="shelf-title"
+          className="mt-1.5 text-balance font-display text-3xl font-bold tracking-[-0.03em] text-foreground sm:text-4xl"
+        >
+          Выберите задачу — ответ справа
+        </h2>
+        <p className="mt-4 rounded-panel border border-dashed border-border bg-card/60 p-5 text-sm text-muted-foreground">
+          Пошаговые протоколы наполняются и проходят проверку.{" "}
+          <Link href="/solutions" className="font-semibold text-link hover:underline">
+            Каталог решений
+          </Link>
+        </p>
+      </section>
+    );
+  }
 
   function select(slug: string) {
     setSelectedSlug(slug);

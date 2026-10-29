@@ -97,6 +97,7 @@ export function useSmartSearch() {
   const [segment, setSegment] = useState<Segment>("auto");
   const [result, setResult] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
@@ -104,11 +105,15 @@ export function useSmartSearch() {
     const trimmed = query.trim();
     if (!trimmed) return;
 
+    // Устаревшие запросы отменяем: запоздавший ответ не перезапишет актуальную выдачу.
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       setLoading(true);
+      setError(false);
       try {
         const response = await fetch(
-          `/api/search?q=${encodeURIComponent(trimmed)}&country=${encodeURIComponent(countryCode)}`
+          `/api/search?q=${encodeURIComponent(trimmed)}&country=${encodeURIComponent(countryCode)}`,
+          { signal: controller.signal }
         );
         if (!response.ok) throw new Error("search failed");
         const data: SearchResponse = await response.json();
@@ -116,13 +121,20 @@ export function useSmartSearch() {
         setOpen(true);
         setHighlightedIndex(-1);
       } catch {
-        setResult(null);
+        if (!controller.signal.aborted) {
+          setResult(null);
+          setError(true);
+          setOpen(true); // иначе сообщение об ошибке недостижимо — панель не откроется
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }, DEBOUNCE_MS);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, countryCode]);
 
   const effectiveIntent: SearchIntent = segment === "auto" ? result?.intent ?? "b2c" : segment;
@@ -155,6 +167,7 @@ export function useSmartSearch() {
     if (!value.trim()) {
       setResult(null);
       setLoading(false);
+      setError(false);
       setOpen(false);
       setHighlightedIndex(-1);
     }
@@ -191,6 +204,7 @@ export function useSmartSearch() {
     setSegment,
     result,
     loading,
+    error,
     open,
     setOpen,
     effectiveIntent,
@@ -347,6 +361,7 @@ export function SearchSuggestions({ search, className }: { search: ReturnType<ty
   const {
     result,
     loading,
+    error,
     hasResults,
     showSolutions,
     showCompanies,
@@ -366,7 +381,12 @@ export function SearchSuggestions({ search, className }: { search: ReturnType<ty
         className
       )}
     >
-      {!hasResults && !loading && (
+      {!hasResults && !loading && error && (
+        <p className="px-4 pb-2 pt-4 text-center text-sm text-muted-foreground">
+          Подсказки не загрузились — проверьте соединение. «Enter» всё равно откроет результаты поиска.
+        </p>
+      )}
+      {!hasResults && !loading && !error && (
         <p className="px-4 pb-2 pt-4 text-center text-sm text-muted-foreground">
           Готового протокола не нашли. Нажмите «Enter», чтобы посмотреть все результаты, или спросите консультанта.
         </p>

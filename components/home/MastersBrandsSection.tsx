@@ -4,10 +4,12 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, BadgeCheck, Star } from "lucide-react";
 import { PhoneButton } from "@/components/PhoneButton";
 import { useRegion } from "@/components/providers/RegionProvider";
+import { useSelectedSolution } from "@/components/providers/SelectedSolutionProvider";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import {
   buildProCompanies,
   companyPriceLabel,
+  covers,
   externalRating,
   rankOrganicCompanies,
 } from "@/lib/solutions/diagnostic";
@@ -88,12 +90,20 @@ export function MastersBrandsSection({
   companies: Company[];
   brands: Brand[];
 }) {
-  const { market, city } = useRegion();
-  const cityNames = market.cities.map((c) => c.name);
-  const inRegion = companies.filter((c) => cityNames.includes(c.city));
-  const pro = solution
-    ? buildProCompanies(companies, solution, { cities: cityNames })
-    : { sponsor: null, organic: rankOrganicCompanies(inRegion).slice(0, 3) };
+  const { city } = useRegion();
+  // Явный выбор пользователя в витрине важнее дефолтного «протокола дня»,
+  // но до первого выбора секция показывает контекст переданного решения.
+  const { solution: picked } = useSelectedSolution();
+  const active = picked ?? solution;
+  // Строгий фильтр выбранного города: компании соседних городов рынка не подставляем.
+  const inCity = companies.filter((c) => c.city === city.name);
+  const pro = active
+    ? (() => {
+        const { sponsor, organic } = buildProCompanies(companies, active, { cities: [city.name] });
+        // Нерелевантные задаче профили не показываем — лучше честный пустой блок.
+        return { sponsor, organic: organic.filter((c) => covers(c, active)) };
+      })()
+    : { sponsor: null, organic: rankOrganicCompanies(inCity).slice(0, 3) };
   const shownBrands = brands.slice(0, BRAND_LIMIT);
 
   return (
@@ -123,14 +133,15 @@ export function MastersBrandsSection({
             </Link>
           </div>
           <p className="mt-2 font-data text-xs text-muted-foreground">
-            Контекст: {solution ? `задача «${solution.title}»` : "все задачи"} · {city.name}
+            Контекст: {active ? `задача «${active.title}»` : "все задачи"} · {city.name}
           </p>
           {pro.sponsor || pro.organic.length > 0 ? (
             <ul className="mt-3">
-              {pro.sponsor && <CompanyRow key={pro.sponsor.id} company={pro.sponsor} sponsor />}
               {pro.organic.map((company) => (
                 <CompanyRow key={company.id} company={company} />
               ))}
+              {/* Спонсор — после органики: первое место в списке всегда независимое. */}
+              {pro.sponsor && <CompanyRow key={pro.sponsor.id} company={pro.sponsor} sponsor />}
             </ul>
           ) : (
             <p className="mt-4 rounded-panel border border-dashed border-border bg-card/60 p-4 text-sm text-muted-foreground">

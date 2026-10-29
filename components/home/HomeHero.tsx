@@ -10,7 +10,6 @@ import { MarketBadge } from "@/components/MarketBadge";
 import { SmartSearch } from "@/components/SmartSearch";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { Aurora, PillTabs, RevealText, SpotlightCard } from "@/components/ui/fx";
-import { BeforeAfter } from "@/components/ui/BeforeAfter";
 import {
   buildDiagnosticResult,
   listSurfaces,
@@ -56,7 +55,7 @@ function pickCapsuleDeck(solutions: Solution[], activeSurface: SolutionSurface |
 /**
  * Hero главной в стиле Epic Games + Steam Featured Capsule:
  * слева — заголовок, SmartSearch с экспресс-триажем ИИ-технолога и 3 принципа платформы;
- * справа — интерактивная капсула До/После с HUD-индикатором химии, зелёным Steam-бейджем выгоды
+ * справа — интерактивная капсула протоколов с HUD-индикатором поверхности, честной сметой выезда
  * и 4 карточками-переключателями протоколов с 7-секундным авто-таймером прогресса.
  */
 export function HomeHero({ solutions, estimates }: HomeHeroProps) {
@@ -174,10 +173,14 @@ export function HomeHero({ solutions, estimates }: HomeHeroProps) {
                 transition={{ duration: reduce ? 0 : 0.45 }}
                 className="absolute inset-0 -z-10"
               >
-                <BeforeAfter
+                {/* Одна тематическая обложка протокола — иллюстрация, не «доказательство результата» */}
+                <Image
                   src={cover}
+                  alt=""
+                  fill
                   priority
                   sizes="(min-width: 1024px) 640px, 100vw"
+                  className="object-cover"
                 />
                 <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/92 via-black/50 to-black/15" />
               </motion.div>

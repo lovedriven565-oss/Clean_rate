@@ -192,7 +192,7 @@ export function externalRating(
   return { value: baseRating, count: reviewCount, source: source === "google" ? "Google" : "Яндекс" };
 }
 
-const covers = (company: Company, solution?: Pick<Solution, "relatedCategory">) =>
+export const covers = (company: Company, solution?: Pick<Solution, "relatedCategory">) =>
   !solution?.relatedCategory || company.categories.includes(solution.relatedCategory);
 
 /**

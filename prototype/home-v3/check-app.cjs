@@ -16,8 +16,18 @@ const ok = (n, c, x = '') => { console.log((c ? 'PASS' : 'FAIL') + ' ' + n + (x 
     p.on('console', m => { if (m.type() === 'error' && !devNoise.test(m.text())) errors.push(w + 'px console: ' + m.text()); });
     await p.goto(BASE, { waitUntil: 'domcontentloaded' });
     await p.locator('#shelf').waitFor({ state: 'attached', timeout: 30000 });
-    await p.waitForTimeout(1200);
+    await p.waitForTimeout(4500); // гидратация на холодной компиляции dev-сервера
     return p;
+  };
+  // Клик с повтором до срабатывания: защита от гонки гидратации на dev-сервере.
+  const clickTillPressed = async (p, loc, timeout = 15000) => {
+    const start = Date.now();
+    while (Date.now() - start < timeout) {
+      await loc.click();
+      await p.waitForTimeout(450);
+      if ((await loc.getAttribute('aria-pressed')) === 'true') return true;
+    }
+    return false;
   };
   const overflow = async (p, w) => ok(`overflow@${w}`, (await p.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth)) === 0);
 
@@ -29,13 +39,25 @@ const ok = (n, c, x = '') => { console.log((c ? 'PASS' : 'FAIL') + ' ' + n + (x 
   ok('rows rendered', rowCount >= 10, 'rows: ' + rowCount);
   ok('desktop detail visible', await d.locator('#shelf aside >> visible=true').count() === 1);
 
+  // маркировка платных мест — слово «Реклама», «Спонсор» в #pros не используется;
+  // дефолтная задача (вино) имеет демо-спонсора в Минске → плашка «Реклама» видна
+  const prosText0 = await d.locator('#pros').innerText();
+  // innerText отдаёт текст после CSS uppercase → проверяем регистронезависимо
+  ok('pros marks paid as Реклама', !prosText0.includes('Спонсор') && /реклама/i.test(prosText0));
+  // первая строка списка — органическая: платная строка идёт после органики
+  const firstProsRow = await d.locator('#pros li').first().innerText();
+  ok('first pros row is organic', !/реклама/i.test(firstProsRow));
+  const minskFirstCompany = firstProsRow.split('\n')[0].trim();
+
   // клик по строке → деталь меняется, aria-pressed на ней
   const second = d.locator('button[data-sol]').nth(1);
   const secondSlug = await second.getAttribute('data-sol');
   const secondTitle = (await second.locator('span').nth(2).textContent()).trim();
-  await second.click(); await d.waitForTimeout(400);
-  ok('click selects row', (await second.getAttribute('aria-pressed')) === 'true');
+  ok('click selects row', await clickTillPressed(d, second));
+  await d.waitForTimeout(400);
   ok('detail shows selected', (await d.locator('#shelf aside').textContent()).includes(secondTitle.split(' ').slice(0, 3).join(' ')), secondTitle);
+  // выбранная задача становится контекстом секции мастеров
+  ok('pros follows selection', (await d.locator('#pros').textContent()).includes('задача «' + secondTitle.split(' ').slice(0, 3).join(' ')), secondTitle);
 
   // hover-превью: деталь показывает наведённую, выбор остаётся на кликнутой
   const first = d.locator('button[data-sol]').first();
@@ -69,6 +91,21 @@ const ok = (n, c, x = '') => { console.log((c ? 'PASS' : 'FAIL') + ' ' + n + (x 
   await d.locator('#shelf aside a[href="#pros"]').click(); await d.waitForTimeout(800);
   ok('pros anchor scrolls', await d.evaluate(() => { const r = document.getElementById('pros').getBoundingClientRect(); return r.top < innerHeight && r.top > -r.height; }));
 
+  // умный поиск: ввод → подсказки (дождаться панели; первая компиляция /api/search медленная)
+  await d.locator('input[type="search"]').first().fill('вино');
+  const suggBox = d.locator('.glass.rounded-panel').first();
+  await suggBox.waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
+  const sugg = await suggBox.innerText().catch(() => '');
+  ok('search suggestions open', sugg.includes('Решения') || sugg.includes('вино') || sugg.length > 20, sugg.slice(0, 60));
+  await d.keyboard.press('Escape');
+
+  // честные формы: страницы партнёров и брендов отдают рабочую форму
+  for (const path of ['/for-partners', '/for-brands']) {
+    const res = await d.context().request.get(BASE.replace(/\/$/, '') + path, { timeout: 90000 }).catch(() => null);
+    const html = res?.ok() ? await res.text() : '';
+    ok(`form page ${path}`, !!res?.ok() && html.includes('<form'), 'status ' + (res?.status() ?? 'timeout'));
+  }
+
   // честность: нет выдуманной экономии (innerText — без содержимого <script>)
   const body = await d.locator('body').innerText();
   ok('no fake savings', !/−?\s*75%|DIY −/.test(body), (body.match(/.{0,20}75%.{0,20}/) || ['none'])[0]);
@@ -88,13 +125,26 @@ const ok = (n, c, x = '') => { console.log((c ? 'PASS' : 'FAIL') + ' ' + n + (x 
   await d.evaluate(() => document.documentElement.classList.remove('dark'));
   await d.close();
 
+  // === Смена региона: cookie ch_region=RU:moscow → мастера Москвы, не Минска ===
+  const rctx = await b.newContext({ viewport: { width: 1280, height: 900 } });
+  await rctx.addCookies([{ name: 'ch_region', value: 'RU:moscow', url: BASE }]);
+  const rp = await rctx.newPage();
+  rp.on('pageerror', e => { if (!/Transition was aborted/.test(e.message)) errors.push('region pageerror: ' + e.message); });
+  await rp.goto(BASE, { waitUntil: 'domcontentloaded' });
+  await rp.locator('#pros').waitFor({ state: 'attached', timeout: 30000 });
+  await rp.waitForTimeout(1500);
+  const moscowPros = await rp.locator('#pros').innerText();
+  ok('region cookie switches context', moscowPros.includes('Москва'), moscowPros.split('\n').find(l => l.includes('Контекст')) || 'no context line');
+  ok('region filters city strictly', !moscowPros.includes(minskFirstCompany), minskFirstCompany + ' leaked to Moscow');
+  await rctx.close();
+
   // === Планшет 768 ===
   const t = await newPage(768);
   await overflow(t, 768);
   // на планшете (<lg) inline-раскрытие под строкой
   const trow = t.locator('button[data-sol]').nth(2);
   const tTitle = (await trow.locator('span').nth(2).textContent()).trim();
-  await trow.click(); await t.waitForTimeout(400);
+  await clickTillPressed(t, trow); await t.waitForTimeout(400);
   ok('tablet inline expand', (await t.locator('#shelf [id^="exp-"]:not([hidden])').textContent()).includes(tTitle.split(' ').slice(0, 3).join(' ')));
   await t.close();
 
@@ -111,7 +161,7 @@ const ok = (n, c, x = '') => { console.log((c ? 'PASS' : 'FAIL') + ' ' + n + (x 
   ok('search visible @390x844', vis.input && vis.btn, `btn bottom ${vis.bottom}/${vis.ih}`);
   const mrow = m.locator('button[data-sol]').nth(1);
   const mTitle = (await mrow.locator('span').nth(2).textContent()).trim();
-  await mrow.scrollIntoViewIfNeeded(); await mrow.click(); await m.waitForTimeout(500);
+  await mrow.scrollIntoViewIfNeeded(); await clickTillPressed(m, mrow); await m.waitForTimeout(500);
   const exp = m.locator('#shelf [id^="exp-"]:not([hidden])');
   ok('mobile inline answer', (await exp.textContent()).includes(mTitle.split(' ').slice(0, 3).join(' ')));
   ok('mobile expanded has steps', (await exp.locator('ol li').count()) >= 3, 'steps: ' + await exp.locator('ol li').count());

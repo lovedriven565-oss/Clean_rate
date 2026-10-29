@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Ban, ChevronDown, Hand, ShieldAlert, Sparkles } from "lucide-react";
@@ -8,7 +9,6 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ShareButton } from "@/components/ShareButton";
 import { AdPlacement } from "@/components/ads/AdPlacement";
 import { DiyPanel } from "@/components/solution/DiyPanel";
-import { BeforeAfter } from "@/components/ui/BeforeAfter";
 import { ProPanel } from "@/components/solution/ProPanel";
 import { SolutionCard } from "@/components/solution/SolutionCard";
 import {
@@ -131,15 +131,16 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               {/* Баннер с обложкой: первое «Не делайте» прямо на фото — предупреждение
                   до прокрутки к чек-листу и на любом экране */}
               <div className="data-surface relative min-h-[240px] overflow-hidden rounded-panel sm:min-h-[300px] lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:min-h-full">
-                <BeforeAfter
+                {/* Тематическая обложка протокола — иллюстрация, не «доказательство результата» */}
+                <Image
                   src={solutionCover(solution)}
+                  alt=""
+                  fill
                   priority
                   sizes="(min-width: 1024px) 560px, 100vw"
+                  className="object-cover"
                 />
                 <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
-                <span className="pointer-events-none absolute bottom-2.5 right-3 z-10 text-[10px] font-medium text-white/60">
-                  до/после: стилизация
-                </span>
                 {solution.warnings[0] && (
                   <p className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-start gap-2.5 p-5 pb-7 text-[13px] leading-snug text-white sm:p-6 sm:pb-8">
                     <Ban className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />

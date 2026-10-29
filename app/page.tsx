@@ -7,9 +7,11 @@ import { HomeHero } from "@/components/home/HomeHero";
 import { HomeMotion, Reveal } from "@/components/home/Reveal";
 import { SolutionShowcase } from "@/components/home/SolutionShowcase";
 import { MastersBrandsSection } from "@/components/home/MastersBrandsSection";
-import { AdCreative } from "@/components/ads/AdCreative";
+import { HomeEditorialAd } from "@/components/ads/HomeEditorialAd";
+import { SelectedSolutionProvider } from "@/components/providers/SelectedSolutionProvider";
 import { getEligibleAd } from "@/lib/ads/queries";
 import { getAllBrands, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
+import { ENABLED_MARKETS } from "@/lib/markets";
 import { resolveSelection } from "@/lib/solutions/diagnostic";
 import { SITE_NAME, SITE_URL, absoluteUrl, pageAlternates } from "@/lib/site";
 
@@ -21,21 +23,27 @@ export const metadata: Metadata = {
 };
 
 const PRINCIPLES: { icon: LucideIcon; title: string; text: string }[] = [
-  { icon: ShieldCheck, title: "Реклама отделена", text: "Спонсоры стоят отдельной помеченной полкой, место #1 всегда органическое." },
+  { icon: ShieldCheck, title: "Реклама отделена", text: "Платные места помечены «Реклама», первое место в списке всегда органическое." },
   { icon: PhoneCall, title: "Прямой контакт", text: "Телефон и Telegram компании без посредников и комиссии платформы." },
   { icon: Ban, title: "Сначала безопасность", text: "В каждом протоколе блок «Не делайте» с рисками для поверхности." },
 ];
 
 export default async function Home() {
-  const [companies, solutions, estimates, brands, editorialAd] = await Promise.all([
+  const [companies, solutions, estimates, brands, ...editorialAds] = await Promise.all([
     getAllCompanies(),
     getAllSolutions(),
     getPriceEstimates(),
     getAllBrands(),
     // Единственный коммерческий блок главной — ниже полезного контента, не в hero.
-    // null → секция не рендерится вовсе (ни отступа, ни пустой рамки).
-    getEligibleAd("home.editorial_partner", {}),
+    // Страна посетителя на SSG неизвестна → одобренная кампания выбирается для каждого
+    // открытого рынка, а клиент показывает ту, что таргетирует его регион.
+    ...ENABLED_MARKETS.map((market) =>
+      getEligibleAd("home.editorial_partner", { countryCode: market.countryCode })
+    ),
   ]);
+  const editorialAdByCountry = Object.fromEntries(
+    ENABLED_MARKETS.map((market, i) => [market.countryCode, editorialAds[i]])
+  );
 
   const published = solutions.filter((s) => s.status === "published");
   // Протокол дня — тот же, что hero показывает по умолчанию (первый доступный выбор диагностики).
@@ -67,22 +75,20 @@ export default async function Home() {
           <HomeHero solutions={solutions} estimates={estimates} />
 
           <div className="container space-y-20 py-14 sm:space-y-24 sm:py-20">
-            {/* Витрина решений + подборки 2×2 (композиция прототипа home-v3) */}
-            <Reveal>
-              <SolutionShowcase solutions={solutions} estimates={estimates} />
-            </Reveal>
-
-            {/* Партнёр сезона (реклама): помеченный слот, не влияет на органику */}
-            {editorialAd && (
+            <SelectedSolutionProvider>
+              {/* Витрина решений + подборки 2×2 (композиция прототипа home-v3) */}
               <Reveal>
-                <AdCreative ad={editorialAd} />
+                <SolutionShowcase solutions={solutions} estimates={estimates} />
               </Reveal>
-            )}
 
-            {/* Мастера региона + витрина брендов */}
-            <Reveal>
-              <MastersBrandsSection solution={featuredSolution} companies={companies} brands={brands} />
-            </Reveal>
+              {/* Партнёр сезона (реклама): помеченный слот региона, не влияет на органику */}
+              <HomeEditorialAd ads={editorialAdByCountry} />
+
+              {/* Мастера выбранной задачи в выбранном городе + витрина брендов */}
+              <Reveal>
+                <MastersBrandsSection solution={featuredSolution} companies={companies} brands={brands} />
+              </Reveal>
+            </SelectedSolutionProvider>
 
             {/* Принципы — bento-манифест */}
             <Reveal>
@@ -144,8 +150,8 @@ export default async function Home() {
                       Вы бренд химии или клининговая компания? Займите место в протоколах и рейтинге.
                     </h2>
                     <p className="mt-4 max-w-xl text-cta-foreground/75">
-                      Разместите безопасные составы прямо в пошаговых решениях по поверхностям или подтвердите профиль
-                      клининговой компании с прямым телефоном.
+                      Предложите составы для проверки: совместимые с поверхностью продукты попадают в пошаговые
+                      решения, клининговая компания — в рейтинг с прямым телефоном.
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
