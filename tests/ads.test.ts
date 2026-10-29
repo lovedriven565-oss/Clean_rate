@@ -54,6 +54,9 @@ const safeUpholsteryProduct: ProductSafetyProfile = {
   name: "Kiehl Arenas-exet 3",
   ph: 7.0,
   compatibleSurfaces: ["upholstery", "carpet"],
+  compatibleMaterials: ["велюр"],
+  compatibilitySource: "fixture manufacturer documentation",
+  compatibilityVerified: true,
   prohibitedSurfaces: ["leather"],
 };
 

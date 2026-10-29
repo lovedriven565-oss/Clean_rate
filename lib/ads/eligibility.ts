@@ -50,6 +50,29 @@ export const ALKALI_SENSITIVE_SURFACES: ReadonlySet<string> = new Set([
   "aluminum",
 ]);
 
+const MATERIAL_PATTERNS: Record<string, RegExp> = {
+  marble: /мрамор/i,
+  wool: /шерст/i,
+  silk: /ш[её]лк/i,
+  leather: /кож/i,
+  natural_wood: /дерев/i,
+  enamel: /эмал/i,
+  limestone: /известняк/i,
+};
+
+export function hasVerifiedCompatibility(product: ProductSafetyProfile, surface?: string, material?: string): boolean {
+  const key = surface?.trim().toLowerCase();
+  const materialKey = material?.trim().toLowerCase();
+  return Boolean(
+    product.compatibilityVerified === true &&
+    product.compatibilitySource?.trim() &&
+    key &&
+    materialKey &&
+    product.compatibleSurfaces?.some((value) => value.trim().toLowerCase() === key) &&
+    product.compatibleMaterials?.some((value) => value.trim().toLowerCase() === materialKey)
+  );
+}
+
 /**
  * Проверяет химическую безопасность продукта для указанной поверхности и протокола решения.
  * Гарантирует, что спонсорский продукт не повредит поверхность пользователя.
@@ -64,9 +87,13 @@ export function checkProductSafety(params: {
   const targetMaterial = solution?.material?.toLowerCase() || "";
 
   // 1. Проверка прямого запрета поверхности в спецификации продукта
-  if (targetSurface && product.prohibitedSurfaces && product.prohibitedSurfaces.length > 0) {
+  if (product.prohibitedSurfaces && product.prohibitedSurfaces.length > 0) {
     const isProhibited = product.prohibitedSurfaces.some(
-      (ps) => ps.toLowerCase() === targetSurface.toLowerCase()
+      (ps) => {
+        const key = ps.trim().toLowerCase();
+        return key === targetSurface?.toLowerCase() || key === targetMaterial ||
+          Boolean(targetMaterial && MATERIAL_PATTERNS[key]?.test(targetMaterial));
+      }
     );
     if (isProhibited) {
       return {
@@ -105,7 +132,7 @@ export function checkProductSafety(params: {
         incompatibleAttributes: ["alkali_conflict"],
       };
     }
-    if (targetMaterial.includes("шерсть") || targetMaterial.includes("шелк") || targetMaterial.includes("дерево")) {
+    if (/шерст|шелк|шёлк|дерев/.test(targetMaterial)) {
       return {
         safe: false,
         reason: `Щелочной состав (pH ${product.ph}) разрушает деликатные волокна/материал «${targetMaterial}»`,
@@ -168,12 +195,12 @@ export function checkProductRelevance(params: {
   // 1. Прямое совпадение со списком решений в протоколе
   if (solution) {
     const inProtocol = solution.recommendedProducts?.some(
-      (rp) => rp.productId === product.id || (rp.brandId && rp.brandId === product.brandId)
+      (rp) => rp.productId === product.id
     );
     if (inProtocol) {
       return {
         relevant: true,
-        reason: "Продукт или бренд подтверждён в официальном протоколе решения",
+        reason: "Товар указан в инструкции для этой задачи",
         relevanceScore: 100,
       };
     }
@@ -183,7 +210,7 @@ export function checkProductRelevance(params: {
   if (solution?.slug && campaignTargetSolutions && campaignTargetSolutions.includes(solution.slug)) {
     return {
       relevant: true,
-      reason: `Кампания напрямую авторизована для задачи «${solution.title || solution.slug}»`,
+      reason: `Кампания предназначена для задачи «${solution.title || solution.slug}»`,
       relevanceScore: 80,
     };
   }
@@ -196,7 +223,7 @@ export function checkProductRelevance(params: {
     if (surfaceMatches) {
       return {
         relevant: true,
-        reason: `Продукт сертифицирован для обработки поверхности «${targetSurface}»`,
+        reason: `Поверхность «${targetSurface}» указана в данных каталога`,
         relevanceScore: 60,
       };
     }
@@ -309,6 +336,14 @@ export function checkCampaignEligibility(params: {
       };
     }
 
+    if (campaign.productId !== product.id) {
+      return { eligible: false, reason: "Товар не совпадает с товаром кампании.", matchScore: 0 };
+    }
+
+    if (context.surface && solution?.surface && context.surface.toLowerCase() !== solution.surface.toLowerCase()) {
+      return { eligible: false, reason: "Поверхность контекста не совпадает с задачей.", matchScore: 0 };
+    }
+
     // Safety Gate: проверка безопасности состава
     const safety = checkProductSafety({
       product,
@@ -320,6 +355,14 @@ export function checkCampaignEligibility(params: {
       return {
         eligible: false,
         reason: safety.reason || "Продукт не прошёл контроль безопасности",
+        matchScore: 0,
+      };
+    }
+
+    if (!hasVerifiedCompatibility(product, context.surface || solution?.surface, solution?.material)) {
+      return {
+        eligible: false,
+        reason: "Недостаточно подтверждённых данных о совместимости с материалом.",
         matchScore: 0,
       };
     }

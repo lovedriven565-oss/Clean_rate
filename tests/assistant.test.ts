@@ -185,7 +185,10 @@ describe("assistant consultant", () => {
     assert.equal(answer.solution?.title, "Мойка натяжного потолка без разводов");
     assert.equal(answer.steps.length, 2);
     assert.match(answer.steps[0].tip ?? "", /сварного шва/);
-    assert.equal(answer.warnings.length, 1);
+    assert.equal(answer.warnings.length, 2);
+    assert.match(answer.warnings[0], /не проверен специалистом/);
+    assert.equal(answer.verdict.recommendation, "caution");
+    assert.equal(answer.solution?.diyCostNote, undefined);
   });
 
   it("adapts verdict and warnings when user selects triage context (washed, dried, delicate material)", async () => {
@@ -229,6 +232,9 @@ describe("assistant consultant", () => {
       name: "Нейтральное средство",
       ph: 7,
       compatibleSurfaces: ["floor"],
+      compatibleMaterials: ["мраморная плитка"],
+      compatibilitySource: "fixture manufacturer documentation",
+      compatibilityVerified: true,
     };
     const marbleSolution: Solution = {
       ...wine,

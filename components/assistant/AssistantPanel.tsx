@@ -39,7 +39,7 @@ import { categoryLandingHref } from "@/lib/categories";
 import { formatRating } from "@/lib/format";
 import { buildHumanSafetyBadge, findSeedProduct } from "@/lib/ph";
 import { buildProCompanies } from "@/lib/solutions/diagnostic";
-import { SURFACE_LABELS, SURFACE_RISK_LABELS } from "@/lib/solutions/meta";
+import { SURFACE_LABELS } from "@/lib/solutions/meta";
 import type { Brand, Company, PriceEstimate, Solution, SolutionSurface } from "@/lib/types";
 import { cn, scrollBehavior } from "@/lib/utils";
 
@@ -356,8 +356,8 @@ export function AssistantPanel({
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                     <ShieldCheck className="h-3.5 w-3.5" />
                     {answer.solution.isCustom
-                      ? "Индивидуальный разбор ИИ-технолога · Контроль pH"
-                      : "Проверенный протокол ChistoLab"}
+                      ? "Индивидуальный разбор ИИ-консультанта"
+                      : "Инструкция ChistoLab"}
                   </span>
                   <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
                     {SURFACE_LABELS[answer.solution.surface as SolutionSurface] ?? answer.solution.surface}
@@ -594,11 +594,10 @@ export function AssistantPanel({
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <h4 className="font-display text-base font-bold text-foreground">
-                          Безопасные средства из протокола
+                          Средства из инструкции
                         </h4>
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          Составы подобраны так, чтобы не повредить{" "}
-                          {SURFACE_RISK_LABELS[answer.solution.surface] ?? "поверхность"}.
+                          Проверьте применимость средства к вашему материалу в инструкции производителя.
                         </p>
                       </div>
                     </div>
@@ -615,7 +614,7 @@ export function AssistantPanel({
                         const safetyBadge = buildHumanSafetyBadge({
                           product: seedProduct,
                           surface: answer.solution?.surface,
-                          solution: fullSolution,
+                          solution: fullSolution && material ? { ...fullSolution, material } : fullSolution,
                           note: p.note,
                         });
                         const label =
@@ -657,11 +656,6 @@ export function AssistantPanel({
                                 )}
                                 {safetyBadge.label}
                               </span>
-                              {(p.ph !== undefined || safetyBadge.proPhLabel) && (
-                                <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2 py-0.5 font-data text-[11px] font-medium text-muted-foreground">
-                                  {safetyBadge.proPhLabel ?? `pH ${p.ph}`}
-                                </span>
-                              )}
                             </div>
 
                             <div className="mt-2.5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">

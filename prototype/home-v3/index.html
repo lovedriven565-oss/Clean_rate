@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChistoLab — прототип главной v3 (демо)</title>
+<style>
+@font-face{font-family:"Geist";src:url("assets/fonts/Geist-Variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url("assets/fonts/GeistMono-Variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
+
+:root{
+  color-scheme:light;
+  --bg:150 12% 96%;--fg:160 24% 8%;--card:0 0% 100%;--muted:150 14% 94%;--muted-fg:160 8% 36%;
+  --line:150 10% 86%;--pri:158 62% 24%;--pri-fg:158 30% 98%;--brand:84 72% 50%;--brand-fg:160 40% 8%;
+  --success:152 62% 33%;--danger:356 72% 48%;--sponsor:43 96% 56%;--sponsor-fg:30 60% 12%;
+  --cta:160 24% 8%;--cta-fg:150 16% 96%;--tint:160 30% 20%;--highlight:0 0% 100%;
+  --r-p:14px;--r-c:10px;--ease:cubic-bezier(.16,1,.3,1);
+}
+[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:160 14% 6%;--fg:150 16% 94%;--card:160 12% 10%;--muted:160 12% 14%;--muted-fg:155 8% 64%;
+  --line:160 10% 19%;--pri:84 70% 62%;--pri-fg:160 40% 8%;--brand:84 78% 56%;
+  --success:156 60% 48%;--danger:354 76% 64%;--cta:160 22% 9%;--tint:160 40% 2%;--highlight:150 16% 100%;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-color:hsl(var(--line))}
+html{scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{font-family:"Geist",ui-sans-serif,system-ui,sans-serif;background:hsl(var(--bg));color:hsl(var(--fg));line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{display:block;max-width:100%}
+.mono{font-family:"Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid hsl(var(--pri));outline-offset:3px;border-radius:6px}
+::selection{background:hsl(var(--brand)/.35)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.wrap{max-width:80rem;margin-inline:auto;padding-inline:1rem}
+@media(min-width:640px){.wrap{padding-inline:1.5rem}}
+
+/* поверхности */
+.surf{position:relative;background:hsl(var(--card));border:1px solid hsl(var(--line));box-shadow:inset 0 1px 0 hsl(var(--highlight)/.05),0 20px 40px -28px hsl(var(--tint)/.28)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;padding:0 1.25rem;border-radius:999px;font-size:.875rem;font-weight:600;white-space:nowrap;transition:transform .25s var(--ease),background .2s,box-shadow .2s,border-color .2s}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn-brand{background:hsl(var(--brand));color:hsl(var(--brand-fg));box-shadow:0 6px 18px -8px hsl(var(--brand)/.8)}
+.btn-brand:hover{transform:translateY(-2px)}
+.btn-pri{background:hsl(var(--pri));color:hsl(var(--pri-fg))}
+.btn-pri:hover{transform:translateY(-2px)}
+.btn-ghost{border:1px solid hsl(var(--line));background:hsl(var(--card))}
+.btn-ghost:hover{border-color:hsl(var(--pri)/.5)}
+.btn-sm{min-height:38px;padding:0 .9rem;font-size:.8125rem}
+.pill{display:inline-flex;align-items:center;gap:.4rem;min-height:38px;padding:0 .95rem;border-radius:999px;border:1px solid hsl(var(--line));background:hsl(var(--card));font-size:.8125rem;font-weight:500;color:hsl(var(--muted-fg));transition:all .2s}
+.pill:hover{color:hsl(var(--fg));border-color:hsl(var(--pri)/.4)}
+.pill[aria-pressed=true]{background:hsl(var(--fg));border-color:hsl(var(--fg));color:hsl(var(--bg))}
+.pill .m{font-family:"Geist Mono",monospace;font-size:.7rem;opacity:.7}
+.badge-ad{display:inline-flex;align-items:center;min-height:22px;padding:0 9px;border-radius:999px;background:hsl(var(--sponsor));color:hsl(var(--sponsor-fg));font-weight:700;font-size:.72rem;letter-spacing:.02em;flex:none}
+.warn{display:flex;gap:.6rem;padding:.7rem .85rem;border-radius:var(--r-c);background:hsl(var(--danger)/.09);box-shadow:inset 0 0 0 1px hsl(var(--danger)/.25);font-size:.82rem;line-height:1.45}
+.warn b{color:hsl(var(--danger))}
+.warn .ic{color:hsl(var(--danger));flex:none;margin-top:.1rem}
+.tag{display:inline-flex;align-items:center;gap:.35rem;padding:.18rem .6rem;border-radius:999px;background:hsl(var(--muted));font-size:.72rem;font-weight:600;color:hsl(var(--fg)/.85)}
+
+/* демо-панель */
+.demo-bar{background:#14161a;color:#e8eaf0;font-size:.75rem}
+.demo-bar summary{list-style:none;cursor:pointer}
+.demo-bar summary::-webkit-details-marker{display:none}
+.demo-bar summary .wrap{display:flex;align-items:center;gap:.6rem;padding-block:.45rem;min-height:28px}
+.demo-bar summary .wrap::after{content:"▸";margin-left:auto;color:#f5b921;transition:transform .2s}
+.demo-bar[open] summary .wrap::after{transform:rotate(90deg)}
+.demo-bar b{color:#f5b921;letter-spacing:.04em}
+.demo-bar .opts-bar{display:flex;flex-wrap:wrap;gap:.4rem .9rem;align-items:center;padding-block:.3rem .55rem}
+.demo-bar label{display:inline-flex;align-items:center;gap:.4rem;min-height:32px;cursor:pointer}
+.demo-bar input{accent-color:#f5b921}
+.demo-bar .hint{opacity:.7}
+
+/* шапка */
+header.top{position:sticky;top:0;z-index:40;background:hsl(var(--bg)/.85);backdrop-filter:blur(14px);border-bottom:1px solid hsl(var(--line))}
+header.top .wrap{display:flex;align-items:center;gap:.8rem;height:62px}
+.logo{display:flex;align-items:center;gap:.55rem;font-weight:700;letter-spacing:-.03em;font-size:1.1rem}
+.logo-m{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:hsl(var(--brand));color:hsl(var(--brand-fg));font-size:1rem}
+nav.main{display:none;gap:.2rem;margin-left:.75rem}
+nav.main a{padding:.5rem .8rem;border-radius:999px;font-size:.85rem;font-weight:500;color:hsl(var(--muted-fg));transition:all .2s}
+nav.main a:hover{color:hsl(var(--fg));background:hsl(var(--muted))}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.sel{min-height:38px;padding:0 .8rem;border-radius:999px;border:1px solid hsl(var(--line));background:hsl(var(--card));font-size:.82rem}
+.icon-btn{display:grid;place-items:center;width:38px;height:38px;border-radius:999px;border:1px solid hsl(var(--line));background:hsl(var(--card));font-size:1rem}
+#menuBtn{display:none}
+@media(max-width:899px){#menuBtn{display:grid}}
+@media(min-width:900px){nav.main{display:flex}}
+
+/* 1 HERO */
+.hero{position:relative;isolation:isolate;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto auto;width:60%;height:90%;z-index:-1;background:radial-gradient(closest-side,hsl(var(--brand)/.2),transparent);filter:blur(30px)}
+.hero::after{content:"";position:absolute;inset:auto auto -30% -15%;width:50%;height:80%;z-index:-1;background:radial-gradient(closest-side,hsl(var(--pri)/.12),transparent);filter:blur(40px)}
+.hero-g{display:grid;gap:2.2rem;padding-block:2rem 2.5rem}
+.hero-g>*,.stage>*,.duo>*,.boxes>*,.final>*,.ads-v>*{min-width:0}
+@media(min-width:1024px){.hero-g{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:2.75rem;padding-block:3.25rem;align-items:center}}
+.badge-market{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .8rem .35rem .45rem;border-radius:999px;border:1px solid hsl(var(--line));background:hsl(var(--card));font-size:.8rem;font-weight:500}
+.badge-market .dot{width:22px;height:22px;border-radius:999px;background:hsl(var(--pri)/.12);color:hsl(var(--pri));display:grid;place-items:center;font-size:.8rem}
+h1{margin-top:1.3rem;font-size:clamp(2.05rem,4.3vw,3.2rem);line-height:1.04;letter-spacing:-.04em;font-weight:700;text-wrap:balance}
+h1 em{font-style:normal;color:hsl(var(--pri));background:linear-gradient(hsl(var(--brand)),hsl(var(--brand))) no-repeat 0 94%/100% .14em}
+.lead{margin-top:1rem;max-width:31rem;font-size:1.03rem;color:hsl(var(--muted-fg));line-height:1.55}
+.search{margin-top:1.5rem;display:flex;align-items:center;gap:.5rem;padding:.4rem .4rem .4rem 1rem;border-radius:999px;border:1px solid hsl(var(--line));background:hsl(var(--card));box-shadow:0 18px 40px -26px hsl(var(--tint)/.5);max-width:36rem;transition:border-color .2s,box-shadow .2s}
+.search:focus-within{border-color:hsl(var(--pri));box-shadow:0 0 0 4px hsl(var(--pri)/.12),0 18px 40px -26px hsl(var(--tint)/.5)}
+.search input{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:1rem;color:inherit;outline:0;height:44px}
+.search input::placeholder{color:hsl(var(--muted-fg))}
+.search .ic{color:hsl(var(--muted-fg));font-size:1.15rem}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.85rem;max-width:36rem}
+.msg{margin-top:.9rem;max-width:36rem;padding:.75rem .95rem;border-radius:var(--r-c);background:hsl(var(--muted));font-size:.85rem;display:none}
+.msg.show{display:block}
+.msg.err{background:hsl(var(--danger)/.1);box-shadow:inset 0 0 0 1px hsl(var(--danger)/.3);color:hsl(var(--danger))}
+.note{margin-top:.85rem;font-size:.8rem;color:hsl(var(--muted-fg));max-width:36rem}
+
+/* капсула */
+.capsule{position:relative;min-height:400px;border-radius:var(--r-p);overflow:hidden;background:hsl(var(--cta));color:#fff;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 30px 60px -34px hsl(var(--tint)/.7)}
+@media(min-width:640px){.capsule{min-height:460px}}
+.capsule .cap-img{position:absolute;inset:0;z-index:-2;transition:opacity .6s var(--ease)}
+.capsule .cap-img img{width:100%;height:100%;object-fit:cover}
+.capsule::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,hsl(160 30% 4%/.94),hsl(160 30% 4%/.5) 50%,hsl(160 30% 4%/.05))}
+.cap-top{position:absolute;top:1rem;left:1rem;right:1rem;display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.cap-tag{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .75rem;border-radius:999px;background:hsl(0 0% 0%/.55);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.18);font-family:"Geist Mono",monospace;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.cap-body{padding:1.3rem;display:flex;flex-direction:column;gap:.8rem}
+@media(min-width:640px){.cap-body{padding:1.6rem}}
+.cap-meta{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--brand));font-weight:700;font-family:"Geist Mono",monospace}
+.cap-body h2{font-size:clamp(1.35rem,2.4vw,1.9rem);line-height:1.12;letter-spacing:-.03em;font-weight:700;max-width:28rem;text-wrap:balance}
+.cap-warn{display:flex;gap:.55rem;max-width:32rem;padding:.65rem .8rem;border-radius:var(--r-c);background:hsl(0 0% 0%/.5);box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.1);backdrop-filter:blur(8px);font-size:.8rem;line-height:1.4}
+.cap-warn b{color:hsl(var(--brand))}
+.cap-actions{display:flex;flex-wrap:wrap;gap:.55rem}
+.btn-glass{background:hsl(0 0% 0%/.45);color:#fff;box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.2);backdrop-filter:blur(8px)}
+.btn-glass:hover{background:hsl(0 0% 0%/.65)}
+.deck{margin-top:.7rem;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}
+.deck button{min-width:0}
+.deck button{position:relative;overflow:hidden;display:flex;align-items:center;gap:.55rem;text-align:left;padding:.45rem;border-radius:var(--r-c);border:1px solid hsl(var(--line));background:hsl(var(--card)/.75);opacity:.8;transition:all .25s}
+.deck button:hover{opacity:1;border-color:hsl(var(--pri)/.35)}
+.deck button[aria-pressed=true]{opacity:1;background:hsl(var(--card));border-color:hsl(var(--pri)/.55);box-shadow:0 8px 20px -12px hsl(var(--tint)/.4)}
+.deck img{width:40px;height:40px;border-radius:8px;object-fit:cover;flex:none}
+.deck span{font-size:.72rem;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media(max-width:520px){.deck{grid-template-columns:repeat(2,1fr)}}
+
+/* секции */
+section.s{padding-block:3.5rem}
+@media(min-width:768px){section.s{padding-block:5rem}}
+.sec-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}
+.sec-head h2{font-size:clamp(1.65rem,3.4vw,2.4rem);line-height:1.08;letter-spacing:-.035em;font-weight:700;text-wrap:balance}
+.sec-head p{margin-top:.55rem;color:hsl(var(--muted-fg));max-width:34rem;font-size:.95rem}
+.eyebrow{font-family:"Geist Mono",monospace;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--pri))}
+
+/* витрина steam */
+.tabs{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.35rem;margin-bottom:1.2rem;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs .pill{flex:none}
+.stage{display:grid;gap:1rem}
+@media(min-width:960px){.stage{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);align-items:start}}
+.mlist{display:flex;flex-direction:column;gap:.5rem}
+.mitem{min-width:0}
+.mrow{position:relative;display:flex;align-items:center;gap:.8rem;width:100%;min-width:0;text-align:left;padding:.6rem;border-radius:var(--r-p);border:1px solid transparent;transition:all .25s var(--ease)}
+.mrow:hover{background:hsl(var(--card));border-color:hsl(var(--line))}
+.mrow[aria-pressed=true]{background:hsl(var(--card));border-color:hsl(var(--pri)/.55);box-shadow:0 14px 30px -22px hsl(var(--tint)/.6)}
+.mrow .th{position:relative;width:72px;height:52px;flex:none;border-radius:9px;overflow:hidden;background:hsl(var(--muted))}
+.mrow .th img{width:100%;height:100%;object-fit:cover}
+.mrow .tx{min-width:0;flex:1}
+.mrow .tx b{display:block;font-size:.9rem;font-weight:600;line-height:1.25;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mrow .tx small{display:flex;flex-wrap:wrap;gap:.35rem .55rem;align-items:center;margin-top:.3rem;font-size:.72rem;color:hsl(var(--muted-fg))}
+.mexp{overflow:hidden}
+.detail{border-radius:var(--r-p);overflow:hidden}
+.det-img{position:relative;height:150px}
+.det-img img{width:100%;height:100%;object-fit:cover}
+.det-img::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,hsl(160 30% 4%/.7),transparent 70%)}
+.det-img .tt{position:absolute;left:1rem;right:1rem;bottom:.75rem;z-index:2;color:#fff;font-size:1.1rem;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+.det-img .vid{position:absolute;top:.7rem;right:.7rem;z-index:2}
+.det-body{padding:1.1rem 1.15rem 1.25rem;display:grid;gap:.9rem}
+.steps{list-style:none;display:grid;gap:.55rem;counter-reset:s}
+.steps li{display:grid;grid-template-columns:24px 1fr;gap:.65rem;font-size:.86rem;line-height:1.45;counter-increment:s}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:24px;height:24px;border-radius:999px;background:hsl(var(--pri)/.12);color:hsl(var(--pri));font-size:.72rem;font-weight:700;font-family:"Geist Mono",monospace}
+.det-acts{display:flex;flex-wrap:wrap;gap:.55rem}
+.det-foot{font-size:.76rem;color:hsl(var(--muted-fg))}
+.skel{height:14px;border-radius:7px;background:linear-gradient(90deg,hsl(var(--muted)),hsl(var(--line)),hsl(var(--muted)));background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+@media(min-width:960px){.detail{position:sticky;top:78px}}
+.mexp .detail{margin-top:.5rem}
+@media(max-width:959px){.stage>.detail{display:none}}
+
+/* рекламная перебивка */
+.adstrip{position:relative;display:grid;gap:1rem;border-radius:var(--r-p);padding:1.35rem;border:1px solid hsl(var(--sponsor)/.55);background:linear-gradient(120deg,hsl(var(--sponsor)/.14),hsl(var(--card)) 55%);overflow:hidden;isolation:isolate}
+@media(min-width:860px){.adstrip{grid-template-columns:150px 1fr auto;align-items:center;padding:1.35rem 1.6rem}}
+.adstrip .ph{width:150px;height:110px;border-radius:var(--r-c);overflow:hidden;background:hsl(var(--muted));position:relative;box-shadow:inset 0 0 0 1px hsl(var(--line))}
+.adstrip .ph .demo-img{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:.7rem;color:hsl(var(--muted-fg));padding:.5rem}
+.adstrip h3{font-size:1.15rem;letter-spacing:-.02em;font-weight:700}
+.adstrip p{margin-top:.35rem;font-size:.85rem;color:hsl(var(--muted-fg));max-width:44rem}
+.adstrip .fine{font-size:.72rem;color:hsl(var(--muted-fg))}
+.adstrip .top{display:flex;align-items:center;gap:.6rem;margin-bottom:.45rem;flex-wrap:wrap}
+.ads-v{display:grid;gap:1rem}
+@media(min-width:860px){.ads-v{grid-template-columns:1.15fr .85fr}}
+.adcard{border:1px solid hsl(var(--sponsor)/.5);border-radius:var(--r-p);background:hsl(var(--card));padding:1.15rem;display:grid;gap:.8rem;align-content:start}
+.adcard .head{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap}
+.adcard h3{font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+.adcard p{font-size:.85rem;color:hsl(var(--muted-fg));line-height:1.5}
+.adcard .fine{font-size:.74rem;color:hsl(var(--muted-fg))}
+.adcard .ph{height:120px;border-radius:var(--r-c);background:repeating-linear-gradient(45deg,hsl(var(--fg)/.04) 0 10px,transparent 10px 20px),hsl(var(--muted));display:grid;place-items:center;text-align:center;color:hsl(var(--muted-fg));font-size:.78rem;padding:.6rem;box-shadow:inset 0 0 0 1px hsl(var(--line))}
+.adcard .player{height:180px;border-radius:var(--r-c);background:hsl(var(--cta));color:hsl(var(--cta-fg));display:grid;place-items:center;text-align:center;padding:1rem;font-size:.85rem}
+.adcard .player .off{opacity:.75;font-size:.75rem;margin-top:.4rem}
+.adcard .player.empty{background:hsl(var(--muted));color:hsl(var(--muted-fg));box-shadow:inset 0 0 0 1px dashed hsl(var(--line))}
+
+/* подборки 2x2 */
+.boxes{display:grid;gap:1.25rem}
+@media(min-width:960px){.boxes{grid-template-columns:1fr 1fr}}
+.box{border-radius:var(--r-p);padding:1.15rem 1.25rem 1.3rem}
+.box h3{font-size:1.05rem;font-weight:700;letter-spacing:-.02em}
+.box small{display:block;font-size:.78rem;color:hsl(var(--muted-fg));margin-top:.15rem}
+.box .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;margin-top:.9rem}
+.bcard{position:relative;border-radius:var(--r-c);overflow:hidden;aspect-ratio:4/3;background:hsl(var(--cta));isolation:isolate;display:flex;align-items:flex-end;text-align:left;transition:transform .3s var(--ease)}
+.bcard:hover{transform:translateY(-3px)}
+.bcard img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.bcard:hover img{transform:scale(1.05)}
+.bcard::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,hsl(160 30% 4%/.85),hsl(160 30% 4%/.05) 65%)}
+.bcard .bt{position:relative;z-index:2;padding:.65rem .75rem;color:#fff;font-size:.8rem;font-weight:650;line-height:1.2}
+.bcard .vid{position:absolute;top:.5rem;left:.5rem;z-index:2}
+.box .more{margin-top:.9rem}
+
+/* компании и бренды */
+.duo{display:grid;gap:1.25rem}
+@media(min-width:960px){.duo{grid-template-columns:1.15fr .85fr;align-items:start}}
+.crow{display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.8rem .9rem;border-radius:var(--r-c);border:1px solid hsl(var(--line));background:hsl(var(--card))}
+.crow+.crow{margin-top:.5rem}
+.crow h4{font-size:.92rem;font-weight:650;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.crow .meta{font-size:.76rem;color:hsl(var(--muted-fg));margin-top:.2rem}
+.brandrow{display:flex;align-items:center;gap:.8rem;padding:.8rem .9rem;border-radius:var(--r-c);border:1px solid hsl(var(--line));background:hsl(var(--card))}
+.brandrow+.brandrow{margin-top:.5rem}
+.brandrow .bl{width:38px;height:38px;border-radius:10px;background:hsl(var(--muted));display:grid;place-items:center;font-weight:800;color:hsl(var(--pri));font-size:.9rem;flex:none}
+.brandrow .bt{flex:1;min-width:0}
+.brandrow .bt b{display:block;font-size:.9rem}
+.brandrow .bt small{font-size:.74rem;color:hsl(var(--muted-fg))}
+.pad{padding:1.15rem 1.25rem 1.3rem;border-radius:var(--r-p)}
+.pad h3{font-size:1.05rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.75rem}
+.pad .more{margin-top:1rem}
+.empty{padding:1.4rem;border:1px dashed hsl(var(--line));border-radius:var(--r-p);color:hsl(var(--muted-fg));font-size:.9rem;background:hsl(var(--card)/.6)}
+
+/* финал */
+.final{background:hsl(var(--cta));color:hsl(var(--cta-fg));border-radius:var(--r-p);position:relative;overflow:hidden;isolation:isolate;display:grid;gap:2rem;padding:1.75rem}
+@media(min-width:1024px){.final{grid-template-columns:1.15fr .85fr;gap:3.5rem;padding:3.5rem}}
+.final::before{content:"";position:absolute;inset:auto -10% -40% auto;width:60%;height:80%;z-index:-1;background:radial-gradient(closest-side,hsl(var(--brand)/.28),transparent);filter:blur(30px)}
+.final h2{font-size:clamp(1.85rem,4vw,2.9rem);line-height:1.05;letter-spacing:-.04em;font-weight:700;text-wrap:balance}
+.final h2 em{font-style:normal;color:hsl(var(--brand))}
+.final .lead{color:hsl(var(--cta-fg)/.72);max-width:32rem;margin-top:1rem}
+.princ{margin-top:1.8rem;display:grid;gap:1rem}
+.princ>div{display:grid;grid-template-columns:38px 1fr;gap:.85rem}
+.princ .ic{display:grid;place-items:center;width:38px;height:38px;border-radius:var(--r-c);background:hsl(var(--brand)/.15);color:hsl(var(--brand));font-size:1.05rem}
+.princ h3{font-size:.95rem;font-weight:650}
+.princ p{font-size:.83rem;color:hsl(var(--cta-fg)/.68);margin-top:.1rem}
+.b2b{align-self:center;padding:1.4rem;border-radius:var(--r-p);background:hsl(0 0% 100%/.06);box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.12);backdrop-filter:blur(10px)}
+.b2b h3{font-size:1.4rem;line-height:1.15;letter-spacing:-.03em;font-weight:700;text-wrap:balance}
+.b2b p{margin-top:.65rem;font-size:.87rem;color:hsl(var(--cta-fg)/.72)}
+.b2b .acts{margin-top:1.25rem;display:grid;gap:.55rem}
+.b2b .btn-line{box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.3);color:hsl(var(--cta-fg))}
+.b2b .btn-line:hover{background:hsl(0 0% 100%/.1)}
+.b2b .fine{font-size:.72rem;color:hsl(var(--cta-fg)/.55);margin-top:.9rem}
+
+footer{margin-top:4rem;border-top:1px solid hsl(var(--line));padding-block:2.5rem 2rem;font-size:.82rem;color:hsl(var(--muted-fg))}
+footer .wrap{display:flex;flex-wrap:wrap;gap:.6rem 1.5rem;align-items:center}
+footer a:hover{color:hsl(var(--fg))}
+
+/* варианты ответа, тост и мобильная навигация */
+.opts{margin-top:.7rem;max-width:36rem;display:grid;gap:.45rem}
+.opts button{display:flex;align-items:center;gap:.6rem;width:100%;min-height:44px;padding:.5rem .75rem;border-radius:var(--r-c);border:1px solid hsl(var(--line));background:hsl(var(--card));text-align:left;font-size:.85rem;font-weight:600;transition:all .2s}
+.opts button:hover{border-color:hsl(var(--pri)/.5);transform:translateY(-1px)}
+.opts button img{width:44px;height:32px;border-radius:7px;object-fit:cover;flex:none}
+.opts button small{display:block;font-weight:400;color:hsl(var(--muted-fg));font-size:.72rem}
+.toast{position:fixed;left:50%;bottom:1.1rem;transform:translate(-50%,12px);z-index:60;max-width:min(92vw,26rem);padding:.7rem 1rem;border-radius:var(--r-c);background:hsl(var(--cta));color:hsl(var(--cta-fg));font-size:.82rem;box-shadow:0 18px 40px -18px hsl(0 0% 0%/.5);opacity:0;pointer-events:none;transition:all .3s var(--ease)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.mnav{display:none;border-bottom:1px solid hsl(var(--line));background:hsl(var(--bg));padding:.4rem 0 .7rem}
+.mnav .wrap{display:grid;gap:.2rem}
+.mnav a{padding:.65rem .8rem;border-radius:var(--r-c);font-size:.9rem;font-weight:600;color:hsl(var(--fg))}
+.mnav a:hover{background:hsl(var(--muted))}
+@media(max-width:899px){.mnav.open{display:block}}
+
+.hidden{display:none!important}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<details class="demo-bar" role="region" aria-label="Панель демонстрации прототипа">
+  <summary><div class="wrap"><b>ДЕМО-ПРОТОТИП</b><span class="hint">Локальные данные и заглушки, нерабочие действия помечены «демо».</span></div></summary>
+  <div class="wrap opts-bar">
+    <label><input type="checkbox" id="stLoad"> загрузка</label>
+    <label><input type="checkbox" id="stNoVideo"> нет видео бренда</label>
+    <label><input type="checkbox" id="stNoAds"> нет рекламы</label>
+    <label><input type="checkbox" id="stNoPros"> нет мастеров</label>
+  </div>
+</details>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#top"><span class="logo-m">⌘</span>ChistoLab</a>
+    <nav class="main" aria-label="Основная навигация">
+      <a href="#shelf">Витрина</a>
+      <a href="#collections">Подборки</a>
+      <a href="#adsec">Для брендов</a>
+      <a href="#pros">Мастера</a>
+    </nav>
+    <div class="hdr-r">
+      <label class="sr" for="city">Город</label>
+      <select id="city" class="sel">
+        <option value="minsk">Минск · BY</option>
+        <option value="moscow">Москва · RU</option>
+        <option value="almaty">Алматы · KZ</option>
+      </select>
+      <button class="icon-btn" id="theme" aria-label="Переключить тему" title="Светлая / тёмная тема">◐</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Открыть меню" aria-expanded="false" aria-controls="mnav">☰</button>
+    </div>
+  </div>
+</header>
+<nav class="mnav" id="mnav" aria-label="Мобильная навигация">
+  <div class="wrap">
+    <a href="#top">Поиск и консультант</a>
+    <a href="#shelf">Витрина решений</a>
+    <a href="#collections">Подборки</a>
+    <a href="#pros">Мастера</a>
+    <a href="#adsec">Для брендов</a>
+  </div>
+</nav>
+
+<main id="top">
+
+<!-- 1 HERO -->
+<div class="hero">
+  <div class="wrap hero-g">
+    <div>
+      <span class="badge-market"><span class="dot">●</span><span id="heroCity">Минск · Беларусь</span></span>
+      <h1>Найдите подходящий способ <em>решить задачу чистоты</em></h1>
+      <p class="lead">Пошаговые инструкции с блоком «Не делайте», видео при наличии и мастера вашего города. Без технического жаргона.</p>
+      <form class="search" id="askForm" role="search">
+        <span class="ic" aria-hidden="true">⌕</span>
+        <label class="sr" for="q">Что нужно очистить?</label>
+        <input id="q" name="q" autocomplete="off" placeholder="Что нужно очистить?" maxlength="200">
+        <button class="btn btn-brand" type="submit">Спросить</button>
+      </form>
+      <div class="chips" aria-label="Примеры запросов">
+        <button class="pill" data-q="вино на диване">вино на диване</button>
+        <button class="pill" data-q="налёт в душевой">налёт в душевой</button>
+        <button class="pill" data-q="жир на кухне">жир на кухне</button>
+        <button class="pill" data-q="запах после потопа">запах после потопа</button>
+      </div>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+      <div class="opts" id="opts"></div>
+      <p class="note">Поиск в прототипе ищет по локальным примерам — это не реальный ИИ-консультант. Ответы предварительные, сверяйтесь с инструкцией производителя.</p>
+    </div>
+
+    <div>
+      <div class="capsule" id="capsule">
+        <div class="cap-img"><img id="capImg" src="assets/covers/vino-na-divane.jpg" alt=""></div>
+        <div class="cap-top">
+          <span class="cap-tag" id="capTag">Мебель · инструкция</span>
+          <span class="cap-tag" id="capSteps">4 шага</span>
+        </div>
+        <div class="cap-body">
+          <span class="cap-meta" id="capMeta">Задача №01 · демо</span>
+          <h2 id="capTitle">Пятно красного вина на диване</h2>
+          <p class="cap-warn" id="capWarn"><b>Не делайте:</b> <span id="capWarnTx">не лейте горячую воду — пятно закрепится в ткани.</span></p>
+          <div class="cap-actions">
+            <button class="btn btn-brand" data-goto="shelf">Открыть решение</button>
+            <button class="btn btn-glass" data-demo>Спросить консультанта (демо)</button>
+          </div>
+        </div>
+      </div>
+      <div class="deck" id="deck" aria-label="Быстрое переключение задач"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2 SHELF -->
+<section class="s" id="shelf" style="padding-top:1rem">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Витрина решений</p>
+        <h2>Выберите задачу — ответ справа</h2>
+        <p>Список работает по клику и клавиатуре; на десктопе достаточно наведения. На телефоне ответ раскрывается под выбранной строкой.</p>
+      </div>
+      <span class="fine" style="font-size:.78rem;color:hsl(var(--muted-fg))">Данные и ответы в витрине — демонстрационные</span>
+    </div>
+    <div class="tabs" id="tabs" role="group" aria-label="Категории задач"></div>
+    <div class="stage">
+      <div class="mlist" id="mlist"></div>
+      <div class="detail surf" id="detail" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 AD STRIP -->
+<section class="s" style="padding-block:0" id="adsec">
+  <div class="wrap">
+    <div class="adstrip" id="adStrip">
+      <div class="ph" aria-hidden="true"><div class="demo-img">Фото товара<br>(заглушка)</div></div>
+      <div>
+        <div class="top"><span class="badge-ad">Реклама</span><span class="fine">Бренд-пример «АкваПро» · формат «фото + инструкция»</span></div>
+        <h3>Средство для ухода за текстилем</h3>
+        <p>Карточка товара с описанием и ограничениями от производителя. Пригодность для вашей поверхности не подтверждена — проверьте на скрытом участке.</p>
+        <p class="fine">Источник: материалы бренда (демонстрационный макет). Независимая проверка не проводилась.</p>
+      </div>
+      <div><button class="btn btn-ghost" data-demo>Карточка бренда (демо)</button></div>
+    </div>
+    <div class="ads-v" id="adsV" style="margin-top:1rem">
+      <article class="adcard">
+        <div class="head"><span class="badge-ad">Реклама</span><span class="fine">Бренд-пример «АкваПро»</span></div>
+        <div class="ph">Фото товара (заглушка)</div>
+        <h3>Гель для сантехники (макет)</h3>
+        <p>Описание и ограничения от производителя: не для мрамора и известняка.</p>
+        <p class="fine">Демонстрационная карточка — не подтверждение пригодности для вашей поверхности.</p>
+        <div><button class="btn btn-ghost btn-sm" data-demo>Посмотреть средство (демо)</button></div>
+      </article>
+      <article class="adcard" id="adVideoCard">
+        <div class="head"><span class="badge-ad">Реклама</span><span class="fine">Бренд-пример «ЧистоЛаб Лаб»</span></div>
+        <div class="player" id="adPlayer">
+          <div><b>Видео товара — демонстрационная заглушка</b><p class="off">Реальный ролик не подключён: воспроизведение недоступно. В рабочей версии здесь будет проверенное видео бренда с субтитрами и запуском по нажатию.</p></div>
+        </div>
+        <h3>Средство для мягкой мебели (макет)</h3>
+        <p class="fine">Формат «видео в задаче»: размещается только при подтверждённых правах и применимости к задаче.</p>
+      </article>
+    </div>
+    <div class="empty" id="adEmpty" style="margin-top:1rem;display:none">Подходящих проверенных рекламных размещений сейчас нет — в рабочей версии этот блок скрывается, а не подменяется ложной рекомендацией.</div>
+  </div>
+</section>
+
+<!-- 4 COLLECTIONS -->
+<section class="s" id="collections">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Подборки</p>
+        <h2>Популярные темы</h2>
+        <p>Карточка открывает ту же витрину решений — плашка «Видео» появляется только там, где есть проверенный ролик.</p>
+      </div>
+    </div>
+    <div class="boxes" id="boxes"></div>
+  </div>
+</section>
+
+<!-- 5 PROS + BRANDS -->
+<section class="s" id="pros" style="padding-top:1rem">
+  <div class="wrap duo">
+    <div class="pad surf">
+      <h3>Мастера и компании города</h3>
+      <p style="font-size:.82rem;color:hsl(var(--muted-fg));margin:-.4rem 0 .2rem">Органический порядок не зависит от оплаты. Спонсорские места помечены.</p>
+      <p class="fine" id="proCtx" style="font-size:.74rem;color:hsl(var(--muted-fg));margin-bottom:.7rem"></p>
+      <div id="proList"></div>
+      <div class="more"><button class="btn btn-ghost" data-demo>Весь рейтинг города (демо)</button></div>
+    </div>
+    <div class="pad surf">
+      <h3>Бренды и средства</h3>
+      <p style="font-size:.82rem;color:hsl(var(--muted-fg));margin:-.4rem 0 .9rem">Витрина брендов — без выдуманных баллов; методология отдельно.</p>
+      <div id="brandList"></div>
+      <div class="more"><button class="btn btn-brand" data-demo>Витрина брендов (демо)</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 FINAL -->
+<section class="s" style="padding-top:0">
+  <div class="wrap">
+    <div class="final">
+      <div>
+        <h2>Платный охват возможен. <em>Покупка оценки — нет.</em></h2>
+        <p class="lead">Размещение маркируется «Реклама» и не меняет порядок рейтинга. Контакт с компанией — прямой, без посредников и комиссии платформы.</p>
+        <div class="princ">
+          <div><span class="ic">✓</span><div><h3>Реклама отделена</h3><p>Спонсорские блоки — отдельные помеченные карточки, органическое место №1 не продаётся.</p></div></div>
+          <div><span class="ic">✆</span><div><h3>Прямой контакт</h3><p>Телефон и мессенджер компании без лид-форм и переадресации.</p></div></div>
+          <div><span class="ic">!</span><div><h3>Сначала безопасность</h3><p>В каждой инструкции — блок «Не делайте» с рисками для поверхности.</p></div></div>
+        </div>
+      </div>
+      <div class="b2b">
+        <h3>Вы бренд химии или клининговая компания?</h3>
+        <p>Ручной пилот: маркированная карточка «фото + инструкция» или проверенное видео товара в подходящем контексте. Отчёт — по реально измеренным показам и переходам.</p>
+        <div class="acts">
+          <button class="btn btn-brand" data-demo>Оставить заявку (демо)</button>
+          <button class="btn btn-line" data-demo>Форматы размещения (демо)</button>
+        </div>
+        <p class="fine">Продажи и охват не обещаем: условия пилота согласовываются отдельно.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 ChistoLab — прототип, не рабочий сайт</span>
+    <a href="#" data-demo>Методология (демо)</a>
+    <a href="#" data-demo>Конфиденциальность (демо)</a>
+    <a href="#" data-demo>Контакты (демо)</a>
+    <span style="margin-left:auto">Изображения — тематические иллюстрации, не результат испытаний.</span>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const COV='assets/covers/';
+const TASKS=[
+ {id:'vino',file:'vino-na-divane.jpg',short:'Вино на диване',title:'Пятно красного вина на диване',group:'stains',surf:'Мебель',mat:'шенилл, рогожка',
+  warn:'не лейте горячую воду — танины закрепятся в структуре ткани.',
+  steps:['Промокните пятно сухой салфеткой, не растирая.','Смочите чистую ткань прохладной водой и промокните от краёв к центру.','Нанесите средство для ткани по инструкции производителя, проверив на скрытом участке.','Промокните чистой влажной тканью и дайте высохнуть.'],
+  kw:['вино','диван','пятно'],cats:['stains','soft']},
+ {id:'kofe',file:'kofe-na-tekstile.jpg',short:'Кофе на обивке',title:'Пятно кофе на мебельной обивке',group:'stains',surf:'Мебель',mat:'рогожка, велюр',
+  warn:'не заливайте пятно большим объёмом воды — влага уйдёт в наполнитель.',
+  steps:['Промокните излишки жидкости.','Обработайте от краёв к центру влажной тканью.','Используйте подходящее средство и просушите.'],
+  kw:['кофе','обивк','мебел'],cats:['stains','soft']},
+ {id:'zhir',file:'zhir-vytyazhka-kuhnya.jpg',short:'Жир на вытяжке',title:'Застарелый жир на вытяжке и фартуке',group:'kitchen',surf:'Кухня',mat:'нержавейка, стекло',
+  warn:'не замачивайте алюминиевые решётки в едкой щёлочи — металл потемнеет.',
+  steps:['Снимите и промойте фильтры горячей водой с подходящим средством.','Нанесите обезжириватель, выдержите время по инструкции.','Смойте и протрите насухо.'],
+  kw:['жир','кухн','вытяжк','плита','фартук'],cats:['kitchen']},
+ {id:'vodny',file:'vodny-kamen-dushevaya.jpg',short:'Налёт в душевой',title:'Известковый налёт на стекле душевой',group:'kitchen',surf:'Ванная',mat:'стекло, хром',
+  warn:'не используйте абразивные порошки — микроцарапины ускорят новый налёт.',
+  steps:['Смойте пыль водой.','Нанесите средство от налёта, подходящее материалу, на время из инструкции.','Смойте водой и протрите насухо.'],
+  kw:['налёт','налет','душ','ванн','известк','стекл'],cats:['kitchen','bath']},
+ {id:'krov',file:'krov-na-matrase.jpg',short:'Кровь на матрасе',title:'Пятно крови на чехле матраса',group:'stains',surf:'Матрас',mat:'хлопковый чехол',
+  warn:'только холодная вода: белок сворачивается при нагреве и закрепляется навсегда.',
+  steps:['Промокните пятно холодной водой.','Обработайте подходящим средством для белковых пятен.','Промокните и высушите естественным путём.'],
+  kw:['кровь','матрас'],cats:['stains','soft']},
+ {id:'mocha',file:'mocha-i-zapah-matras.jpg',short:'Моча на матрасе',title:'Запах и следы мочи на матрасе и диване',group:'odors',surf:'Матрас',mat:'чехол, наполнитель',
+  warn:'хлорка и освежители запрещены: хлор реагирует с аммиаком и даёт токсичный газ.',
+  steps:['Промокните влагу чистыми салфетками.','Обработайте ферментным средством по инструкции.','Дайте высохнуть и проветрите помещение.'],
+  kw:['моч','запах','матрас','диван'],cats:['odors','soft']},
+ {id:'zatirka',file:'poslestroy-zatirka-plitka.jpg',short:'Затирка на плитке',title:'Налёт затирки на плитке после ремонта',group:'reno',surf:'Пол',mat:'керамогранит',
+  warn:'не наносите кислоту на мрамор и известняк — полировка сгорит мгновенно.',
+  steps:['Проверьте тип поверхности.','Нанесите подходящий состав на небольшой участок.','Тщательно смойте и просушите.'],
+  kw:['затирк','плитк','ремонт','налёт','пол'],cats:['reno']},
+ {id:'okna',file:'poslestroy-okna-skotch.jpg',short:'Скотч на окнах',title:'Следы скотча и грунтовки на стеклопакетах',group:'reno',surf:'Окна',mat:'стекло, ПВХ-профиль',
+  warn:'не используйте ацетон на пластиковом профиле — он пожелтеет и станет хрупким.',
+  steps:['Удалите пыль влажной тканью.','Размягчите следы подходящим средством для стёкол.','Уберите остатки и отполируйте микрофиброй.'],
+  kw:['окн','скотч','клей','грунтовк','стекл'],cats:['reno']},
+ {id:'office',file:'uborka-ofisa-posle-korporativa.jpg',short:'Офис после корпоратива',title:'Срочная уборка офиса после мероприятия',group:'reno',surf:'Офис',mat:'ковролин, мебель',
+  warn:'не замывайте ковролин бытовой пеной — осадок станет тёмным пятном.',
+  steps:['Соберите крупный мусор и разберите зоны.','Обработайте пятна точечно подходящим средством.','Вызовите мастера для оборудования и глубокой чистки.'],
+  kw:['офис','корпоратив','уборк','бизнес'],cats:['reno']},
+ {id:'syrost',file:'zapah-syrosti-posle-potopa.jpg',short:'Сырость после потопа',title:'Запах сырости и риск плесени после затопления',group:'odors',surf:'Квартира',mat:'стены, пол',
+  warn:'не маскируйте запах освежителями — влага внутри конструкций сохранит проблему.',
+  steps:['Устраните источник влаги и просушите помещение.','Обработайте поражённые зоны подходящим средством.','При большой площади обратитесь к специалисту.'],
+  kw:['потоп','сырост','плесен','запах'],cats:['odors']},
+ {id:'kover',file:'odors.jpg',short:'Запах на ковре',title:'Запах животных на ковре',group:'odors',surf:'Ковёр',mat:'ворс',
+  warn:'не используйте щёлочь на шерстяном ворсе без проверки производителя.',
+  steps:['Уберите загрязнение, не растирая.','Обработайте ферментным средством.','Просушите естественным путём.'],
+  kw:['ковёр','ковер','запах','животн','собак','кошк'],cats:['odors','soft']},
+ {id:'plesen',file:'bathroom.jpg',short:'Плесень в ванной',title:'Чёрная плесень в швах и герметике',group:'kitchen',surf:'Ванная',mat:'швы, силикон',
+  warn:'при большой площади и аллергии не обрабатывайте сами — вызовите специалиста.',
+  steps:['Работайте в перчатках и с вентиляцией.','Нанесите подходящее средство на швы.','Смойте и устраните причину влажности.'],
+  kw:['плесен','грибок','швы','ванн','герметик'],cats:['kitchen','bath']}
+];
+const CATS=[
+ {id:'all',label:'Все задачи',match:()=>true},
+ {id:'stains',label:'Пятна и ткани',match:t=>t.cats.includes('stains')},
+ {id:'kitchen',label:'Кухня и ванная',match:t=>t.cats.includes('kitchen')||t.cats.includes('bath')},
+ {id:'odors',label:'Запахи',match:t=>t.cats.includes('odors')},
+ {id:'reno',label:'После ремонта и офис',match:t=>t.cats.includes('reno')}
+];
+const PROS=[
+ {n:'Чистый Дом',meta:'Минск · химчистка мебели и уборка',sp:true},
+ {n:'Мастер Блеск',meta:'Минск · генеральная уборка',sp:false},
+ {n:'Аква Сервис',meta:'Минск · окна и фасады',sp:false}
+];
+const BRANDS=[
+ {n:'АкваПро',t:'средства для дома'},{n:'ЧистоЛаб Лаб',t:'профессиональная химия'},{n:'ЭкоЛайн',t:'экологичные составы'}
+];
+const CITIES={minsk:'Минск',moscow:'Москва',almaty:'Алматы'};
+const BOXES=[
+ {id:'soft',title:'Мягкая мебель и текстиль',sub:'Диваны, матрасы, ковры',tasks:['vino','kofe','mocha','kover']},
+ {id:'bath',title:'Ванная и кухня',sub:'Налёт, жир, швы',tasks:['vodny','zhir','plesen','zatirka']}
+];
+let cur=TASKS[0],cat='all',q=$('#q');
+const mq=matchMedia('(max-width:959px)'),rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const T=id=>TASKS.find(t=>t.id===id);
+const plur=n=>n+' шаг'+(n>=5?'ов':n>1?'а':'');
+const norm=s=>s.toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]+/g,' ').trim();
+// Общие слова почти не различают задачи — вес дают специфичные признаки и поверхность.
+const COMMON=new Set(['запах','пятно','пятна','диван','матрас','мебель','как','чем','отмыть','вывести','убрать','на','и','в','от','после','у','с']);
+function matchTasks(raw){
+  const n=norm(raw);if(!n)return [];
+  const toks=n.split(' ').filter(t=>t.length>2&&!COMMON.has(t));
+  return TASKS.map(t=>{
+    const hay=norm(t.title+' '+t.short+' '+t.surf+' '+t.mat+' '+t.kw.join(' '));
+    let score=0;
+    t.kw.forEach(k=>{const nk=norm(k);if(n.includes(nk))score+=nk.length+(COMMON.has(nk)?0:6)});
+    toks.forEach(tok=>{if(hay.includes(tok))score+=tok.length+4});
+    return {t,score};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+}
+
+function capSet(t){
+  cur=t;
+  const img=$('#capImg');
+  if(rm){img.src=COV+t.file}
+  else{img.style.opacity=0;setTimeout(()=>{img.src=COV+t.file;img.onload=()=>img.style.opacity=1},220)}
+  $('#capTag').textContent=t.surf+' · инструкция';
+  $('#capSteps').textContent=plur(t.steps.length);
+  $('#capMeta').textContent='Задача №'+String(TASKS.indexOf(t)+1).padStart(2,'0')+' · демо';
+  $('#capTitle').textContent=t.title;
+  $('#capWarnTx').textContent=t.warn;
+  $('#capWarn').firstElementChild.textContent='Не делайте: ';
+  $('#proCtx').textContent=`Контекст: задача «${t.short}» · ${CITIES[$('#city').value]}`;
+  $$('#deck button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===t.id?'true':'false'));
+}
+function renderDeck(){
+  const deck=TASKS.slice(0,4);
+  $('#deck').innerHTML=deck.map(t=>`<button type="button" data-id="${t.id}" aria-pressed="${t.id===cur.id}"><img src="${COV+t.file}" alt=""><span>${t.short}</span></button>`).join('');
+}
+function renderTabs(){
+  $('#tabs').innerHTML=CATS.map(c=>`<button class="pill" data-cat="${c.id}" aria-pressed="${c.id===cat}">${c.label}<span class="m">${TASKS.filter(c.match).length}</span></button>`).join('');
+}
+function filtered(){const c=CATS.find(x=>x.id===cat);return TASKS.filter(c.match)}
+function detailHtml(t,loading){
+  if(loading)return `<div class="det-body"><div class="skel" style="width:55%"></div><div class="skel"></div><div class="skel" style="width:75%"></div><div class="skel" style="width:40%"></div></div>`;
+  return `<div class="det-img"><img src="${COV+t.file}" alt=""><span class="tt">${t.title}</span></div>
+  <div class="det-body">
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap"><span class="tag">${t.surf}</span><span class="tag">${t.mat}</span><span class="tag">${plur(t.steps.length)}</span></div>
+    <div class="warn"><span class="ic" aria-hidden="true">!</span><span><b>Не делайте:</b> ${t.warn}</span></div>
+    <ol class="steps">${t.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <p class="det-foot">Стоимость выезда мастера уточняйте в вашем городе — в прототипе цены не показываются.</p>
+    <div class="det-acts">
+      <button class="btn btn-brand btn-sm" data-demo>Открыть решение (демо)</button>
+      <button class="btn btn-ghost btn-sm" data-pro>Показать мастеров</button>
+    </div>
+    <p class="det-foot">Нет данных о вашей поверхности? Проверьте инструкцию производителя средства и скрытый участок.</p>
+  </div>`;
+}
+function renderList(){
+  const list=filtered();
+  if(!list.some(t=>t.id===cur.id))cur=list[0]||cur;
+  if(!list.length){$('#mlist').innerHTML='<div class="empty">В этой категории задач в демо нет — выберите другую.</div>';return}
+  $('#mlist').innerHTML=list.map(t=>{
+    const sel=t.id===cur.id;
+    return `<div class="mitem">
+      <button class="mrow" type="button" data-id="${t.id}" aria-pressed="${sel}" aria-expanded="${sel&&mq.matches}" aria-controls="exp-${t.id}">
+        <span class="th"><img src="${COV+t.file}" alt=""></span>
+        <span class="tx"><b>${t.title}</b><small><span class="tag">${t.surf}</span><span>${t.mat}</span><span class="mono">${plur(t.steps.length)}</span></small></span>
+      </button>
+      <div class="mexp" id="exp-${t.id}" ${sel&&mq.matches?'':'hidden'}>${sel&&mq.matches?detailHtml(t,$('#stLoad').checked):''}</div>
+    </div>`;
+  }).join('');
+}
+function renderDetail(){
+  $('#detail').innerHTML=mq.matches?'':detailHtml(cur,$('#stLoad').checked);
+  renderList();
+  renderDeck();capSync();
+}
+function capSync(){
+  $$('#deck button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===cur.id?'true':'false'));
+}
+function pick(t,scroll){
+  cur=t;capSet(t);
+  if(!filtered().some(x=>x.id===t.id)){cat='all';renderTabs()}
+  renderList();
+  if(!mq.matches)$('#detail').innerHTML=detailHtml(t,$('#stLoad').checked);
+  if(scroll){const el=(mq.matches?document.querySelector(`.mrow[data-id="${t.id}"]`)?.closest('.mitem'):$('#detail'))||$('#shelf');el.scrollIntoView({behavior:rm?'auto':'smooth',block:'start'})}
+}
+function renderPros(){
+  const g=$('#proList');
+  $('#proCtx').textContent=`Контекст: задача «${cur.short}» · ${CITIES[$('#city').value]}`;
+  const empty=$('#stNoPros').checked||$('#city').value!=='minsk';
+  if(empty){g.innerHTML=`<div class="empty">В городе «${CITIES[$('#city').value]}» проверенных компаний в демо нет — случайные не подставляем.</div>`;return}
+  g.innerHTML=PROS.map(p=>`<div class="crow"><div><h4>${p.n} <span class="fine" style="font-size:.7rem;color:hsl(var(--muted-fg))">(демо)</span>${p.sp?' <span class="badge-ad">Спонсор</span>':''}</h4><div class="meta">${p.meta}</div></div><button class="btn btn-pri btn-sm" data-demo>Связаться (демо)</button></div>`).join('');
+}
+function renderBrands(){
+  $('#brandList').innerHTML=BRANDS.map(b=>`<div class="brandrow"><span class="bl">${b.n[0]}</span><span class="bt"><b>${b.n} <span class="fine" style="font-size:.7rem;color:hsl(var(--muted-fg))">(демо)</span></b><small>${b.t}</small></span><button class="btn btn-ghost btn-sm" data-demo>Открыть</button></div>`).join('');
+}
+function renderAds(){
+  const noAds=$('#stNoAds').checked;
+  $('#adStrip').classList.toggle('hidden',noAds);
+  $('#adsV').classList.toggle('hidden',noAds);
+  $('#adEmpty').style.display=noAds?'block':'none';
+  const p=$('#adPlayer');
+  if($('#stNoVideo').checked){p.className='player empty';p.innerHTML='<div><b>Проверенного видео для этого товара нет.</b><p class="off">В рабочей версии показывается фото и текстовая инструкция вместо плеера.</p></div>'}
+  else{p.className='player';p.innerHTML='<div><b>Видео товара — демонстрационная заглушка</b><p class="off">Реальный ролик не подключён: воспроизведение недоступно. В рабочей версии здесь будет проверенное видео бренда с субтитрами и запуском по нажатию.</p></div>'}
+}
+function renderBoxes(){
+  $('#boxes').innerHTML=BOXES.map(b=>`<div class="box surf"><h3>${b.title}</h3><small>${b.sub}</small>
+    <div class="grid2">${b.tasks.map(id=>{const t=T(id);return `<button class="bcard" data-id="${t.id}"><img src="${COV+t.file}" alt="" loading="lazy"><span class="bt">${t.short}</span></button>`}).join('')}</div>
+    <div class="more"><button class="btn btn-ghost btn-sm" data-demo>Все решения темы (демо)</button></div></div>`).join('');
+}
+function renderAll(){renderTabs();renderList();$('#detail').innerHTML=mq.matches?'':detailHtml(cur,false);renderDeck();renderBoxes();renderPros();renderBrands();renderAds()}
+
+function show(text,err){const m=$('#msg');m.textContent=text;m.className='msg show'+(err?' err':'')}
+function toast(text){const t=$('#toast');t.textContent=text;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),3200)}
+function renderOpts(items){
+  $('#opts').innerHTML=items.map(({t})=>`<button type="button" data-opt="${t.id}"><img src="${COV+t.file}" alt=""><span>${t.title}<small>${t.surf} · ${t.mat} · ${plur(t.steps.length)}</small></span></button>`).join('');
+}
+$('#askForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  $('#opts').innerHTML='';
+  const v=q.value.trim().toLowerCase();
+  if(!v){show('Опишите, что нужно очистить, — например, «вино на диване».',true);q.focus();return}
+  if(v==='ошибка'||v==='error'){show('Демонстрационная ошибка консультанта. Инструкции ниже работают без него — выберите задачу из списка.',true);return}
+  const hits=matchTasks(v);
+  const clear=hits.length===1||(hits.length>1&&hits[0].score>=hits[1].score*1.5);
+  if(clear){show(`Нашли задачу «${hits[0].t.short}». Это предварительный автоматический ответ по локальным примерам.`,false);pick(hits[0].t,true)}
+  else if(hits.length){show('Запрос подходит к нескольким задачам — выберите подходящую, чтобы не получить неверную инструкцию:',false);renderOpts(hits.slice(0,4))}
+  else show('Точного совпадения нет. Попробуйте другие слова или выберите задачу из списка. Подсказка: введите «ошибка» для демо-состояния сбоя.',false);
+});
+document.addEventListener('click',e=>{
+  const o=e.target.closest('[data-opt]');if(o){$('#opts').innerHTML='';pick(T(o.dataset.opt),true);return}
+  const mb=e.target.closest('#menuBtn');if(mb){const n=$('#mnav'),open=!n.classList.contains('open');n.classList.toggle('open',open);mb.setAttribute('aria-expanded',open);return}
+  const ml=e.target.closest('#mnav a');if(ml){$('#mnav').classList.remove('open');$('#menuBtn').setAttribute('aria-expanded','false');return}
+  const c=e.target.closest('.chips [data-q]');if(c){q.value=c.dataset.q;$('#askForm').requestSubmit();return}
+  const d=e.target.closest('[data-demo]');if(d){e.preventDefault();toast('Это демо-действие: в прототипе оно не работает.');return}
+  const g=e.target.closest('[data-goto]');if(g){document.getElementById(g.dataset.goto)?.scrollIntoView({behavior:rm?'auto':'smooth'});return}
+  const pr=e.target.closest('[data-pro]');if(pr){document.getElementById('pros')?.scrollIntoView({behavior:rm?'auto':'smooth'});return}
+  const b=e.target.closest('#deck button');if(b){pick(T(b.dataset.id),true);return}
+  const bc=e.target.closest('.bcard');if(bc){pick(T(bc.dataset.id),true);return}
+  const tb=e.target.closest('#tabs .pill');if(tb){cat=tb.dataset.cat;renderTabs();renderList();if(!mq.matches)$('#detail').innerHTML=detailHtml(cur,false);return}
+  const r=e.target.closest('.mrow');if(r){
+    const t=T(r.dataset.id),wasSame=t.id===cur.id;
+    cur=t;capSet(t);
+    if(mq.matches&&wasSame){renderList();return}
+    renderList();
+    if(!mq.matches)$('#detail').innerHTML=detailHtml(t,$('#stLoad').checked);
+    document.querySelector(`.mrow[data-id="${t.id}"]`)?.focus();
+    return}
+});
+document.addEventListener('keydown',e=>{
+  const r=e.target.closest?.('.mrow');if(!r)return;
+  if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;
+  e.preventDefault();
+  const rows=[...document.querySelectorAll('.mrow')];
+  const i=rows.indexOf(r)+(e.key==='ArrowDown'?1:-1);
+  if(rows[i])rows[i].focus();
+});
+document.addEventListener('pointermove',e=>{
+  if(mq.matches)return;
+  const r=e.target.closest?.('.mrow');
+  if(r&&r.dataset.id!==cur.id){const t=T(r.dataset.id);cur=t;capSet(t);renderList();$('#detail').innerHTML=detailHtml(t,$('#stLoad').checked)}
+},{passive:true});
+$('#city').addEventListener('change',()=>{$('#heroCity').textContent=CITIES[$('#city').value]+({minsk:' · Беларусь',moscow:' · Россия',almaty:' · Казахстан'})[$('#city').value];renderPros()});
+$('#theme').addEventListener('click',()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'});
+['stLoad','stNoVideo','stNoAds','stNoPros'].forEach(id=>$('#'+id).addEventListener('change',()=>{renderList();if(!mq.matches)$('#detail').innerHTML=detailHtml(cur,$('#stLoad').checked);renderAds();renderPros()}));
+mq.addEventListener('change',renderDetail);
+renderAll();
+</script>
+</body>
+</html>

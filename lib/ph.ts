@@ -87,9 +87,8 @@ export function surfaceLabel(value: string): string {
 export function surfaceVerdict(product: ProductSafetyProfile, surface: string): { verdict: SurfaceVerdict; reason?: string } {
   const safety = checkProductSafety({ product, surface });
   if (!safety.safe) return { verdict: "forbidden", reason: safety.reason };
-  if (product.compatibleSurfaces?.some((s) => s.toLowerCase() === surface.toLowerCase())) return { verdict: "ok" };
-  if (product.ph !== undefined && phZone(product.ph) === "neutral") return { verdict: "ok" };
-  return { verdict: "caution", reason: "Производитель не указывает эту поверхность: проверьте на незаметном участке." };
+  if (product.compatibilityVerified && product.compatibilitySource?.trim() && product.compatibleSurfaces?.some((s) => s.toLowerCase() === surface.toLowerCase())) return { verdict: "ok" };
+  return { verdict: "caution", reason: "Недостаточно данных, проверьте инструкцию производителя." };
 }
 
 export type SafetyTrafficLight = "green" | "yellow" | "red";
@@ -116,7 +115,7 @@ export function findSeedProduct(
 ): SeedProduct | undefined {
   if (item.productId) {
     const byId = catalog.find((p) => p.id === item.productId || p.slug === item.productId);
-    if (byId) return byId;
+    return byId;
   }
   const text = `${item.productName ?? ""} ${item.note ?? ""}`.toLowerCase();
   if (text.trim().length > 0) {
@@ -154,8 +153,8 @@ export function buildHumanSafetyBadge(params: {
       return {
         light: "red",
         verdict: "forbidden",
-        label: "Риск смыть краску или оставить вечный ореол",
-        detail: safety.reason ?? "Опасно для этого покрытия: может смыть краситель или сжечь ворс.",
+        label: "Не применять для этого покрытия",
+        detail: safety.reason ?? "Проверьте ограничения производителя.",
         className: "border-danger/25 bg-danger/10 text-danger",
         proPhLabel,
         compatibleLabels,
@@ -164,28 +163,12 @@ export function buildHumanSafetyBadge(params: {
     }
 
     const sv = surfaceVerdict(product, surface);
-    const nonNeutralPh = product.ph !== undefined && phZone(product.ph) !== "neutral";
-    if (sv.verdict === "caution" || nonNeutralPh || DELICATE_MATERIAL_RE.test(material)) {
-      return {
-        light: "yellow",
-        verdict: "caution",
-        label: "Сначала тест на незаметном шве · Деликатное покрытие",
-        detail:
-          sv.reason ??
-          "Активная формула требует проверки стойкости красителя на скрытом участке и тщательного промывания водой.",
-        className: "border-star/30 bg-star/15 text-star",
-        proPhLabel,
-        compatibleLabels,
-        prohibitedLabels,
-      };
-    }
-
     return {
-      light: "green",
-      verdict: "ok",
-      label: "Не оставляет белых разводов · Безопасно для обивки и ворса",
-      detail: "Нейтральная формула бережно работает по волокнам и покрытию без вымывания цвета.",
-      className: "border-success/25 bg-success/10 text-success",
+      light: "yellow",
+      verdict: "caution",
+      label: "Проверьте инструкцию производителя",
+      detail: sv.reason ?? "Данных о совместимости с конкретным материалом недостаточно.",
+      className: "border-star/30 bg-star/15 text-star",
       proPhLabel,
       compatibleLabels,
       prohibitedLabels,
@@ -196,14 +179,14 @@ export function buildHumanSafetyBadge(params: {
     const zone = product.ph !== undefined ? phZone(product.ph) : "neutral";
     if (zone === "acid" || zone === "alkali") {
       return {
-        light: "red",
-        verdict: "forbidden",
-        label: "Риск смыть краску или оставить ореол на деликатных покрытиях",
+        light: "yellow",
+        verdict: "caution",
+        label: "Уточните материал и инструкцию производителя",
         detail:
           prohibitedLabels.length > 0
             ? `Строго нельзя применять на: ${prohibitedLabels.join(", ")}.`
             : "Концентрированный состав: применять строго по целевым поверхностям.",
-        className: "border-danger/25 bg-danger/10 text-danger",
+        className: "border-star/30 bg-star/15 text-star",
         proPhLabel,
         compatibleLabels,
         prohibitedLabels,
@@ -222,11 +205,11 @@ export function buildHumanSafetyBadge(params: {
       };
     }
     return {
-      light: "green",
-      verdict: "ok",
-      label: "Не оставляет белых разводов · Безопасно для обивки и ворса",
-      detail: "Бережная формула без агрессивных кислот и щелочей.",
-      className: "border-success/25 bg-success/10 text-success",
+      light: "yellow",
+      verdict: "caution",
+      label: "Уточните материал и инструкцию производителя",
+      detail: "Без конкретного материала нельзя подтвердить совместимость.",
+      className: "border-star/30 bg-star/15 text-star",
       proPhLabel,
       compatibleLabels,
       prohibitedLabels,
@@ -241,20 +224,19 @@ export function buildHumanSafetyBadge(params: {
       detail: "Проверьте состав на скрытом шве перед основной обработкой.",
       className: "border-star/30 bg-star/15 text-star",
       proPhLabel: null,
-      compatibleLabels: surface ? [surfaceLabel(surface)] : [],
+      compatibleLabels: [],
       prohibitedLabels: [],
     };
   }
 
   return {
-    light: "green",
-    verdict: "ok",
-    label: "Не оставляет белых разводов · Безопасно для обивки и ворса",
-    detail: "Подходит для бережной домашней чистки по шагам протокола.",
-    className: "border-success/25 bg-success/10 text-success",
+    light: "yellow",
+    verdict: "caution",
+    label: "Недостаточно данных о средстве",
+    detail: "Проверьте инструкцию производителя для конкретного материала.",
+    className: "border-star/30 bg-star/15 text-star",
     proPhLabel: null,
-    compatibleLabels: surface ? [surfaceLabel(surface)] : [],
+    compatibleLabels: [],
     prohibitedLabels: [],
   };
 }
-

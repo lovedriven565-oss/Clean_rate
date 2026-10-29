@@ -3,7 +3,8 @@
 import { useId, useRef, useSyncExternalStore, type PointerEvent, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { motion, useMotionTemplate, useMotionValue, useSpring } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { BRAND_COLORS } from "@/lib/site";
 import { cn, nextRadioIndex } from "@/lib/utils";
 
@@ -39,7 +40,7 @@ export function SpotlightCard({ children, className }: { children: ReactNode; cl
 
 /** 3D-наклон за курсором: только мышь, не на тач, выключается при reduced-motion. */
 export function Tilt({ children, className, max = 5 }: { children: ReactNode; className?: string; max?: number }) {
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
   const rx = useSpring(0, { stiffness: 220, damping: 22 });
   const ry = useSpring(0, { stiffness: 220, damping: 22 });
 
@@ -98,7 +99,7 @@ export function RevealText({
   parts: { text: string; accent?: boolean }[];
   className?: string;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
   const label = parts.map((p) => p.text).join(" ");
   let index = 0;
   return (
@@ -194,7 +195,7 @@ export function PillTabs({
   className?: string;
 }) {
   const uid = useId();
-  const reduce = useReducedMotion() ?? false;
+  const reduce = usePrefersReducedMotion();
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const selectedIndex = options.findIndex((o) => o.id === value);
 

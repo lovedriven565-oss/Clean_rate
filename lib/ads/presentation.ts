@@ -35,7 +35,7 @@ export function adCtaMeta(ad: Pick<EligibleAd, "ctaType" | "ctaText">): AdCtaMet
 export function describePh(ph: number): string {
   if (ph < 6) return `pH ${ph} — кислотный состав`;
   if (ph > 8) return `pH ${ph} — щелочной состав`;
-  return `pH ${ph} — нейтральный, безопасен для волокон и цвета`;
+  return `pH ${ph} — нейтральный`;
 }
 
 function surfaceLabel(value: string): string | null {
@@ -53,7 +53,6 @@ export function buildAdReasons(
   const reasons: string[] = [];
 
   if (ad.reasonText) reasons.push(ad.reasonText);
-  if (ad.productPh !== undefined) reasons.push(describePh(ad.productPh));
 
   const labels = (ad.productCompatibleSurfaces ?? [])
     .map((s) => ({ key: s, label: surfaceLabel(s) }))
@@ -62,7 +61,7 @@ export function buildAdReasons(
   if (labels.length > 0) {
     const current = currentSurface ? labels.find((s) => s.key === currentSurface) : undefined;
     const ordered = current ? [current, ...labels.filter((s) => s.key !== current.key)] : labels;
-    reasons.push(`Допущен производителем для: ${ordered.map((s) => s.label.toLowerCase()).join(", ")}`);
+    reasons.push(`Поверхности в данных каталога: ${ordered.map((s) => s.label.toLowerCase()).join(", ")}`);
   }
 
   return reasons.slice(0, 3);
@@ -142,4 +141,3 @@ export function formatBrandLeadGoalPrefill(input: {
 
   return `${parts.join(". ")}.`;
 }
-

@@ -32,7 +32,7 @@ export function SponsoredProductCard({ ad, surface }: { ad: EligibleAd; surface?
             <AdBadge text={ad.badgeText} />
             <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-success/10 px-2.5 text-[11px] font-semibold text-success">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Прошёл проверку безопасности
+              Проверьте инструкцию производителя
             </span>
           </div>
 
@@ -65,7 +65,7 @@ export function SponsoredProductCard({ ad, surface }: { ad: EligibleAd; surface?
         </div>
 
         <aside className="rounded-panel border border-border/70 bg-muted/40 p-5 sm:p-6">
-          <span className="text-xs font-bold uppercase tracking-[0.16em] text-foreground">Почему подходит</span>
+          <span className="text-xs font-bold uppercase tracking-[0.16em] text-foreground">Данные о средстве</span>
           <ul className="mt-4 space-y-3">
             {reasons.map((reason) => (
               <li key={reason} className="flex gap-3 text-sm leading-6 text-foreground">
@@ -77,7 +77,7 @@ export function SponsoredProductCard({ ad, surface }: { ad: EligibleAd; surface?
             ))}
           </ul>
           <p className="mt-5 border-t border-border/70 pt-4 text-xs leading-5 text-muted-foreground">
-            Допуск выдан автоматически по паспорту продукта и протоколу задачи. Платное размещение не меняет
+            Проверка не гарантирует сохранность материала. Платное размещение не меняет
             рекомендации в протоколе выше и не влияет на рейтинг.
           </p>
         </aside>

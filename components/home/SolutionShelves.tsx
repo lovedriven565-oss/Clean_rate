@@ -62,7 +62,7 @@ function SolutionTile({
           <span className="absolute inset-x-2.5 bottom-2.5 flex items-center justify-between gap-1.5 rounded-control bg-black/75 px-2.5 py-1.5 font-data text-[10px] font-semibold uppercase tracking-wider text-white/95 backdrop-blur-sm ring-1 ring-inset ring-white/15 transition-opacity duration-200 group-hover/tile:opacity-0 group-focus-visible/tile:opacity-0">
             <span className="inline-flex items-center gap-1 text-brand">
               <FlaskConical className="size-3 shrink-0" aria-hidden />
-              КОНТРОЛЬ pH
+              ИНСТРУКЦИЯ
             </span>
             <span>{stepsLabel}</span>
           </span>
@@ -129,7 +129,7 @@ function ShelfPartnerPitchTile({ activeCategoryLabel }: { activeCategoryLabel?: 
             Производите или поставляете проверенную химию?
           </p>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            Интегрируйте безопасный состав в протоколы{activeCategoryLabel ? ` («${activeCategoryLabel}»)` : ""} с прямой кнопкой покупки у дилера.
+            Предложите средство для инструкций{activeCategoryLabel ? ` («${activeCategoryLabel}»)` : ""} с проверкой применимости и ссылкой на дилера.
           </p>
         </div>
 

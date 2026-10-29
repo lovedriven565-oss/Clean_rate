@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChistoLab: прототип главной (6 секций)</title>
+<style>
+@font-face{font-family:"Geist";src:url("geist/dist/fonts/geist-sans/Geist-Variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url("geist/dist/fonts/geist-mono/GeistMono-Variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
+
+:root{
+  color-scheme:light;
+  --background:150 12% 96%;--foreground:160 24% 8%;--card:0 0% 100%;--muted:150 14% 94%;--muted-fg:160 8% 36%;
+  --border:150 10% 86%;--primary:158 62% 24%;--primary-fg:158 30% 98%;--brand:84 72% 50%;--brand-fg:160 40% 8%;
+  --success:152 62% 33%;--danger:356 72% 48%;--sponsor:43 96% 56%;--sponsor-fg:30 60% 12%;
+  --cta:160 24% 8%;--cta-fg:150 16% 96%;--tint:160 30% 20%;
+  --ph-acid:356 72% 52%;--ph-mild-acid:32 92% 52%;--ph-neutral:152 55% 40%;--ph-mild-alkali:190 70% 42%;--ph-alkali:222 72% 54%;
+  --r-panel:14px;--r-control:10px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+.dark{
+  color-scheme:dark;
+  --background:160 14% 6%;--foreground:150 16% 94%;--card:160 12% 10%;--muted:160 12% 14%;--muted-fg:155 8% 64%;
+  --border:160 10% 19%;--primary:84 70% 62%;--primary-fg:160 40% 8%;--brand:84 78% 56%;
+  --success:156 60% 48%;--danger:354 76% 64%;--cta:160 22% 9%;--tint:160 40% 2%;
+  --ph-acid:356 78% 62%;--ph-mild-acid:32 92% 58%;--ph-neutral:152 55% 50%;--ph-mild-alkali:190 70% 52%;--ph-alkali:222 80% 66%;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-color:hsl(var(--border))}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{font-family:"Geist",system-ui,sans-serif;background:hsl(var(--background));color:hsl(var(--foreground));line-height:1.5;min-height:100dvh}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{display:block;max-width:100%}
+svg.i{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:2px solid hsl(var(--primary));outline-offset:3px}
+::selection{background:hsl(var(--brand)/.35)}
+.mono{font-family:"Geist Mono",ui-monospace,monospace}
+.num{font-variant-numeric:tabular-nums}
+.wrap{width:100%;max-width:80rem;margin-inline:auto;padding-inline:1rem}
+@media(min-width:640px){.wrap{padding-inline:1.5rem}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* buttons: pill = interactive */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;padding:0 1.25rem;border-radius:999px;font-size:.875rem;font-weight:600;white-space:nowrap;transition:transform .25s var(--ease),background-color .2s,box-shadow .2s}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn-brand{background:hsl(var(--brand));color:hsl(var(--brand-fg));box-shadow:0 6px 18px -8px hsl(var(--brand)/.8)}
+.btn-brand:hover{transform:translateY(-2px)}
+.btn-primary{background:hsl(var(--primary));color:hsl(var(--primary-fg))}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-ghost{border:1px solid hsl(var(--border));background:hsl(var(--card))}
+.btn-ghost:hover{border-color:hsl(var(--primary)/.5)}
+.btn-glass{background:hsl(0 0% 0%/.45);color:#fff;box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.2);backdrop-filter:blur(8px)}
+.btn-glass:hover{background:hsl(0 0% 0%/.65)}
+.btn-sm{min-height:36px;padding:0 .9rem;font-size:.8125rem}
+.pill{display:inline-flex;align-items:center;gap:.4rem;min-height:36px;padding:0 .9rem;border-radius:999px;border:1px solid hsl(var(--border));background:hsl(var(--card));font-size:.8125rem;font-weight:500;color:hsl(var(--muted-fg));transition:all .2s}
+.pill:hover{color:hsl(var(--foreground));border-color:hsl(var(--primary)/.4)}
+.pill[aria-pressed=true],.pill[aria-selected=true]{background:hsl(var(--foreground));border-color:hsl(var(--foreground));color:hsl(var(--background))}
+.panel{background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:var(--r-panel);box-shadow:0 1px 0 hsl(0 0% 100%/.6) inset,0 12px 32px -22px hsl(var(--tint)/.35)}
+.dark .panel{box-shadow:0 1px 0 hsl(0 0% 100%/.04) inset}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}*{animation:none!important}html{scroll-behavior:auto}}
+
+/* proto bar + nav */
+.protobar{background:hsl(var(--cta));color:hsl(var(--cta-fg));font-size:.75rem;text-align:center;padding:.4rem 1rem;opacity:.95}
+.nav{position:sticky;top:0;z-index:40;background:hsl(var(--background)/.82);backdrop-filter:blur(14px);border-bottom:1px solid hsl(var(--border))}
+.nav-in{display:flex;align-items:center;gap:1rem;height:64px}
+.logo{display:flex;align-items:center;gap:.6rem;font-weight:700;letter-spacing:-.03em;font-size:1.125rem}
+.logo-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:hsl(var(--brand));color:hsl(var(--brand-fg));font-size:1.1rem}
+.nav-links{display:none;gap:.25rem;margin-left:1rem}
+.nav-links a{padding:.5rem .8rem;border-radius:999px;font-size:.875rem;font-weight:500;color:hsl(var(--muted-fg));transition:all .2s}
+.nav-links a:hover{color:hsl(var(--foreground));background:hsl(var(--muted))}
+.nav-links a.on{color:hsl(var(--foreground))}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.nav-search{display:none;align-items:center;gap:.6rem;height:38px;padding:0 .9rem;border-radius:999px;border:1px solid hsl(var(--border));background:hsl(var(--card));color:hsl(var(--muted-fg));font-size:.8125rem;min-width:200px}
+.nav-search kbd{margin-left:auto;font-family:"Geist Mono",monospace;font-size:.6875rem;padding:.1rem .4rem;border-radius:6px;background:hsl(var(--muted))}
+.icon-btn{display:grid;place-items:center;width:38px;height:38px;border-radius:999px;border:1px solid hsl(var(--border));background:hsl(var(--card));font-size:1.05rem}
+.region{display:none}
+@media(min-width:900px){.nav-links{display:flex}.nav-search{display:flex}.region{display:inline-flex}}
+
+/* 1 HERO */
+.hero{position:relative;isolation:isolate;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto auto;width:60%;height:90%;z-index:-1;background:radial-gradient(closest-side,hsl(var(--brand)/.22),transparent);filter:blur(30px)}
+.hero::after{content:"";position:absolute;inset:auto auto -30% -15%;width:50%;height:80%;z-index:-1;background:radial-gradient(closest-side,hsl(var(--primary)/.14),transparent);filter:blur(40px)}
+.hero-grid{display:grid;gap:2.5rem;padding-block:2.25rem 2.75rem}
+@media(min-width:1024px){.hero-grid{grid-template-columns:1fr 1fr;gap:3rem;padding-block:3.5rem 3.5rem;align-items:center}}
+.badge-market{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .8rem .35rem .45rem;border-radius:999px;border:1px solid hsl(var(--border));background:hsl(var(--card));font-size:.8125rem;font-weight:500}
+.badge-market span.ic{display:grid;place-items:center;width:22px;height:22px;border-radius:999px;background:hsl(var(--primary)/.12);color:hsl(var(--primary))}
+h1{margin-top:1.4rem;font-size:clamp(2.2rem,4.1vw,3.1rem);line-height:1.04;letter-spacing:-.04em;font-weight:700;text-wrap:balance}
+h1 em{font-style:normal;color:hsl(var(--primary));position:relative}
+h1 em{background:linear-gradient(hsl(var(--brand)),hsl(var(--brand))) no-repeat 0 94%/100% .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone;animation:underline 1s .5s var(--ease) both}
+@keyframes underline{from{background-size:0 .14em}}
+.lead{margin-top:1.1rem;max-width:30rem;font-size:1.0625rem;color:hsl(var(--muted-fg));line-height:1.55}
+.search{margin-top:1.75rem;display:flex;align-items:center;gap:.5rem;padding:.4rem .4rem .4rem 1.1rem;border-radius:999px;border:1px solid hsl(var(--border));background:hsl(var(--card));box-shadow:0 18px 40px -26px hsl(var(--tint)/.5);transition:border-color .2s,box-shadow .2s;max-width:36rem}
+.search:focus-within{border-color:hsl(var(--primary));box-shadow:0 0 0 4px hsl(var(--primary)/.12),0 18px 40px -26px hsl(var(--tint)/.5)}
+.search input{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:1rem;color:inherit;outline:0;height:44px}
+.search input::placeholder{color:hsl(var(--muted-fg))}
+.search .i{font-size:1.2rem;color:hsl(var(--muted-fg))}
+.chips{margin-top:.9rem;display:flex;flex-wrap:wrap;gap:.5rem;max-width:36rem}
+
+.capsule{position:relative;min-height:420px;border-radius:var(--r-panel);overflow:hidden;background:hsl(var(--cta));color:#fff;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 30px 60px -34px hsl(var(--tint)/.7)}
+@media(min-width:640px){.capsule{min-height:480px}}
+.capsule .bg{position:absolute;inset:0;z-index:-2}
+.capsule .bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.06);transition:opacity .7s var(--ease),transform 1.4s var(--ease)}
+.capsule .bg img.on{opacity:1;transform:scale(1)}
+.capsule::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,hsl(160 30% 4%/.94) 0%,hsl(160 30% 4%/.55) 45%,hsl(160 30% 4%/.05) 100%)}
+.cap-top{position:absolute;top:1rem;left:1rem;right:1rem;display:flex;justify-content:space-between;gap:.5rem;align-items:flex-start;flex-wrap:wrap}
+@media(max-width:639px){.cap-top .btn{font-size:.72rem;padding:0 .6rem}.cap-save{font-size:.72rem}}
+.cap-save{display:inline-flex;align-items:baseline;gap:.5rem;padding:.4rem .7rem;border-radius:var(--r-control);background:hsl(var(--success));color:#fff;font-size:.8125rem;font-weight:700}
+.cap-save small{font-weight:500;opacity:.9;font-size:.75rem}
+.cap-body{padding:1.25rem;display:flex;flex-direction:column;gap:.85rem}
+@media(min-width:640px){.cap-body{padding:1.6rem}}
+.cap-body .meta{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--brand));font-weight:600}
+.cap-body h2{font-size:clamp(1.4rem,2.4vw,1.95rem);line-height:1.12;letter-spacing:-.03em;font-weight:700;max-width:30rem;text-wrap:balance}
+.cap-warn{display:flex;gap:.6rem;max-width:32rem;padding:.7rem .85rem;border-radius:var(--r-control);background:hsl(0 0% 0%/.5);box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.1);font-size:.8125rem;line-height:1.4;backdrop-filter:blur(8px)}
+.cap-warn b{color:hsl(var(--brand))}
+.cap-warn .i{margin-top:.1rem;font-size:1rem;color:hsl(var(--brand))}
+.cap-actions{display:flex;flex-wrap:wrap;gap:.6rem}
+.cap-swap{animation:capin .55s var(--ease)}
+@keyframes capin{from{opacity:0;transform:translateY(12px)}}
+.deck{margin-top:.75rem;display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
+@media(min-width:640px){.deck{grid-template-columns:repeat(4,1fr)}}
+.deck button{position:relative;overflow:hidden;display:flex;align-items:center;gap:.6rem;text-align:left;padding:.5rem;border-radius:var(--r-control);border:1px solid hsl(var(--border));background:hsl(var(--card)/.7);opacity:.8;transition:all .25s}
+.deck button:hover{opacity:1;border-color:hsl(var(--primary)/.35)}
+.deck button[aria-selected=true]{opacity:1;background:hsl(var(--card));border-color:hsl(var(--primary)/.5)}
+.deck img{width:42px;height:42px;border-radius:8px;object-fit:cover;flex:none}
+.deck span{font-size:.75rem;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.deck i.bar{position:absolute;left:0;bottom:0;height:2px;width:0;background:hsl(var(--brand))}
+.deck button[aria-selected=true] i.bar{animation:fill 7s linear forwards}
+.paused .deck button[aria-selected=true] i.bar{animation-play-state:paused}
+@keyframes fill{to{width:100%}}
+
+/* 2 TICKER + SHELVES */
+.ticker{border-block:1px solid hsl(var(--border));background:hsl(var(--card)/.6);overflow:hidden;display:flex;align-items:center}
+.ticker-label{display:none;flex:none;padding:0 1.25rem;font-size:.8125rem;font-weight:600;color:hsl(var(--muted-fg));border-right:1px solid hsl(var(--border));align-self:stretch;align-items:center;gap:.5rem}
+@media(min-width:768px){.ticker-label{display:flex}}
+.mq{flex:1;min-width:0;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.mq-track{display:flex;gap:.6rem;width:max-content;padding:.8rem 0;animation:mq 60s linear infinite}
+.mq:hover .mq-track{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+.tk{display:inline-flex;align-items:center;gap:.6rem;padding:.45rem .95rem;border-radius:999px;border:1px solid hsl(var(--border));background:hsl(var(--card));font-size:.875rem;white-space:nowrap;transition:border-color .2s}
+.tk:hover{border-color:hsl(var(--primary)/.5)}
+.tk b{font-weight:500}
+.tk em{font-style:normal;font-size:.75rem;padding:.1rem .5rem;border-radius:99px;background:hsl(var(--primary)/.1);color:hsl(var(--primary));font-weight:600}
+
+section.s{padding-block:4.5rem}
+@media(min-width:768px){section.s{padding-block:6rem}}
+.sec-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.75rem}
+.sec-head h2{font-size:clamp(1.7rem,3.4vw,2.5rem);line-height:1.08;letter-spacing:-.035em;font-weight:700;text-wrap:balance}
+.sec-head p{margin-top:.6rem;color:hsl(var(--muted-fg));max-width:34rem}
+.shelf-ctl{display:flex;gap:.5rem;align-items:center}
+.filters{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.25rem;scrollbar-width:none;margin-bottom:1.25rem}
+.filters::-webkit-scrollbar{display:none}
+.filters .pill{flex:none}
+.posters{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x mandatory;padding:.25rem 1rem 1.5rem;margin-inline:-1rem;scrollbar-width:none}
+.posters::-webkit-scrollbar{display:none}
+@media(min-width:640px){.posters{padding-inline:1.5rem;margin-inline:-1.5rem}}
+.poster{flex:none;width:min(72vw,260px);scroll-snap-align:start;display:flex;flex-direction:column;gap:.75rem;animation:capin .5s var(--ease) both}
+.poster .pic{position:relative;aspect-ratio:3/4;border-radius:var(--r-panel);overflow:hidden;background:hsl(var(--cta));isolation:isolate}
+.poster .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
+.poster:hover .pic img{transform:scale(1.07)}
+.poster .pic::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,hsl(160 30% 4%/.9),hsl(160 30% 4%/.05) 60%)}
+.poster .pic h3{position:absolute;left:.9rem;right:.9rem;bottom:.9rem;z-index:2;color:#fff;font-size:1.02rem;line-height:1.18;letter-spacing:-.02em;font-weight:650;text-wrap:balance}
+.poster .stop{position:absolute;z-index:3;inset:auto .6rem .6rem .6rem;padding:.7rem .8rem;border-radius:var(--r-control);background:hsl(var(--cta)/.96);color:#fff;font-size:.78rem;line-height:1.35;transform:translateY(105%);transition:transform .45s var(--ease)}
+.poster .stop b{color:hsl(var(--brand));display:block;margin-bottom:.15rem}
+.poster:hover .stop,.poster:focus-within .stop{transform:none}
+.poster .row{display:flex;justify-content:space-between;align-items:center;font-size:.8125rem;color:hsl(var(--muted-fg));padding-inline:.15rem}
+.poster .row b{color:hsl(var(--foreground));font-weight:650}
+.surf{font-size:.75rem;font-weight:600;letter-spacing:.02em}
+
+/* 3 SHOWCASE */
+.showcase{display:grid;gap:1.25rem}
+@media(min-width:1024px){.showcase{grid-template-columns:1fr 1.05fr;gap:1.5rem;align-items:start}}
+.list-head{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.9rem}
+.list-head .lbl{font-size:.8125rem;color:hsl(var(--muted-fg));margin-right:.25rem}
+.srow{display:grid;grid-template-columns:64px 1fr auto;gap:.9rem;align-items:center;width:100%;text-align:left;padding:.65rem;border-radius:var(--r-panel);border:1px solid transparent;transition:all .25s var(--ease)}
+.srow:hover{background:hsl(var(--card));border-color:hsl(var(--border))}
+.srow[aria-selected=true]{background:hsl(var(--card));border-color:hsl(var(--primary)/.55);box-shadow:0 14px 30px -22px hsl(var(--tint)/.6);transform:translateX(4px)}
+.srow img{width:64px;height:64px;border-radius:12px;object-fit:cover}
+.srow h3{font-size:.9375rem;font-weight:600;line-height:1.25;letter-spacing:-.01em}
+.srow .sub{margin-top:.2rem;font-size:.75rem;color:hsl(var(--muted-fg));display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.srow .price{text-align:right;font-size:.9375rem;font-weight:700;white-space:nowrap}
+.srow .price small{display:block;font-weight:500;color:hsl(var(--muted-fg));font-size:.6875rem}
+.range{display:block;height:4px;border-radius:99px;background:hsl(var(--brand));margin-top:.45rem;max-width:140px}
+.srow:not(:last-child){margin-bottom:.15rem}
+.side{position:relative}
+@media(min-width:1024px){.side{position:sticky;top:84px}}
+.seg{display:grid;grid-template-columns:1fr 1fr;padding:.25rem;border-radius:999px;background:hsl(var(--muted));border:1px solid hsl(var(--border));position:relative}
+.seg button{position:relative;z-index:1;min-height:42px;border-radius:999px;font-size:.875rem;font-weight:600;color:hsl(var(--muted-fg));display:flex;align-items:center;justify-content:center;gap:.5rem;transition:color .25s}
+.seg button[aria-selected=true]{color:hsl(var(--primary-fg))}
+.seg .thumb{position:absolute;top:.25rem;bottom:.25rem;left:.25rem;width:calc(50% - .25rem);border-radius:999px;background:hsl(var(--primary));transition:transform .45s var(--ease)}
+.seg[data-v="pro"] .thumb{transform:translateX(100%)}
+.dark .seg button[aria-selected=true]{color:hsl(var(--primary-fg))}
+.side-card{margin-top:.9rem;overflow:hidden}
+.side-cover{position:relative;height:170px;isolation:isolate}
+.side-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.side-cover::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,hsl(160 30% 4%/.85),transparent 70%)}
+.side-cover h3{position:absolute;left:1.1rem;right:1.1rem;bottom:.9rem;color:#fff;font-size:1.25rem;line-height:1.15;letter-spacing:-.025em;font-weight:700;text-wrap:balance}
+.side-body{padding:1.15rem 1.25rem 1.3rem;display:grid;gap:1rem}
+.warn{display:flex;gap:.6rem;padding:.75rem .9rem;border-radius:var(--r-control);background:hsl(var(--danger)/.09);box-shadow:inset 0 0 0 1px hsl(var(--danger)/.25);font-size:.8125rem;line-height:1.4}
+.warn .i{color:hsl(var(--danger));font-size:1.05rem;margin-top:.05rem}
+.warn b{color:hsl(var(--danger))}
+.steps{list-style:none;display:grid;gap:.6rem;counter-reset:s}
+.steps li{display:grid;grid-template-columns:26px 1fr;gap:.7rem;font-size:.875rem;line-height:1.45;counter-increment:s}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:26px;height:26px;border-radius:999px;background:hsl(var(--primary)/.12);color:hsl(var(--primary));font-size:.75rem;font-weight:700}
+.gear{display:grid;gap:.5rem}
+.gear-item{display:flex;gap:.75rem;align-items:center;padding:.6rem .75rem;border-radius:var(--r-control);border:1px solid hsl(var(--border));font-size:.8125rem}
+.gear-item b{display:block;font-size:.875rem}
+.gear-item span.d{color:hsl(var(--muted-fg))}
+.phtag{margin-left:auto;flex:none;padding:.2rem .55rem;border-radius:99px;font-size:.75rem;font-weight:700;color:#fff}
+.ph-n{background:hsl(var(--ph-neutral))}.ph-a{background:hsl(var(--ph-acid))}.ph-ma{background:hsl(var(--ph-mild-acid));color:hsl(var(--sponsor-fg))}.ph-mal{background:hsl(var(--ph-mild-alkali))}.ph-al{background:hsl(var(--ph-alkali))}
+.big-price{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
+.big-price .v{font-size:2.6rem;font-weight:700;letter-spacing:-.04em;line-height:1}
+.big-price .u{color:hsl(var(--muted-fg));font-size:.9rem}
+.note{font-size:.8125rem;color:hsl(var(--muted-fg));line-height:1.45}
+.crow{display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.7rem .8rem;border-radius:var(--r-control);border:1px solid hsl(var(--border))}
+.crow h4{font-size:.9375rem;font-weight:600;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.crow .m{margin-top:.15rem;font-size:.75rem;color:hsl(var(--muted-fg));display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.star{color:hsl(var(--sponsor));display:inline-flex;align-items:center;gap:.2rem;font-weight:700;color:hsl(var(--foreground))}
+.star .i{color:hsl(var(--sponsor));fill:hsl(var(--sponsor));stroke:none}
+.tag-s{padding:.05rem .45rem;border-radius:99px;font-size:.6875rem;font-weight:700;background:hsl(var(--sponsor));color:hsl(var(--sponsor-fg))}
+.tag-v{display:inline-flex;align-items:center;gap:.25rem;font-size:.75rem;color:hsl(var(--primary));font-weight:600}
+.swap{animation:capin .45s var(--ease)}
+
+/* 4 TOP */
+.bento2{display:grid;gap:1rem}
+@media(min-width:1024px){.bento2{grid-template-columns:1.25fr 1fr;align-items:stretch}}
+.pad{padding:1.4rem}
+@media(min-width:640px){.pad{padding:1.75rem}}
+.pad h2{font-size:1.6rem;letter-spacing:-.03em;line-height:1.1;font-weight:700}
+.pad .sub{margin-top:.4rem;color:hsl(var(--muted-fg));font-size:.9rem}
+.sponsor-slot{margin-top:1.25rem;padding:.9rem;border-radius:var(--r-control);background:hsl(var(--sponsor)/.12);box-shadow:inset 0 0 0 1px hsl(var(--sponsor)/.45)}
+.sponsor-slot .t{display:flex;align-items:center;justify-content:space-between;gap:.5rem;font-size:.75rem;color:hsl(var(--muted-fg));margin-bottom:.5rem}
+.org{margin-top:1rem;display:grid}
+.orow{display:grid;grid-template-columns:30px 1fr auto;gap:.85rem;align-items:center;padding:.8rem .2rem;border-radius:var(--r-control);transition:background .2s,padding .25s var(--ease)}
+.orow+.orow{border-top:1px solid hsl(var(--border))}
+.orow:hover{background:hsl(var(--muted)/.6);padding-inline:.6rem}
+.orow .rk{font-weight:700;font-size:1.05rem;color:hsl(var(--muted-fg))}
+.orow:first-child .rk{color:hsl(var(--primary))}
+.brands{background:hsl(var(--cta));color:hsl(var(--cta-fg));border-color:transparent;position:relative;overflow:hidden;isolation:isolate}
+.brands::before{content:"";position:absolute;inset:-30% -20% auto auto;width:70%;height:60%;z-index:-1;background:radial-gradient(closest-side,hsl(var(--brand)/.28),transparent);filter:blur(24px)}
+.brands .sub{color:hsl(var(--cta-fg)/.7)}
+.brand-list{margin-top:1.4rem;display:grid;gap:1.1rem}
+.brow{display:grid;grid-template-columns:1fr auto;gap:.25rem .75rem;align-items:end}
+.brow h3{font-size:1.05rem;font-weight:650;letter-spacing:-.015em}
+.brow .meta{grid-column:1;font-size:.78rem;color:hsl(var(--cta-fg)/.65)}
+.brow .score{grid-row:1/3;grid-column:2;font-size:1.9rem;font-weight:700;letter-spacing:-.04em;color:hsl(var(--brand));line-height:1}
+.brow .bar{grid-column:1/3;height:3px;border-radius:99px;background:hsl(var(--brand));transform-origin:left;transform:scaleX(0);transition:transform 1.1s .2s var(--ease)}
+.in .brow .bar{transform:scaleX(var(--w))}
+.brands .btn{margin-top:1.6rem}
+.brands .foot{margin-top:1.2rem;font-size:.78rem;color:hsl(var(--cta-fg)/.6)}
+
+/* 5 LAB */
+.lab{display:grid;gap:1rem}
+@media(min-width:900px){.lab{grid-template-columns:repeat(6,1fr)}.lab .a{grid-column:span 4}.lab .b{grid-column:span 2}.lab .c{grid-column:span 6}}
+.tile{position:relative;overflow:hidden;border-radius:var(--r-panel);isolation:isolate;padding:1.5rem}
+@media(min-width:640px){.tile{padding:1.9rem}}
+.tile h3{font-size:clamp(1.35rem,2.2vw,1.8rem);line-height:1.12;letter-spacing:-.03em;font-weight:700;text-wrap:balance}
+.tile p.t{margin-top:.6rem;font-size:.9375rem;line-height:1.5}
+.a{background:hsl(var(--cta));color:hsl(var(--cta-fg));display:grid;gap:1.5rem;align-content:space-between}
+@media(min-width:900px){.a{grid-template-columns:1fr 1fr;align-items:stretch}}
+.a>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;opacity:.35}
+.a::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,hsl(var(--cta)) 30%,hsl(var(--cta)/.5))}
+.a .t{color:hsl(var(--cta-fg)/.75)}
+.tri{padding:1rem;border-radius:var(--r-control);background:hsl(0 0% 100%/.07);box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.12);backdrop-filter:blur(8px);display:grid;gap:.8rem;align-content:start}
+.tri .q{font-size:.75rem;color:hsl(var(--cta-fg)/.65);margin-bottom:.35rem}
+.tri .opts{display:flex;flex-wrap:wrap;gap:.4rem}
+.tri .opt{min-height:34px;padding:0 .8rem;border-radius:999px;font-size:.8125rem;font-weight:500;color:hsl(var(--cta-fg));box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.22);transition:all .2s}
+.tri .opt:hover{box-shadow:inset 0 0 0 1px hsl(var(--brand))}
+.tri .opt[aria-pressed=true]{background:hsl(var(--brand));color:hsl(var(--brand-fg));box-shadow:none;font-weight:650}
+.tri .res{padding:.75rem .85rem;border-radius:var(--r-control);background:hsl(var(--brand)/.14);font-size:.84rem;line-height:1.45}
+.tri .res b{color:hsl(var(--brand))}
+.b{background:hsl(var(--brand));color:hsl(var(--brand-fg));display:flex;flex-direction:column;justify-content:space-between;gap:1.5rem}
+.b .big{font-size:clamp(3.4rem,7vw,5rem);font-weight:700;letter-spacing:-.06em;line-height:.9}
+.b .t{color:hsl(var(--brand-fg)/.8)}
+.b .cmp{display:grid;gap:.5rem;font-size:.84rem}
+.b .cmp div{display:flex;justify-content:space-between;padding-bottom:.45rem;border-bottom:1px solid hsl(var(--brand-fg)/.2)}
+.b .cmp div:last-child{border:0}
+.c{background:hsl(var(--card));border:1px solid hsl(var(--border));display:grid;gap:1.25rem}
+@media(min-width:900px){.c{grid-template-columns:1fr 1.6fr;align-items:center}}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem}
+.scale button{display:grid;gap:.15rem;text-align:left;padding:.75rem .7rem;border-radius:var(--r-control);color:#fff;transition:transform .3s var(--ease),box-shadow .3s;min-height:84px;align-content:end}
+.scale button:hover,.scale button.on{transform:translateY(-6px);box-shadow:0 14px 24px -14px currentColor}
+.scale b{font-size:1.25rem;letter-spacing:-.03em}
+.scale span{font-size:.72rem;opacity:.92;line-height:1.2}
+.scale .s1{background:hsl(var(--ph-acid))}.scale .s2{background:hsl(var(--ph-mild-acid));color:hsl(var(--sponsor-fg))}.scale .s3{background:hsl(var(--ph-neutral))}.scale .s4{background:hsl(var(--ph-mild-alkali))}.scale .s5{background:hsl(var(--ph-alkali))}
+.scale-note{margin-top:.8rem;font-size:.84rem;color:hsl(var(--muted-fg));min-height:2.6em}
+@media(max-width:560px){.scale{grid-template-columns:repeat(5,minmax(0,1fr))}.scale span{display:none}.scale button{min-height:64px}}
+
+/* 6 MANIFESTO + B2B */
+.final{background:hsl(var(--cta));color:hsl(var(--cta-fg));border-radius:var(--r-panel);position:relative;overflow:hidden;isolation:isolate;display:grid;gap:2.5rem;padding:1.75rem}
+@media(min-width:640px){.final{padding:3rem}}
+@media(min-width:1024px){.final{grid-template-columns:1.15fr .85fr;gap:4rem;padding:4rem}}
+.final::before{content:"";position:absolute;inset:auto -10% -40% auto;width:60%;height:80%;z-index:-1;background:radial-gradient(closest-side,hsl(var(--brand)/.3),transparent);filter:blur(30px)}
+.final h2{font-size:clamp(1.9rem,4vw,3rem);line-height:1.05;letter-spacing:-.04em;font-weight:700;text-wrap:balance}
+.final h2 em{font-style:normal;color:hsl(var(--brand))}
+.final .lead{color:hsl(var(--cta-fg)/.72);max-width:32rem}
+.princ{margin-top:2rem;display:grid;gap:1.1rem}
+.princ>div{display:grid;grid-template-columns:40px 1fr;gap:.9rem}
+.princ .ic{display:grid;place-items:center;width:40px;height:40px;border-radius:var(--r-control);background:hsl(var(--brand)/.14);color:hsl(var(--brand));font-size:1.2rem}
+.princ h3{font-size:1rem;font-weight:650}
+.princ p{font-size:.875rem;color:hsl(var(--cta-fg)/.68);margin-top:.1rem}
+.b2b{align-self:end;padding:1.5rem;border-radius:var(--r-panel);background:hsl(0 0% 100%/.06);box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.12);backdrop-filter:blur(10px)}
+.b2b h3{font-size:1.5rem;line-height:1.15;letter-spacing:-.03em;font-weight:700;text-wrap:balance}
+.b2b p{margin-top:.7rem;font-size:.9rem;color:hsl(var(--cta-fg)/.72)}
+.b2b .acts{margin-top:1.4rem;display:grid;gap:.6rem}
+.b2b .btn-line{box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.3);color:hsl(var(--cta-fg))}
+.b2b .btn-line:hover{background:hsl(0 0% 100%/.1)}
+
+/* footer */
+@media(max-width:639px){#capSurf{display:none!important}}
+.dark .final,.dark .brands,.dark .a{box-shadow:inset 0 0 0 1px hsl(0 0% 100%/.09)}
+footer{margin-top:5rem;border-top:1px solid hsl(var(--border));padding-block:3rem 2rem}
+.fgrid{display:grid;gap:2rem}
+@media(min-width:768px){.fgrid{grid-template-columns:1.4fr repeat(3,1fr)}}
+.fgrid h4{font-size:.8125rem;font-weight:650;margin-bottom:.8rem}
+.fgrid ul{list-style:none;display:grid;gap:.5rem;font-size:.875rem;color:hsl(var(--muted-fg))}
+.fgrid a:hover{color:hsl(var(--foreground))}
+.copy{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid hsl(var(--border));font-size:.8125rem;color:hsl(var(--muted-fg));display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol><symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol><symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol><symbol id="i-phone-call" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/><path d="M14.05 2a9 9 0 0 1 8 7.94"/><path d="M14.05 6A5 5 0 0 1 18 10"/></symbol><symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol><symbol id="i-flask-conical" viewBox="0 0 24 24"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></symbol><symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></symbol><symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol><symbol id="i-hand" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol><symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol><symbol id="i-badge-check" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol></svg>
+
+<div class="protobar">Прототип главной (Фаза 3 плана): 6 секций. Данные демонстрационные, ссылки не активны.</div>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="#" class="logo"><span class="logo-mark"><svg class="i"><use href="#i-flask-conical"/></svg></span>ChistoLab</a>
+    <nav class="nav-links" aria-label="Основная навигация">
+      <a href="#shelves" class="on">Решения</a>
+      <a href="#top">Рейтинг</a>
+      <a href="#top">Бренды</a>
+      <a href="#lab">ИИ-технолог</a>
+    </nav>
+    <div class="nav-right">
+      <button class="nav-search" id="navSearch" type="button"><svg class="i"><use href="#i-search"/></svg>Найти решение<kbd>/</kbd></button>
+      <button class="pill region" type="button"><svg class="i"><use href="#i-map-pin"/></svg>Минск, BY<svg class="i"><use href="#i-chevron-down"/></svg></button>
+      <button class="icon-btn" id="theme" type="button" aria-label="Сменить тему"><svg class="i"><use href="#i-moon"/></svg></button>
+      <a href="#final" class="btn btn-primary btn-sm">Разместить бизнес</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- 1. HERO -->
+<section class="hero" id="hero">
+  <div class="wrap hero-grid">
+    <div style="min-width:0">
+      <span class="badge-market rv"><span class="ic"><svg class="i"><use href="#i-map-pin"/></svg></span>Минск, Беларусь</span>
+      <h1 class="rv" style="transition-delay:.05s">Любая задача чистоты <em>решается за минуту</em></h1>
+      <p class="lead rv" style="transition-delay:.1s">Пошаговые протоколы с блоком «Не делайте», ориентиры цен и проверенные компании вашего города.</p>
+      <form class="search rv" style="transition-delay:.15s" onsubmit="return false" role="search">
+        <svg class="i"><use href="#i-search"/></svg>
+        <label class="sr" for="q">Опишите задачу</label>
+        <input id="q" type="search" placeholder="Например: вино на диване" autocomplete="off">
+        <button class="btn btn-brand" type="submit">Найти<svg class="i"><use href="#i-arrow-right"/></svg></button>
+      </form>
+      <div class="chips rv" style="transition-delay:.2s">
+        <button class="pill" type="button" data-fill="Вино на диване">Вино на диване</button>
+        <button class="pill" type="button" data-fill="Налёт в душевой">Налёт в душевой</button>
+        <button class="pill" type="button" data-fill="Жир на вытяжке">Жир на вытяжке</button>
+      </div>
+    </div>
+
+    <div id="capWrap" class="rv" style="min-width:0;transition-delay:.12s">
+      <article class="capsule" aria-live="polite">
+        <div class="bg" id="capBg"></div>
+        <div class="cap-top">
+          <span class="btn btn-sm btn-glass" id="capSurf" style="min-height:32px;cursor:default"></span>
+          <div style="display:flex;gap:.4rem;align-items:center">
+            <span class="cap-save num" id="capSave"></span>
+            <button class="icon-btn" id="capPause" type="button" aria-label="Пауза" style="width:34px;height:34px;background:hsl(0 0% 0%/.45);border-color:hsl(0 0% 100%/.2);color:#fff"><svg class="i"><use href="#i-pause"/></svg></button>
+          </div>
+        </div>
+        <div class="cap-body cap-swap" id="capBody"></div>
+      </article>
+      <div class="deck" id="deck" role="tablist" aria-label="Протоколы витрины"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. TICKER + SHELVES -->
+<div class="ticker" aria-label="Популярные задачи">
+  <p class="ticker-label">Минск, 10 протоколов</p>
+  <div class="mq"><div class="mq-track" id="mq"></div></div>
+</div>
+
+<section class="s" id="shelves">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <h2>Частые задачи</h2>
+        <p>Наведите на постер, чтобы увидеть главную ошибку, которой стоит избегать.</p>
+      </div>
+      <div class="shelf-ctl">
+        <button class="icon-btn" id="prev" type="button" aria-label="Назад"><svg class="i" style="transform:scaleX(-1)"><use href="#i-arrow-right"/></svg></button>
+        <button class="icon-btn" id="next" type="button" aria-label="Вперёд"><svg class="i"><use href="#i-arrow-right"/></svg></button>
+      </div>
+    </div>
+    <div class="filters rv" id="filters" role="group" aria-label="Тип задачи"></div>
+    <div class="posters" id="posters"></div>
+  </div>
+</section>
+
+<!-- 3. SHOWCASE -->
+<section class="s" id="showcase" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <h2>Сделайте сами или вызовите мастера</h2>
+        <p>Выберите задачу из списка. Сразу видно, что делать самому, сколько это стоит у мастера и кому позвонить.</p>
+      </div>
+    </div>
+    <div class="showcase">
+      <div class="rv">
+        <div class="list-head" role="group" aria-label="Сортировка">
+          <span class="lbl">Сортировка</span>
+          <button class="pill" type="button" data-sort="pop" aria-pressed="true">Популярные</button>
+          <button class="pill" type="button" data-sort="cheap" aria-pressed="false">Дешевле</button>
+          <button class="pill" type="button" data-sort="steps" aria-pressed="false">Меньше шагов</button>
+        </div>
+        <div id="slist" role="listbox" aria-label="Протоколы"></div>
+      </div>
+      <aside class="side rv" style="transition-delay:.08s">
+        <div class="seg" id="seg" data-v="diy" role="tablist">
+          <i class="thumb"></i>
+          <button type="button" role="tab" aria-selected="true" data-v="diy"><svg class="i"><use href="#i-hand"/></svg>Своими руками</button>
+          <button type="button" role="tab" aria-selected="false" data-v="pro"><svg class="i"><use href="#i-phone-call"/></svg>Вызвать мастера</button>
+        </div>
+        <div class="panel side-card" id="side"></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- 4. TOP COMPANIES + BRANDS -->
+<section class="s" id="top" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <span class="mono" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--muted-fg))">Рейтинг без покупных мест</span>
+        <h2 style="margin-top:.5rem">Лучшие в вашем городе</h2>
+      </div>
+    </div>
+    <div class="bento2">
+      <div class="panel pad rv">
+        <h2>Клининговые компании Минска</h2>
+        <p class="sub">Порядок задают открытые отзывы Google и Яндекса. Оплата на него не влияет.</p>
+        <div class="sponsor-slot">
+          <div class="t"><span class="tag-s">Спонсор</span><span>Платное размещение, вне рейтинга</span></div>
+          <div class="crow" style="background:hsl(var(--card))">
+            <div>
+              <h4>Спектр Клининг <span class="tag-v"><svg class="i"><use href="#i-badge-check"/></svg>Профиль проверен</span></h4>
+              <div class="m"><span class="star"><svg class="i"><use href="#i-star"/></svg>4,8</span><span>12 отзывов Google</span><span>от 6 BYN/м²</span></div>
+            </div>
+            <a class="btn btn-primary btn-sm" href="#"><svg class="i"><use href="#i-phone"/></svg>Позвонить</a>
+          </div>
+        </div>
+        <div class="org" id="org"></div>
+        <a href="#" class="btn btn-ghost" style="margin-top:1.25rem">Весь рейтинг Минска<svg class="i"><use href="#i-arrow-right"/></svg></a>
+      </div>
+
+      <div class="panel pad brands rv" style="transition-delay:.08s">
+        <h2>Индекс доверия профи</h2>
+        <p class="sub">Бренды химии и техники, которые мастера реально применяют в проверенных протоколах.</p>
+        <div class="brand-list" id="brands"></div>
+        <a href="#" class="btn btn-brand">Все бренды<svg class="i"><use href="#i-arrow-right"/></svg></a>
+        <p class="foot">Индекс считается по подтверждённым связям и интересу пользователей.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. LAB -->
+<section class="s" id="lab" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head rv"><div><h2>Инструменты лаборатории</h2></div></div>
+    <div class="lab">
+      <article class="tile a rv">
+        <img src="public/covers/vino-na-divane.jpg" alt="">
+        <div>
+          <h3>ИИ-технолог подскажет безопасный порядок</h3>
+          <p class="t">Ответьте на два вопроса, чтобы не сжечь ткань сильной химией.</p>
+          <a href="#" class="btn btn-brand" style="margin-top:1.4rem">Запустить диагностику<svg class="i"><use href="#i-arrow-right"/></svg></a>
+        </div>
+        <div class="tri" id="tri">
+          <div><div class="q">Давность пятна</div><div class="opts" data-k="age"><button class="opt" type="button" aria-pressed="true" data-v="fresh">Свежее</button><button class="opt" type="button" aria-pressed="false" data-v="old">Старое</button></div></div>
+          <div><div class="q">Материал</div><div class="opts" data-k="mat"><button class="opt" type="button" aria-pressed="true" data-v="chen">Шенилл</button><button class="opt" type="button" aria-pressed="false" data-v="cot">Хлопок</button><button class="opt" type="button" aria-pressed="false" data-v="silk">Шёлк</button></div></div>
+          <div class="res" id="triRes"></div>
+        </div>
+      </article>
+
+      <article class="tile b rv" style="transition-delay:.06s">
+        <div>
+          <div class="big num" id="save">−75%</div>
+          <p class="t">к бюджету, если провести простой протокол самому.</p>
+        </div>
+        <div class="cmp num">
+          <div><span>Своими руками</span><b>15-30 BYN</b></div>
+          <div><span>Мастер, диван</span><b>60-120 BYN</b></div>
+        </div>
+      </article>
+
+      <article class="tile c rv" style="transition-delay:.04s">
+        <div>
+          <h3>Светофор pH на каждом средстве</h3>
+          <p class="t" style="color:hsl(var(--muted-fg))">Кислота и щёлочь опасны для камня, алюминия и шёлка. Мы заранее показываем уровень.</p>
+        </div>
+        <div>
+          <div class="scale num" id="scale">
+            <button class="s1" type="button" data-t="Кислоты (pH до 3). Снимают налёт и ржавчину. Нельзя на мрамор, известняк, хром.">pH 1-3<span>Сильная кислота</span></button>
+            <button class="s2" type="button" data-t="Мягкие кислоты (pH 3-6). Против известкового налёта на стекле и керамике.">pH 4-6<span>Мягкая кислота</span></button>
+            <button class="s3" type="button" data-t="Нейтральные (pH 6-8). Безопасны для большинства тканей и покрытий.">pH 7<span>Нейтрально</span></button>
+            <button class="s4" type="button" data-t="Мягкие щёлочи (pH 8-10). Для жиров и органических пятен на ткани.">pH 9<span>Мягкая щёлочь</span></button>
+            <button class="s5" type="button" data-t="Сильные щёлочи (pH 11+). Только для нержавейки и керамики. Алюминий чернеет.">pH 12<span>Сильная щёлочь</span></button>
+          </div>
+          <p class="scale-note" id="scaleNote">Нажмите на уровень, чтобы увидеть, где его можно применять.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 6. MANIFESTO + B2B -->
+<section id="final" style="padding-bottom:0">
+  <div class="wrap">
+    <div class="final rv">
+      <div>
+        <h2>Платный охват возможен. <em>Покупка оценки нет.</em></h2>
+        <p class="lead" style="margin-top:1.1rem">Реклама помечена и стоит отдельной полкой. Первое место в рейтинге всегда органическое.</p>
+        <div class="princ">
+          <div><span class="ic"><svg class="i"><use href="#i-shield-check"/></svg></span><div><h3>Реклама отделена</h3><p>Спонсоры видны сразу и не меняют порядок компаний.</p></div></div>
+          <div><span class="ic"><svg class="i"><use href="#i-phone-call"/></svg></span><div><h3>Прямой контакт</h3><p>Телефон и Telegram компании без посредников и комиссии.</p></div></div>
+          <div><span class="ic"><svg class="i"><use href="#i-ban"/></svg></span><div><h3>Сначала безопасность</h3><p>В каждом протоколе есть блок «Не делайте» с рисками для поверхности.</p></div></div>
+        </div>
+      </div>
+      <div class="b2b">
+        <h3>Вы бренд химии или клининговая компания?</h3>
+        <p>Займите место в протоколах по поверхностям или подтвердите профиль компании с прямым телефоном.</p>
+        <div class="acts">
+          <a class="btn btn-brand" href="#">Интеграция для брендов<svg class="i"><use href="#i-arrow-right"/></svg></a>
+          <a class="btn btn-line" href="#">Тарифы для компаний</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <a href="#" class="logo"><span class="logo-mark"><svg class="i"><use href="#i-flask-conical"/></svg></span>ChistoLab</a>
+        <p style="margin-top:.9rem;font-size:.875rem;color:hsl(var(--muted-fg));max-width:20rem">Протоколы чистоты, честный рейтинг компаний и безопасная профессиональная химия.</p>
+      </div>
+      <div><h4>Решения</h4><ul><li><a href="#">Пятна на мебели</a></li><li><a href="#">Ванная и кухня</a></li><li><a href="#">После ремонта</a></li></ul></div>
+      <div><h4>Рейтинг</h4><ul><li><a href="#">Компании</a></li><li><a href="#">Бренды</a></li><li><a href="#">Методология</a></li></ul></div>
+      <div><h4>Бизнесу</h4><ul><li><a href="#">Для брендов</a></li><li><a href="#">Для компаний</a></li><li><a href="#">Контакты</a></li></ul></div>
+    </div>
+    <div class="copy"><span>© 2026 ChistoLab</span><span>chistolab.pro</span></div>
+  </div>
+</footer>
+
+<script>
+const COV = "public/covers/";
+const S = [
+ {id:"vino",file:"vino-na-divane.jpg",title:"Пятно красного вина на диване из шенилла",short:"Вино на диване",group:"Пятна",surf:"Мебель",steps:5,min:60,max:120,unit:"диван",diy:"15-30",ph:"7",warn:"Не используйте горячую воду: танины вина заварятся в ткань намертво.",
+  how:["Промокните пятно сухой салфеткой, не трите.","Нанесите холодную воду и нейтральный пенный состав.","Обработайте энзимным удалителем танинов и промокните."],
+  gear:[["Kiehl","Энзимный удалитель танинов","7",'ph-n'],["Нейтральная пена","Для шенилла и флока","7",'ph-n']],
+  note:"Химчистка посадочного места и удаление пятна экстрактором",
+  pros:[["SAUBER GRUPPE","4,6","24 отзыва"],["FreshClean","4,5","8 отзывов"],["Clean.Clean","","Отзывов пока нет"]]},
+ {id:"zhir",file:"zhir-vytyazhka-kuhnya.jpg",title:"Застарелый жир на кухонной вытяжке и фартуке",short:"Жир на вытяжке",group:"Кухня",surf:"Кухня",steps:6,min:70,max:150,unit:"кухня",diy:"20-40",ph:"11",warn:"Не замачивайте алюминиевые решётки в едкой щёлочи: металл почернеет за минуты.",
+  how:["Снимите фильтры и разогрейте жир тёплой водой.","Нанесите щелочной обезжириватель, выдержите 10 минут.","Смойте и протрите досуха по направлению шлифовки."],
+  gear:[["Grass","Щелочной обезжириватель","11",'ph-al'],["Мягкий скребок","Пластик, без металла","-",'ph-n']],
+  note:"Профессиональное обезжиривание вытяжки и фартука",
+  pros:[["SAUBER GRUPPE","4,6","24 отзыва"],["FreshRoom","","Отзывов пока нет"],["FreshClean","4,5","8 отзывов"]]},
+ {id:"vodny",file:"vodny-kamen-dushevaya.jpg",title:"Известковый налёт и водный камень на стекле душевой",short:"Налёт в душевой",group:"Ванная",surf:"Ванная",steps:4,min:45,max:90,unit:"кабина",diy:"10-25",ph:"4",warn:"Не используйте абразивные порошки: микроцарапины ускорят рост нового камня.",
+  how:["Смочите стекло тёплой водой.","Нанесите мягкую кислоту, подержите 5 минут.","Смойте и протрите микрофиброй."],
+  gear:[["Kärcher","Средство от известкового налёта","4",'ph-ma'],["Микрофибра","Без абразива","-",'ph-n']],
+  note:"Удаление налёта и защитная полировка стекла",
+  pros:[["FreshClean","4,5","8 отзывов"],["SAUBER GRUPPE","4,6","24 отзыва"],["Clean.Clean","","Отзывов пока нет"]]},
+ {id:"krov",file:"krov-na-matrase.jpg",title:"Пятно крови на чехле матраса",short:"Кровь на матрасе",group:"Пятна",surf:"Матрасы",steps:4,min:70,max:140,unit:"матрас",diy:"15-30",ph:"7",warn:"Строго запрещена тёплая вода: белок свернётся и свяжется с волокнами навсегда.",
+  how:["Промокните пятно холодной водой.","Нанесите ферментный состав на 10 минут.","Промокните насухо, не промачивая матрас насквозь."],
+  gear:[["Kiehl","Ферментный удалитель белка","7",'ph-n'],["Салфетки","Без отдушек","-",'ph-n']],
+  note:"Глубокая экстракция с расщеплением белка",
+  pros:[["SAUBER GRUPPE","4,6","24 отзыва"],["FreshClean","4,5","8 отзывов"],["FreshRoom","","Отзывов пока нет"]]},
+ {id:"zatirka",file:"poslestroy-zatirka-plitka.jpg",title:"Налёт затирки на плитке после ремонта",short:"Затирка на плитке",group:"После ремонта",surf:"Полы",steps:5,min:5,max:12,unit:"м²",diy:"2-5",ph:"2",warn:"Не наносите кислоту на мрамор и известняк: полировка сгорит мгновенно.",
+  how:["Проверьте покрытие на неприметном месте.","Нанесите кислотный состав для цементного налёта.","Тщательно смойте и нейтрализуйте поверхность."],
+  gear:[["Prochem","Кислотный очиститель после ремонта","2",'ph-a'],["Нейлоновая щётка","Без металла","-",'ph-n']],
+  note:"Послестроительная уборка плитки",
+  pros:[["Спектр Клининг","4,8","12 отзывов, спонсор"],["FreshClean","4,5","8 отзывов"],["SAUBER GRUPPE","4,6","24 отзыва"]]},
+ {id:"office",file:"uborka-ofisa-posle-korporativa.jpg",title:"Срочная уборка офиса после корпоратива",short:"Офис после корпоратива",group:"Офис",surf:"Офис",steps:5,min:4,max:8,unit:"м²",diy:"-",ph:"7",warn:"Не замывайте ковролин бытовой пеной: осадок через неделю станет тёмным пятном.",
+  how:["Соберите мусор и разделите отходы.","Обработайте пятна на ковролине экстрактором.","Продезинфицируйте столы и контактные поверхности."],
+  gear:[["Grass","Универсальный нейтральный концентрат","7",'ph-n'],["Ecolab","Дезинфицирующее средство","8",'ph-mal']],
+  note:"Разовая уборка офиса по договору с фиксированной ценой",
+  pros:[["Спектр Клининг","4,8","12 отзывов, спонсор"],["SAUBER GRUPPE","4,6","24 отзыва"],["FreshClean","4,5","8 отзывов"]]},
+ {id:"okna",file:"poslestroy-okna-skotch.jpg",title:"Следы скотча, клея и грунтовки на стеклопакетах",short:"Скотч на окнах",group:"После ремонта",surf:"Окна",steps:4,min:20,max:40,unit:"окно",diy:"5-10",ph:"7",warn:"Не используйте ацетон на пластиковом профиле: он пожелтеет и станет хрупким.",
+  how:["Размягчите клей тёплой водой.","Подденьте следы пластиковым скребком.","Протрите остатки мягким спиртовым составом."],
+  gear:[["Vileda Professional","Скребок и микрофибра","-",'ph-n'],["Спиртовой состав","Для стекла","7",'ph-n']],
+  note:"Мойка окон после ремонта с удалением клея",
+  pros:[["FreshClean","4,5","8 отзывов"],["SAUBER GRUPPE","4,6","24 отзыва"],["Clean.Clean","","Отзывов пока нет"]]},
+ {id:"mocha",file:"mocha-i-zapah-matras.jpg",title:"Запах и следы мочи на матрасе и диване",short:"Моча на матрасе",group:"Пятна",surf:"Матрасы",steps:5,min:80,max:160,unit:"матрас",diy:"20-40",ph:"7",warn:"Хлорка и освежители запрещены: хлор реагирует с аммиаком и даёт токсичный газ.",
+  how:["Промокните влагу сухим полотенцем.","Обработайте ферментным нейтрализатором уратов.","Просушите без фена и проветрите."],
+  gear:[["Kiehl","Нейтрализатор уратов","7",'ph-n'],["Полотенца","Хлопок","-",'ph-n']],
+  note:"Полная дезинфекция и удаление запаха энзимами",
+  pros:[["SAUBER GRUPPE","4,6","24 отзыва"],["FreshRoom","","Отзывов пока нет"],["FreshClean","4,5","8 отзывов"]]}
+];
+const ORG=[["SAUBER GRUPPE","4,6","24 отзыва Google","от 4 BYN/м²",true],["FreshClean","4,5","8 отзывов Яндекс","от 3 BYN/м²",true],["Clean.Clean","","Отзывов пока нет","уточняйте цену",false],["FreshRoom","","Отзывов пока нет","уточняйте цену",false],["SkyClean","","Отзывов пока нет","уточняйте цену",false]];
+const BR=[["Kiehl","в 6 протоколах",86],["Prochem","в 4 протоколах",72],["Kärcher","в 3 протоколах",64],["Ecolab","в 3 протоколах",51]];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const ic=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const steps=n=>n+" "+(n%10===1&&n%100!==11?"шаг":[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?"шага":"шагов");
+const fmt=n=>String(n).replace(".",",");
+
+/* theme */
+const root=document.documentElement;
+if(matchMedia("(prefers-color-scheme: dark)").matches)root.classList.add("dark");
+const setIcon=()=>$("#theme").innerHTML=ic(root.classList.contains("dark")?"sun":"moon");
+setIcon();
+$("#theme").onclick=()=>{root.classList.toggle("dark");setIcon()};
+$("#navSearch").onclick=()=>{$("#hero").scrollIntoView({behavior:"smooth"});setTimeout(()=>$("#q").focus(),350)};
+addEventListener("keydown",e=>{if(e.key==="/"&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();$("#navSearch").click()}});
+$$("[data-fill]").forEach(b=>b.onclick=()=>{$("#q").value=b.dataset.fill;$("#q").focus()});
+
+/* reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
+$$(".rv").forEach(el=>io.observe(el));
+
+/* animated number */
+function animNum(el,to,dur=700){
+  if(reduce){el.textContent=to;return}
+  const from=+el.dataset.v||0;el.dataset.v=to;const t0=performance.now();
+  (function f(t){const p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,4);el.textContent=Math.round(from+(to-from)*e);if(p<1)requestAnimationFrame(f)})(t0);
+}
+
+/* 1 hero capsule */
+const DECK=[S[0],S[1],S[2],S[5]];let cur=0,timer,paused=false;
+$("#capBg").innerHTML=DECK.map((s,i)=>`<img src="${COV+s.file}" alt="" ${i?"":'class="on"'}>`).join("");
+$("#deck").innerHTML=DECK.map((s,i)=>`<button type="button" role="tab" aria-selected="${i===0}" data-i="${i}"><img src="${COV+s.file}" alt=""><span>${s.short}</span><i class="bar"></i></button>`).join("");
+function showCap(i){
+  cur=i;const s=DECK[i];
+  $$("#capBg img").forEach((im,k)=>im.classList.toggle("on",k===i));
+  $$("#deck button").forEach((b,k)=>{b.setAttribute("aria-selected",k===i);const bar=b.querySelector(".bar");bar.style.animation="none";bar.offsetWidth;bar.style.animation=""});
+  $("#capSurf").innerHTML=ic("flask-conical")+s.surf+", контроль pH, "+steps(s.steps);
+  $("#capSave").innerHTML=`Мастер ${s.min}-${s.max} BYN <small>DIY −75%</small>`;
+  const b=$("#capBody");b.classList.remove("cap-swap");b.offsetWidth;b.classList.add("cap-swap");
+  b.innerHTML=`<div class="meta">Протокол дня</div><h2>${s.title}</h2><p class="cap-warn">${ic("ban")}<span><b>Не делайте: </b>${s.warn}</span></p><div class="cap-actions"><a class="btn btn-brand" href="#">Открыть протокол${ic("arrow-right")}</a><a class="btn btn-glass" href="#">${ic("sparkles")}Спросить ИИ-технолога</a></div>`;
+  clearTimeout(timer);if(!reduce&&!paused)timer=setTimeout(()=>showCap((cur+1)%DECK.length),7000);
+}
+$("#deck").onclick=e=>{const b=e.target.closest("button");if(b)showCap(+b.dataset.i)};
+const cw=$("#capWrap");
+cw.onmouseenter=()=>{paused=true;cw.classList.add("paused");clearTimeout(timer)};
+cw.onmouseleave=()=>{paused=false;cw.classList.remove("paused");showCap(cur)};
+$("#capPause").onclick=()=>{paused=!paused;cw.classList.toggle("paused",paused);$("#capPause").innerHTML=ic(paused?"play":"pause");paused?clearTimeout(timer):showCap(cur)};
+showCap(0);if(reduce)$("#capPause").hidden=true;
+
+/* 2 ticker + shelves */
+$("#mq").innerHTML=[...S,...S].map(s=>`<a class="tk" href="#"><b>${s.short}</b><em class="num">от ${s.min} BYN</em></a>`).join("");
+const groups=["Все",...new Set(S.map(s=>s.group))];let grp="Все";
+$("#filters").innerHTML=groups.map((g,i)=>`<button class="pill" type="button" aria-pressed="${i===0}" data-g="${g}">${g}</button>`).join("");
+function renderPosters(){
+  $("#posters").innerHTML=S.filter(s=>grp==="Все"||s.group===grp).map((s,i)=>`
+  <a class="poster" href="#" style="animation-delay:${i*.05}s">
+    <div class="pic"><img src="${COV+s.file}" alt="" loading="lazy"><h3>${s.short}</h3><div class="stop"><b>Не делайте</b>${s.warn}</div></div>
+    <div class="row"><span class="surf">${s.surf}, ${steps(s.steps)}</span><b class="num">от ${s.min} BYN</b></div>
+  </a>`).join("");
+  $("#posters").scrollTo({left:0});
+}
+$("#filters").onclick=e=>{const b=e.target.closest("button");if(!b)return;grp=b.dataset.g;$$("#filters button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderPosters()};
+$("#prev").onclick=()=>$("#posters").scrollBy({left:-540,behavior:"smooth"});
+$("#next").onclick=()=>$("#posters").scrollBy({left:540,behavior:"smooth"});
+renderPosters();
+
+/* 3 showcase */
+let sort="pop",sel=S[0].id,mode="diy";
+const maxP=Math.max(...S.slice(0,7).map(s=>s.max));
+function sorted(){const a=[...S];if(sort==="cheap")a.sort((x,y)=>x.min-y.min);if(sort==="steps")a.sort((x,y)=>x.steps-y.steps);return a}
+function renderList(){
+  $("#slist").innerHTML=sorted().map(s=>`<button class="srow" type="button" role="option" aria-selected="${s.id===sel}" data-id="${s.id}">
+    <img src="${COV+s.file}" alt="" loading="lazy">
+    <div><h3>${s.short}</h3><div class="sub"><span>${s.surf}</span><span>${steps(s.steps)}</span></div></div>
+    <div class="price num">${s.min}-${s.max} BYN<small>за ${s.unit}</small><span class="range" style="width:${Math.max(18,Math.round(s.max/maxP*100))}%;margin-left:auto;opacity:${s.max>maxP?.2:1}"></span></div>
+  </button>`).join("");
+}
+function renderSide(){
+  const s=S.find(x=>x.id===sel);let h;
+  if(mode==="diy"){
+    h=`<div class="side-cover"><img src="${COV+s.file}" alt=""><h3>${s.title}</h3></div>
+    <div class="side-body swap">
+      <div class="warn">${ic("ban")}<span><b>Не делайте: </b>${s.warn}</span></div>
+      <ol class="steps">${s.how.map(x=>`<li>${x}</li>`).join("")}</ol>
+      <div class="gear">${s.gear.map(g=>`<div class="gear-item"><div><b>${g[0]}</b><span class="d">${g[1]}</span></div><span class="phtag ${g[3]}">${g[2]==="-"?"без pH":"pH "+g[2]}</span></div>`).join("")}</div>
+      <a class="btn btn-primary" href="#">Открыть все ${steps(s.steps)}${ic("arrow-right")}</a>
+    </div>`;
+  }else{
+    h=`<div class="side-body swap" style="padding-top:1.4rem">
+      <div><div class="note" style="margin-bottom:.4rem">Смета мастера в Минске, за ${s.unit}</div>
+        <div class="big-price num"><span class="v"><span id="pMin" data-v="0">0</span>-<span id="pMax" data-v="0">0</span></span><span class="u">BYN</span></div>
+        <p class="note" style="margin-top:.5rem">${s.note}</p></div>
+      <div class="gear">${s.pros.map((c,i)=>`<div class="crow"><div><h4>${c[0].replace(/ спонсор$/,"")}${/спонсор/.test(c[2])?'<span class="tag-s">Спонсор</span>':""}</h4><div class="m">${c[1]?`<span class="star">${ic("star")}${c[1]}</span>`:""}<span>${c[2].replace(", спонсор","")}</span></div></div><a class="btn btn-ghost btn-sm" href="#">${ic("phone")}Позвонить</a></div>`).join("")}</div>
+      <a class="btn btn-primary" href="#">Все компании Минска${ic("arrow-right")}</a>
+    </div>`;
+  }
+  $("#side").innerHTML=h;
+  if(mode==="pro"){animNum($("#pMin"),s.min);animNum($("#pMax"),s.max)}
+}
+$("#slist").onclick=e=>{const b=e.target.closest(".srow");if(!b)return;sel=b.dataset.id;$$("#slist .srow").forEach(x=>x.setAttribute("aria-selected",x===b));renderSide()};
+document.querySelector("[data-sort]").parentElement.onclick=e=>{const b=e.target.closest("[data-sort]");if(!b)return;sort=b.dataset.sort;$$("[data-sort]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderList()};
+$("#seg").onclick=e=>{const b=e.target.closest("button");if(!b)return;mode=b.dataset.v;$("#seg").dataset.v=mode;$$("#seg button").forEach(x=>x.setAttribute("aria-selected",x===b));renderSide()};
+renderList();renderSide();
+
+/* 4 top */
+$("#org").innerHTML=ORG.map((c,i)=>`<div class="orow"><span class="rk num">${i+1}</span><div><h4 style="font-size:.9375rem;font-weight:600">${c[0]}</h4><div class="m" style="margin-top:.15rem;font-size:.75rem;color:hsl(var(--muted-fg));display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">${c[1]?`<span class="star">${ic("star")}${c[1]}</span>`:""}<span>${c[2]}</span><span>${c[3]}</span></div></div><a class="btn btn-ghost btn-sm" href="#">${ic("phone")}Позвонить</a></div>`).join("");
+$("#brands").innerHTML=BR.map(b=>`<div class="brow"><h3>${b[0]}</h3><div class="meta">${b[1]}</div><div class="score num">${b[2]}</div><div class="bar" style="--w:${b[2]/100}"></div></div>`).join("");
+
+/* 5 lab */
+const TRI={fresh:{chen:["холодная вода, нейтральная пена pH 7, промокание без трения","10 минут"],cot:["холодная вода и мягкий нейтральный гель pH 7","10 минут"],silk:["только сухая салфетка и вызов мастера, любая химия опасна","сразу"]},
+ old:{chen:["энзимный удалитель pH 7 с выдержкой, без щётки","30 минут"],cot:["щелочной пятновыводитель pH 9 на 15 минут и промывка","25 минут"],silk:["химчистка у мастера, домашний протокол риск","сразу"]}};
+let age="fresh",mat="chen";
+function tri(){const [t,time]=TRI[age][mat];$("#triRes").innerHTML=`<b>Порядок:</b> ${t}. <b>Время:</b> ${time}.`}
+$("#tri").onclick=e=>{const o=e.target.closest(".opt");if(!o)return;const g=o.parentElement;g.querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===o));if(g.dataset.k==="age")age=o.dataset.v;else mat=o.dataset.v;tri()};
+tri();
+$("#scale").onclick=e=>{const b=e.target.closest("button");if(!b)return;$$("#scale button").forEach(x=>x.classList.toggle("on",x===b));$("#scaleNote").textContent=b.dataset.t};
+</script>
+</body>
+</html>

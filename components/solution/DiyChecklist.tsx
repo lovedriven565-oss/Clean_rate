@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { ArrowRight, Check, Lightbulb, Printer, RotateCcw, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +51,7 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
     setDone((current) => (current.includes(order) ? current.filter((o) => o !== order) : [...current, order]));
   }
 
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
   const doneCount = steps.filter((step) => done.includes(step.order)).length;
   const progress = steps.length > 0 ? Math.round((doneCount / steps.length) * 100) : 0;
   const complete = hydrated && steps.length > 0 && doneCount === steps.length;

@@ -49,9 +49,9 @@ describe("surface compatibility", () => {
     assert.equal(surfaceVerdict(alkaliDegreaser, "wool").verdict, "forbidden");
   });
 
-  it("allows manufacturer-approved surfaces and neutral chemistry", () => {
-    assert.equal(surfaceVerdict(acidCleaner, "floor").verdict, "ok");
-    assert.equal(surfaceVerdict(neutralSpotter, "carpet").verdict, "ok");
+  it("requires an evidence source and does not infer compatibility from neutral pH", () => {
+    assert.equal(surfaceVerdict({ ...acidCleaner, compatibilitySource: "fixture", compatibilityVerified: true }, "floor").verdict, "ok");
+    assert.equal(surfaceVerdict(neutralSpotter, "carpet").verdict, "caution");
   });
 
   it("asks for caution when there is no explicit approval", () => {
@@ -67,12 +67,12 @@ describe("surface compatibility", () => {
 });
 
 describe("human safety traffic light badges", () => {
-  it("returns green badge for neutral safe product with compact pro pH label", () => {
+  it("requires material evidence even for a neutral product", () => {
     const badge = buildHumanSafetyBadge({ product: neutralSpotter, surface: "upholstery" });
-    assert.equal(badge.light, "green");
-    assert.equal(badge.label, "Не оставляет белых разводов · Безопасно для обивки и ворса");
-    assert.match(badge.className, /bg-success\/10/);
-    assert.match(badge.className, /text-success/);
+    assert.equal(badge.light, "yellow");
+    assert.equal(badge.label, "Проверьте инструкцию производителя");
+    assert.match(badge.className, /bg-star\/15/);
+    assert.match(badge.className, /text-star/);
     assert.equal(badge.proPhLabel, "Для профи: pH 7.0");
     assert.deepEqual(badge.compatibleLabels, ["Мебель"]);
     assert.deepEqual(badge.prohibitedLabels, ["Кожа"]);
@@ -81,7 +81,7 @@ describe("human safety traffic light badges", () => {
   it("returns yellow caution badge for non-neutral enzyme formula or delicate material", () => {
     const badge = buildHumanSafetyBadge({ product: mildAlkaliEnzyme, surface: "upholstery" });
     assert.equal(badge.light, "yellow");
-    assert.equal(badge.label, "Сначала тест на незаметном шве · Деликатное покрытие");
+    assert.equal(badge.label, "Проверьте инструкцию производителя");
     assert.match(badge.className, /bg-star\/15/);
     assert.match(badge.className, /text-star/);
     assert.equal(badge.proPhLabel, "Для профи: pH 8.5");
@@ -90,7 +90,7 @@ describe("human safety traffic light badges", () => {
   it("returns red danger badge when product is prohibited on the surface", () => {
     const badge = buildHumanSafetyBadge({ product: acidCleaner, surface: "upholstery" });
     assert.equal(badge.light, "red");
-    assert.match(badge.label, /Риск смыть краску или оставить вечный ореол/);
+    assert.match(badge.label, /Не применять/);
     assert.match(badge.className, /bg-danger\/10/);
     assert.match(badge.className, /text-danger/);
     assert.equal(badge.proPhLabel, "Для профи: pH 1.5");
@@ -115,4 +115,3 @@ describe("human safety traffic light badges", () => {
     assert.equal(byNote?.ph, 7.0);
   });
 });
-

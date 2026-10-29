@@ -84,13 +84,13 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
             <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                  Светофор безопасности покрытий
+                  Средства и материалы
                 </span>
                 <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
-                  Профессиональные средства {brand.name}: где безопасно, а где нельзя
+                  Профессиональные средства {brand.name}: материалы и ограничения
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                  Понятный вердикт по совместимости с материалами без сложной химии, а точный показатель pH вынесен компактной меткой для технологов.
+                  Уточняйте применимость и ограничения для конкретного материала в инструкции производителя.
                 </p>
               </div>
             </div>
@@ -120,11 +120,6 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
                           )}
                           {safety.label}
                         </span>
-                        {safety.proPhLabel && (
-                          <span className="inline-flex items-center rounded-full border border-border bg-card px-2.5 py-0.5 font-data text-[11px] font-medium text-muted-foreground">
-                            {safety.proPhLabel}
-                          </span>
-                        )}
                       </div>
 
                       <h3 className="mt-3 font-display text-lg font-bold text-foreground">{item.name}</h3>
@@ -134,7 +129,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
                     <div className="space-y-2.5 border-t border-border/70 pt-3.5 text-xs">
                       {safety.compatibleLabels.length > 0 && (
                         <div>
-                          <span className="font-semibold text-foreground">Идеально и безопасно для:</span>
+                          <span className="font-semibold text-foreground">Поверхности в данных каталога:</span>
                           <div className="mt-1.5 flex flex-wrap gap-1.5">
                             {safety.compatibleLabels.map((surfaceName) => (
                               <span

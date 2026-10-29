@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { ArrowRight, Ban, FlaskConical, Pause, PhoneCall, Play, Sparkles, Star, type LucideIcon } from "lucide-react";
 import { MarketBadge } from "@/components/MarketBadge";
 import { SmartSearch } from "@/components/SmartSearch";
@@ -59,7 +60,7 @@ function pickCapsuleDeck(solutions: Solution[], activeSurface: SolutionSurface |
  * и 4 карточками-переключателями протоколов с 7-секундным авто-таймером прогресса.
  */
 export function HomeHero({ solutions, estimates }: HomeHeroProps) {
-  const reduce = useReducedMotion() ?? false;
+  const reduce = usePrefersReducedMotion();
   const { market, city } = useRegion();
   const [selection, setSelection] = useState<DiagnosticSelection>({});
   const [paused, setPaused] = useState(false);
@@ -128,7 +129,7 @@ export function HomeHero({ solutions, estimates }: HomeHeroProps) {
           <MarketBadge />
           <RevealText
             className="mt-6 text-balance font-display text-4xl font-bold leading-[1.05] tracking-[-0.035em] text-foreground sm:text-5xl lg:text-[3.4rem]"
-            parts={[{ text: "Любая задача чистоты" }, { text: "решается за минуту", accent: true }]}
+            parts={[{ text: "Найдите подходящий способ" }, { text: "решить задачу чистоты", accent: true }]}
           />
           <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted-foreground">
             Пошаговые протоколы с блоком «Не делайте», ориентиры цен и проверенные компании города. Прямые контакты без
@@ -192,17 +193,16 @@ export function HomeHero({ solutions, estimates }: HomeHeroProps) {
                       {SURFACE_LABELS[activeSolution.surface]}
                     </span>
                     <span className="rounded-full bg-black/65 px-2.5 py-1 font-data text-[11px] font-semibold uppercase tracking-wider text-white/90 backdrop-blur-sm ring-1 ring-inset ring-white/15">
-                      КОНТРОЛЬ pH · {pluralize(result.totalSteps, ["шаг", "шага", "шагов"])}
+                      ИНСТРУКЦИЯ · {pluralize(result.totalSteps, ["шаг", "шага", "шагов"])}
                     </span>
                   </div>
 
-                  {/* Зелёный Steam-бейдж выгоды DIY vs Смета мастера */}
+                  {/* Честный ориентир сметы мастера по региону — без неверифицированной «экономии» */}
                   <div className="flex items-center gap-1.5">
                     {result.estimate && (
                       <span className="inline-flex items-center gap-1.5 rounded-control bg-success px-2.5 py-1 font-data text-xs font-bold tabular-nums text-white shadow-sm">
-                        <span>DIY −75%</span>
-                        <span className="text-white/85 font-normal">·</span>
-                        <span>мастер {result.estimate.min}–{result.estimate.max}</span>
+                        Выезд мастера: {result.estimate.min}–{result.estimate.max}
+                        {result.estimate.unit ? ` ${result.estimate.unit}` : ""}
                       </span>
                     )}
                     {!reduce && deck.length > 1 && (

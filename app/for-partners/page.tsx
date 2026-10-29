@@ -2,7 +2,8 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { BadgeCheck, Building2, Check, Phone, ShieldCheck, Users } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
@@ -71,7 +72,7 @@ const partnerFeatures = [
 ];
 
 export default function ForPartnersPage() {
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
   const { countryCode } = useRegion();
   const [plan, setPlan] = useState<PartnerPlan>("base");
   const [prefill, setPrefill] = useState<PartnerPrefill | null>(null);

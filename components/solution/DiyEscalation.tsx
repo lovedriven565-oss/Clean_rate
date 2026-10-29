@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { ArrowDown, MessageCircle, ShieldCheck } from "lucide-react";
 import { PhoneButton } from "@/components/PhoneButton";
 import { useRegion } from "@/components/providers/RegionProvider";
@@ -22,7 +23,7 @@ export function DiyEscalation({
   estimates: PriceEstimate[];
   companies: Company[];
 }) {
-  const reduce = useReducedMotion() ?? false;
+  const reduce = usePrefersReducedMotion();
   const { market, city } = useRegion();
   const offer = buildEscalation(solution, estimates, companies, {
     countryCode: market.countryCode,

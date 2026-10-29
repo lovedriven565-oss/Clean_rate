@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import Image from "next/image";
-import { animate, useInView, useReducedMotion, type AnimationPlaybackControls } from "motion/react";
+import { animate, useInView, type AnimationPlaybackControls } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { MoveHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +35,7 @@ export function BeforeAfter({ src, className, sizes = "100vw", priority, default
   const dragging = useRef(false);
   const touched = useRef(false);
   const invite = useRef<AnimationPlaybackControls | null>(null);
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
   const inView = useInView(rootRef, { once: true, amount: 0.6 });
 
   // «Лазерная шторка» сама показывает, что её можно двигать; любое касание пользователя её останавливает.

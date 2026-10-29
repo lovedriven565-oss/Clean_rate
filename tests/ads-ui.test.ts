@@ -45,7 +45,7 @@ describe("Блок 3 — презентационный слой рекламы"
   });
 
   describe("«Почему подходит» — только проверяемые факты", () => {
-    it("собирает причину допуска, класс pH и допуски производителя (текущая поверхность первой)", () => {
+    it("показывает данные каталога без заявления о безопасности по pH", () => {
       const reasons = buildAdReasons(
         {
           reasonText: "Продукт или бренд подтверждён в официальном протоколе решения",
@@ -55,10 +55,9 @@ describe("Блок 3 — презентационный слой рекламы"
         "upholstery"
       );
 
-      assert.equal(reasons.length, 3);
+      assert.equal(reasons.length, 2);
       assert.match(reasons[0], /подтверждён в официальном протоколе/);
-      assert.match(reasons[1], /pH 7 — нейтральный/);
-      assert.match(reasons[2], /^Допущен производителем для: мебель, ковёр, матрас$/);
+      assert.match(reasons[1], /^Поверхности в данных каталога: мебель, ковёр, матрас$/);
     });
 
     it("не выдумывает факты: без данных список пустой", () => {
@@ -113,19 +112,14 @@ describe("Блок 3 — презентационный слой рекламы"
     });
     after(() => restore());
 
-    it("спонсорский состав получает причину допуска и факты паспорта для блока «Почему подходит»", async () => {
+    it("не показывает товарную рекламу без подтверждённого источника для материала", async () => {
       const ad = await getEligibleAd(
         "solution.sponsored_product",
         { solutionSlug: "vino-na-divane", surface: "upholstery", countryCode: "BY" },
         { now: NOW }
       );
 
-      assert.notEqual(ad, null);
-      assert.equal(ad?.productId, "prod-kiehl-arenas");
-      assert.ok(ad?.reasonText, "reasonText должен быть заполнен relevance-гейтом");
-      assert.equal(ad?.productPh, 7);
-      assert.ok(ad?.brandAccent, "brandAccent нужен шаблону для деликатного акцента");
-      assert.ok(buildAdReasons(ad!, "upholstery").length >= 2);
+      assert.equal(ad, null);
     });
 
     it("пакетная выборка по категориям: партнёр только у таргетированной категории, остальным — null", async () => {

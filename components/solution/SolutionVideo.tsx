@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import {
   ArrowUpRight,
   Ban,
@@ -119,7 +120,7 @@ export function SolutionVideo({
 }
 
 function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands: Brand[] }) {
-  const reduce = useReducedMotion() ?? false;
+  const reduce = usePrefersReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -154,7 +155,7 @@ function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands:
       list.push({
         id: "products",
         kind: "products",
-        label: "Безопасные составы",
+        label: "Средства из инструкции",
         surfaceLabel: SURFACE_LABELS[solution.surface],
         material: solution.material,
         items: products.slice(0, 3).map((p, idx) => {
@@ -271,9 +272,9 @@ function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands:
               </span>
             )}
             {current.kind === "products" && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-2.5 py-1 text-xs font-semibold text-success">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-star/30 bg-star/15 px-2.5 py-1 text-xs font-semibold text-star">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Безопасно для: {surfaceTarget}
+                Материал: {surfaceTarget} · проверьте инструкцию
               </span>
             )}
           </div>

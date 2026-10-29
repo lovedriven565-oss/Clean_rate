@@ -23,7 +23,7 @@ export function LabBlueprintCards() {
         <div className="relative flex items-center justify-between gap-4">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-cta-foreground/15 bg-cta-foreground/10 px-3 py-1 font-data text-[11px] font-semibold uppercase tracking-wider text-brand">
             <Sparkles className="size-3.5" aria-hidden />
-            AI · pH LAB 01
+            AI · CHISTOLAB 01
           </span>
           <svg
             aria-hidden
@@ -63,7 +63,7 @@ export function LabBlueprintCards() {
 
         <div className="relative mt-4">
           <h3 className="font-display text-xl font-bold tracking-tight text-cta-foreground sm:text-2xl">
-            ИИ-технолог и pH-анализ
+            ИИ-консультант по чистке
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-cta-foreground/75">
             Точечный триаж пятна за 1 клик: учитывает давность, замывание мылом и деликатность покрытия без риска сжечь ткань.
@@ -136,7 +136,7 @@ export function LabBlueprintCards() {
             Своими руками: экономия до 75%
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-cta-foreground/75">
-            Пошаговые технологические карты со стоп-ошибками «Не делайте», таймингом выдержки и проверенными средствами.
+            Пошаговые инструкции с предупреждениями «Не делайте» и средствами для изучения.
           </p>
         </div>
 

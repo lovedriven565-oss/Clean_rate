@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { animate, useInView, useReducedMotion } from "motion/react";
+import { animate, useInView } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { ArrowUpRight, Info } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { BRAND_SCORE_WEIGHTS, prosChoiceIds } from "@/lib/brand-score";
@@ -148,7 +149,7 @@ function LeaderboardRow({ brand, rank, share, prosChoice }: { brand: RankedBrand
 function ScoreBar({ share, accent }: { share: number; accent: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
   return (
     <span ref={ref} className="block h-1.5 w-full overflow-hidden rounded-full bg-muted">
       <span
@@ -172,7 +173,7 @@ function ScoreBar({ share, accent }: { share: number; accent: string }) {
 function CountUp({ value }: { value: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
 
   useEffect(() => {
     const node = ref.current;

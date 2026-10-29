@@ -307,6 +307,9 @@ export interface ProductSafetyProfile {
   compatibleSurfaces?: string[];
   prohibitedSurfaces?: string[];
   hazards?: string[];
+  compatibleMaterials?: string[];
+  compatibilitySource?: string;
+  compatibilityVerified?: boolean;
 }
 
 export interface EligibleAd {

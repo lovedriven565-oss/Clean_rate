@@ -5,12 +5,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { HomeHero } from "@/components/home/HomeHero";
 import { HomeMotion, Reveal } from "@/components/home/Reveal";
-import { LabBlueprintCards } from "@/components/home/LabBlueprintCards";
-import { SolutionShelves } from "@/components/home/SolutionShelves";
-import { SteamShowcase } from "@/components/home/SteamShowcase";
-import { PriceTable } from "@/components/home/PriceTable";
-import { TaskTicker } from "@/components/home/TaskTicker";
-import { TwoPathsSection } from "@/components/home/TwoPathsSection";
+import { SolutionShowcase } from "@/components/home/SolutionShowcase";
+import { MastersBrandsSection } from "@/components/home/MastersBrandsSection";
 import { AdCreative } from "@/components/ads/AdCreative";
 import { getEligibleAd } from "@/lib/ads/queries";
 import { getAllBrands, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
@@ -70,28 +66,10 @@ export default async function Home() {
 
           <HomeHero solutions={solutions} estimates={estimates} />
 
-          {/* Живая лента задач — единственный marquee на странице */}
-          <TaskTicker solutions={published} estimates={estimates} />
-
           <div className="container space-y-20 py-14 sm:space-y-24 sm:py-20">
+            {/* Витрина решений + подборки 2×2 (композиция прототипа home-v3) */}
             <Reveal>
-              <SolutionShelves solutions={solutions} estimates={estimates} />
-            </Reveal>
-
-            <Reveal>
-              <LabBlueprintCards />
-            </Reveal>
-
-            <Reveal>
-              <SteamShowcase solutions={solutions} estimates={estimates} brands={brands} />
-            </Reveal>
-
-            <Reveal>
-              <PriceTable solutions={solutions} estimates={estimates} />
-            </Reveal>
-
-            <Reveal>
-              <TwoPathsSection solution={featuredSolution} companies={companies} />
+              <SolutionShowcase solutions={solutions} estimates={estimates} />
             </Reveal>
 
             {/* Партнёр сезона (реклама): помеченный слот, не влияет на органику */}
@@ -100,6 +78,11 @@ export default async function Home() {
                 <AdCreative ad={editorialAd} />
               </Reveal>
             )}
+
+            {/* Мастера региона + витрина брендов */}
+            <Reveal>
+              <MastersBrandsSection solution={featuredSolution} companies={companies} brands={brands} />
+            </Reveal>
 
             {/* Принципы — bento-манифест */}
             <Reveal>

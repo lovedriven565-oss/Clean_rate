@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { PH_MAX, phPosition, phZoneLabel, riskZonesForSurface, surfaceLabel } from "@/lib/ph";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +26,7 @@ export function PhScale({
   compact?: boolean;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
   const position = phPosition(ph);
   const riskZones = surface ? riskZonesForSurface(surface) : [];
 

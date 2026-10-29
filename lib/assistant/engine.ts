@@ -11,7 +11,7 @@
  * отдаёт структурированный ответ, собранный из данных протокола и контекста триажа.
  */
 
-import { checkProductSafety } from "@/lib/ads/eligibility";
+import { checkProductSafety, hasVerifiedCompatibility } from "@/lib/ads/eligibility";
 import { ASSISTANT_GUIDES } from "@/lib/assistant/guides";
 import { relatedSolutions, SURFACE_LABELS, SEVERITY_LABELS } from "@/lib/solutions/meta";
 import { mergeRanked, rankSolutions, rankSolutionsByTokens } from "@/lib/search/rank";
@@ -375,7 +375,7 @@ export function filterSafeProducts(
           role: sp.role,
           note: sp.note,
           ph: profile.ph,
-          verified: true,
+          verified: hasVerifiedCompatibility(profile, solution.surface, solution.material),
         },
       ];
     }
@@ -485,13 +485,13 @@ export function buildProtocolAnswer(
   const productNotes = products
     .map((p) => {
       const label = [p.brandName, p.note].filter(Boolean).join(": ");
-      return p.ph !== undefined ? `${label} (pH ${p.ph})` : label;
+      return label;
     })
     .filter(Boolean)
     .slice(0, 3);
 
   const parts = [
-    `По вашему запросу «${query}» подобран проверенный технологический протокол «${solution.title}» (покрытие: ${targetMaterial}).`,
+    `По вашему запросу «${query}» подобрана инструкция «${solution.title}» (покрытие: ${targetMaterial}).`,
     timingNote,
     "",
     "Шаги по протоколу:",
@@ -501,7 +501,7 @@ export function buildProtocolAnswer(
     parts.push("", `Осторожно: ${solution.warnings.join(" ")}`);
   }
   if (productNotes.length > 0) {
-    parts.push(`Проверенные средства из протокола: ${productNotes.join("; ")}.`);
+    parts.push(`Средства из протокола: ${productNotes.join("; ")}. Проверьте применимость в инструкции производителя.`);
   }
   parts.push("", `Если не поможет: ${solution.whenToCallPro}`);
   return parts.join("\n");
@@ -517,7 +517,7 @@ export const ASSISTANT_SYSTEM_PROMPT = [
   "3. Обязательно учитывай уточнения пользователя (свежее или высохшее пятно, замывали ли уже мылом/Ванишем, какой материал поверхности).",
   "4. Пиши чётко, живо, без воды и без markdown-разметки (без звёздочек ** и решёток #), разделяя мысль на 3 коротких абзаца:",
   "   — Абзац 1 (Суть и первое действие): почему пятно ведёт себя так на этом покрытии и что сделать прямо сейчас в первую очередь (с учётом советов технолога из шагов).",
-  "   — Абзац 2 (Главный риск и выбор средства): чего категорически нельзя делать на этом материале и какой тип состава из протокола безопасен (с упоминанием pH, если указан).",
+  "   — Абзац 2 (Главный риск и выбор средства): чего нельзя делать и почему применимость средства нужно проверять по инструкции производителя; не обещай безопасность по pH.",
   "   — Абзац 3 (Прогноз: когда справитесь сами, а когда нужен мастер): честный критерий, в какой ситуации домашняя чистка поможет, а когда лучше не рисковать вещью и вызвать мастера с экстрактором/спецоборудованием.",
 ].join("\n");
 
@@ -539,7 +539,7 @@ export function buildGroundedPrompt(
   const productLines = products
     .map(
       (p) =>
-        `- ${[p.brandName, p.note].filter(Boolean).join(": ")}${p.ph !== undefined ? ` (pH ${p.ph})` : ""}${p.role === "recommended" ? " [основное]" : " [альтернатива]"}`
+        `- ${[p.brandName, p.note].filter(Boolean).join(": ")}${p.ph !== undefined ? ` (pH ${p.ph})` : ""}${p.role === "recommended" ? " [основное]" : " [альтернатива]"}${p.verified ? "" : " [совместимость не подтверждена]"}`
     )
     .join("\n");
 
@@ -562,7 +562,7 @@ export function buildGroundedPrompt(
     timingLabel ? `Состояние загрязнения у пользователя: ${timingLabel}` : "",
     `Пошаговая технология и секреты:\n${steps}`,
     solution.warnings.length ? `Строгие запреты (Осторожно): ${solution.warnings.join(" ")}` : "",
-    productLines ? `Проверенные средства:\n${productLines}` : "",
+    productLines ? `Средства из инструкции; совместимость требует подтверждения:\n${productLines}` : "",
     solution.diyCostNote ? `Ориентир затрат на домашнюю чистку: ${solution.diyCostNote}` : "",
     solution.proTimeNote ? `Время работы мастера: ${solution.proTimeNote}` : "",
     estimateSummary ? `Ориентир цены вызова мастера в регионе пользователя: ${estimateSummary}` : "",
@@ -583,7 +583,7 @@ export function buildGroundedPrompt(
 export const OPEN_EXPERT_SYSTEM_PROMPT = [
   "Ты — главный технолог по клинингу и химчистке платформы ChistoLab (chistolab.pro).",
   "Пользователь задал вопрос по чистке/уборке, для которого в статической базе ещё нет готовой карточки.",
-  "Твоя задача — составить точный, безопасный и исчерпывающий технологический протокол в формате JSON.",
+  "Предложи предварительный ответ в формате JSON. Достоверность и применимость к материалу не проверены; прямо скажи об этом и предложи проверить инструкцию производителя или обратиться к специалисту.",
   "ЖЕЛЕЗНЫЕ ЗАКОНЫ ХИМИЧЕСКОЙ БЕЗОПАСНОСТИ CHISTOLAB (нарушать запрещено):",
   "1. Кислоты (pH < 6, уксус, лимонная/соляная кислота) СТРОГО ЗАПРЕЩЕНЫ на мраморе, травертине, известняке, эмали ванн, акриле, алюминии, хромированной эконом-фурнитуре и чёрной матовой сантехнике (PVD).",
   "2. Щелочи (pH > 9.5, каустик, антижиры, сода с трением) СТРОГО ЗАПРЕЩЕНЫ на алюминии, шерсти, шёлке, вискозе, коже, нубуке, ламинате, паркете и каталитической эмали духовок.",
@@ -602,16 +602,14 @@ export const OPEN_EXPERT_SYSTEM_PROMPT = [
   '  "recommendation": "diy" | "caution" | "pro",',
   '  "badge": "Короткий статус вердикта (например: Можно справиться дома · Пошаговый протокол)",',
   '  "summary": "Пояснение вердикта в 1–2 предложениях",',
-  '  "text": "Экспертное заключение технолога в 2–3 абзацах (без звёздочек ** и решёток #): физика/химия загрязнения, первое действие и выбор безопасного pH",',
+  '  "text": "Предварительный ответ в 2–3 абзацах: ограничения, первое действие и необходимость проверить инструкцию производителя; не обещай безопасность по pH",',
   '  "steps": [',
   '    { "order": 1, "instruction": "Чёткое действие шага 1", "tip": "Профессиональный нюанс технолога" },',
   '    { "order": 2, "instruction": "Чёткое действие шага 2", "tip": "Профессиональный нюанс технолога" },',
   '    { "order": 3, "instruction": "Чёткое действие шага 3" }',
   "  ],",
   '  "warnings": ["Строгий запрет 1 с объяснением последствия для материала", "Строгий запрет 2"],',
-  '  "whenToCallPro": "В каком случае домашняя чистка опасна и нужен профессионал со спецтехникой",',
-  '  "diyCostNote": "Ориентир стоимости домашних средств в BYN",',
-  '  "proTimeNote": "Ориентир времени работы мастера"',
+  '  "whenToCallPro": "В каком случае домашняя чистка опасна и нужен профессионал со спецтехникой"',
   "}",
 ].join("\n");
 
@@ -715,11 +713,11 @@ export async function generateOpenExpertAnswer(
             tip: s.tip?.trim() || undefined,
           }));
 
-        const warnings = (parsed.warnings ?? []).map((w) => w.trim()).filter(Boolean);
-        const recommendation =
-          parsed.recommendation === "diy" || parsed.recommendation === "pro"
-            ? parsed.recommendation
-            : "caution";
+        const warnings = [
+          "Ответ сгенерирован ИИ и не проверен специалистом. Проверьте инструкцию производителя и при сомнениях обратитесь к мастеру.",
+          ...(parsed.warnings ?? []).map((w) => w.trim()).filter(Boolean),
+        ];
+        const recommendation = parsed.recommendation === "pro" ? "pro" : "caution";
 
         const closestAlternatives: AssistantAlternative[] = pool
           .filter((s) => s.surface === surface || s.relatedCategory === relatedCategory)
@@ -736,15 +734,11 @@ export async function generateOpenExpertAnswer(
           mode: "answer",
           text:
             parsed.text?.trim() ||
-            `Технологический разбор по запросу «${query}» подготовлен с учётом безопасности покрытия.`,
+            `Предварительный ответ ИИ по запросу «${query}» не проверен специалистом.`,
           verdict: {
             recommendation,
-            badge:
-              parsed.badge?.trim() ||
-              "Индивидуальный протокол технолога ChistoLab · Сделайте тест на скрытом участке",
-            summary:
-              parsed.summary?.trim() ||
-              "Протокол составлен ИИ-технологом по правилам химической совместимости материалов. Перед применением проверьте состав на незаметном участке.",
+            badge: "Предварительный ответ ИИ",
+            summary: "Ответ не проверен специалистом. Уточните материал и проверьте инструкцию производителя.",
           },
           firstAid: steps[0]?.instruction,
           solution: {
@@ -756,8 +750,6 @@ export async function generateOpenExpertAnswer(
             problemType,
             severity: context?.timing === "washed" ? "extreme" : context?.timing === "dried" ? "set" : "fresh",
             relatedCategory,
-            diyCostNote: parsed.diyCostNote?.trim(),
-            proTimeNote: parsed.proTimeNote?.trim(),
             whenToCallPro:
               parsed.whenToCallPro?.trim() ||
               "Если после первой бережной попытки загрязнение не сходит или покрытие деликатное — остановитесь и вызовите профильного мастера.",
@@ -769,11 +761,11 @@ export async function generateOpenExpertAnswer(
           alternatives: closestAlternatives,
           materialOptions: getMaterialOptions(surface),
           followUpQuestions: [
-            `Чем безопасно заменить профессиональное средство для задачи «${parsed.title?.trim() || query}»?`,
+            `Какие ограничения у средства для задачи «${parsed.title?.trim() || query}»?`,
             "Что делать, если пятно или налёт уже застарелые?",
             "Как не оставить разводов и ореола после высыхания?",
           ],
-          confidence: 0.78,
+          confidence: 0,
         };
       } catch {
         // Модель ответила прозой без JSON — ниже отдадим текстовую консультацию
@@ -800,9 +792,8 @@ export async function generateOpenExpertAnswer(
       text: prose.slice(0, 3000),
       verdict: {
         recommendation: "caution",
-        badge: "Разбор ИИ-технолога · Сделайте тест на скрытом участке",
-        summary:
-          "Ответ составлен ИИ-технологом ChistoLab по правилам химической совместимости материалов. Перед применением любого средства проверьте его на незаметном участке.",
+        badge: "Предварительный ответ ИИ",
+        summary: "Ответ не проверен специалистом. Уточните материал и проверьте инструкцию производителя.",
       },
       solution: {
         id: "custom-ai-protocol",
@@ -819,15 +810,15 @@ export async function generateOpenExpertAnswer(
       },
       steps: [],
       products: [],
-      warnings: [],
+      warnings: ["Ответ сгенерирован ИИ и не проверен специалистом. Проверьте инструкцию производителя и при сомнениях обратитесь к мастеру."],
       alternatives: closestAlternatives,
       materialOptions: getMaterialOptions("other"),
       followUpQuestions: [
-        "Какое средство безопасно для деликатного покрытия?",
+        "Какие ограничения у средств для деликатного покрытия?",
         "Что делать, если загрязнение уже застарелое?",
         "В каком случае лучше вызвать профессионала?",
       ],
-      confidence: 0.7,
+      confidence: 0,
     };
   }
   return null;
@@ -916,7 +907,7 @@ export async function consult(params: {
     };
   }
 
-  const products = filterSafeProducts(primary, safetyMap);
+  const products = filterSafeProducts(context?.material ? { ...primary, material: context.material } : primary, safetyMap);
   const warnings = buildContextualWarnings(primary, context);
   const verdict = buildVerdict(primary, context);
   const orderedSteps = [...primary.diySteps].sort((a, b) => a.order - b.order);

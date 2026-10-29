@@ -237,8 +237,23 @@
   - Табы категорий сверху, слева плотный Master-list с мини-обложками и зелёными Steam-бейджами сметы, справа — Sticky плеер (`parseVideoSource` для реального `videoUrl` или 3-фазный авто-симулятор работы средства со светофором `buildHumanSafetyBadge` и прямыми кнопками конверсии `[Купить средство / Средство бренда]` и `[Открыть протокол]`). Подключён в `app/page.tsx`.
 - **Проверки:** `npm run typecheck` — 0 ошибок, `npm run lint` — чисто, `npm run test` — 192/192, `npm run build` — ок.
 
+## Стандарт и полный арсенал для премиальных сайтов будущего (2026–2027)
+Глобальное правило по умолчанию подключено в `C:\Users\gushc\.devin\rules\web-design-stack.md` (всегда активно во всех сессиях). Краткая матрица того, что уже есть в `ChistoLab` и что подключать для задач следующего уровня:
+
+- **Уже в проекте:** Next.js 16.3, React 19, Tailwind v4 (`@theme inline`), `@base-ui/react`, `motion/react` v13, `@paper-design/shaders-react` (`MeshGradient`), `geist` (`Sans` + `Mono` / `font-data`), `lucide-react`, кастомные `SpotlightCard`, `Tilt`, `GlowLink`, `RevealText`, `PillTabs`, скиллы `.devin/skills/linear-style-ui` и `.devin/skills/epic-steam-lab`.
+- **Недостающие библиотеки (ставить точечно по задаче):**
+  - **3D / WebGL / Spatial:** `three` + `@react-three/fiber` + `@react-three/drei` + `@react-three/postprocessing` (3D-сцены, стеклянное преломление `MeshTransmissionMaterial`, Bloom); `@rive-app/react-canvas` (интерактивные векторные стейт-машины 120fps); `cobe` (5 KB WebGL-глобус для мультирегиональности); `curtainsjs` / `ogl` (liquid-искажения медиа).
+  - **Scrollytelling и сложные таймлайны:** `gsap` + `@gsap/react` (`ScrollTrigger`, `Flip`, `SplitText`), нативный CSS `animation-timeline: view() / scroll()`, Canvas Image Sequence для покадрового разбора.
+  - **Тактильный UI и микро-интеракции:** `@number-flow/react` (каскадная физика цифр для цен/индексов/смет), `vaul` (физические mobile-drawers), `cmdk` (`⌘K`-палитра), `sonner` (пружинные стековые тосты), `embla-carousel-react`, процедурный Web Audio микро-отклик (0 KB ассетов).
+  - **Copy-paste доноры (адаптировать под токены `globals.css`):** Atelier UI (`@atelier/*`), React Bits (`reactbits.dev`), Motion Primitives (`motion-primitives.com`), 21st.dev, Cult UI.
+- **Платформенные фичи CSS 2026–2027 по умолчанию:** View Transitions API (`<ViewTransition>` / `startViewTransition`), `color-mix(in oklch, ...)`, CSS `@container` + `subgrid` (выравнивание карточек и кнопок в один ряд), `@starting-style`, Progressive Blur маски.
 
 
+## Трансформация ChistoLab — фаза 1 (локально)
+- Совместимость товаров не подтверждается одним pH, брендом или таргетингом. Для `solution.sponsored_product` нужны точный материал и поверхность, подтверждённый источник и признак проверки; запреты имеют приоритет. Новые поля `compatibleMaterials`, `compatibilitySource`, `compatibilityVerified` пока существуют только в `ProductSafetyProfile` и тестовых фикстурах, а в D1/seed не сохраняются: товарный рекламный слот остаётся закрытым до отдельного проектирования и заполнения данных.
+- Локальный seed: 16 решений без `videoUrl`, 32 связи с рекомендациями без `productId`. Это не результаты проверки продакшен-D1 или прав на медиа.
+- Свободный ответ консультанта помечается как предварительный и непроверенный; генерация ИИ всё ещё может ошибаться и не заменяет проверку экспертом.
+- Проверки: `npm run typecheck`, `npm run lint`, `npm run test` (200 тестов), `npm run build`. Деплой и изменение продакшен-базы не выполнялись. Фазу 2 (`prototype/home-v3/`) начинать только с разрешения владельца.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
