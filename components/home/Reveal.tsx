@@ -1,9 +1,10 @@
 "use client";
 
-import { MotionConfig, motion } from "motion/react";
+import { MotionConfig } from "motion/react";
+import { InView } from "@/components/ui/in-view";
 import { cn } from "@/lib/utils";
 
-/** Плавное появление секции при скролле. Уважает prefers-reduced-motion через MotionConfig в HomeMotion. */
+/** Плавное появление секции при скролле (InView из реестра). Уважает prefers-reduced-motion через MotionConfig в HomeMotion. */
 export function Reveal({
   children,
   className,
@@ -14,15 +15,15 @@ export function Reveal({
   delay?: number;
 }) {
   return (
-    <motion.div
+    <InView
       className={cn(className)}
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10% 0px" }}
+      variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
       transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
+      viewOptions={{ margin: "-10% 0px" }}
+      once
     >
       {children}
-    </motion.div>
+    </InView>
   );
 }
 

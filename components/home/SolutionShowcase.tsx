@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { ArrowRight, Ban, PlayCircle, Wrench } from "lucide-react";
 import { PillTabs } from "@/components/ui/fx";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { useSelectedSolution } from "@/components/providers/SelectedSolutionProvider";
 import { Collections } from "@/components/home/Collections";
@@ -342,33 +343,43 @@ export function SolutionShowcase({
           }}
           onKeyDown={onListKeyDown}
         >
-          {filteredList.map((item) => {
-            const isSelected = item.slug === selected.slug;
-            const isDisplayed = item.slug === displayed.slug;
-            const est = pickEstimate(estimates, item, ctx);
-            const estView = est ? formatEstimate(est, ctx) : null;
+          {/* Подсветка выбранной строки — AnimatedBackground (Motion Primitives);
+              hover-превью панели остаётся на hoverSlug и не трогает выбор. */}
+          <AnimatedBackground
+            defaultValue={selected.slug}
+            onValueChange={(id) => {
+              if (id) select(id);
+            }}
+            transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 34 }}
+            className="rounded-panel bg-primary/[0.07] ring-1 ring-inset ring-primary/30"
+          >
+            {filteredList.map((item) => {
+              const isSelected = item.slug === selected.slug;
+              const isDisplayed = item.slug === displayed.slug;
+              const est = pickEstimate(estimates, item, ctx);
+              const estView = est ? formatEstimate(est, ctx) : null;
 
-            return (
-              <div key={item.id} className="scroll-mt-28">
-                <button
-                  type="button"
-                  data-sol={item.slug}
-                  aria-pressed={isSelected}
-                  aria-expanded={isSelected}
-                  aria-controls={`exp-${item.slug}`}
-                  onClick={() => select(item.slug)}
-                  onMouseEnter={() => {
-                    if (!hoverSuppressed.current) setHoverSlug(item.slug);
-                  }}
-                  className={cn(
-                    "data-surface group relative flex w-full items-center gap-3.5 rounded-panel p-2.5 text-left transition-all",
-                    isSelected
-                      ? "border-primary/55 bg-card shadow-[0_14px_32px_-18px_hsl(var(--brand)/0.45)] ring-1 ring-inset ring-primary/25"
-                      : isDisplayed
-                        ? "border-primary/35 bg-card"
-                        : "bg-card/70 hover:border-primary/30 hover:bg-card",
-                  )}
-                >
+              return (
+                <div key={item.id} data-id={item.slug} className="block scroll-mt-28">
+                  <button
+                    type="button"
+                    data-sol={item.slug}
+                    aria-pressed={isSelected}
+                    aria-expanded={isSelected}
+                    aria-controls={`exp-${item.slug}`}
+                    onClick={() => select(item.slug)}
+                    onMouseEnter={() => {
+                      if (!hoverSuppressed.current) setHoverSlug(item.slug);
+                    }}
+                    className={cn(
+                      "data-surface group relative flex w-full items-center gap-3.5 rounded-panel p-2.5 text-left transition-all",
+                      isSelected
+                        ? "bg-card"
+                        : isDisplayed
+                          ? "border-primary/35 bg-card"
+                          : "bg-card/70 hover:border-primary/30 hover:bg-card",
+                    )}
+                  >
                   <span className="relative h-14 w-20 shrink-0 overflow-hidden rounded-control bg-muted">
                     <Image
                       src={solutionCover(item)}
@@ -411,8 +422,9 @@ export function SolutionShowcase({
                   )}
                 </div>
               </div>
-            );
-          })}
+              );
+            })}
+          </AnimatedBackground>
         </div>
 
         {/* Sticky-панель выбранной задачи — только десктоп */}

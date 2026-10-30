@@ -73,6 +73,14 @@ export function listProblems(solutions: Solution[], surface: SolutionSurface): P
   );
 }
 
+/** Все типы проблем со счётчиками по published-решениям — для первого шага диагностики главной. */
+export function listAllProblems(solutions: Solution[]): ProblemOption[] {
+  const list = published(solutions);
+  return PROBLEM_TYPES.map((id) => ({ id, label: PROBLEM_TYPE_LABELS[id], count: list.filter((s) => s.problemType === id).length })).filter(
+    (option) => option.count > 0,
+  );
+}
+
 export function findProtocols(solutions: Solution[], surface: SolutionSurface, problem: SolutionProblemType): Solution[] {
   return published(solutions).filter((s) => s.surface === surface && s.problemType === problem);
 }

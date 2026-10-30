@@ -67,7 +67,7 @@
 - Применить миграцию `0002` в проде: `wrangler d1 migrations apply cleaning-rating-db --remote`, засеять `solutions`/`intent_keywords`/`price_estimates`.
 - Задать `NEXT_PUBLIC_SITE_URL` в `wrangler.jsonc` (`vars`) под реальный домен.
 - `CompanyTable` форматирует цену по городу компании; при появлении компаний RU/KZ проверить `formatMarketPriceFrom`.
-- OG-изображение (`opengraph-image.tsx`) — не сделано.
+- OG-изображение (`app/opengraph-image.tsx` + per-route варианты) — сделано.
 
 ### Проверки после Шага 3 (пройдены)
 - `npm run typecheck` — 0 ошибок
@@ -117,7 +117,7 @@
 - `components/ads/AdCreative.tsx` — изоморфный рендерер по `placement` (без импорта D1/drizzle — можно импортировать из client-компонентов). Оборачивает шаблон в `AdImpression` с `key={campaignId}`.
 - SSG-страницы не знают страну пользователя → серверный гейт работает без гео-фильтра, а `AdImpression` дополнительно скрывает кампанию, если `targetCountries` не содержит регион из cookie (`isAdVisibleInCountry`). Seed-кампании таргетированы на BY/RU/KZ, поэтому на практике сдвига нет.
 - `/rating`: категория выбирается на клиенте, поэтому `app/rating/page.tsx` резолвит партнёров пакетом — `getEligibleAdsForCategories()` → `RatingContent` получает `categoryAds` и показывает `AdCreative` только при выбранной категории (`all` → ничего). Органический порядок списка не трогается, ранг не присваивается.
-- Главная: `getEligibleAd("home.editorial_partner", {})` в `Promise.all`; секция рендерится условно целиком (нет кампании — нет и отступа). Блок стоит после «Бренды профи», перед манифестом — не в hero.
+- Главная: `getEligibleAd("home.editorial_partner", {})` в `Promise.all`; секция рендерится условно целиком (нет кампании — нет и отступа). Блок стоит после витрины решений, перед «Мастера и бренды» — не в hero.
 
 ### Файлы
 - `lib/ads/presentation.ts` — чистые хелперы: `AD_MARK_LABEL` («Реклама»), `AD_CTA_META` (4 CTA + website: подпись/hint/иконка), `adCtaMeta`, `buildAdReasons` («Почему подходит»: причина relevance-гейта + класс pH + допуски производителя, ≤3 факта, без выдумок), `describePh`, `adTrackingEntity`, `isAdVisibleInCountry`.
@@ -144,7 +144,7 @@
 - Палитра — токены `app/globals.css` (лайм `--brand` только заливки, тёмная мята `--primary`/`--link` для текста, золото `--sponsor`, звёзды `--star`/`--ad`). Цвета вне CSS (OG, favicon, `manifest`, `themeColor`, SVG-бейдж `/badge/[slug]`) берутся из `BRAND_COLORS` в `lib/site.ts` — при смене токенов менять оба места. Хардкод `amber-*`/hex в компонентах запрещён.
 - Shape lock: интерактив — `rounded-full`, панели — `rounded-panel`, поля — `rounded-control`; поверхности — `.data-surface`, стекло `.glass` только для поиска, ИИ-панели и навбара.
 - `components/CompanyTable.tsx` — единственный список компаний (`/rating`, `/[city]/[category]`, `/brands/[slug]` c `ranked={false}`). Режим «плитка» и `CompanyCard` удалены; старый `?view=grid` игнорируется.
-- Главная: `components/home/*` (`HomeHero`, `SolutionShelves`, `TaskTicker`, `TwoPathsSection`, `PriceTable`, `Marquee`, `Reveal`); логика — `lib/solutions/{covers,diagnostic,shelves}.ts`; эффекты — `components/ui/fx`. На экране допустим только один `Marquee`.
+- Главная: `components/home/*` (`HomeHero`, `LiveStats`, `RoomsBento`, `SolutionShowcase`, `MastersBrandsSection`, `Reveal`); логика — `lib/solutions/{covers,diagnostic,shelves}.ts`; эффекты — `components/ui/fx` + реестровые компоненты `components/ui/{text-effect,in-view,animated-group,animated-background,animated-number,bento-grid}.tsx` и `components/arc/radio-cards`.
 - Картинки полок — `public/shelves/*.jpg` (Pexels License: stains 5659651, odors 13450868, renovation 9908376, kitchen 4850197, bathroom 7587870, office 12526862). Прототипы `/dev/design/*` и `components/dev*` удалены.
 - Сборка: `next.config` — `staticPageGenerationTimeout: 180`, `staticGenerationMaxConcurrency: 1` (иначе SSG падает по таймауту). Dev-сервер перед `npm run build` остановить; после удаления роутов чистить `.next/types`.
 - Тесты: `npm run test` — 126 тестов (добавлены `solutions-diagnostic`, `solutions-shelves`, `semantic-search`, `launch-guards`, `ph`, `assistant`).
@@ -157,8 +157,8 @@
 ## Спринт «Прямо сейчас» — безопасность, доверие, конверсия (сделано)
 - **Демо-реклама снята, спонсор-витрина возвращена:** `seedCampaigns` в `db/seed-data.ts` — все `status: "draft"` (без договора реклама реальных брендов не показывается). «Спектр Клининг» — `promoted: true` как витрина платного размещения (решение владельца): слот «Спонсор» отделён от органики, тест-страж — органика никогда не содержит `promoted`. Тесты рекламного движка — через `tests/helpers/demo-campaigns.ts`, спонсорские — на фикстуре `withSponsor`.
 - **Navbar** — только «Решения» и «Рейтинг компаний» (+ `aria-current`, активность по `match`-префиксам, `/companies` относится к рейтингу); CTA «Разместить бизнес» с `lg`. Консультант живёт в выпадашке поиска (`SearchSuggestions`: постоянная строка «Спросить ИИ-консультанта» последним пунктом, навигация стрелками включена; `assistantHrefFor` в `SmartSearch.tsx`).
-- **Hero главной** — счётчики «10/13/9» заменены на `QUALITY_MARKS` (три проверяемых факта доверия, stagger-анимация). Проп `stats` у `HomeHero` и `getAllBrands` на главной удалены.
-- **`/suppliers`** — `robots: { index: false }`, убрана из `app/sitemap.ts` и футера (секция «Бизнесу» теперь ведёт на `/for-brands`).
+- **Hero главной** — счётчики «10/13/9» заменены на `QUALITY_MARKS` (три проверяемых факта доверия, stagger-анимация). Проп `stats` у `HomeHero` и `getAllBrands` на главной удалены. *(устарело — см. «Главная ChistoLab 2.0» ниже)*
+- **`/suppliers`** — `robots: { index: false }`, убрана из `app/sitemap.ts` и футера (секция «Бизнесу» теперь ведёт на `/for-brands`). *(позже страница удалена полностью — см. «Главная ChistoLab 2.0»)*
 - **`/for-brands`** — `pageAlternates` + OG, счётчики заменены на принципы.
 - **Мостик DIY→Pro:** `components/solution/DiyEscalation.tsx` (client) после `DiyChecklist` — риск-поверхность из `SURFACE_RISK_LABELS` (`lib/solutions/meta.ts`), смета «от» и первый органический мастер региона через `buildEscalation()` (`lib/solutions/diagnostic.ts`, тестируемый чистый хелпер). `PhoneButton` получил проп `label`. `ProPanel` переведён с собственного `pickCompanies` (буст `promoted +2`) на `buildProCompanies`: органика по доверию, спонсор — отдельной помеченной строкой; `StickyCallBar` ведёт на organic[0].
 - **RU/Москва открыта и наполнена:** `MARKETS.RU.enabled: true`; у `City` — `enabled?: boolean` (СПб скрыт). Хелпер `openCities(market)` — единый источник для селектора, посадочных и форм. В `seedCompanies` добавлены 10 реальных московских компаний (открытые рейтинги Ведомости/Klerk): `verified: false`, `ratingSource: "unverified"` — баллы не выдумываем. `db/seed.ts` выводит `country_code` через `getMarketByCity`, а не хардкод 'BY'. Посадочные Москвы — `noindex`, пока компаний < 2 (`LANDING_INDEX_MIN_COMPANIES`): с 10 компаниями в базе порог уже пройден — пересмотреть при желании индексации. KZ закрыт.
@@ -170,7 +170,7 @@
 
 ## Этап 3.5 + Этап 4 — полировка дизайна и 16 SEO-протоколов (сделано)
 - `SolutionVideo.tsx` — сторис-плеер на токенах (`data-surface`, `bg-danger/10`, `bg-primary/10`, `bg-success/10`, `text-star`), без `zinc/white/red/sky/emerald/amber`; кнопки `h-10`; кадр 8000 мс; автопауза по `onPointerDown`/`onFocusCapture` (кнопка с `data-pause-toggle` не перехватывается, иначе клик снимал бы паузу).
-- `HomeHero` — подзаголовок ≤18 слов без «—», подписи шагов `01/02/03` обычным регистром (`font-data`), «Открыть протокол» — pill `bg-brand` (`GlowLink` в `components/ui/fx` теперь не используется).
+- `HomeHero` — подзаголовок ≤18 слов без «—», подписи шагов `01/02/03` обычным регистром (`font-data`), «Открыть протокол» — pill `bg-brand` (`GlowLink` в `components/ui/fx` теперь не используется). *(устарело — hero переписан, см. «Главная ChistoLab 2.0»)*
 - CTA разведены: шапка «Подключить компанию», B2B-блок главной «Интеграция для брендов» / «Тарифы для клининга».
 - `/solutions/[slug]` — без капса у «Частые вопросы»/«Похожие задачи», «Компании · Город» в ProPanel — `h3`. `AdPlacement` получил проп `pitchOnly`: активная кампания — под «Двумя путями», `EmptySlotPitch` — после FAQ.
 - **View Transitions:** в Next 16.3 флага `experimental.viewTransition` нет (работает без конфигурации, React canary в App Router). Корень обёрнут в `<ViewTransition>` в `app/layout.tsx` (кросс-фейд при навигации); при `prefers-reduced-motion` анимации `::view-transition-*` отключены в `globals.css`.
@@ -217,7 +217,7 @@
 - `Navbar`: при скролле > 24px на `lg+` превращается в плавающую `.glass`-капсулу (`max-w-6xl!` — `.container`/`.glass` вне слоёв, перебиваем через `!`); hover-плашка пунктов через `motion layoutId="nav-hover-pill"`.
 - `TaskTicker`: слева статус (пульс `animate-ping`, «Страна · N протоколов», `sm+`), края `Marquee` — `.fx-mask-x` (mask-image) вместо плашек цвета фона. Рекламы в ленте нет (политика).
 - `SolutionShelves`: смета бейджем на обложке (сплошной `bg-card/95`, не `.glass`). `PriceTable`: `motion.li layout` при сортировке, маркер и подпись медианы ориентиров, единица измерения (`/ м²`), акцент строки при hover. Рекламы в таблице нет.
-- Главная: принципы — bento-манифест (координатная сетка, `.linear-beam`, 3 карточки `PRINCIPLES`); B2B-блок получил `.linear-beam`. Footer: контурный водяной знак `SITE_DOMAIN` (`aria-hidden`).
+- Главная: принципы — bento-манифест (координатная сетка, `.linear-beam`, 3 карточки `PRINCIPLES`); B2B-блок получил `.linear-beam`. Footer: контурный водяной знак `SITE_DOMAIN` (`aria-hidden`). *(манифест позже удалён — см. «Главная ChistoLab 2.0»)*
 - `next build` можно запускать при живом dev-сервере: Next 16 пишет dev в `.next/dev`. В PowerShell `npm` не в PATH — `$env:Path = "C:\Users\annab\AppData\Local\Programs\node;" + $env:Path` и `npm.cmd`. `git` в системе не установлен, а в папке проекта нет `.git`.
 - Известное (не новое): при reduced-motion на `/` hydration-warning от `HomeHero`/`RevealText` (`useReducedMotion` на клиенте ≠ SSR).
 - **Проверки:** typecheck 0, lint чисто, test 191/191, build ок; Playwright 1440/390: шейдер только на десктопе, горизонтального скролла нет.
@@ -236,6 +236,7 @@
 - **Двухколоночный стенд `SteamShowcase.tsx` (Dual-Engine Video / Chemical Demo):**
   - Табы категорий сверху, слева плотный Master-list с мини-обложками и зелёными Steam-бейджами сметы, справа — Sticky плеер (`parseVideoSource` для реального `videoUrl` или 3-фазный авто-симулятор работы средства со светофором `buildHumanSafetyBadge` и прямыми кнопками конверсии `[Купить средство / Средство бренда]` и `[Открыть протокол]`). Подключён в `app/page.tsx`.
 - **Проверки:** `npm run typecheck` — 0 ошибок, `npm run lint` — чисто, `npm run test` — 192/192, `npm run build` — ок.
+- *(устарело: капсула, PillTabs в hero и авто-ротация удалены — см. «Главная ChistoLab 2.0» ниже)*
 
 ## Стандарт и полный арсенал для премиальных сайтов будущего (2026–2027)
 Глобальное правило по умолчанию подключено в `C:\Users\gushc\.devin\rules\web-design-stack.md` (всегда активно во всех сессиях). Краткая матрица того, что уже есть в `ChistoLab` и что подключать для задач следующего уровня:
@@ -254,6 +255,31 @@
 - Локальный seed: 16 решений без `videoUrl`, 32 связи с рекомендациями без `productId`. Это не результаты проверки продакшен-D1 или прав на медиа.
 - Свободный ответ консультанта помечается как предварительный и непроверенный; генерация ИИ всё ещё может ошибаться и не заменяет проверку экспертом.
 - Проверки: `npm run typecheck`, `npm run lint`, `npm run test` (200 тестов), `npm run build`. Деплой и изменение продакшен-базы не выполнялись. Фазу 2 (`prototype/home-v3/`) начинать только с разрешения владельца.
+
+## Главная ChistoLab 2.0 — реестровые компоненты и диагностика в три тапа (сделано)
+
+По `plan-09dd577c1cca0c26.md`: hero и лишние секции заменены на тёплую витрину без картинки; компоненты Motion Primitives, Magic UI и Arc реально задействованы.
+
+### Реестры и правила использования
+- `components/ui/` — из реестров: `text-effect`, `in-view`, `animated-group`, `animated-number`, `animated-background` (Motion Primitives), `bento-grid` (Magic UI, переписан на токены и `next/link`, иконки только `lucide-react`).
+- `components/arc/radio-cards/` — Arc, CSS-модуль адаптирован к токенам (`hsl(var(--primary))`, `var(--radius-panel)`); Arc `foundation.css` не подключать. В `radio-cards.module.css` переменные проекта — триплеты HSL, поэтому `var(--border)`/`var(--foreground)` без `hsl()` использовать нельзя.
+- `components/ui/button.tsx` (shadcn) и зависимости `cn`, `radix-ui`, `@radix-ui/react-icons` удалены — после переписи bento-grid не нужны.
+- `motion.create` во время рендера запрещён линт-правилом `react-hooks/static-components`: теги — модульная карта `motionComponents` в `animated-group.tsx`/`animated-number.tsx`.
+- `AnimatedNumber` — SSR отдаёт итоговое значение, count-up с нуля только после гидрации (jump(0) → set); при reduced-motion — `jump(value)`.
+- `AnimatedBackground` — управляемый: `defaultValue` синхронизируется с выбором родителя (setState-эффект убран, lint `set-state-in-effect`). Дочерний элемент должен принимать `data-id`; классы мержатся — ребёнку давать `block`/`w-full`, чтобы перебить `inline-flex`.
+- `Reveal` теперь внутри на `InView` (общая замена самописного whileInView); `HomeMotion` (`MotionConfig reducedMotion="user"`) сохраняется.
+
+### Главная (`app/page.tsx` + `components/home/`)
+- `HomeHero` переписан: `TextEffect` для H1, диагностика на всю ширину без картинки — `RadioCards` «Что случилось» (`listAllProblems`, новая чистая функция) + «На чём» (`listSurfaces`), карточка результата с «Не делайте», сметой и CTA. CTA — `<Link>` со стилями `arc/button/button.module.css` (сам Arc `Button` — `<button>`, для навигации нужен anchor). `Aurora`, `SpotlightCard`, `QUALITY_MARKS`, капсула с авто-ротацией, `PillTabs` в hero удалены. `SmartSearch` остался запасным путём.
+- `LiveStats` — ряд честных счётчиков (протоколы, открытые города через `openCities`, сумма шагов) на `AnimatedNumber` + `AnimatedGroup`.
+- `RoomsBento` — секция «По комнатам и поверхностям» на `BentoGrid` из `buildTaskShelves` (обложки `public/shelves`, featured-полка `lg:col-span-2 lg:row-span-2`), ссылки на `/solutions?type=/surface=`.
+- `SolutionShowcase` — подсветка выбранной строки через `AnimatedBackground` (wash `bg-primary/[0.07]` + ring), hover-превью панели остаётся на `hoverSlug`.
+- `app/page.tsx` — bento-манифест `PRINCIPLES` удалён; оставлена строка «Реклама отделена. Рейтинг не продаётся.» → `/rating/methodology`; B2B-блок — один CTA «Бизнесу» → `/for-partners`.
+- `app/suppliers/` удалён (404 по договорённости); ссылок не осталось, таблица `suppliers` в схеме БД не связана со страницей и не тронута.
+
+### Проверки (пройдены)
+- `npm run typecheck` — 0 ошибок; `npm run lint` — чисто; `npm run test` — 201/201 (+1 тест `listAllProblems`); `npm run build` — 141 страница, `/suppliers` нет в маршрутах.
+- Ручная проверка dev: `/`, `/solutions/vino-na-divane`, `/companies/spectrclean`, `/brands/kiehl` — 200; `/suppliers` — 404. В SSR-разметке: оба radiogroup диагностики, «Не делайте», «Открыть протокол», LiveStats, bento-полки, строка доверия, один CTA «Бизнесу». Aurora/капсулы/QUALITY_MARKS в HTML нет.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

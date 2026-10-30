@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Ban, PhoneCall, ShieldCheck, type LucideIcon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { HomeHero } from "@/components/home/HomeHero";
 import { HomeMotion, Reveal } from "@/components/home/Reveal";
+import { LiveStats } from "@/components/home/LiveStats";
+import { RoomsBento } from "@/components/home/RoomsBento";
 import { SolutionShowcase } from "@/components/home/SolutionShowcase";
 import { MastersBrandsSection } from "@/components/home/MastersBrandsSection";
 import { HomeEditorialAd } from "@/components/ads/HomeEditorialAd";
 import { SelectedSolutionProvider } from "@/components/providers/SelectedSolutionProvider";
 import { getEligibleAd } from "@/lib/ads/queries";
 import { getAllBrands, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
-import { ENABLED_MARKETS } from "@/lib/markets";
+import { ENABLED_MARKETS, openCities } from "@/lib/markets";
 import { resolveSelection } from "@/lib/solutions/diagnostic";
+import { pluralize } from "@/lib/format";
 import { SITE_NAME, SITE_URL, absoluteUrl, pageAlternates } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -21,12 +24,6 @@ export const metadata: Metadata = {
     "Пятно на диване, офис после корпоратива или выбор профессиональной химии — одна строка поиска. Пошаговые протоколы ChistoLab, честный рейтинг клининговых компаний и бренды для профи.",
   alternates: pageAlternates("/"),
 };
-
-const PRINCIPLES: { icon: LucideIcon; title: string; text: string }[] = [
-  { icon: ShieldCheck, title: "Реклама отделена", text: "Платные места помечены «Реклама», первое место в списке всегда органическое." },
-  { icon: PhoneCall, title: "Прямой контакт", text: "Телефон и Telegram компании без посредников и комиссии платформы." },
-  { icon: Ban, title: "Сначала безопасность", text: "В каждом протоколе блок «Не делайте» с рисками для поверхности." },
-];
 
 export default async function Home() {
   const [companies, solutions, estimates, brands, ...editorialAds] = await Promise.all([
@@ -48,6 +45,15 @@ export default async function Home() {
   const published = solutions.filter((s) => s.status === "published");
   // Протокол дня — тот же, что hero показывает по умолчанию (первый доступный выбор диагностики).
   const featuredSolution = resolveSelection(solutions, {}).solution ?? published[0] ?? null;
+
+  // Живые цифры — только реальные данные, без выдуманных метрик.
+  const openCityCount = ENABLED_MARKETS.reduce((sum, market) => sum + openCities(market).length, 0);
+  const totalSteps = published.reduce((sum, s) => sum + s.diySteps.length, 0);
+  const stats = [
+    { value: published.length, label: pluralize(published.length, ["протокол", "протокола", "протоколов"]) },
+    { value: openCityCount, label: pluralize(openCityCount, ["открытый город", "открытых города", "открытых городов"]) },
+    { value: totalSteps, label: pluralize(totalSteps, ["шаг", "шага", "шагов"]) + " в инструкциях" },
+  ];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -75,8 +81,15 @@ export default async function Home() {
           <HomeHero solutions={solutions} estimates={estimates} />
 
           <div className="container space-y-20 py-14 sm:space-y-24 sm:py-20">
+            <LiveStats stats={stats} />
+
+            {/* По комнатам и поверхностям — bento-полки с обложками */}
+            <Reveal>
+              <RoomsBento solutions={solutions} />
+            </Reveal>
+
             <SelectedSolutionProvider>
-              {/* Витрина решений + подборки 2×2 (композиция прототипа home-v3) */}
+              {/* Витрина решений + подборки (мастер-деталь) */}
               <Reveal>
                 <SolutionShowcase solutions={solutions} estimates={estimates} />
               </Reveal>
@@ -90,54 +103,15 @@ export default async function Home() {
               </Reveal>
             </SelectedSolutionProvider>
 
-            {/* Принципы — bento-манифест */}
-            <Reveal>
-              <section aria-labelledby="principles-title" className="relative isolate">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-x-4 -inset-y-8 -z-10 bg-[linear-gradient(to_right,hsl(var(--border)/0.7)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.7)_1px,transparent_1px)] bg-size-[40px_40px] mask-[radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
-                />
-                <div className="grid gap-4 lg:grid-cols-3 lg:grid-rows-3">
-                  <div className="data-surface linear-beam flex flex-col justify-between gap-8 rounded-panel p-6 sm:p-8 lg:col-span-2 lg:row-span-3">
-                    <div>
-                      <p className="font-data text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                        Манифест {SITE_NAME}
-                      </p>
-                      <h2
-                        id="principles-title"
-                        className="mt-4 max-w-2xl text-balance font-display text-3xl font-bold leading-[1.08] tracking-[-0.035em] text-foreground sm:text-5xl"
-                      >
-                        Платный охват возможен. <span className="text-link">Покупка оценки — нет.</span>
-                      </h2>
-                      <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-                        Размещение маркируется «Реклама» и не меняет порядок рейтинга. Контакт с компанией прямой, без
-                        лид-форм и комиссии платформы.
-                      </p>
-                    </div>
-                    <Link
-                      href="/rating/methodology"
-                      className="inline-flex min-h-11 items-center gap-1 self-start text-sm font-semibold text-link"
-                    >
-                      Как считаем рейтинг
-                      <ArrowRight className="size-4" aria-hidden />
-                    </Link>
-                  </div>
-                  {PRINCIPLES.map(({ icon: Icon, title, text }) => (
-                    <div key={title} className="data-surface flex items-start gap-4 rounded-panel p-5">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-control bg-primary/10 text-link ring-1 ring-inset ring-primary/15">
-                        <Icon className="size-5" aria-hidden />
-                      </span>
-                      <div className="min-w-0">
-                        <h3 className="font-display text-base font-bold tracking-tight text-foreground">{title}</h3>
-                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{text}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </Reveal>
+            {/* Строка доверия вместо бенто-манифеста */}
+            <p className="text-center text-sm text-muted-foreground">
+              Реклама отделена. Рейтинг не продаётся.{" "}
+              <Link href="/rating/methodology" className="font-semibold text-link hover:underline">
+                Как считаем рейтинг
+              </Link>
+            </p>
 
-            {/* B2B */}
+            {/* B2B: единый вход для бизнеса */}
             <Reveal>
               <section className="linear-beam relative overflow-hidden rounded-panel bg-cta p-7 text-cta-foreground sm:p-12">
                 <div
@@ -154,21 +128,13 @@ export default async function Home() {
                       решения, клининговая компания — в рейтинг с прямым телефоном.
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Link
-                      href="/for-brands"
-                      className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition-transform active:scale-[0.98]"
-                    >
-                      Интеграция для брендов
-                      <ArrowRight className="size-4" aria-hidden />
-                    </Link>
-                    <Link
-                      href="/for-partners"
-                      className="inline-flex min-h-12 items-center gap-2 rounded-full border border-cta-foreground/25 bg-cta-foreground/10 px-6 text-sm font-semibold text-cta-foreground transition-colors hover:bg-cta-foreground/15 active:scale-[0.98]"
-                    >
-                      Тарифы для клининга
-                    </Link>
-                  </div>
+                  <Link
+                    href="/for-partners"
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition-transform active:scale-[0.98]"
+                  >
+                    Бизнесу
+                    <ArrowRight className="size-4" aria-hidden />
+                  </Link>
                 </div>
               </section>
             </Reveal>

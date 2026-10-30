@@ -9,6 +9,7 @@ import {
   externalRating,
   findProtocols,
   formatEstimate,
+  listAllProblems,
   listProblems,
   listSurfaces,
   nextRadioIndex,
@@ -78,6 +79,19 @@ describe("diagnostic: surfaces and problems", () => {
       ["odor", "postrenovation"],
     );
     assert.deepEqual(listProblems(solutions, "facade"), []);
+  });
+
+  it("listAllProblems counts every published problem type across surfaces", () => {
+    const problems = listAllProblems(solutions);
+    assert.ok(problems.length > 0);
+    for (const p of problems) {
+      assert.equal(p.count, solutions.filter((x) => x.problemType === p.id).length);
+      assert.ok(p.count > 0);
+    }
+    assert.equal(problems.reduce((sum, p) => sum + p.count, 0), solutions.length);
+    assert.deepEqual(listAllProblems([]), []);
+    const drafts: Solution[] = [{ ...wine, id: "d", slug: "d", problemType: "stain", status: "draft" }];
+    assert.deepEqual(listAllProblems(drafts), []);
   });
 });
 
