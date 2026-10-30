@@ -44,19 +44,20 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
-  --radius-panel: 0.875rem;
-  --radius-control: 0.625rem;
+  --radius-panel: 1.25rem;
+  --radius-control: 0.875rem;
 }
 
 :root {
   color-scheme: light;
-  --background: 150 12% 96%;
+  /* Тёплая основа: льняной фон с лёгким шалфейным оттенком, белые карточки, зелёный остаётся единственным акцентом. */
+  --background: 60 16% 96%;
   --foreground: 160 24% 8%;
-  --card: 0 0% 100%;
+  --card: 50 30% 99%;
   --card-foreground: 160 24% 8%;
-  --muted: 150 14% 94%;
-  --muted-foreground: 160 8% 36%;
-  --border: 150 10% 86%;
+  --muted: 58 14% 93%;
+  --muted-foreground: 160 8% 34%;
+  --border: 55 12% 86%;
   /* текстовый акцент и кнопки: тёмная мята (AA на светлом) */
   --primary: 158 62% 24%;
   --primary-foreground: 158 30% 98%;
@@ -85,9 +86,9 @@
   --ph-neutral: 152 55% 40%;
   --ph-mild-alkali: 190 70% 42%;
   --ph-alkali: 222 72% 54%;
-  --shadow-tint: 160 30% 20%;
+  --shadow-tint: 40 22% 18%;
   --highlight: 0 0% 100%;
-  --radius: 0.875rem;
+  --radius: 1.25rem;
 }
 
 .dark {
@@ -146,6 +147,16 @@ body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 ::selection {
