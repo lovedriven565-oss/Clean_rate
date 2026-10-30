@@ -218,6 +218,14 @@ export const campaigns = sqliteTable(
       enum: ["where_to_buy", "request_quote", "training", "demo", "website"],
     }),
     badgeText: text("badge_text"),
+    /** Тип медиа-креатива: image|video — только для проверенных материалов бренда */
+    mediaType: text("media_type", { enum: ["image", "video"] }),
+    /** URL проверенного медиа-креатива (https: фото или видео/плеер) */
+    mediaUrl: text("media_url"),
+    /** Обложка видео-креатива — фасад до явного клика на воспроизведение */
+    mediaPoster: text("media_poster"),
+    /** Альтернативный текст медиа для доступности */
+    mediaAlt: text("media_alt"),
     priority: integer("priority").notNull().default(0),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }),

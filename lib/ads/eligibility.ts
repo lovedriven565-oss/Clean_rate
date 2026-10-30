@@ -514,6 +514,10 @@ export function resolveEligibleAd(
     badgeText: campaign.badgeText || defaultBadgeText(campaign.placement),
     reasonText,
     targetCountries: campaign.targetCountries ?? null,
+    mediaType: campaign.mediaType ?? null,
+    mediaUrl: campaign.mediaUrl ?? null,
+    mediaPoster: campaign.mediaPoster ?? null,
+    mediaAlt: campaign.mediaAlt ?? null,
   };
 }
 

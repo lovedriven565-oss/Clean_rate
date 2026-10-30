@@ -262,6 +262,9 @@ export type AdCtaType = "where_to_buy" | "request_quote" | "training" | "demo" |
 
 export type CampaignStatus = "draft" | "active" | "paused" | "completed";
 
+/** Тип медиа-креатива кампании: статичное фото или проверенное видео */
+export type AdMediaType = "image" | "video";
+
 export interface Campaign {
   id: string;
   brandId: string;
@@ -285,6 +288,10 @@ export interface Campaign {
   ctaUrl?: string | null;
   ctaType?: AdCtaType | null;
   badgeText?: string | null;
+  mediaType?: AdMediaType | null;
+  mediaUrl?: string | null;
+  mediaPoster?: string | null;
+  mediaAlt?: string | null;
   priority: number;
   createdAt: Date;
   updatedAt?: Date | null;
@@ -337,4 +344,9 @@ export interface EligibleAd {
   reasonText?: string;
   /** Страны кампании — клиентский гейт для SSG-страниц, где страна известна только из cookie */
   targetCountries?: string[] | null;
+  /** Медиа-креатив: фото или видео бренда — только проверенные материалы */
+  mediaType?: AdMediaType | null;
+  mediaUrl?: string | null;
+  mediaPoster?: string | null;
+  mediaAlt?: string | null;
 }

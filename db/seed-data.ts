@@ -1690,6 +1690,10 @@ export interface SeedCampaign {
   ctaUrl: string;
   ctaType: AdCtaType;
   badgeText?: string;
+  mediaType?: "image" | "video";
+  mediaUrl?: string;
+  mediaPoster?: string;
+  mediaAlt?: string;
   priority: number;
 }
 
