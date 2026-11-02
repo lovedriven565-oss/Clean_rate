@@ -5,9 +5,8 @@ import Link from "next/link";
 import { ArrowRight, BadgeCheck, MessageCircle, Phone, Star } from "lucide-react";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { trackClick } from "@/lib/analytics";
-import { categoryLandingHref } from "@/lib/categories";
+import { getCategoryName, categoryLandingHref } from "@/lib/categories";
 import { formatMarketCurrency } from "@/lib/format";
 import { CLEANING_SERVICES, pickCategoryEstimate } from "@/lib/home/cleaning-services";
 import {
@@ -22,10 +21,9 @@ import type { CategoryId, Company, PriceEstimate } from "@/lib/types";
 const ORGANIC_LIMIT = 3;
 
 /**
- * «Рейтинг проверенных клинеров по видам работ»: табы шести услуг,
- * вилка цен выбранного города (pe-cat-*) и карточки компаний города —
- * спонсорский слот с открытой маркировкой «Реклама» + органический порядок
- * по доверию. Прямые контакты (звонок/Telegram) трекаются.
+ * «Проверенные клинеры рядом»: табы шести услуг, смета города (pe-cat-*)
+ * и карточки компаний в ряд — спонсорская карточка с лаймовой рамкой и
+ * пометкой «Реклама» + органический порядок по доверию. Прямые контакты трекаются.
  */
 export function CleanersByServiceSection({
   companies,
@@ -51,22 +49,22 @@ export function CleanersByServiceSection({
   }, [companies, city.name, service]);
 
   return (
-    <section id="cleaners" aria-labelledby="cleaners-title" className="scroll-mt-24 bg-ink py-12 text-ink-foreground sm:py-16">
+    <section id="cleaners" aria-labelledby="cleaners-title" className="scroll-mt-24 border-y border-border bg-muted/40 py-12 sm:py-16">
       <div className="container">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-data text-[11px] font-bold uppercase tracking-[0.16em] text-lime">Мастера и цены</p>
-            <h2 id="cleaners-title" className="mt-2 max-w-xl text-balance font-display text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
-              Проверенные клинеры в {city.nameIn}
+            <p className="font-data text-[11px] font-bold uppercase tracking-[0.16em] text-teal">ChistoLab / Pro</p>
+            <h2 id="cleaners-title" className="mt-2 max-w-xl text-balance font-display text-3xl font-bold tracking-[-0.03em] text-foreground sm:text-4xl">
+              Проверенные клинеры рядом ({city.name})
             </h2>
-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-ink-foreground/70">
-              Органический порядок по доверию: проверенный профиль и подтверждённая внешняя оценка.
+            <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
+              Мастера с подтверждёнными отзывами. Звоните напрямую — без посредников.
               Рекламные места помечены и на ранжирование не влияют.
             </p>
           </div>
           <Link
             href={categoryLandingHref(city.slug, service)}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-lime hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal hover:underline"
           >
             Вся категория
             <ArrowRight className="size-4" aria-hidden />
@@ -84,8 +82,8 @@ export function CleanersByServiceSection({
               className={cn(
                 "min-h-11 shrink-0 rounded-full border px-4 text-sm font-semibold transition-colors",
                 service === s.id
-                  ? "border-lime bg-lime text-ink"
-                  : "border-white/15 bg-white/5 text-ink-foreground/80 hover:border-lime/50 hover:text-ink-foreground",
+                  ? "border-ink bg-ink text-ink-foreground"
+                  : "border-border bg-card text-muted-foreground hover:border-ink/40 hover:text-foreground",
               )}
             >
               {s.label}
@@ -93,51 +91,45 @@ export function CleanersByServiceSection({
           ))}
         </div>
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-          <div className="rounded-panel border border-white/10 bg-white/5 p-5 sm:p-6">
-            <p className="font-data text-[11px] font-bold uppercase tracking-[0.14em] text-ink-foreground/60">
-              {serviceInfo.label} · {city.name}
-            </p>
-            {estimate ? (
-              <>
-                <p className="mt-2 font-data text-3xl font-bold tracking-tight text-lime sm:text-4xl">
-                  {formatMarketCurrency(estimate.priceMin, estimate.currency as "BYN" | "RUB" | "KZT")}
-                  <span className="text-ink-foreground/50"> – </span>
-                  {formatMarketCurrency(estimate.priceMax, estimate.currency as "BYN" | "RUB" | "KZT")}
-                </p>
-                <p className="mt-1 text-sm text-ink-foreground/60">
-                  {estimate.unit ? `за ${estimate.unit}` : ""}
-                  {estimate.note ? ` · ${estimate.note}` : ""}
-                </p>
-              </>
-            ) : (
-              <p className="mt-2 text-sm text-ink-foreground/60">
-                Ориентир цены для этого города появится позже — сметы собираем из открытых прайсов.
+        {/* Смета выбранной услуги в городе */}
+        <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-1 rounded-panel border border-border bg-card p-5">
+          <p className="font-data text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+            {serviceInfo.label} · {city.name}
+          </p>
+          {estimate ? (
+            <>
+              <p className="font-data text-2xl font-bold tracking-tight text-teal sm:text-3xl">
+                {formatMarketCurrency(estimate.priceMin, estimate.currency as "BYN" | "RUB" | "KZT")}
+                <span className="text-muted-foreground"> – </span>
+                {formatMarketCurrency(estimate.priceMax, estimate.currency as "BYN" | "RUB" | "KZT")}
               </p>
-            )}
-            <p className="mt-4 text-xs leading-5 text-ink-foreground/50">
-              Итоговая стоимость зависит от площади и загрязнения — точную цену называет компания после осмотра.
-            </p>
-          </div>
-
-          <div>
-            {sponsor || organic.length > 0 ? (
-              <ul className="space-y-3">
-                {sponsor && <CleanerCard key={sponsor.id} company={sponsor} service={service} countryCode={market.countryCode} sponsor />}
-                {organic.map((company) => (
-                  <CleanerCard key={company.id} company={company} service={service} countryCode={market.countryCode} />
-                ))}
-              </ul>
-            ) : (
-              <p className="rounded-panel border border-dashed border-white/15 bg-white/5 p-5 text-sm text-ink-foreground/70">
-                В городе «{city.name}» компаний по услуге «{serviceInfo.label}» пока нет — случайные не подставляем.{" "}
-                <Link href="/for-partners" className="font-semibold text-lime">
-                  Разместить компанию
-                </Link>
+              <p className="text-sm text-muted-foreground">
+                {estimate.unit ? `за ${estimate.unit}` : ""}
+                {estimate.note ? ` · ${estimate.note}` : ""} · точную цену называет компания после осмотра
               </p>
-            )}
-          </div>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Ориентир цены для этого города появится позже — сметы собираем из открытых прайсов.
+            </p>
+          )}
         </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {sponsor && <CleanerCard key={sponsor.id} company={sponsor} service={service} countryCode={market.countryCode} sponsor />}
+          {organic.map((company) => (
+            <CleanerCard key={company.id} company={company} service={service} countryCode={market.countryCode} />
+          ))}
+        </div>
+
+        {!sponsor && organic.length === 0 && (
+          <p className="mt-6 rounded-panel border border-dashed border-border bg-card p-5 text-sm text-muted-foreground">
+            В городе «{city.name}» компаний по услуге «{serviceInfo.label}» пока нет — случайные не подставляем.{" "}
+            <Link href="/for-partners" className="font-semibold text-teal">
+              Разместить компанию
+            </Link>
+          </p>
+        )}
       </div>
     </section>
   );
@@ -157,52 +149,71 @@ function CleanerCard({
   const rating = externalRating(company);
 
   return (
-    <li className="flex flex-col gap-3 rounded-panel border border-white/10 bg-card p-4 text-foreground sm:flex-row sm:items-center">
-      <Link href={`/companies/${company.slug}`} className="flex min-w-0 flex-1 items-center gap-3">
-        <CompanyAvatar id={company.id} name={company.name} size="md" className="shrink-0" />
-        <span className="min-w-0">
-          <span className="flex flex-wrap items-center gap-1.5">
-            <span className="truncate text-sm font-bold">{company.name}</span>
-            {company.verified && <BadgeCheck className="size-4 shrink-0 text-teal" aria-label="Профиль проверен" />}
-            {sponsor && <StatusBadge variant="sponsor" />}
-          </span>
-          <span className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-muted-foreground">
+    <article
+      className={cn(
+        "flex flex-col gap-4 rounded-panel border bg-card p-5 transition-shadow hover:shadow-md",
+        sponsor ? "border-2 border-lime" : "border-border",
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <Link href={`/companies/${company.slug}`} className="flex min-w-0 items-center gap-3">
+          <CompanyAvatar id={company.id} name={company.name} size="md" className="shrink-0" />
+          <span className="min-w-0">
+            <span className="flex flex-wrap items-center gap-1.5">
+              <span className="truncate text-sm font-bold text-foreground">{company.name}</span>
+              {company.verified && <BadgeCheck className="size-4 shrink-0 text-teal" aria-label="Профиль проверен" />}
+            </span>
             {rating && (
-              <span className="inline-flex items-center gap-1 font-data">
+              <span className="mt-0.5 inline-flex items-center gap-1 font-data text-xs font-semibold text-foreground">
                 <Star className="size-3 fill-star text-star" aria-hidden />
-                {rating.value.toFixed(1)} · {rating.count} · {rating.source}
+                {rating.value.toFixed(1)} · {rating.count} отзывов · {rating.source}
               </span>
             )}
-            <span className="font-data">{companyPriceLabel(company)}</span>
           </span>
-        </span>
-      </Link>
-
-      <div className="flex shrink-0 items-center gap-2">
-        {company.phone && (
-          <a
-            href={telHref(company.phone)}
-            onClick={() => trackClick({ companyId: company.id, categoryId: service, clickType: "phone", countryCode })}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-semibold text-ink-foreground transition-transform active:scale-[0.98]"
-          >
-            <Phone className="size-4" aria-hidden />
-            Позвонить
-          </a>
-        )}
-        {company.telegramUrl && (
-          <a
-            href={company.telegramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Telegram ${company.name}`}
-            onClick={() => trackClick({ companyId: company.id, categoryId: service, clickType: "telegram", countryCode })}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm font-semibold text-foreground transition-colors hover:border-ink/40"
-          >
-            <MessageCircle className="size-4" aria-hidden />
-            Telegram
-          </a>
+        </Link>
+        {sponsor && (
+          <span className="shrink-0 rounded-[6px] bg-lime-soft px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-ink">
+            Реклама
+          </span>
         )}
       </div>
-    </li>
+
+      <div className="flex flex-wrap gap-1.5">
+        {company.categories.slice(0, 3).map((category) => (
+          <span key={category} className="rounded-full border border-border bg-muted/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+            {getCategoryName(category)}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-auto">
+        <p className="font-data text-lg font-bold text-foreground">{companyPriceLabel(company)}</p>
+        <div className="mt-3 flex gap-2">
+          {company.phone && (
+            <a
+              href={telHref(company.phone)}
+              onClick={() => trackClick({ companyId: company.id, categoryId: service, clickType: "phone", countryCode })}
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-control bg-lime px-4 text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+            >
+              <Phone className="size-4" aria-hidden />
+              Позвонить
+            </a>
+          )}
+          {company.telegramUrl && (
+            <a
+              href={company.telegramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Telegram ${company.name}`}
+              onClick={() => trackClick({ companyId: company.id, categoryId: service, clickType: "telegram", countryCode })}
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-control bg-ink px-4 text-sm font-semibold text-ink-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+            >
+              <MessageCircle className="size-4" aria-hidden />
+              Telegram
+            </a>
+          )}
+        </div>
+      </div>
+    </article>
   );
 }

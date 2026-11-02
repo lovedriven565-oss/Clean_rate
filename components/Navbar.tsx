@@ -1,26 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
-import { ArrowUpRight, Menu, Sparkles, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Loader2, Menu, Search, Sparkles, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NavSearch } from "@/components/NavSearch";
 import { RegionSelector } from "@/components/RegionSelector";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SearchSuggestions, useSmartSearch } from "@/components/SmartSearch";
+import { Input } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 
 /**
- * Шапка держит три основных раздела и бизнес-CTA. Консультант живёт в поиске
- * (подсказка «Спросить ИИ-консультанта»).
- * `match` — разделы, которые подсвечивают пункт (профиль компании относится к рейтингу,
- * а `/for-brands` — к брендам).
+ * Шапка в стиле Lovable: тонкий промо-бар, первый этаж с широкой строкой поиска,
+ * второй этаж — полоса разделов платформы (на десктопе). Консультант доступен
+ * и из поиска («Спросить ИИ-консультанта»), и отдельной кнопкой.
  */
 const navLinks = [
-  { href: "/solutions", label: "Решения", match: ["/solutions"] },
-  { href: "/brands", label: "Бренды", match: ["/brands", "/for-brands"] },
+  { href: "/solutions", label: "Протоколы", match: ["/solutions"] },
+  { href: "/#shelf", label: "Средства по зонам", match: [] },
+  { href: "/#videolab", label: "Краш-тесты", match: [] },
+  { href: "/#cleaners", label: "Клинеры рядом", match: [] },
   { href: "/rating", label: "Рейтинг компаний", match: ["/rating", "/companies"] },
+  { href: "/brands", label: "Бренды", match: ["/brands", "/for-brands"] },
 ];
 
 function subscribeScroll(onChange: () => void) {
@@ -50,48 +54,76 @@ export function Navbar() {
   const compact = scrolled && !open;
 
   return (
-    <header className="glass sticky top-0 z-40 border-x-0 border-t-0">
-      <div className="container flex h-14 items-center justify-between gap-3 sm:h-16">
-        <Link href="/" className="group flex min-w-0 items-center text-foreground" onClick={() => setOpen(false)}>
-          <BrandLogo markClassName="transition-transform group-hover:scale-105" />
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <NavSearch />
-          <RegionSelector className="hidden md:inline-flex" />
-          <ThemeToggle className="hidden sm:inline-flex" />
-          <Link
-            href="/assistant"
-            aria-current={pathname === "/assistant" ? "page" : undefined}
-            aria-label="ИИ-технолог"
-            className="inline-flex h-11 items-center gap-1.5 rounded-full bg-ink px-3.5 text-xs font-semibold text-ink-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98] sm:px-4"
-          >
-            <Sparkles className="size-3.5 text-lime" aria-hidden />
-            <span className="hidden sm:inline">ИИ-технолог</span>
+    <header className="sticky top-0 z-40">
+      {/* Промо-бар */}
+      <div className="bg-ink text-ink-foreground">
+        <div className="container flex h-9 items-center justify-between gap-3 text-xs">
+          <p className="flex min-w-0 items-center gap-2">
+            <span aria-hidden className="relative flex size-1.5 shrink-0">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-75" />
+              <span className="relative inline-flex size-1.5 rounded-full bg-lime" />
+            </span>
+            <span className="truncate">
+              <span className="font-semibold text-lime">Неделя чистоты:</span>{" "}
+              <span className="text-ink-foreground/80">краш-тесты средств и сметы мастеров в Минске, Москве и Алматы</span>
+            </span>
+          </p>
+          <Link href="/solutions" className="hidden shrink-0 items-center gap-1 font-semibold text-lime hover:underline sm:inline-flex">
+            Все протоколы
+            <ArrowRight className="size-3.5" aria-hidden />
           </Link>
-          <Link
-            href="/for-partners"
-            aria-current={pathname === "/for-partners" ? "page" : undefined}
-            className="hidden h-11 items-center gap-2 rounded-full bg-brand px-4 text-xs font-semibold text-brand-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98] xl:inline-flex"
-          >
-            Подключить компанию
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-          <button
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            aria-label={open ? "Закрыть меню" : "Открыть меню"}
-            aria-expanded={open}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground lg:hidden"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
         </div>
       </div>
 
+      {/* Первый этаж: логотип, широкий поиск, регион, ИИ-технолог, CTA */}
+      <div className="glass border-x-0 border-t-0">
+        <div className="container flex h-16 items-center justify-between gap-3">
+          <Link href="/" className="group flex min-w-0 shrink-0 items-center text-foreground" onClick={() => setOpen(false)}>
+            <BrandLogo markClassName="transition-transform group-hover:scale-105" />
+          </Link>
+
+          <HeaderSearch />
+
+          <div className="flex items-center gap-2">
+            <div className="lg:hidden">
+              <NavSearch />
+            </div>
+            <RegionSelector className="hidden md:inline-flex" />
+            <ThemeToggle className="hidden sm:inline-flex" />
+            <Link
+              href="/assistant"
+              aria-current={pathname === "/assistant" ? "page" : undefined}
+              aria-label="ИИ-технолог"
+              className="inline-flex h-11 items-center gap-1.5 rounded-control bg-ink px-3.5 text-xs font-semibold text-ink-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98] sm:px-4"
+            >
+              <Sparkles className="size-3.5 text-lime" aria-hidden />
+              <span className="hidden sm:inline">ИИ-технолог</span>
+            </Link>
+            <Link
+              href="/for-partners"
+              aria-current={pathname === "/for-partners" ? "page" : undefined}
+              className="hidden h-11 items-center gap-2 rounded-control bg-lime px-4 text-xs font-semibold text-ink transition-transform hover:-translate-y-0.5 active:scale-[0.98] xl:inline-flex"
+            >
+              Подключить компанию
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+            <button
+              type="button"
+              onClick={() => setOpen((value) => !value)}
+              aria-label={open ? "Закрыть меню" : "Открыть меню"}
+              aria-expanded={open}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-control border border-border bg-card text-foreground lg:hidden"
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Второй этаж: полоса разделов */}
       <div
         className={cn(
-          "hidden overflow-hidden border-t border-border/70 transition-[max-height,opacity] duration-300 lg:block",
+          "hidden overflow-hidden border-b border-border/70 bg-card/80 backdrop-blur-xl transition-[max-height,opacity] duration-300 lg:block",
           compact ? "max-h-0 border-transparent opacity-0" : "max-h-14 opacity-100"
         )}
       >
@@ -108,7 +140,7 @@ export function Navbar() {
                 onFocus={() => setHovered(link.href)}
                 onBlur={() => setHovered(null)}
                 className={cn(
-                  "relative isolate rounded-full px-4 py-1.5 font-medium text-muted-foreground transition-colors hover:text-foreground",
+                  "relative isolate rounded-control px-4 py-1.5 font-medium text-muted-foreground transition-colors hover:text-foreground",
                   active && "bg-ink text-ink-foreground hover:text-ink-foreground"
                 )}
               >
@@ -117,7 +149,7 @@ export function Navbar() {
                     layoutId="nav-hover-pill"
                     aria-hidden
                     transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                    className="absolute inset-0 -z-10 rounded-full bg-muted"
+                    className="absolute inset-0 -z-10 rounded-control bg-muted"
                   />
                 )}
                 {link.label}
@@ -149,7 +181,7 @@ export function Navbar() {
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "rounded-control px-4 py-3.5 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                    active && "bg-primary/10 font-semibold text-primary"
+                    active && "bg-teal/10 font-semibold text-teal"
                   )}
                 >
                   {link.label}
@@ -159,7 +191,7 @@ export function Navbar() {
             <Link
               href="/for-partners"
               onClick={() => setOpen(false)}
-              className="mt-3 inline-flex h-13 items-center justify-center gap-2 rounded-full bg-brand px-4 text-base font-semibold text-brand-foreground"
+              className="mt-3 inline-flex h-13 items-center justify-center gap-2 rounded-control bg-lime px-4 text-base font-semibold text-ink"
             >
               Подключить компанию
               <ArrowUpRight className="h-4 w-4" />
@@ -168,5 +200,58 @@ export function Navbar() {
         </nav>
       )}
     </header>
+  );
+}
+
+/**
+ * Широкая строка поиска в шапке (десктоп ≥lg): та же логика и подсказки, что у
+ * SmartSearch на главной, но без чипов — инпут + кнопка «Найти».
+ */
+function HeaderSearch() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const search = useSmartSearch();
+  const { query, loading, open, setOpen, handleQueryChange, handleSubmit, handleKeyDown } = search;
+
+  useEffect(() => {
+    function onClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [setOpen]);
+
+  return (
+    <div ref={containerRef} className="relative mx-4 hidden min-w-0 max-w-xl flex-1 lg:block">
+      <form onSubmit={handleSubmit} role="search" className="flex w-full items-center gap-2">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input
+            ref={inputRef}
+            value={query}
+            onChange={(event) => handleQueryChange(event.target.value)}
+            onFocus={() => query.trim() && setOpen(true)}
+            onKeyDown={handleKeyDown}
+            type="search"
+            aria-label="Поиск по платформе"
+            placeholder="Вино на диване, обезжириватель, клинер…"
+            className="h-11 rounded-control pl-10 pr-4"
+          />
+          {loading && (
+            <Loader2 className="absolute right-3.5 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" aria-hidden />
+          )}
+        </div>
+        <button
+          type="submit"
+          className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-control bg-ink px-5 text-sm font-semibold text-ink-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+        >
+          Найти
+        </button>
+      </form>
+
+      {open && query.trim() && <SearchSuggestions search={search} className="shadow-xl" />}
+    </div>
   );
 }

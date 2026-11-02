@@ -151,8 +151,8 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
                 aria-label={`Шаг ${step.order}`}
                 onClick={() => toggle(step.order)}
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-full font-data text-sm font-semibold transition-colors",
-                  checked ? "bg-lime text-ink" : "bg-foreground text-background hover:bg-foreground/85"
+                  "flex h-9 w-9 items-center justify-center rounded-control font-data text-sm font-semibold transition-colors",
+                  checked ? "bg-lime text-ink" : "bg-teal text-teal-foreground hover:bg-teal/90"
                 )}
               >
                 {checked ? <Check className="h-4 w-4" /> : String(step.order).padStart(2, "0")}

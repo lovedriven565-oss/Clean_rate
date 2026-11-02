@@ -10,7 +10,6 @@ import { ProductZoneShelf } from "@/components/home/ProductZoneShelf";
 import { SeasonalBrandBanner } from "@/components/home/SeasonalBrandBanner";
 import { VideoLabSection } from "@/components/home/VideoLabSection";
 import { CleanersByServiceSection } from "@/components/home/CleanersByServiceSection";
-import { SelectedSolutionProvider } from "@/components/providers/SelectedSolutionProvider";
 import { getEligibleAd } from "@/lib/ads/queries";
 import { seedAffiliateProducts, seedProducts, seedSolutionProducts } from "@/db/seed-data";
 import { getAllBrands, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
@@ -68,27 +67,25 @@ export default async function Home() {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
           />
 
-          <SelectedSolutionProvider>
-            {/* Первый экран: «Решить самому» ⇄ «Вызвать клининг» */}
-            <PlatformHero solutions={published} estimates={estimates} companies={companies} />
+          {/* Первый экран: «Решить самому» ⇄ «Вызвать клининг» */}
+          <PlatformHero solutions={published} estimates={estimates} companies={companies} />
 
-            {/* Все протоколы — горизонтальная лента частых задач */}
-            <TaskRibbon solutions={published} estimates={estimates} />
+          {/* Средства и техника по зонам дома */}
+          <ProductZoneShelf products={shelf} estimates={estimates} />
 
-            {/* Средства и техника по зонам дома */}
-            <ProductZoneShelf products={shelf} />
+          {/* Спецпроект сезона: активная кампания региона или редакционный выбор лаборатории */}
+          <div className="container">
+            <SeasonalBrandBanner ads={editorialAdByCountry} shelfProducts={shelf} />
+          </div>
 
-            {/* Спецпроект сезона (реклама): помеченный слот региона, не влияет на органику */}
-            <div className="container">
-              <SeasonalBrandBanner ads={editorialAdByCountry} shelfProducts={shelf} />
-            </div>
-
-            {/* Краш-тесты и разборы протоколов 9:16 */}
-            <VideoLabSection solutions={published} products={shelf} />
-          </SelectedSolutionProvider>
+          {/* Краш-тесты и разборы протоколов 9:16 */}
+          <VideoLabSection solutions={published} products={shelf} />
 
           {/* Клинеры города по видам работ: цены, спонсор + органика */}
           <CleanersByServiceSection companies={companies} estimates={estimates} />
+
+          {/* Лента всех протоколов — каталог и SEO-вес внизу страницы */}
+          <TaskRibbon solutions={published} estimates={estimates} />
 
           <div className="container space-y-16 py-14 sm:space-y-20 sm:py-20">
             {/* Строка доверия */}

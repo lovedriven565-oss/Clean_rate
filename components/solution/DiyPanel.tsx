@@ -91,22 +91,6 @@ export function DiyPanel({
             </span>
           </div>
 
-          {/* Человеческий светофор безопасности покрытий вместо сухих цифр pH */}
-          <div className="mt-3.5 flex flex-wrap gap-2" aria-label="Светофор безопасности для покрытия">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-star/30 bg-star/15 px-3 py-1 text-[11px] font-semibold text-star">
-              <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Совместимость с материалом нужно уточнить
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-star/30 bg-star/15 px-3 py-1 text-[11px] font-semibold text-star">
-              <FlaskConical className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Сначала тест на незаметном шве · Деликатное покрытие
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-danger/25 bg-danger/10 px-3 py-1 text-[11px] font-semibold text-danger">
-              <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Бытовая щёлочь и хлор: риск смыть краску и оставить ореол
-            </span>
-          </div>
-
           <ul className="mt-4 space-y-2.5">
             {[...recommended, ...alternatives].map((product) => {
               const brand = brandBySlugOrId(product.brandId);

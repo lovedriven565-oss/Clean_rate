@@ -38,7 +38,7 @@ describe("zone-shelf", () => {
   it("теги отражают запреты и состав", () => {
     assert.ok(safetyTags({ ph: 7, compatibleSurfaces: ["upholstery"] }).includes("Нейтральный состав"));
     const tags = safetyTags({ ph: 1.5, prohibitedSurfaces: ["marble", "enamel"] });
-    assert.ok(tags.includes("Сильная кислота"));
+    assert.ok(tags.includes("Сильный состав"));
     assert.ok(tags.some((t) => t === "Не для мрамора и эмали"));
   });
 

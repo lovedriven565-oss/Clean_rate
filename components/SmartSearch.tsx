@@ -222,7 +222,7 @@ export function useSmartSearch() {
   };
 }
 
-export function SmartSearch() {
+export function SmartSearch({ bare = false }: { bare?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [flash, setFlash] = useState(false);
@@ -293,6 +293,7 @@ export function SmartSearch() {
         </button>
       </form>
 
+      {!bare && (
       <div className="mt-3 flex flex-wrap items-center gap-1.5 px-1">
         {SEGMENTS.map(({ value, label, icon: Icon }) => (
           <button
@@ -323,8 +324,10 @@ export function SmartSearch() {
           </button>
         ))}
       </div>
+      )}
 
       {/* Экспресс-триаж состояния пятна для ИИ-технолога в 1 клик */}
+      {!bare && (
       <div className="mt-2 flex flex-wrap items-center gap-1.5 px-1">
         <span className="mr-0.5 font-data text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Триаж пятна:
@@ -350,6 +353,7 @@ export function SmartSearch() {
           ИИ-технолог
         </button>
       </div>
+      )}
 
       {open && query.trim() && <SearchSuggestions search={search} />}
     </div>

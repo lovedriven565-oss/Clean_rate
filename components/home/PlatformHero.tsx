@@ -3,11 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Ban, Phone, Send, Sparkles } from "lucide-react";
+import { ArrowRight, Ban, Building2, FlaskConical, ListChecks, MapPinned, Phone, Send, Sparkles } from "lucide-react";
 import { MarketBadge } from "@/components/MarketBadge";
 import { SmartSearch } from "@/components/SmartSearch";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { useSelectedSolution } from "@/components/providers/SelectedSolutionProvider";
 import { trackClick } from "@/lib/analytics";
 import { formatMarketCurrency, pluralize } from "@/lib/format";
 import { CLEANING_SERVICES, pickCategoryEstimate, pickTopCompany } from "@/lib/home/cleaning-services";
@@ -60,7 +59,6 @@ export function PlatformHero({
   companies: Company[];
 }) {
   const { market, city } = useRegion();
-  const { select: reportSelection } = useSelectedSolution();
   const [mode, setMode] = useState<Mode>("diy");
 
   const initial = useMemo(() => resolveSelection(solutions, {}), [solutions]);
@@ -76,10 +74,6 @@ export function PlatformHero({
     [solutions, problem, surface],
   );
   const active = protocols.find((s) => s.slug === variant) ?? protocols[0] ?? null;
-
-  useEffect(() => {
-    if (active) reportSelection(active);
-  }, [active, reportSelection]);
 
   function pickProblem(next: SolutionProblemType) {
     const options = listSurfaceAvailability(solutions, next);
@@ -105,10 +99,10 @@ export function PlatformHero({
 
   const cityCompanies = companies.filter((c) => c.city === city.name).length;
   const metrics = [
-    { value: solutions.length, label: pluralize(solutions.length, ["протокол", "протокола", "протоколов"]) },
-    { value: solutions.reduce((n, s) => n + s.diySteps.length, 0), label: "шагов в инструкциях" },
-    { value: cityCompanies, label: `компаний · ${city.name}` },
-    { value: market.cities.filter((c) => c.enabled !== false).length, label: `гор. · ${market.name}` },
+    { icon: FlaskConical, value: solutions.length, label: pluralize(solutions.length, ["протокол", "протокола", "протоколов"]) },
+    { icon: ListChecks, value: solutions.reduce((n, s) => n + s.diySteps.length, 0), label: "шагов в инструкциях" },
+    { icon: Building2, value: cityCompanies, label: `компаний · ${city.name}` },
+    { icon: MapPinned, value: market.cities.filter((c) => c.enabled !== false).length, label: `гор. · ${market.name}` },
   ];
 
   return (
@@ -200,12 +194,12 @@ export function PlatformHero({
               )}
             </div>
 
-            <div className="mt-7 rounded-panel bg-card p-3 text-foreground">
-              <p className="mb-2 flex items-center gap-1.5 px-1 text-sm text-muted-foreground">
-                <Sparkles className="size-3.5 text-teal" aria-hidden />
+            <div className="mt-7 max-w-xl">
+              <p className="mb-2 flex items-center gap-1.5 px-1 text-sm text-ink-foreground/70">
+                <Sparkles className="size-3.5 text-lime" aria-hidden />
                 Или опишите задачу словами
               </p>
-              <SmartSearch />
+              <SmartSearch bare />
             </div>
           </div>
 
@@ -385,10 +379,11 @@ export function PlatformHero({
 
         <dl className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-panel bg-white/10 sm:grid-cols-4">
           {metrics.map((m) => (
-            <div key={m.label} className="bg-ink px-4 py-4">
-              <dt className="sr-only">{m.label}</dt>
-              <dd>
-                <span className="font-data text-2xl font-bold text-lime">{m.value}</span>
+            <div key={m.label} className="flex items-center gap-3 bg-ink px-4 py-4">
+              <m.icon className="size-5 shrink-0 text-lime" aria-hidden />
+              <dd className="min-w-0">
+                <dt className="sr-only">{m.label}</dt>
+                <span className="font-data text-2xl font-bold text-ink-foreground">{m.value}</span>
                 <span className="mt-0.5 block text-xs text-ink-foreground/60">{m.label}</span>
               </dd>
             </div>

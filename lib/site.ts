@@ -35,15 +35,15 @@ export const SITE_MONOGRAM = (() => {
 
 /** Фирменные цвета для растровых картинок (ImageResponse не читает CSS-переменные). */
 export const BRAND_COLORS = {
-  ink: "#0d1110",
-  inkSoft: "#161d1b",
-  primary: "#176347",
-  primaryBright: "#a0e637",
-  brand: "#92db24",
-  brandForeground: "#0c1d17",
-  mint: "#2eb885",
-  paper: "#f6f6f3",
-  muted: "#9caba4",
+  ink: "#1a1a1a",
+  inkSoft: "#262626",
+  primary: "#0f7a5f",
+  primaryBright: "#c8f03d",
+  brand: "#c8f03d",
+  brandForeground: "#1a1a1a",
+  mint: "#2eb89a",
+  paper: "#f7f7f7",
+  muted: "#a3a3a3",
 } as const;
 
 /**

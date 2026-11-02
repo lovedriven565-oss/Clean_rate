@@ -86,11 +86,11 @@ const GENITIVE: Record<string, string> = {
 };
 
 const PH_TAG: Record<ReturnType<typeof phZone>, string> = {
-  acid: "Сильная кислота",
+  acid: "Сильный состав",
   "mild-acid": "Мягкий кислотный",
   neutral: "Нейтральный состав",
   "mild-alkali": "Щелочной состав",
-  alkali: "Сильная щёлочь",
+  alkali: "Сильный состав",
 };
 
 /** Человеческие теги: вердикт состава + главные запреты производителя, без цифр pH. */

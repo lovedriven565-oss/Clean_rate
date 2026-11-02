@@ -34,6 +34,7 @@
   --color-ink: hsl(var(--ink));
   --color-ink-foreground: hsl(var(--ink-foreground));
   --color-lime: hsl(var(--lime));
+  --color-lime-soft: hsl(var(--lime-soft));
   --color-teal: hsl(var(--teal));
   --color-teal-foreground: hsl(var(--teal-foreground));
   --color-danger-soft: hsl(var(--danger-soft));
@@ -56,97 +57,99 @@
 
 :root {
   color-scheme: light;
-  /* Тёплая основа: льняной фон с лёгким шалфейным оттенком, белые карточки, зелёный остаётся единственным акцентом. */
-  --background: 0 0% 97%;
-  --foreground: 160 24% 8%;
+  /* База Lovable: чистый нейтральный фон #F7F7F7, белые карточки, графит без оттенка. */
+  --background: 0 0% 97.5%;
+  --foreground: 0 0% 11%;
   --card: 0 0% 100%;
-  --card-foreground: 160 24% 8%;
-  --muted: 0 0% 94%;
-  --muted-foreground: 160 8% 34%;
-  --border: 0 0% 88%;
-  /* текстовый акцент и кнопки: тёмная мята (AA на светлом) */
-  --primary: 158 62% 24%;
-  --primary-foreground: 158 30% 98%;
-  --link: 158 62% 24%;
+  --card-foreground: 0 0% 11%;
+  --muted: 0 0% 95%;
+  --muted-foreground: 0 0% 40%;
+  --border: 0 0% 90%;
+  /* текстовый акцент и кнопки: изумрудный teal (AA на светлом) */
+  --primary: 173 80% 28%;
+  --primary-foreground: 170 30% 98%;
+  --link: 173 80% 28%;
   /* лайм — только заливки, никогда текст на светлом */
-  --brand: 84 72% 50%;
-  --brand-foreground: 160 40% 8%;
-  --mint: 158 60% 45%;
+  --brand: 74 86% 58%;
+  --brand-foreground: 0 0% 10%;
+  --mint: 168 60% 42%;
   --aurora: 0.22;
   --ad: 38 92% 38%;
   /* accent = focus-ring (color lock) */
-  --accent: 158 62% 30%;
-  --accent-foreground: 158 30% 98%;
+  --accent: 173 80% 30%;
+  --accent-foreground: 170 30% 98%;
   --star: 39 94% 46%;
   --success: 152 62% 33%;
-  --danger: 356 72% 48%;
+  --danger: 14 80% 46%;
   --sponsor: 43 96% 56%;
   --sponsor-foreground: 30 60% 12%;
-  /* Фирменные поверхности Lovable-стиля: графит, кислотный лайм, тёмная мята. */
-  --ink: 160 24% 8%;
-  --ink-foreground: 150 16% 96%;
-  --lime: 84 72% 50%;
-  --teal: 158 62% 24%;
-  --teal-foreground: 158 30% 98%;
-  --danger-soft: 356 72% 96%;
-  --contrast: 160 24% 8%;
-  --contrast-foreground: 150 16% 96%;
+  /* Фирменные поверхности Lovable: нейтральный графит, кислотный лайм, изумруд. */
+  --ink: 0 0% 10%;
+  --ink-foreground: 0 0% 96%;
+  --lime: 74 86% 58%;
+  --lime-soft: 74 60% 92%;
+  --teal: 173 80% 28%;
+  --teal-foreground: 170 30% 98%;
+  --danger-soft: 15 55% 96%;
+  --contrast: 0 0% 10%;
+  --contrast-foreground: 0 0% 96%;
   /* Финал страницы и CTA-панели остаются тёмными в обеих темах (в отличие от инверсного --contrast). */
-  --cta: 160 24% 8%;
-  --cta-foreground: 150 16% 96%;
+  --cta: 0 0% 10%;
+  --cta-foreground: 0 0% 96%;
   --ph-acid: 356 72% 52%;
   --ph-mild-acid: 32 92% 52%;
   --ph-neutral: 152 55% 40%;
   --ph-mild-alkali: 190 70% 42%;
   --ph-alkali: 222 72% 54%;
-  --shadow-tint: 40 22% 18%;
+  --shadow-tint: 0 0% 10%;
   --highlight: 0 0% 100%;
   --radius: 0.75rem;
 }
 
 .dark {
   color-scheme: dark;
-  --background: 160 14% 6%;
-  --foreground: 150 16% 94%;
-  --card: 160 12% 10%;
-  --card-foreground: 150 16% 94%;
-  --muted: 160 12% 14%;
-  --muted-foreground: 155 8% 64%;
-  --border: 160 10% 19%;
+  --background: 0 0% 7%;
+  --foreground: 0 0% 93%;
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 93%;
+  --muted: 0 0% 14%;
+  --muted-foreground: 0 0% 62%;
+  --border: 0 0% 18%;
   /* на тёмном лайм читается и текстом, и заливкой */
-  --primary: 84 70% 62%;
-  --primary-foreground: 160 40% 8%;
-  --link: 84 70% 62%;
-  --brand: 84 78% 56%;
-  --brand-foreground: 160 40% 8%;
-  --mint: 158 60% 40%;
+  --primary: 74 80% 60%;
+  --primary-foreground: 0 0% 10%;
+  --link: 74 80% 60%;
+  --brand: 74 86% 58%;
+  --brand-foreground: 0 0% 10%;
+  --mint: 168 50% 42%;
   --aurora: 0.16;
   --ad: 40 90% 60%;
-  --accent: 84 70% 62%;
-  --accent-foreground: 160 40% 8%;
+  --accent: 74 80% 60%;
+  --accent-foreground: 0 0% 10%;
   --star: 43 96% 58%;
   --success: 156 60% 48%;
-  --danger: 354 76% 64%;
+  --danger: 16 76% 62%;
   --sponsor: 43 96% 60%;
   --sponsor-foreground: 30 60% 10%;
   /* ink-панели остаются тёмными и в тёмной теме — это бренд-блоки, а не инверсия. */
-  --ink: 160 22% 9%;
-  --ink-foreground: 150 16% 96%;
-  --lime: 84 78% 56%;
-  --teal: 84 70% 62%;
-  --teal-foreground: 160 40% 8%;
-  --danger-soft: 356 60% 15%;
-  --contrast: 150 16% 94%;
-  --contrast-foreground: 160 14% 8%;
-  --cta: 160 22% 9%;
-  --cta-foreground: 150 16% 96%;
+  --ink: 0 0% 9%;
+  --ink-foreground: 0 0% 96%;
+  --lime: 74 86% 58%;
+  --lime-soft: 74 30% 18%;
+  --teal: 168 55% 55%;
+  --teal-foreground: 0 0% 10%;
+  --danger-soft: 14 40% 16%;
+  --contrast: 0 0% 93%;
+  --contrast-foreground: 0 0% 8%;
+  --cta: 0 0% 9%;
+  --cta-foreground: 0 0% 96%;
   --ph-acid: 356 78% 62%;
   --ph-mild-acid: 32 92% 58%;
   --ph-neutral: 152 55% 50%;
   --ph-mild-alkali: 190 70% 52%;
   --ph-alkali: 222 80% 66%;
-  --shadow-tint: 160 40% 2%;
-  --highlight: 150 16% 100%;
+  --shadow-tint: 0 0% 0%;
+  --highlight: 0 0% 100%;
 }
 
 /* В @layer base: иначе безслойное правило перебивает все border-* утилиты (hover:border-brand, border-primary и т.д.). */
