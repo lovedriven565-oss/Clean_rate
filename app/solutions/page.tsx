@@ -27,7 +27,7 @@ export default async function SolutionsPage() {
             <nav aria-label="Хлебные крошки" className="text-xs text-muted-foreground">
               <ol className="flex items-center gap-2">
                 <li>
-                  <Link href="/" className="text-link hover:underline">Главная</Link>
+                  <Link href="/" className="text-teal hover:underline">Главная</Link>
                 </li>
                 <li aria-hidden>/</li>
                 <li className="font-medium text-foreground">Решения</li>
@@ -42,11 +42,11 @@ export default async function SolutionsPage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-2 text-xs font-medium text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 data-surface rounded-full px-3 py-1.5">
-                <Hand className="h-3.5 w-3.5 text-primary" />
+                <Hand className="h-3.5 w-3.5 text-teal" />
                 Сделать самому
               </span>
               <span className="inline-flex items-center gap-1.5 data-surface rounded-full px-3 py-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <Sparkles className="h-3.5 w-3.5 text-teal" />
                 Вызвать мастера
               </span>
             </div>
@@ -70,14 +70,14 @@ export default async function SolutionsPage() {
             <div className="mt-5 flex shrink-0 flex-wrap gap-3 lg:mt-0">
               <Link
                 href="/assistant"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition-transform hover:-translate-y-0.5"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-lime px-6 text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5"
               >
                 Спросить консультанта
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/rating"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold text-link transition-colors hover:underline"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold text-teal transition-colors hover:underline"
               >
                 Открыть рейтинг
               </Link>

@@ -96,7 +96,7 @@ function ExplorerInner({ solutions }: { solutions: Solution[] }) {
           <button
             type="button"
             onClick={() => router.replace(pathname, { scroll: false })}
-            className="text-sm font-semibold text-link hover:underline"
+            className="text-sm font-semibold text-teal hover:underline"
           >
             Сбросить фильтры
           </button>

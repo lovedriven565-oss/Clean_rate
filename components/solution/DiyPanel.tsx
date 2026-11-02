@@ -35,7 +35,7 @@ export function DiyPanel({
     >
       <header className="flex items-start justify-between gap-4">
         <div>
-          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-teal">
             <Hand className="h-3.5 w-3.5" />
             Путь 1
           </span>
@@ -125,14 +125,14 @@ export function DiyPanel({
               return (
                 <li
                   key={product.id ?? label}
-                  className="group flex flex-col gap-3 rounded-control border border-border/80 bg-muted/30 p-4 transition-colors hover:border-primary/30 hover:bg-card sm:flex-row sm:items-center sm:justify-between"
+                  className="group flex flex-col gap-3 rounded-control border border-border/80 bg-muted/30 p-4 transition-colors hover:border-teal/30 hover:bg-card sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
                         className={
                           isPrimary
-                            ? "inline-flex items-center rounded-full bg-primary/12 px-2.5 py-0.5 text-[11px] font-semibold text-primary"
+                            ? "inline-flex items-center rounded-full bg-teal/12 px-2.5 py-0.5 text-[11px] font-semibold text-teal"
                             : "inline-flex items-center rounded-full border border-border bg-card px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
                         }
                       >
@@ -157,7 +157,7 @@ export function DiyPanel({
 
                     {brand ? (
                       <Link href={`/brands/${brand.slug}`} className="mt-2 block">
-                        <span className="block text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
+                        <span className="block text-sm font-semibold text-foreground transition-colors group-hover:text-teal">
                           {label}
                         </span>
                         <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground group-hover:text-foreground">
@@ -182,7 +182,7 @@ export function DiyPanel({
                     {brand && (
                       <Link
                         href={`/brands/${brand.slug}`}
-                        className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-card/70 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+                        className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-card/70 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-teal/30 hover:text-foreground"
                       >
                         О бренде
                       </Link>
@@ -192,7 +192,7 @@ export function DiyPanel({
                         href={buyUrl}
                         target="_blank"
                         rel="sponsored nofollow noopener"
-                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3.5 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground active:scale-[0.98]"
+                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-teal/25 bg-teal/10 px-3.5 text-xs font-semibold text-teal transition-colors hover:bg-teal hover:text-teal-foreground active:scale-[0.98]"
                       >
                         <ShoppingCart className="h-3.5 w-3.5" />
                         Купить

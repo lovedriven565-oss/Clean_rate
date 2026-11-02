@@ -47,6 +47,12 @@ export const AUDIENCE_LABELS: Record<SolutionAudience, string> = {
   both: "Дом и бизнес",
 };
 
+/** Заголовок-запрос «Как убрать …»; для уборки помещений название уже действие, префикс не добавляется. */
+export function howToTitle(solution: Pick<Solution, "title" | "problemType">): string {
+  if (solution.problemType === "general") return solution.title;
+  return `Как убрать ${solution.title.charAt(0).toLowerCase()}${solution.title.slice(1)}`;
+}
+
 export const PROBLEM_TYPES = Object.keys(PROBLEM_TYPE_LABELS) as SolutionProblemType[];
 export const SURFACES = Object.keys(SURFACE_LABELS) as SolutionSurface[];
 

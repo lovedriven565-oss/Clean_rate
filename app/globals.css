@@ -31,6 +31,12 @@
   --color-star: hsl(var(--star));
   --color-sponsor: hsl(var(--sponsor));
   --color-sponsor-foreground: hsl(var(--sponsor-foreground));
+  --color-ink: hsl(var(--ink));
+  --color-ink-foreground: hsl(var(--ink-foreground));
+  --color-lime: hsl(var(--lime));
+  --color-teal: hsl(var(--teal));
+  --color-teal-foreground: hsl(var(--teal-foreground));
+  --color-danger-soft: hsl(var(--danger-soft));
   --color-contrast: hsl(var(--contrast));
   --color-contrast-foreground: hsl(var(--contrast-foreground));
   --color-cta: hsl(var(--cta));
@@ -41,23 +47,23 @@
   --color-ph-neutral: hsl(var(--ph-neutral));
   --color-ph-mild-alkali: hsl(var(--ph-mild-alkali));
   --color-ph-alkali: hsl(var(--ph-alkali));
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
-  --radius-panel: 1.25rem;
-  --radius-control: 0.875rem;
+  --font-sans: var(--font-golos), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-golos), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
+  --radius-panel: 0.75rem;
+  --radius-control: 0.625rem;
 }
 
 :root {
   color-scheme: light;
   /* Тёплая основа: льняной фон с лёгким шалфейным оттенком, белые карточки, зелёный остаётся единственным акцентом. */
-  --background: 60 16% 96%;
+  --background: 0 0% 97%;
   --foreground: 160 24% 8%;
-  --card: 50 30% 99%;
+  --card: 0 0% 100%;
   --card-foreground: 160 24% 8%;
-  --muted: 58 14% 93%;
+  --muted: 0 0% 94%;
   --muted-foreground: 160 8% 34%;
-  --border: 55 12% 86%;
+  --border: 0 0% 88%;
   /* текстовый акцент и кнопки: тёмная мята (AA на светлом) */
   --primary: 158 62% 24%;
   --primary-foreground: 158 30% 98%;
@@ -76,6 +82,13 @@
   --danger: 356 72% 48%;
   --sponsor: 43 96% 56%;
   --sponsor-foreground: 30 60% 12%;
+  /* Фирменные поверхности Lovable-стиля: графит, кислотный лайм, тёмная мята. */
+  --ink: 160 24% 8%;
+  --ink-foreground: 150 16% 96%;
+  --lime: 84 72% 50%;
+  --teal: 158 62% 24%;
+  --teal-foreground: 158 30% 98%;
+  --danger-soft: 356 72% 96%;
   --contrast: 160 24% 8%;
   --contrast-foreground: 150 16% 96%;
   /* Финал страницы и CTA-панели остаются тёмными в обеих темах (в отличие от инверсного --contrast). */
@@ -88,7 +101,7 @@
   --ph-alkali: 222 72% 54%;
   --shadow-tint: 40 22% 18%;
   --highlight: 0 0% 100%;
-  --radius: 1.25rem;
+  --radius: 0.75rem;
 }
 
 .dark {
@@ -116,6 +129,13 @@
   --danger: 354 76% 64%;
   --sponsor: 43 96% 60%;
   --sponsor-foreground: 30 60% 10%;
+  /* ink-панели остаются тёмными и в тёмной теме — это бренд-блоки, а не инверсия. */
+  --ink: 160 22% 9%;
+  --ink-foreground: 150 16% 96%;
+  --lime: 84 78% 56%;
+  --teal: 84 70% 62%;
+  --teal-foreground: 160 40% 8%;
+  --danger-soft: 356 60% 15%;
   --contrast: 150 16% 94%;
   --contrast-foreground: 160 14% 8%;
   --cta: 160 22% 9%;

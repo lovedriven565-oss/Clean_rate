@@ -11,6 +11,7 @@ import {
   formatEstimate,
   listAllProblems,
   listProblems,
+  listSurfaceAvailability,
   listSurfaces,
   nextRadioIndex,
   pickEstimate,
@@ -40,6 +41,19 @@ describe("diagnostic: surfaces and problems", () => {
     assert.equal(surfaces.reduce((sum, s) => sum + s.count, 0), solutions.length);
     assert.ok(surfaces.some((s) => s.id === "carpet"), "carpet has published protocols");
     assert.ok(!surfaces.some((s) => s.id === "facade"), "no protocols, so no tile");
+  });
+
+  it("surface availability marks impossible pairs instead of hiding or swapping them", () => {
+    const all = listSurfaces(solutions).map((s) => s.id);
+    const odor = listSurfaceAvailability(solutions, "odor");
+    assert.deepEqual(odor.map((s) => s.id), all, "every surface stays visible");
+    const enabled = odor.filter((s) => s.available).map((s) => s.id);
+    assert.ok(enabled.includes("carpet") && enabled.includes("mattress"));
+    assert.ok(!enabled.includes("window") && !enabled.includes("bathroom"));
+    for (const s of odor) {
+      assert.equal(s.available, solutions.some((x) => x.surface === s.id && x.problemType === "odor"));
+    }
+    assert.ok(listSurfaceAvailability(solutions, null).every((s) => s.available));
   });
 
   it("draft and archived solutions never produce tiles", () => {
@@ -296,7 +310,7 @@ describe("pro companies", () => {
     assert.equal(offer.company?.city, "Москва");
     assert.ok(offer.company!.phone || offer.company!.telegramUrl, "master must have a direct contact");
     assert.match(offer.priceFrom ?? "", /2\s?500/);
-    const kz = buildEscalation(wine, [], companies, { countryCode: "KZ", city: "Алматы", cities: ["Алматы"] });
+    const kz = buildEscalation(wine, [], companies, { countryCode: "KZ", city: "Астана", cities: ["Астана"] });
     assert.equal(kz.company, null);
     assert.equal(buildEscalation(wine, [], []).priceFrom, null);
   });

@@ -94,10 +94,10 @@ describe("turnstile verification", () => {
 });
 
 describe("market focus", () => {
-  it("opens Belarus and Russia (Moscow only); Kazakhstan stays closed until it has companies", () => {
+  it("opens Belarus, Russia (Moscow) and Kazakhstan (Almaty); unlaunched cities stay closed", () => {
     assert.deepEqual(
       ENABLED_MARKETS.map((m) => m.countryCode),
-      ["BY", "RU"]
+      ["BY", "RU", "KZ"]
     );
     assert.deepEqual(
       openCities(MARKETS.BY).map((c) => c.slug),
@@ -107,38 +107,53 @@ describe("market focus", () => {
       openCities(MARKETS.RU).map((c) => c.slug),
       ["moscow"]
     );
+    assert.deepEqual(
+      openCities(MARKETS.KZ).map((c) => c.slug),
+      ["almaty"]
+    );
   });
 
-  it("falls back to the default market for a disabled country (old cookie)", () => {
+  it("resolves every enabled market from the region cookie", () => {
     assert.equal(getMarket("RU").countryCode, "RU");
-    assert.equal(getMarket("KZ").countryCode, "BY");
+    assert.equal(getMarket("KZ").countryCode, "KZ");
+    assert.equal(getMarket("XX").countryCode, "BY");
   });
 
   it("hides cities that are not launched yet from the region selector and landings", () => {
     assert.equal(getCity("RU", "spb").slug, "moscow");
     assert.equal(getCity("BY", "brest").slug, "minsk");
+    assert.equal(getCity("KZ", "astana").slug, "almaty");
     assert.equal(getCityBySlug("spb"), undefined);
     assert.equal(getCityBySlug("brest"), undefined);
     assert.equal(getCityBySlug("ekb"), undefined);
+    assert.equal(getCityBySlug("astana"), undefined);
     assert.equal(getCityBySlug("moscow")?.market.countryCode, "RU");
+    assert.equal(getCityBySlug("almaty")?.market.countryCode, "KZ");
     const cities = new Set(landingStaticParams().map((p) => p.city));
     assert.ok(cities.has("minsk"));
     assert.ok(cities.has("moscow"));
+    assert.ok(cities.has("almaty"));
     assert.ok(!cities.has("brest"));
     assert.ok(!cities.has("spb"));
     assert.ok(!cities.has("kazan"));
-    assert.ok(!cities.has("almaty"));
+    assert.ok(!cities.has("astana"));
   });
 
   it("synchronously builds footer SEO links only for open cities and filters indexable landings", () => {
     const footerLinks = getFooterLandingLinks(3);
-    assert.equal(footerLinks.length, 6);
-    assert.ok(footerLinks.every((l) => l.href.startsWith("/minsk/") || l.href.startsWith("/moscow/")));
-    assert.ok(footerLinks.every((l) => !l.href.startsWith("/brest/") && !l.href.startsWith("/spb/") && !l.href.startsWith("/almaty/")));
+    assert.equal(footerLinks.length, 9);
+    assert.ok(
+      footerLinks.every(
+        (l) => l.href.startsWith("/minsk/") || l.href.startsWith("/moscow/") || l.href.startsWith("/almaty/")
+      )
+    );
+    assert.ok(
+      footerLinks.every((l) => !l.href.startsWith("/brest/") && !l.href.startsWith("/spb/") && !l.href.startsWith("/astana/"))
+    );
 
     const indexable = getIndexableLandings(getFallbackCompanies());
     assert.ok(indexable.length > 0);
-    assert.ok(indexable.every((p) => p.city === "minsk" || p.city === "moscow"));
+    assert.ok(indexable.every((p) => p.city === "minsk" || p.city === "moscow" || p.city === "almaty"));
     assert.deepEqual(getIndexableLandings([]), []);
   });
 
@@ -151,7 +166,7 @@ describe("market focus", () => {
     const languages = Object.keys(alternates.languages ?? {});
     assert.ok(languages.includes("ru-BY"));
     assert.ok(languages.includes("ru-RU"));
-    assert.ok(!languages.includes("ru-KZ"));
+    assert.ok(languages.includes("ru-KZ"));
     assert.equal(alternates.canonical, "https://chistolab.pro/");
   });
 

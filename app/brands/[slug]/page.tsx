@@ -58,7 +58,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
         <section className="container -mt-8 relative z-10">
           <div className="data-surface grid gap-6 rounded-panel border border-border p-6 sm:grid-cols-[auto_1fr] sm:items-center sm:p-8">
             <div>
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Индекс доверия профи</span>
+              <span className="text-xs font-bold uppercase tracking-[0.18em] text-teal">Индекс доверия профи</span>
               <div className="mt-2 flex items-end gap-3">
                 <strong className="font-data text-5xl font-medium text-foreground">{score}</strong>
                 <span className="pb-2 text-sm text-muted-foreground">#{position + 1} из {ranked.length}</span>
@@ -83,7 +83,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
           <section className="container pt-16">
             <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-teal">
                   Средства и материалы
                 </span>
                 <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
@@ -172,12 +172,12 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
           <section className="container py-16">
             <div className="mb-8 flex items-end justify-between gap-4">
               <div>
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">В протоколах</span>
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-teal">В протоколах</span>
                 <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
                   Где {brand.name} рекомендуют
                 </h2>
               </div>
-              <Link href="/solutions" className="text-sm font-semibold text-primary">
+              <Link href="/solutions" className="text-sm font-semibold text-teal">
                 Все решения
               </Link>
             </div>
@@ -188,14 +188,14 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
                   <li key={solution.id}>
                     <Link
                       href={`/solutions/${solution.slug}`}
-                      className="group flex h-full flex-col gap-2 rounded-control border border-border bg-card p-5 transition-colors hover:border-primary/30"
+                      className="group flex h-full flex-col gap-2 rounded-control border border-border bg-card p-5 transition-colors hover:border-teal/30"
                     >
                       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                         {link?.role === "recommended" ? "Рекомендуем" : "Альтернатива"}
                       </span>
-                      <span className="font-display text-base font-bold text-foreground group-hover:text-primary">{solution.title}</span>
+                      <span className="font-display text-base font-bold text-foreground group-hover:text-teal">{solution.title}</span>
                       {link?.note && <span className="text-sm text-muted-foreground">{link.note}</span>}
-                      <span className="mt-auto inline-flex items-center gap-1 pt-2 text-xs font-semibold text-primary">
+                      <span className="mt-auto inline-flex items-center gap-1 pt-2 text-xs font-semibold text-teal">
                         Открыть протокол
                         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                       </span>

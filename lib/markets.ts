@@ -78,10 +78,11 @@ export const MARKETS: Record<CountryCode, Market> = {
     currency: "KZT",
     phoneCode: "+7",
     mapsHost: "yandex.kz",
-    enabled: false,
+    enabled: true,
     cities: [
       { slug: "almaty", name: "Алматы", nameIn: "Алматы" },
-      { slug: "astana", name: "Астана", nameIn: "Астане" },
+      // Астана закрыта до появления компаний: пустой город ломает рейтинг и ProPanel
+      { slug: "astana", name: "Астана", nameIn: "Астане", enabled: false },
     ],
   },
 };

@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ViewTransition } from "react";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
+import { Golos_Text, JetBrains_Mono } from "next/font/google";
 import { ExternalAnalytics } from "@/components/analytics/ExternalAnalytics";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { MotionProvider } from "@/components/providers/MotionProvider";
@@ -9,6 +8,9 @@ import { RegionProvider } from "@/components/providers/RegionProvider";
 import { SpeculationRules } from "@/components/SpeculationRules";
 import { BRAND_COLORS, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
+
+const golos = Golos_Text({ subsets: ["latin", "cyrillic"], variable: "--font-golos", display: "swap" });
+const jetbrains = JetBrains_Mono({ subsets: ["latin", "cyrillic"], variable: "--font-jetbrains", display: "swap" });
 
 const description =
   "Лаборатория решений чистоты ChistoLab: пошаговые протоколы выведения пятен и уборки, честный рейтинг клининговых компаний и бренды для профи в Беларуси и России.";
@@ -52,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="ru" suppressHydrationWarning className={`${golos.variable} ${jetbrains.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <SpeculationRules />

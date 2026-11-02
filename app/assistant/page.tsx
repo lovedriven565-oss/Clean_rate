@@ -32,7 +32,7 @@ export default async function AssistantPage() {
       <main className="flex-1">
         <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
           <header className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-teal">
               Два пути решения · Проверенные протоколы
             </span>
             <h1 className="mt-2 font-display text-3xl font-bold tracking-[-0.03em] text-foreground sm:text-4xl">

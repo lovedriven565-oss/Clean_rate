@@ -38,7 +38,7 @@ export function ProPanel({
     >
       <header className="flex items-start justify-between gap-4">
         <div>
-          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-teal">
             <Sparkles className="h-3.5 w-3.5" />
             Путь 2
           </span>
@@ -67,7 +67,7 @@ export function ProPanel({
 
       <div className="mt-8 flex items-baseline justify-between gap-3">
         <h3 className="text-base font-semibold text-foreground">Компании · {city.name}</h3>
-        <Link href={ratingHref} className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+        <Link href={ratingHref} className="inline-flex items-center gap-1 text-xs font-semibold text-teal">
           Весь рейтинг
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
@@ -84,7 +84,7 @@ export function ProPanel({
       ) : (
         <div className="mt-3 rounded-control border border-dashed border-border bg-card/60 p-5 text-sm leading-6 text-muted-foreground">
           В {city.nameIn} компании ещё подключаются к платформе.{" "}
-          <Link href="/for-partners" className="font-semibold text-primary">
+          <Link href="/for-partners" className="font-semibold text-teal">
             Разместить компанию
           </Link>
         </div>
@@ -113,13 +113,13 @@ function CompanyRow({ company, sponsor = false }: { company: Company; sponsor?: 
   const categoryId = company.categories[0];
 
   return (
-    <article className="flex flex-col gap-3 rounded-control border border-border/80 bg-card p-4 transition-colors hover:border-primary/30 sm:flex-row sm:items-center">
+    <article className="flex flex-col gap-3 rounded-control border border-border/80 bg-card p-4 transition-colors hover:border-teal/30 sm:flex-row sm:items-center">
       <Link href={`/companies/${company.slug}`} className="flex min-w-0 flex-1 items-center gap-3">
         <CompanyAvatar id={company.id} name={company.name} size="md" className="shrink-0" />
         <span className="min-w-0">
           <span className="flex items-center gap-1.5">
             <span className="truncate text-sm font-semibold text-foreground">{company.name}</span>
-            {company.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-primary" />}
+            {company.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-teal" />}
             {sponsor && <StatusBadge variant="sponsor" />}
           </span>
           <span className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
@@ -147,7 +147,7 @@ function CompanyRow({ company, sponsor = false }: { company: Company; sponsor?: 
             rel="noopener noreferrer"
             aria-label={`Telegram ${company.name}`}
             onClick={() => trackClick({ companyId: company.id, categoryId, clickType: "telegram" })}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-teal/40 hover:text-teal"
           >
             <MessageCircle className="h-4 w-4" />
           </a>

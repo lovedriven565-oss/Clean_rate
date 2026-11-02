@@ -10,17 +10,17 @@ export function SolutionCard({ solution, className }: { solution: Solution; clas
     <Link
       href={`/solutions/${solution.slug}`}
       className={cn(
-        "group data-surface flex h-full flex-col rounded-panel p-5 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-brand/50 hover:shadow-[0_24px_48px_-24px_hsl(var(--brand)/0.45)] sm:p-6",
+        "group data-surface flex h-full flex-col rounded-panel p-5 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-lime/50 hover:shadow-[0_24px_48px_-24px_hsl(var(--lime)/0.45)] sm:p-6",
         className
       )}
     >
       <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
-        <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">{PROBLEM_TYPE_LABELS[solution.problemType]}</span>
+        <span className="rounded-full bg-teal/10 px-2.5 py-1 text-teal">{PROBLEM_TYPE_LABELS[solution.problemType]}</span>
         <span className="rounded-full bg-muted px-2.5 py-1 text-muted-foreground">{SURFACE_LABELS[solution.surface]}</span>
         <span className="rounded-full bg-muted px-2.5 py-1 text-muted-foreground">{SEVERITY_LABELS[solution.severity]}</span>
       </div>
 
-      <h3 className="mt-4 font-display text-lg font-bold leading-snug tracking-[-0.02em] text-foreground group-hover:text-primary">
+      <h3 className="mt-4 font-display text-lg font-bold leading-snug tracking-[-0.02em] text-foreground group-hover:text-teal">
         {solution.title}
       </h3>
       <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{solutionSummary(solution, 140)}</p>
@@ -36,7 +36,7 @@ export function SolutionCard({ solution, className }: { solution: Solution; clas
             {AUDIENCE_LABELS[solution.audience]}
           </span>
         </span>
-        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:text-teal" />
       </div>
     </Link>
   );

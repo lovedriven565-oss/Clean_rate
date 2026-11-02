@@ -46,11 +46,11 @@ export function DiyEscalation({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
       transition={{ type: "spring", stiffness: 140, damping: 20 }}
-      className="no-print relative isolate mt-8 overflow-hidden rounded-panel border border-brand/35 bg-brand/[0.07] p-5 sm:p-6"
+      className="no-print relative isolate mt-8 overflow-hidden rounded-panel border border-lime/35 bg-lime/[0.07] p-5 sm:p-6"
     >
-      <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 -z-10 size-56 rounded-full bg-brand/20 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 -z-10 size-56 rounded-full bg-lime/20 blur-3xl" />
       <div className="flex items-start gap-4">
-        <span className="hidden size-11 shrink-0 items-center justify-center rounded-control bg-brand text-brand-foreground shadow-[0_10px_24px_-12px_hsl(var(--brand)/0.9)] sm:flex">
+        <span className="hidden size-11 shrink-0 items-center justify-center rounded-control bg-lime text-ink shadow-[0_10px_24px_-12px_hsl(var(--lime)/0.9)] sm:flex">
           <ShieldCheck className="size-5" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
@@ -87,7 +87,7 @@ export function DiyEscalation({
                 onClick={() =>
                   trackClick({ companyId: company.id, categoryId: solution.relatedCategory, clickType: "telegram" })
                 }
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-lime px-5 text-sm font-semibold text-ink shadow-sm shadow-lime/30 transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
               >
                 <MessageCircle className="size-4" aria-hidden />
                 Написать мастеру
@@ -95,7 +95,7 @@ export function DiyEscalation({
             ) : null}
             <a
               href="#pro"
-              className="inline-flex h-11 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary/35 hover:text-primary active:scale-[0.98]"
+              className="inline-flex h-11 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:border-teal/35 hover:text-teal active:scale-[0.98]"
             >
               {company ? "Сравнить мастеров" : "Цены и мастера"}
               <ArrowDown className="size-4" aria-hidden />

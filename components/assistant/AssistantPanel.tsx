@@ -271,20 +271,20 @@ export function AssistantPanel({
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="relative flex-1">
-              <Sparkles className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
+              <Sparkles className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-teal" />
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Опишите задачу: «пролил гранатовый сок на велюр», «запах мочи на матрасе»…"
                 aria-label="Вопрос технологу по чистке"
-                className="h-12 border-border/80 bg-card/80 pl-11 pr-4 text-[15px] shadow-none focus:border-primary"
+                className="h-12 border-border/80 bg-card/80 pl-11 pr-4 text-[15px] shadow-none focus:border-teal"
               />
             </div>
             <button
               type="submit"
               disabled={loading || query.trim().length < 2}
               className={cn(
-                "inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition",
+                "inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-lime px-6 text-sm font-semibold text-ink transition",
                 "hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
               )}
             >
@@ -310,8 +310,8 @@ export function AssistantPanel({
                   className={cn(
                     "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors",
                     active
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border/80 bg-card/70 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                      ? "border-teal bg-teal text-teal-foreground"
+                      : "border-border/80 bg-card/70 text-muted-foreground hover:border-teal/40 hover:text-foreground"
                   )}
                 >
                   <span>{opt.label}</span>
@@ -333,8 +333,8 @@ export function AssistantPanel({
                 className={cn(
                   "rounded-full border px-3 py-1 text-xs transition-colors",
                   query === scenario
-                    ? "border-primary/40 bg-primary/10 font-semibold text-primary"
-                    : "border-border/70 bg-card/50 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                    ? "border-teal/40 bg-teal/10 font-semibold text-teal"
+                    : "border-border/70 bg-card/50 text-muted-foreground hover:border-teal/30 hover:text-foreground"
                 )}
               >
                 {scenario}
@@ -353,7 +353,7 @@ export function AssistantPanel({
             <div className="flex flex-wrap items-center justify-between gap-3">
               {answer.solution ? (
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-teal/10 px-3 py-1 text-xs font-semibold text-teal">
                     <ShieldCheck className="h-3.5 w-3.5" />
                     {answer.solution.isCustom
                       ? "Индивидуальный разбор ИИ-консультанта"
@@ -374,7 +374,7 @@ export function AssistantPanel({
               {answer.solution && !answer.solution.isCustom && !answer.solution.isGuide && (
                 <Link
                   href={`/solutions/${answer.solution.slug}`}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-teal hover:underline"
                 >
                   Страница протокола
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -405,8 +405,8 @@ export function AssistantPanel({
                       className={cn(
                         "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                         active
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-muted/40 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                          ? "border-teal bg-teal text-teal-foreground"
+                          : "border-border bg-muted/40 text-muted-foreground hover:border-teal/30 hover:text-foreground"
                       )}
                     >
                       {mat}
@@ -491,9 +491,9 @@ export function AssistantPanel({
                       key={alt.id}
                       type="button"
                       onClick={() => handleAlternativeSwitch(alt.id, alt.title)}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-teal/40 hover:text-teal"
                     >
-                      <Sparkles className="h-3 w-3 text-primary" />
+                      <Sparkles className="h-3 w-3 text-teal" />
                       {alt.title}
                     </button>
                   ))}
@@ -513,7 +513,7 @@ export function AssistantPanel({
               >
                 <header className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-teal">
                       <Hand className="h-3.5 w-3.5" />
                       Путь 1 · Сделать самому
                     </span>
@@ -526,7 +526,7 @@ export function AssistantPanel({
                   </div>
                   {answer.solution.diyCostNote && (
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
-                      <Wallet className="h-3.5 w-3.5 text-primary" />
+                      <Wallet className="h-3.5 w-3.5 text-teal" />
                       {answer.solution.diyCostNote}
                     </span>
                   )}
@@ -544,7 +544,7 @@ export function AssistantPanel({
                             "rounded-control border p-3.5 transition-colors",
                             done
                               ? "border-success/30 bg-success/5"
-                              : "border-border/80 bg-card/80 hover:border-primary/30"
+                              : "border-border/80 bg-card/80 hover:border-teal/30"
                           )}
                         >
                           <label className="flex cursor-pointer items-start gap-3">
@@ -560,7 +560,7 @@ export function AssistantPanel({
                                 "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border font-data text-xs font-bold transition-colors",
                                 done
                                   ? "border-success bg-success text-white"
-                                  : "border-primary/35 bg-primary/10 text-primary"
+                                  : "border-teal/35 bg-teal/10 text-teal"
                               )}
                             >
                               {done ? <Check className="h-3.5 w-3.5" /> : step.order}
@@ -575,8 +575,8 @@ export function AssistantPanel({
                                 {step.instruction}
                               </span>
                               {step.tip && (
-                                <span className="mt-1.5 block rounded-control border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs leading-5 text-foreground/90">
-                                  <strong className="font-semibold text-primary">Нюанс технолога:</strong>{" "}
+                                <span className="mt-1.5 block rounded-control border border-teal/20 bg-teal/5 px-3 py-1.5 text-xs leading-5 text-foreground/90">
+                                  <strong className="font-semibold text-teal">Нюанс технолога:</strong>{" "}
                                   {step.tip}
                                 </span>
                               )}
@@ -635,7 +635,7 @@ export function AssistantPanel({
                               <span
                                 className={
                                   isPrimary
-                                    ? "inline-flex items-center rounded-full bg-primary/12 px-2.5 py-0.5 text-[11px] font-semibold text-primary"
+                                    ? "inline-flex items-center rounded-full bg-teal/12 px-2.5 py-0.5 text-[11px] font-semibold text-teal"
                                     : "inline-flex items-center rounded-full border border-border bg-muted/60 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
                                 }
                               >
@@ -674,7 +674,7 @@ export function AssistantPanel({
                                 {brand && (
                                   <Link
                                     href={`/brands/${brand.slug}`}
-                                    className="inline-flex h-8 items-center gap-1 rounded-full border border-border bg-muted/50 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+                                    className="inline-flex h-8 items-center gap-1 rounded-full border border-border bg-muted/50 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-teal/30 hover:text-foreground"
                                   >
                                     О бренде
                                   </Link>
@@ -684,7 +684,7 @@ export function AssistantPanel({
                                     href={buyUrl}
                                     target="_blank"
                                     rel="sponsored nofollow noopener"
-                                    className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                                    className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-teal/25 bg-teal/10 px-3 text-xs font-semibold text-teal transition-colors hover:bg-teal hover:text-teal-foreground"
                                   >
                                     <ShoppingCart className="h-3.5 w-3.5" />
                                     Купить
@@ -708,7 +708,7 @@ export function AssistantPanel({
               >
                 <header className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-teal">
                       <Sparkles className="h-3.5 w-3.5" />
                       Путь 2 · Вызвать мастера
                     </span>
@@ -721,7 +721,7 @@ export function AssistantPanel({
                   </div>
                   {answer.solution.proTimeNote && (
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground">
-                      <Clock className="h-3.5 w-3.5 text-primary" />
+                      <Clock className="h-3.5 w-3.5 text-teal" />
                       {answer.solution.proTimeNote}
                     </span>
                   )}
@@ -743,7 +743,7 @@ export function AssistantPanel({
                   </h4>
                   <Link
                     href={ratingHref}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-teal hover:underline"
                   >
                     Весь рейтинг
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -762,7 +762,7 @@ export function AssistantPanel({
                       return (
                         <li
                           key={company.id}
-                          className="flex flex-col gap-2.5 rounded-control border border-border/80 bg-card p-3.5 transition-colors hover:border-primary/30 sm:flex-row sm:items-center"
+                          className="flex flex-col gap-2.5 rounded-control border border-border/80 bg-card p-3.5 transition-colors hover:border-teal/30 sm:flex-row sm:items-center"
                         >
                           <Link
                             href={`/companies/${company.slug}`}
@@ -780,7 +780,7 @@ export function AssistantPanel({
                                   {company.name}
                                 </span>
                                 {company.verified && (
-                                  <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
+                                  <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-teal" />
                                 )}
                                 {isSponsor && <StatusBadge variant="sponsor" />}
                               </span>
@@ -819,7 +819,7 @@ export function AssistantPanel({
                                     clickType: "telegram",
                                   })
                                 }
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-teal/40 hover:text-teal"
                               >
                                 <MessageCircle className="h-4 w-4" />
                               </a>
@@ -832,7 +832,7 @@ export function AssistantPanel({
                 ) : (
                   <div className="mt-3 rounded-control border border-dashed border-border bg-card/60 p-4 text-xs leading-5 text-muted-foreground">
                     В {city.nameIn} компании ещё подключаются к платформе.{" "}
-                    <Link href="/for-partners" className="font-semibold text-primary">
+                    <Link href="/for-partners" className="font-semibold text-teal">
                       Подключить компанию
                     </Link>
                   </div>
@@ -840,7 +840,7 @@ export function AssistantPanel({
 
                 <Link
                   href={answer.solution.isCustom ? "/solutions" : `/solutions/${answer.solution.slug}`}
-                  className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+                  className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-teal/30 bg-teal/5 px-4 text-xs font-semibold text-teal transition-colors hover:bg-teal/10"
                 >
                   {answer.solution.isCustom
                     ? "Смотреть все проверенные протоколы"
@@ -863,9 +863,9 @@ export function AssistantPanel({
                     key={q}
                     type="button"
                     onClick={() => handleFollowUpClick(q)}
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-4 py-2 text-left text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-4 py-2 text-left text-xs font-medium text-foreground transition-colors hover:border-teal/40 hover:bg-teal/5 hover:text-teal"
                   >
-                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" />
+                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-teal" />
                     <span>{q}</span>
                   </button>
                 ))}

@@ -73,6 +73,23 @@ export function listProblems(solutions: Solution[], surface: SolutionSurface): P
   );
 }
 
+export interface SurfaceAvailability extends SurfaceOption {
+  /** Есть ли опубликованный протокол для сочетания «выбранная проблема × эта поверхность». */
+  available: boolean;
+}
+
+/** Все поверхности каталога; недоступные для проблемы помечены, а не скрыты и не подменяются молча. */
+export function listSurfaceAvailability(
+  solutions: Solution[],
+  problem: SolutionProblemType | null,
+): SurfaceAvailability[] {
+  const list = published(solutions);
+  return listSurfaces(solutions).map((option) => ({
+    ...option,
+    available: !problem || list.some((s) => s.surface === option.id && s.problemType === problem),
+  }));
+}
+
 /** Все типы проблем со счётчиками по published-решениям — для первого шага диагностики главной. */
 export function listAllProblems(solutions: Solution[]): ProblemOption[] {
   const list = published(solutions);

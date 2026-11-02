@@ -79,7 +79,7 @@ export function SolutionVideo({
     return (
       <figure className="mt-6">
         <figcaption className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Play className="h-3.5 w-3.5 text-primary" />
+          <Play className="h-3.5 w-3.5 text-teal" />
           Видеоразбор протокола
         </figcaption>
         <div
@@ -212,7 +212,7 @@ function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands:
     >
       <figcaption className="mb-3 flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
+          <Sparkles className="h-3.5 w-3.5 text-teal" />
           Интерактивный разбор протокола
         </span>
         <span className="font-data text-xs font-medium text-muted-foreground">
@@ -234,10 +234,10 @@ function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands:
                 aria-selected={isActive}
                 aria-label={`${slide.label} (кадр ${idx + 1} из ${slides.length})`}
                 onClick={() => setActiveIndex(idx)}
-                className="group relative flex h-6 flex-1 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+                className="group relative flex h-6 flex-1 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal rounded-full"
               >
                 <span className="relative block h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                {isPassed && <span className="block h-full w-full rounded-full bg-primary" />}
+                {isPassed && <span className="block h-full w-full rounded-full bg-teal" />}
                 {isActive && (
                   <motion.span
                     key={`${slide.id}-${paused ? "paused" : "play"}`}
@@ -248,7 +248,7 @@ function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands:
                         ? { duration: 0 }
                         : { duration: SLIDE_DURATION_MS / 1000, ease: "linear" }
                     }
-                    className="block h-full rounded-full bg-primary"
+                    className="block h-full rounded-full bg-teal"
                   />
                 )}
                 </span>
@@ -267,7 +267,7 @@ function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands:
               </span>
             )}
             {current.kind === "step" && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 font-data text-xs font-semibold text-primary">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal/25 bg-teal/10 px-2.5 py-1 font-data text-xs font-semibold text-teal">
                 {current.label}
               </span>
             )}
@@ -321,7 +321,7 @@ function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands:
               {current.kind === "step" && (
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-data text-xs font-bold text-primary-foreground">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal font-data text-xs font-bold text-teal-foreground">
                       {String(current.order).padStart(2, "0")}
                     </span>
                     <p className="text-[15px] font-medium leading-relaxed text-foreground sm:text-base">
@@ -358,7 +358,7 @@ function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands:
                         {item.brandSlug && (
                           <Link
                             href={`/brands/${item.brandSlug}`}
-                            className="inline-flex h-10 min-h-10 shrink-0 items-center gap-1 rounded-full border border-border px-3.5 text-xs font-semibold text-link transition-colors hover:bg-muted"
+                            className="inline-flex h-10 min-h-10 shrink-0 items-center gap-1 rounded-full border border-border px-3.5 text-xs font-semibold text-teal transition-colors hover:bg-muted"
                           >
                             Бренд
                             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -392,7 +392,7 @@ function ProtocolStoryPlayer({ solution, brands }: { solution: Solution; brands:
           <button
             type="button"
             onClick={goNext}
-            className="inline-flex h-10 min-h-10 items-center gap-1.5 rounded-full bg-primary px-5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.98]"
+            className="inline-flex h-10 min-h-10 items-center gap-1.5 rounded-full bg-teal px-5 text-xs font-semibold text-teal-foreground transition-colors hover:bg-teal/90 active:scale-[0.98]"
           >
             {safeIndex === slides.length - 1 ? "Сначала" : "Дальше"}
             <ChevronRight className="h-4 w-4" />

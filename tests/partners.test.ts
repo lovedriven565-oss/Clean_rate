@@ -40,7 +40,7 @@ describe("parsePartnerPrefill — авто-заполнение формы па�
 
   it("drops unknown cities, plans and categories", () => {
     const prefill = parsePartnerPrefill(
-      new URLSearchParams("company=Чистый дом&city=Алматы&plan=gold&categories=hacking,windows")
+      new URLSearchParams("company=Чистый дом&city=Астана&plan=gold&categories=hacking,windows")
     );
     assert.deepEqual(prefill, { companyName: "Чистый дом", city: undefined, plan: undefined, categoryIds: ["windows"] });
   });

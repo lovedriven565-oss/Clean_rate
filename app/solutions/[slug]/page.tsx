@@ -117,7 +117,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
             <div className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
-                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">{SURFACE_LABELS[solution.surface]}</span>
+                  <span className="rounded-full bg-teal/10 px-2.5 py-1 text-teal">{SURFACE_LABELS[solution.surface]}</span>
                   {solution.material && <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{solution.material}</span>}
                   <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{SEVERITY_LABELS[solution.severity]}</span>
                   <span className="rounded-full bg-card/80 px-2.5 py-1 text-muted-foreground">{AUDIENCE_LABELS[solution.audience]}</span>
@@ -143,7 +143,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
                 <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
                 {solution.warnings[0] && (
                   <p className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-start gap-2.5 p-5 pb-7 text-[13px] leading-snug text-white sm:p-6 sm:pb-8">
-                    <Ban className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
+                    <Ban className="mt-0.5 size-4 shrink-0 text-lime" aria-hidden />
                     <span>
                       <span className="font-semibold">Не делайте: </span>
                       {solution.warnings[0]}
@@ -161,12 +161,12 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
                     href="#diy"
                     className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border bg-card text-sm font-semibold text-foreground"
                   >
-                    <Hand className="h-4 w-4 text-primary" />
+                    <Hand className="h-4 w-4 text-teal" />
                     Сделать самому
                   </a>
                   <a
                     href="#pro"
-                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand text-sm font-semibold text-brand-foreground"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-lime text-sm font-semibold text-ink"
                   >
                     <Sparkles className="h-4 w-4" />
                     Вызвать мастера
@@ -200,7 +200,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
         <section id="faq" className="scroll-mt-32 border-y border-border bg-muted/35 py-14 sm:py-20">
           <div className="container grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
             <div>
-              <span className="text-sm font-semibold text-primary">Частые вопросы</span>
+              <span className="text-sm font-semibold text-teal">Частые вопросы</span>
               <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
                 Коротко о главном
               </h2>
@@ -231,12 +231,12 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
           <section id="related" className="container scroll-mt-32 py-14 sm:py-20">
             <div className="mb-8 flex items-end justify-between gap-4">
               <div>
-                <span className="text-sm font-semibold text-primary">Похожие задачи</span>
+                <span className="text-sm font-semibold text-teal">Похожие задачи</span>
                 <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
                   Ещё решения
                 </h2>
               </div>
-              <Link href="/solutions" className="text-sm font-semibold text-primary">
+              <Link href="/solutions" className="text-sm font-semibold text-teal">
                 Все решения
               </Link>
             </div>

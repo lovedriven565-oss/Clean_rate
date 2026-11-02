@@ -178,7 +178,7 @@ export function RescueCalculator({
       className="no-print mt-6 rounded-panel border border-border bg-card/85 p-5 shadow-xs sm:p-6"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-teal">
           <Clock className="h-3.5 w-3.5" aria-hidden />
           Вердикт за 10 секунд · Сам или мастер
         </span>
@@ -210,8 +210,8 @@ export function RescueCalculator({
                     ? "border-danger bg-danger/[0.08] ring-1 ring-danger/35"
                     : item.tone === "caution"
                       ? "border-star bg-star/[0.10] ring-1 ring-star/35"
-                      : "border-primary bg-primary/[0.08] ring-1 ring-primary/30"
-                  : "border-border bg-muted/35 hover:border-primary/30 hover:bg-card",
+                      : "border-teal bg-teal/[0.08] ring-1 ring-teal/30"
+                  : "border-border bg-muted/35 hover:border-teal/30 hover:bg-card",
               )}
             >
               <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -301,7 +301,7 @@ export function RescueCalculator({
                   onClick={() =>
                     trackClick({ companyId: company.id, categoryId: solution.relatedCategory, clickType: "telegram" })
                   }
-                  className="inline-flex h-10 items-center gap-2 rounded-full bg-brand px-4 text-xs font-semibold text-brand-foreground shadow-xs transition-transform hover:-translate-y-0.5 active:scale-[0.98] sm:text-sm"
+                  className="inline-flex h-10 items-center gap-2 rounded-full bg-lime px-4 text-xs font-semibold text-ink shadow-xs transition-transform hover:-translate-y-0.5 active:scale-[0.98] sm:text-sm"
                 >
                   <MessageCircle className="h-4 w-4" aria-hidden />
                   {offer.priceFrom
@@ -312,9 +312,9 @@ export function RescueCalculator({
 
               <a
                 href="#pro"
-                className="inline-flex h-10 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-foreground transition-colors hover:border-primary/35 hover:text-primary sm:text-sm"
+                className="inline-flex h-10 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-foreground transition-colors hover:border-teal/35 hover:text-teal sm:text-sm"
               >
-                <Sparkles className="h-3.5 w-3.5 text-brand" aria-hidden />
+                <Sparkles className="h-3.5 w-3.5 text-lime" aria-hidden />
                 {offer.priceFrom ? `Мастера в ${city.nameIn} (от ${offer.priceFrom})` : `Выбрать мастера в ${city.nameIn}`}
               </a>
             </>
@@ -322,7 +322,7 @@ export function RescueCalculator({
             <>
               <a
                 href={current.ctaHref}
-                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:text-sm"
+                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-teal px-4 text-xs font-semibold text-teal-foreground transition-colors hover:bg-teal/90 sm:text-sm"
               >
                 {current.ctaLabel}
                 <ArrowDown className="h-3.5 w-3.5" aria-hidden />
@@ -330,7 +330,7 @@ export function RescueCalculator({
               {current.id === "dried" && (
                 <a
                   href="#pro"
-                  className="inline-flex h-10 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/35 hover:text-foreground"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-teal/35 hover:text-foreground"
                 >
                   Или сравнить с выездом мастера
                 </a>
@@ -356,9 +356,9 @@ export function RescueCalculator({
               className={cn(
                 "flex flex-col justify-between rounded-control border p-3 text-xs",
                 row.id === "master" && selected === "rubbed"
-                  ? "border-brand/40 bg-brand/[0.06]"
+                  ? "border-lime/40 bg-lime/[0.06]"
                   : row.id === "pro_diy" && selected === "dried"
-                    ? "border-primary/35 bg-primary/[0.05]"
+                    ? "border-teal/35 bg-teal/[0.05]"
                     : "border-border/80 bg-muted/25",
               )}
             >

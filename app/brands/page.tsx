@@ -20,7 +20,7 @@ export default async function BrandsPage() {
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-12 sm:py-18">
             <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Бренды" }]} />
-            <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-teal">
               <Boxes className="h-3.5 w-3.5" />
               Индекс доверия профи
             </span>
@@ -49,19 +49,19 @@ export default async function BrandsPage() {
         </section>
 
         <section className="container pb-16 sm:pb-24">
-          <div className="grid gap-6 rounded-panel bg-cta p-8 text-cta-foreground sm:p-12 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="grid gap-6 rounded-panel bg-ink p-8 text-ink-foreground sm:p-12 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-2xl">
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Брендам</span>
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-teal">Брендам</span>
               <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] sm:text-4xl">
                 Место в индексе не продаётся. Его зарабатывают компании, которые на вас работают.
               </h2>
-              <p className="mt-4 text-sm leading-6 text-cta-foreground/75">
+              <p className="mt-4 text-sm leading-6 text-ink-foreground/75">
                 Подтвердите связи с компаниями, добавьте продукты в протоколы и поднимайтесь в лидерборде открыто.
               </p>
             </div>
             <Link
               href="/for-brands"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-teal px-6 text-sm font-semibold text-teal-foreground transition-transform hover:-translate-y-0.5"
             >
               Как попасть в индекс
               <ArrowRight className="h-4 w-4" />

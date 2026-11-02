@@ -281,6 +281,32 @@
 - `npm run typecheck` — 0 ошибок; `npm run lint` — чисто; `npm run test` — 201/201 (+1 тест `listAllProblems`); `npm run build` — 141 страница, `/suppliers` нет в маршрутах.
 - Ручная проверка dev: `/`, `/solutions/vino-na-divane`, `/companies/spectrclean`, `/brands/kiehl` — 200; `/suppliers` — 404. В SSR-разметке: оба radiogroup диагностики, «Не делайте», «Открыть протокол», LiveStats, bento-полки, строка доверия, один CTA «Бизнесу». Aurora/капсулы/QUALITY_MARKS в HTML нет.
 
+## Редизайн ChistoLab в стиле Lovable — Этапы 3–4 (сделано)
+
+По `plan-2fa43d9a6e48191e.md` (этапы 1–2 были сделаны ранее: шрифты Golos Text + JetBrains Mono, токены, двухэтажная шапка, `PlatformHero`, `ProductZoneShelf`, `SeasonalBrandBanner`).
+
+### Дизайн-токены (важно)
+- В `app/globals.css` теперь РЕАЛЬНО определены `--ink`/`--ink-foreground`/`--lime`/`--teal`/`--teal-foreground`/`--danger-soft` в `:root` и `.dark` (в этапе 1 они были объявлены в `@theme`, но не заданы — `bg-ink`/`text-lime` молча не работали).
+- Внутренние страницы переведены на словарь `ink/lime/teal`: `bg-brand`→`bg-lime`, `text-brand-foreground`→`text-ink`, `bg-cta`→`bg-ink`, `text-cta-foreground`→`text-ink-foreground`, `text-link`/`text-primary`→`text-teal`, `bg-primary`→`bg-teal`, `primary-foreground`→`teal-foreground` (значения токенов идентичны, визуал не изменился). Предупреждения — `bg-danger-soft`.
+- Новые компоненты пишем на `ink/lime/teal`; старые `primary`/`brand`/`cta` в общих компонентах (PhoneButton, StatusBadge) оставлены как семантика и продолжают работать.
+
+### Главная `/` (боевая сборка)
+Порядок блоков: `PlatformHero` → `TaskRibbon` → `ProductZoneShelf` → `SeasonalBrandBanner` → `VideoLabSection` → `CleanersByServiceSection` → trust-строка + B2B CTA. Metadata (`pageAlternates`) и JSON-LD WebSite сохранены.
+- `components/home/TaskRibbon.tsx` — перенесён из `components/home/v5/` (v5 удалён).
+- `components/home/VideoLabSection.tsx` — 5 карточек 9:16; по клику сторис-плеер в модалке: таймлайн «Не делайте» → шаги → карточка протестированного средства (первая `ShelfProduct` с `solutionSlug`) + «Где купить» (`trackEvent`); при `videoUrl` — `parseVideoSource`. Кадры живут в `StoryBody` с `key={solution.slug}` (сброс без setState-эффекта).
+- `components/home/CleanersByServiceSection.tsx` — тёмный блок: табы 6 услуг (`CLEANING_SERVICES`), вилка цен `pickCategoryEstimate` (pe-cat-*), спонсорский слот `StatusBadge "Реклама"` + органика `rankOrganicCompanies`, кнопки Позвонить/Telegram с `trackClick`.
+- Удалены: `app/dev/home/`, `components/home/{HomeHero,RoomsBento,SolutionShowcase,LiveStats,LabBlueprintCards,Collections,PriceTable,SteamShowcase,TwoPathsSection,SolutionShelves,MastersBrandsSection}.tsx`, `components/ads/HomeEditorialAd.tsx`.
+
+### Рынок KZ открыт
+- `db/seed-data.ts`: +3 проверенные компании Алматы (`taza-almaty`, `alaclean`, `shine-almaty`, `verified: true`, `ratingSource: "unverified"` — баллы не выдумываем). Все 6 услуг покрыты ≥2 компаниями → лендинги `/almaty/*` индексируемы.
+- `lib/markets.ts`: `KZ.enabled: true`, Астана `enabled: false` (нет компаний). `ENABLED_MARKETS` = BY/RU/KZ → `RegionSelector`, hreflang `ru-KZ`, sitemap и футер-лендинги включают Алматы автоматически.
+- `migrations/seed.sql` перегенерирован (`npx tsx db/seed.ts`): прод-D1 получит компании Алматы при пересиде.
+- Обновлены тесты: `launch-guards` (3 рынка, 9 футер-ссылок, ru-KZ), `partners` (закрытый город → Астана), `solutions-diagnostic` (пустая база → Астана), `cleaning-services` (+тест «топ-компания по всем 6 услугам в Минске/Москве/Алматы»).
+
+### Проверки (пройдены)
+- `typecheck` 0, `lint` 0, `test` 213/213, `build` 160 страниц (`/[city]/[category]` ×18 incl. almaty, `companies/[slug]` SSG ×29).
+- Вручную (dev:3111): `/` — все секции; `/almaty/uborka-kvartir` — 3 компании; `/astana/*` — 404; все внутренние маршруты — 200.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

@@ -108,7 +108,7 @@ export default function ForPartnersPage() {
               transition={{ duration: 0.5 }}
               className="flex flex-col items-start"
             >
-              <span className="inline-flex items-center gap-2 data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-primary">
+              <span className="inline-flex items-center gap-2 data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-teal">
                 <Building2 className="h-3.5 w-3.5" />
                 Клининговым компаниям
               </span>
@@ -137,7 +137,7 @@ export default function ForPartnersPage() {
               transition={{ duration: 0.55, delay: 0.1 }}
               className="data-surface rounded-panel p-7 sm:p-9"
             >
-              <span className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-teal">
                 <ShieldCheck className="h-4 w-4" />
                 Принципы размещения
               </span>
@@ -146,19 +146,19 @@ export default function ForPartnersPage() {
               </h2>
               <ul className="mt-6 space-y-4 text-sm leading-6 text-muted-foreground">
                 <li className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal/10 text-teal">
                     <Check className="h-3.5 w-3.5" />
                   </span>
                   <span><strong>Базовый профиль бесплатен:</strong> мы не требуем обязательных платежей за нахождение в каталоге.</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal/10 text-teal">
                     <Check className="h-3.5 w-3.5" />
                   </span>
                   <span><strong>Прямой контакт:</strong> телефон и Telegram ведут напрямую к вам, без скрытых комиссий с каждого заказа.</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal/10 text-teal">
                     <Check className="h-3.5 w-3.5" />
                   </span>
                   <span><strong>Рейтинг не продаётся:</strong> органическая оценка рассчитывается по открытым отзывам, платное продвижение маркируется отдельно.</span>
@@ -220,12 +220,12 @@ export default function ForPartnersPage() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
               <SpotlightCard className="flex flex-col p-8 sm:p-10 lg:col-span-2">
                 <h3 className="font-display text-2xl font-bold text-foreground">Базовое размещение</h3>
-                <p className="mt-1 font-semibold text-primary">Бесплатно навсегда</p>
+                <p className="mt-1 font-semibold text-teal">Бесплатно навсегда</p>
                 <p className="mt-6 font-data text-4xl font-semibold tracking-tight text-foreground">0</p>
                 <ul className="mt-7 flex flex-1 flex-col gap-3.5">
                   {features.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" />
                       {f}
                     </li>
                   ))}
@@ -240,13 +240,13 @@ export default function ForPartnersPage() {
                 </Button>
               </SpotlightCard>
 
-              <SpotlightCard className="linear-beam flex flex-col border-primary/50 p-8 sm:p-10 lg:col-span-3">
+              <SpotlightCard className="linear-beam flex flex-col border-teal/50 p-8 sm:p-10 lg:col-span-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="font-display text-2xl font-bold text-foreground">PRO Спонсор</h3>
                     <p className="mt-1 text-sm text-muted-foreground">Индивидуальный расчёт по городу и категориям</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-brand px-3.5 py-1 text-xs font-bold text-brand-foreground">
+                  <span className="shrink-0 rounded-full bg-lime px-3.5 py-1 text-xs font-bold text-ink">
                     Максимум охвата
                   </span>
                 </div>
@@ -257,7 +257,7 @@ export default function ForPartnersPage() {
                 <ul className="mt-7 flex flex-1 flex-col gap-3.5">
                   {partnerFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" />
                       {f}
                     </li>
                   ))}
@@ -286,13 +286,13 @@ export default function ForPartnersPage() {
               </p>
               <div className="mt-8 space-y-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-teal/10 text-teal">
                     <Users className="h-4 w-4" />
                   </span>
                   <span>Без скрытых комиссий с заказов</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-teal/10 text-teal">
                     <BadgeCheck className="h-4 w-4" />
                   </span>
                   <span>Официальная верификация данных</span>

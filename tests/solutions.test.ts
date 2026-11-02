@@ -9,6 +9,7 @@ import {
 } from "../lib/db/queries.js";
 import { classifyIntent } from "../lib/search/intent-router.js";
 import { buildSolutionFaq, buildSolutionJsonLd } from "../lib/solutions/structured-data.js";
+import { howToTitle } from "../lib/solutions/meta.js";
 import type { SolutionProblemType, SolutionSurface } from "../lib/types.js";
 
 const STAGE4_PROTOCOLS: {
@@ -24,6 +25,20 @@ const STAGE4_PROTOCOLS: {
   { slug: "nalet-chernaya-santehnika", surface: "bathroom", problemType: "scale", sampleKeyword: "черный смеситель" },
   { slug: "sledy-reziny-kleya-laminat", surface: "floor", problemType: "postrenovation", sampleKeyword: "клей на ламинате" },
 ];
+
+describe("howToTitle", () => {
+  it("turns a noun phrase into a search-style «Как убрать …» question", () => {
+    assert.equal(
+      howToTitle({ title: "Пятно красного вина на диване", problemType: "stain" }),
+      "Как убрать пятно красного вина на диване",
+    );
+  });
+
+  it("keeps cleaning-service titles unchanged", () => {
+    const title = "Срочная уборка офиса после корпоративного мероприятия";
+    assert.equal(howToTitle({ title, problemType: "general" }), title);
+  });
+});
 
 describe("solutions graph and data layer", () => {
   it("loads 16 published solutions with complete protocol data", async () => {

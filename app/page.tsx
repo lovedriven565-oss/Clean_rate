@@ -3,19 +3,19 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { HomeHero } from "@/components/home/HomeHero";
 import { HomeMotion, Reveal } from "@/components/home/Reveal";
-import { LiveStats } from "@/components/home/LiveStats";
-import { RoomsBento } from "@/components/home/RoomsBento";
-import { SolutionShowcase } from "@/components/home/SolutionShowcase";
-import { MastersBrandsSection } from "@/components/home/MastersBrandsSection";
-import { HomeEditorialAd } from "@/components/ads/HomeEditorialAd";
+import { PlatformHero } from "@/components/home/PlatformHero";
+import { TaskRibbon } from "@/components/home/TaskRibbon";
+import { ProductZoneShelf } from "@/components/home/ProductZoneShelf";
+import { SeasonalBrandBanner } from "@/components/home/SeasonalBrandBanner";
+import { VideoLabSection } from "@/components/home/VideoLabSection";
+import { CleanersByServiceSection } from "@/components/home/CleanersByServiceSection";
 import { SelectedSolutionProvider } from "@/components/providers/SelectedSolutionProvider";
 import { getEligibleAd } from "@/lib/ads/queries";
+import { seedAffiliateProducts, seedProducts, seedSolutionProducts } from "@/db/seed-data";
 import { getAllBrands, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
-import { ENABLED_MARKETS, openCities } from "@/lib/markets";
-import { resolveSelection } from "@/lib/solutions/diagnostic";
-import { pluralize } from "@/lib/format";
+import { ENABLED_MARKETS } from "@/lib/markets";
+import { buildShelfProducts } from "@/lib/products/zone-shelf";
 import { SITE_NAME, SITE_URL, absoluteUrl, pageAlternates } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -43,17 +43,7 @@ export default async function Home() {
   );
 
   const published = solutions.filter((s) => s.status === "published");
-  // Протокол дня — тот же, что hero показывает по умолчанию (первый доступный выбор диагностики).
-  const featuredSolution = resolveSelection(solutions, {}).solution ?? published[0] ?? null;
-
-  // Живые цифры — только реальные данные, без выдуманных метрик.
-  const openCityCount = ENABLED_MARKETS.reduce((sum, market) => sum + openCities(market).length, 0);
-  const totalSteps = published.reduce((sum, s) => sum + s.diySteps.length, 0);
-  const stats = [
-    { value: published.length, label: pluralize(published.length, ["протокол", "протокола", "протоколов"]) },
-    { value: openCityCount, label: pluralize(openCityCount, ["открытый город", "открытых города", "открытых городов"]) },
-    { value: totalSteps, label: pluralize(totalSteps, ["шаг", "шага", "шагов"]) + " в инструкциях" },
-  ];
+  const shelf = buildShelfProducts(seedAffiliateProducts, seedProducts, seedSolutionProducts, brands);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -78,32 +68,30 @@ export default async function Home() {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
           />
 
-          <HomeHero solutions={solutions} estimates={estimates} />
+          <SelectedSolutionProvider>
+            {/* Первый экран: «Решить самому» ⇄ «Вызвать клининг» */}
+            <PlatformHero solutions={published} estimates={estimates} companies={companies} />
 
-          <div className="container space-y-20 py-14 sm:space-y-24 sm:py-20">
-            <LiveStats stats={stats} />
+            {/* Все протоколы — горизонтальная лента частых задач */}
+            <TaskRibbon solutions={published} estimates={estimates} />
 
-            {/* По комнатам и поверхностям — bento-полки с обложками */}
-            <Reveal>
-              <RoomsBento solutions={solutions} />
-            </Reveal>
+            {/* Средства и техника по зонам дома */}
+            <ProductZoneShelf products={shelf} />
 
-            <SelectedSolutionProvider>
-              {/* Витрина решений + подборки (мастер-деталь) */}
-              <Reveal>
-                <SolutionShowcase solutions={solutions} estimates={estimates} />
-              </Reveal>
+            {/* Спецпроект сезона (реклама): помеченный слот региона, не влияет на органику */}
+            <div className="container">
+              <SeasonalBrandBanner ads={editorialAdByCountry} shelfProducts={shelf} />
+            </div>
 
-              {/* Партнёр сезона (реклама): помеченный слот региона, не влияет на органику */}
-              <HomeEditorialAd ads={editorialAdByCountry} />
+            {/* Краш-тесты и разборы протоколов 9:16 */}
+            <VideoLabSection solutions={published} products={shelf} />
+          </SelectedSolutionProvider>
 
-              {/* Мастера выбранной задачи в выбранном городе + витрина брендов */}
-              <Reveal>
-                <MastersBrandsSection solution={featuredSolution} companies={companies} brands={brands} />
-              </Reveal>
-            </SelectedSolutionProvider>
+          {/* Клинеры города по видам работ: цены, спонсор + органика */}
+          <CleanersByServiceSection companies={companies} estimates={estimates} />
 
-            {/* Строка доверия вместо бенто-манифеста */}
+          <div className="container space-y-16 py-14 sm:space-y-20 sm:py-20">
+            {/* Строка доверия */}
             <p className="text-center text-sm text-muted-foreground">
               Реклама отделена. Рейтинг не продаётся.{" "}
               <Link href="/rating/methodology" className="font-semibold text-link hover:underline">
@@ -113,24 +101,24 @@ export default async function Home() {
 
             {/* B2B: единый вход для бизнеса */}
             <Reveal>
-              <section className="linear-beam relative overflow-hidden rounded-panel bg-cta p-7 text-cta-foreground sm:p-12">
+              <section className="linear-beam relative overflow-hidden rounded-panel bg-ink p-7 text-ink-foreground sm:p-12">
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-brand/30 blur-3xl"
+                  className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-lime/20 blur-3xl"
                 />
                 <div className="relative flex flex-wrap items-end justify-between gap-6">
                   <div className="max-w-2xl">
                     <h2 className="text-balance font-display text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
                       Вы бренд химии или клининговая компания? Займите место в протоколах и рейтинге.
                     </h2>
-                    <p className="mt-4 max-w-xl text-cta-foreground/75">
+                    <p className="mt-4 max-w-xl text-ink-foreground/75">
                       Предложите составы для проверки: совместимые с поверхностью продукты попадают в пошаговые
                       решения, клининговая компания — в рейтинг с прямым телефоном.
                     </p>
                   </div>
                   <Link
                     href="/for-partners"
-                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition-transform active:scale-[0.98]"
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-lime px-6 text-sm font-semibold text-ink transition-transform active:scale-[0.98]"
                   >
                     Бизнесу
                     <ArrowRight className="size-4" aria-hidden />

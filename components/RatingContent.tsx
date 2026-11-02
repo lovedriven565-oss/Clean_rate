@@ -135,7 +135,7 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-12 sm:py-18">
             <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Рейтинг компаний" }]} />
-            <span className="mt-4 block text-xs font-bold uppercase tracking-[0.2em] text-primary">Открытая методология</span>
+            <span className="mt-4 block text-xs font-bold uppercase tracking-[0.2em] text-teal">Открытая методология</span>
             <div className="mt-3 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <h1 className="max-w-3xl font-display text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-5xl">
@@ -145,7 +145,7 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
                   Органическая оценка не зависит от оплаты. Источник рейтинга и коммерческая маркировка показываются отдельно.
                 </p>
               </div>
-              <Link href="/rating/methodology" className="inline-flex shrink-0 items-center justify-center rounded-full border border-primary/25 bg-card/80 px-5 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5">
+              <Link href="/rating/methodology" className="inline-flex shrink-0 items-center justify-center rounded-full border border-teal/25 bg-card/80 px-5 py-2.5 text-sm font-semibold text-teal hover:bg-teal/5">
                 Как рассчитывается рейтинг
               </Link>
             </div>

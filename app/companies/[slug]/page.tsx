@@ -75,7 +75,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-12 sm:py-18">
             <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Рейтинг компаний", href: "/rating" }, { label: company.name }]} />
-            <Link href="/rating" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+            <Link href="/rating" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-teal">
               <ArrowLeft className="h-4 w-4" />
               Все компании
             </Link>
@@ -92,13 +92,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                       {company.name}
                     </h1>
                     <span className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4 text-primary" />
+                      <MapPin className="h-4 w-4 text-teal" />
                       {fullAddress}
                       <a
                         href={`https://${getMarketByCity(company.city).mapsHost}/maps/?text=${encodeURIComponent(fullAddress)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-teal hover:underline"
                       >
                         <Navigation className="h-3.5 w-3.5" />
                         Маршрут
@@ -114,7 +114,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               </div>
 
               <aside className="data-surface rounded-panel p-6">
-                <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Органический балл</span>
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-teal">Органический балл</span>
                 <div className="mt-3 flex items-end gap-2">
                   <strong className="font-data text-5xl font-medium text-foreground">{organicScore ?? "—"}</strong>
                   {organicScore !== null && <span className="pb-1.5 text-sm text-muted-foreground">из 100</span>}
@@ -131,7 +131,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 <div className="mt-5 border-t border-border pt-4 text-xs text-muted-foreground">
                   Источник: <span className="font-semibold text-foreground">{ratingSourceLabel(company.ratingSource)}</span>
                 </div>
-                <Link href="/rating/methodology" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+                <Link href="/rating/methodology" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-teal">
                   Методология
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Link>
@@ -144,7 +144,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
           <div className="space-y-6">
             <article className="data-surface rounded-panel p-7 sm:p-9">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-control bg-primary/10 text-primary"><BriefcaseBusiness className="h-5 w-5" /></span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-control bg-teal/10 text-teal"><BriefcaseBusiness className="h-5 w-5" /></span>
                 <h2 className="font-display text-2xl font-bold text-foreground">Услуги и специализация</h2>
               </div>
               <div className="mt-6 flex flex-wrap gap-2">
@@ -155,7 +155,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                       key={category.id}
                       href={companyCity ? categoryLandingHref(companyCity.city.slug, category.id) : `/rating?category=${category.id}`}
                     >
-                      <Badge className="px-3 py-1.5 text-xs text-foreground hover:border-primary/30">{category.name}</Badge>
+                      <Badge className="px-3 py-1.5 text-xs text-foreground hover:border-teal/30">{category.name}</Badge>
                     </Link>
                   );
                 })}
@@ -164,7 +164,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 <ul className="mt-7 grid gap-3 sm:grid-cols-2">
                   {company.tags.map((tag) => (
                     <li key={tag} className="flex items-start gap-2 text-sm text-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" />
                       {tag}
                     </li>
                   ))}
@@ -188,7 +188,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
             {company.recentReview && publishedRating && (
               <article className="data-surface rounded-panel p-7 sm:p-9">
-                <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Отзыв в профиле</span>
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-teal">Отзыв в профиле</span>
                 <blockquote className="mt-4 font-display text-xl leading-8 text-foreground">“{company.recentReview.text}”</blockquote>
                 <p className="mt-5 text-sm font-semibold text-muted-foreground">{company.recentReview.author}</p>
               </article>
@@ -217,7 +217,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             </div>
 
             <div className="linear-beam data-surface rounded-panel p-6">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal">
                 <ShieldCheck className="h-4 w-4" aria-hidden />
                 Для владельца бизнеса
               </span>
@@ -237,9 +237,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 </Link>
                 <Link
                   href={partnerClaimHref(company, "pro")}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 text-center text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 text-center text-sm font-semibold text-foreground transition-colors hover:border-teal/40"
                 >
-                  <BriefcaseBusiness className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                  <BriefcaseBusiness className="h-4 w-4 shrink-0 text-teal" aria-hidden />
                   Занять PRO-слот в г. {company.city}
                 </Link>
               </div>

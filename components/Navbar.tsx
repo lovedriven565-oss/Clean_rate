@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, Sparkles, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NavSearch } from "@/components/NavSearch";
 import { RegionSelector } from "@/components/RegionSelector";
@@ -47,67 +47,32 @@ export function Navbar() {
     return match.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   }
 
-  const floating = scrolled && !open;
+  const compact = scrolled && !open;
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-40 transition-colors duration-300",
-        !floating && "glass border-x-0 border-t-0",
-        floating && "lg:pt-3"
-      )}
-    >
-      <div
-        className={cn(
-          "container flex h-17 items-center justify-between gap-3 transition-[max-width,height,border-radius] duration-300",
-          floating && "glass lg:h-14 lg:max-w-6xl! lg:rounded-full"
-        )}
-      >
+    <header className="glass sticky top-0 z-40 border-x-0 border-t-0">
+      <div className="container flex h-14 items-center justify-between gap-3 sm:h-16">
         <Link href="/" className="group flex min-w-0 items-center text-foreground" onClick={() => setOpen(false)}>
           <BrandLogo markClassName="transition-transform group-hover:scale-105" />
         </Link>
-
-        <nav
-          onPointerLeave={() => setHovered(null)}
-          className="hidden items-center gap-1 rounded-full border border-border/80 bg-card/65 p-1 text-sm lg:flex"
-        >
-          {navLinks.map((link) => {
-            const active = isActive(link.match);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={active ? "page" : undefined}
-                onPointerEnter={() => setHovered(link.href)}
-                onFocus={() => setHovered(link.href)}
-                onBlur={() => setHovered(null)}
-                className={cn(
-                  "relative isolate rounded-full px-4 py-2 font-medium text-muted-foreground transition-colors hover:text-foreground",
-                  active && "bg-foreground text-background hover:text-background"
-                )}
-              >
-                {hovered === link.href && !active && (
-                  <motion.span
-                    layoutId="nav-hover-pill"
-                    aria-hidden
-                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                    className="absolute inset-0 -z-10 rounded-full bg-muted"
-                  />
-                )}
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
 
         <div className="flex items-center gap-2">
           <NavSearch />
           <RegionSelector className="hidden md:inline-flex" />
           <ThemeToggle className="hidden sm:inline-flex" />
           <Link
+            href="/assistant"
+            aria-current={pathname === "/assistant" ? "page" : undefined}
+            aria-label="ИИ-технолог"
+            className="inline-flex h-11 items-center gap-1.5 rounded-full bg-ink px-3.5 text-xs font-semibold text-ink-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98] sm:px-4"
+          >
+            <Sparkles className="size-3.5 text-lime" aria-hidden />
+            <span className="hidden sm:inline">ИИ-технолог</span>
+          </Link>
+          <Link
             href="/for-partners"
             aria-current={pathname === "/for-partners" ? "page" : undefined}
-            className="hidden h-10 items-center gap-2 rounded-full bg-brand px-4 text-xs font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5 active:scale-[0.98] lg:inline-flex"
+            className="hidden h-11 items-center gap-2 rounded-full bg-brand px-4 text-xs font-semibold text-brand-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98] xl:inline-flex"
           >
             Подключить компанию
             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -124,8 +89,46 @@ export function Navbar() {
         </div>
       </div>
 
+      <div
+        className={cn(
+          "hidden overflow-hidden border-t border-border/70 transition-[max-height,opacity] duration-300 lg:block",
+          compact ? "max-h-0 border-transparent opacity-0" : "max-h-14 opacity-100"
+        )}
+      >
+        <nav onPointerLeave={() => setHovered(null)} className="container flex h-12 items-center gap-1 text-sm" aria-label="Основная навигация">
+          {navLinks.map((link) => {
+            const active = isActive(link.match);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active ? "page" : undefined}
+                tabIndex={compact ? -1 : undefined}
+                onPointerEnter={() => setHovered(link.href)}
+                onFocus={() => setHovered(link.href)}
+                onBlur={() => setHovered(null)}
+                className={cn(
+                  "relative isolate rounded-full px-4 py-1.5 font-medium text-muted-foreground transition-colors hover:text-foreground",
+                  active && "bg-ink text-ink-foreground hover:text-ink-foreground"
+                )}
+              >
+                {hovered === link.href && !active && (
+                  <motion.span
+                    layoutId="nav-hover-pill"
+                    aria-hidden
+                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                    className="absolute inset-0 -z-10 rounded-full bg-muted"
+                  />
+                )}
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
       {open && (
-        <nav className="absolute inset-x-0 top-full max-h-[calc(100dvh-4.25rem)] overflow-y-auto border-t border-border/70 bg-card/95 backdrop-blur-xl lg:hidden">
+        <nav className="absolute inset-x-0 top-full max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-border/70 bg-card/95 backdrop-blur-xl lg:hidden">
           <div className="container flex flex-col gap-1 py-4">
             <div className="mb-3 flex items-center justify-between gap-3 md:hidden">
               <div className="min-w-0 flex-1">

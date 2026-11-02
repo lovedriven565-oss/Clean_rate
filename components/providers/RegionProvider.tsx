@@ -50,7 +50,7 @@ function writeCookie(name: string, value: string) {
 function parseRegionCookie(raw: string | undefined): RegionState | null {
   if (!raw) return null;
   const [countryCode, citySlug] = raw.split(":");
-  // Cookie выключенного рынка (например, KZ до запуска) игнорируется → регион по умолчанию;
+  // Cookie выключенного рынка (например, устаревшая KZ до запуска) игнорируется → регион по умолчанию;
   // скрытый город открытого рынка (spb) откатывается на первый открытый (getCity).
   if (!countryCode || !isEnabledCountry(countryCode)) return null;
   return { countryCode, citySlug: getCity(countryCode, citySlug).slug };

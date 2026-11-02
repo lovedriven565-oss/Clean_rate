@@ -63,9 +63,9 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
           <div className="h-1.5 rounded-full bg-muted">
             <div
               className={cn(
-                "h-full rounded-full bg-brand transition-all duration-500",
-                progress > 0 && "shadow-[0_0_10px_hsl(var(--brand)/0.65)]",
-                complete && "shadow-[0_0_16px_hsl(var(--brand)/0.9)]"
+                "h-full rounded-full bg-lime transition-all duration-500",
+                progress > 0 && "shadow-[0_0_10px_hsl(var(--lime)/0.65)]",
+                complete && "shadow-[0_0_16px_hsl(var(--lime)/0.9)]"
               )}
               style={{ width: `${progress}%` }}
             />
@@ -90,7 +90,7 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
             type="button"
             onClick={() => window.print()}
             aria-label="Распечатать чек-лист"
-            className="no-print inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+            className="no-print inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-teal/30 hover:text-foreground"
           >
             <Printer className="h-3.5 w-3.5" />
             Распечатать
@@ -110,7 +110,7 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
               className="overflow-hidden"
             >
               <div className="mt-4 flex flex-wrap items-center gap-3 rounded-panel border border-success/30 bg-success/10 px-4 py-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-[0_0_14px_hsl(var(--brand)/0.6)]">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-lime text-ink shadow-[0_0_14px_hsl(var(--lime)/0.6)]">
                   <ShieldCheck className="h-4 w-4" aria-hidden />
                 </span>
                 <p className="min-w-0 flex-1 text-sm font-semibold text-foreground">
@@ -152,7 +152,7 @@ export function DiyChecklist({ slug, steps }: { slug: string; steps: DiyStep[] }
                 onClick={() => toggle(step.order)}
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-full font-data text-sm font-semibold transition-colors",
-                  checked ? "bg-brand text-brand-foreground" : "bg-foreground text-background hover:bg-foreground/85"
+                  checked ? "bg-lime text-ink" : "bg-foreground text-background hover:bg-foreground/85"
                 )}
               >
                 {checked ? <Check className="h-4 w-4" /> : String(step.order).padStart(2, "0")}
