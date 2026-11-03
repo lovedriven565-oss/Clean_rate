@@ -1564,9 +1564,9 @@ export const seedPriceEstimates: SeedPriceEstimate[] = [
   { id: "pe-48", solutionId: "sledy-reziny-kleya-laminat", countryCode: "KZ", city: "Алматы", currency: "KZT", priceMin: 700, priceMax: 1600, unit: "м²", note: "Уборка пола от клея и скотча" },
 
   // Сметы по категориям для быстрого вывода
-  { id: "pe-cat-1", categoryId: "apartments", countryCode: "BY", city: "Минск", currency: "BYN", priceMin: 80, priceMax: 200, unit: "уборка", note: "Поддерживающая уборка 1–3-комнатной квартиры" },
-  { id: "pe-cat-2", categoryId: "apartments", countryCode: "RU", city: "Москва", currency: "RUB", priceMin: 3000, priceMax: 8000, unit: "уборка", note: "Уборка квартиры" },
-  { id: "pe-cat-3", categoryId: "apartments", countryCode: "KZ", city: "Алматы", currency: "KZT", priceMin: 15000, priceMax: 40000, unit: "уборка", note: "Уборка жилых помещений" },
+  { id: "pe-cat-1", categoryId: "apartments", countryCode: "BY", city: "Минск", currency: "BYN", priceMin: 80, priceMax: 200, unit: "уборку", note: "Поддерживающая уборка 1–3-комнатной квартиры" },
+  { id: "pe-cat-2", categoryId: "apartments", countryCode: "RU", city: "Москва", currency: "RUB", priceMin: 3000, priceMax: 8000, unit: "уборку", note: "Уборка квартиры" },
+  { id: "pe-cat-3", categoryId: "apartments", countryCode: "KZ", city: "Алматы", currency: "KZT", priceMin: 15000, priceMax: 40000, unit: "уборку", note: "Уборка жилых помещений" },
   { id: "pe-cat-4", categoryId: "offices", countryCode: "BY", city: "Минск", currency: "BYN", priceMin: 3, priceMax: 7, unit: "м²", note: "Регулярный клининг офиса по договору" },
   { id: "pe-cat-5", categoryId: "offices", countryCode: "RU", city: "Москва", currency: "RUB", priceMin: 120, priceMax: 280, unit: "м²", note: "Уборка офисов" },
   { id: "pe-cat-6", categoryId: "offices", countryCode: "KZ", city: "Алматы", currency: "KZT", priceMin: 600, priceMax: 1400, unit: "м²", note: "Клининг офисов" },

@@ -13,12 +13,19 @@ import type { Company, PriceEstimate, Solution } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export type RescueScenarioId = "fresh" | "dried" | "rubbed";
+export type RescueRiskLevel = 1 | 2 | 3;
+
+export const RESCUE_RISK_LABELS: Record<RescueRiskLevel, string> = {
+  1: "Низкий риск",
+  2: "Средний риск",
+  3: "Высокий риск",
+};
 
 export interface RescueScenarioOption {
   id: RescueScenarioId;
   buttonLabel: string;
   shortTag: string;
-  chancePercent: number;
+  riskLevel: RescueRiskLevel;
   tone: "success" | "caution" | "danger";
   badgeClassName: string;
   headline: string;
@@ -50,10 +57,10 @@ export function buildRescueScenarios(
       id: "fresh",
       buttonLabel: "Только что (свежее)",
       shortTag: "Первые 15–30 мин",
-      chancePercent: 85,
+      riskLevel: 1,
       tone: "success",
       badgeClassName: "border-success/25 bg-success/10 text-success",
-      headline: "Шанс вывести дома: 85% (низкий риск испортить покрытие)",
+      headline: "Низкий риск испортить покрытие — действуйте сразу по протоколу",
       explanation: `Загрязнение ещё на поверхности и не успело связаться с основой. Главное — не тереть щёткой и не лить горячую воду: идите по пошаговому чек-листу ниже, чтобы бережно спасти ${riskSurface}.`,
       ctaLabel: "Перейти к пошаговому чек-листу",
       ctaHref: "#diy-steps",
@@ -63,10 +70,10 @@ export function buildRescueScenarios(
       id: "dried",
       buttonLabel: "Засохло (вчера и раньше)",
       shortTag: "Въевшееся пятно",
-      chancePercent: 40,
+      riskLevel: 2,
       tone: "caution",
       badgeClassName: "border-star/30 bg-star/15 text-star",
-      headline: "Шанс вывести дома: 40% · Нужен специализированный состав",
+      headline: "Средний риск: бытовая химия уже не возьмёт — нужен специализированный состав",
       explanation:
         "Обычная вода и бытовое мыло уже не возьмут высохший пигмент — нужен специализированный профессиональный пятновыводитель из подборки ниже с обязательным тестом на незаметном шве.",
       ctaLabel: "Подобрать специализированный состав",
@@ -77,10 +84,10 @@ export function buildRescueScenarios(
       id: "rubbed",
       buttonLabel: "Уже тёрли бытовой химией / содой / горячей водой",
       shortTag: "Риск ореола",
-      chancePercent: 15,
+      riskLevel: 3,
       tone: "danger",
       badgeClassName: "border-danger/25 bg-danger/10 text-danger",
-      headline: "Стоп! Шанс дома: 15% (высокий риск вечного ореола и повреждения ворса)",
+      headline: "Стоп! Высокий риск вечного ореола и повреждения ворса",
       explanation: `Бытовая пена, сода или горячая вода уже загнали грязь глубоко в поролон/основу и зафиксировали пятно. Дальнейшее трение оставит жёлтый круг или белёсую проплешина. Чтобы спасти ${riskSurface}, нужен промывочный водосос-экстрактор, который вытянет химию и грязь из глубины.`,
       ctaLabel: priceFrom ? `Вызвать проверенного мастера — от ${priceFrom}` : "Вызвать проверенного мастера",
       ctaHref: "#pro",
@@ -226,7 +233,7 @@ export function RescueCalculator({
                   item.badgeClassName,
                 )}
               >
-                Шанс дома: {item.chancePercent}%
+                {RESCUE_RISK_LABELS[item.riskLevel]}
               </span>
             </button>
           );
@@ -262,19 +269,34 @@ export function RescueCalculator({
               current.badgeClassName,
             )}
           >
-            {current.chancePercent}% успех дома
+            {RESCUE_RISK_LABELS[current.riskLevel]}
           </span>
         </div>
 
-        {/* Индикатор шанса спасения */}
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-background/80">
-          <div
-            className={cn(
-              "h-full rounded-full transition-all duration-300",
-              current.tone === "danger" ? "bg-danger" : current.tone === "caution" ? "bg-star" : "bg-success",
-            )}
-            style={{ width: `${current.chancePercent}%` }}
-          />
+        {/* Качественная шкала риска испортить покрытие — без выдуманных процентов */}
+        <div className="mt-3" role="img" aria-label={`Риск испортить покрытие: ${RESCUE_RISK_LABELS[current.riskLevel]}`}>
+          <div className="flex gap-1">
+            {([1, 2, 3] as const).map((level) => (
+              <span
+                key={level}
+                className={cn(
+                  "h-2 flex-1 rounded-full transition-colors duration-300",
+                  level <= current.riskLevel
+                    ? current.tone === "danger"
+                      ? "bg-danger"
+                      : current.tone === "caution"
+                        ? "bg-star"
+                        : "bg-success"
+                    : "bg-background/80",
+                )}
+              />
+            ))}
+          </div>
+          <div className="mt-1 flex justify-between font-data text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <span>Низкий</span>
+            <span>Средний</span>
+            <span>Высокий риск</span>
+          </div>
         </div>
 
         <p className="mt-3 text-sm leading-6 text-foreground/90">{current.explanation}</p>

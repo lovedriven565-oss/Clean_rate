@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { href: "/solutions", label: "Протоколы", match: ["/solutions"] },
   { href: "/#shelf", label: "Средства по зонам", match: [] },
-  { href: "/#videolab", label: "Краш-тесты", match: [] },
+  { href: "/#videolab", label: "Разборы", match: [] },
   { href: "/#cleaners", label: "Клинеры рядом", match: [] },
   { href: "/rating", label: "Рейтинг компаний", match: ["/rating", "/companies"] },
   { href: "/brands", label: "Бренды", match: ["/brands", "/for-brands"] },
@@ -65,7 +65,7 @@ export function Navbar() {
             </span>
             <span className="truncate">
               <span className="font-semibold text-lime">Неделя чистоты:</span>{" "}
-              <span className="text-ink-foreground/80">краш-тесты средств и сметы мастеров в Минске, Москве и Алматы</span>
+              <span className="text-ink-foreground/80">разборы протоколов и сметы мастеров в Минске, Москве и Алматы</span>
             </span>
           </p>
           <Link href="/solutions" className="hidden shrink-0 items-center gap-1 font-semibold text-lime hover:underline sm:inline-flex">

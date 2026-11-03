@@ -8,9 +8,8 @@ import { useRegion } from "@/components/providers/RegionProvider";
 import { trackClick } from "@/lib/analytics";
 import { getCategoryName, categoryLandingHref } from "@/lib/categories";
 import { formatMarketCurrency } from "@/lib/format";
-import { CLEANING_SERVICES, pickCategoryEstimate } from "@/lib/home/cleaning-services";
+import { CLEANING_SERVICES, cleanerCardPrice, pickCategoryEstimate } from "@/lib/home/cleaning-services";
 import {
-  companyPriceLabel,
   externalRating,
   rankOrganicCompanies,
   telHref,
@@ -58,7 +57,7 @@ export function CleanersByServiceSection({
               Проверенные клинеры рядом ({city.name})
             </h2>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
-              Мастера с подтверждёнными отзывами. Звоните напрямую — без посредников.
+              Компании с проверенным профилем. Звоните напрямую — без посредников.
               Рекламные места помечены и на ранжирование не влияют.
             </p>
           </div>
@@ -116,9 +115,9 @@ export function CleanersByServiceSection({
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sponsor && <CleanerCard key={sponsor.id} company={sponsor} service={service} countryCode={market.countryCode} sponsor />}
+          {sponsor && <CleanerCard key={sponsor.id} company={sponsor} service={service} serviceUnit={estimate?.unit ?? null} countryCode={market.countryCode} sponsor />}
           {organic.map((company) => (
-            <CleanerCard key={company.id} company={company} service={service} countryCode={market.countryCode} />
+            <CleanerCard key={company.id} company={company} service={service} serviceUnit={estimate?.unit ?? null} countryCode={market.countryCode} />
           ))}
         </div>
 
@@ -138,15 +137,18 @@ export function CleanersByServiceSection({
 function CleanerCard({
   company,
   service,
+  serviceUnit,
   countryCode,
   sponsor = false,
 }: {
   company: Company;
   service: CategoryId;
+  serviceUnit: string | null;
   countryCode: string;
   sponsor?: boolean;
 }) {
   const rating = externalRating(company);
+  const serviceTags = [service, ...company.categories.filter((c) => c !== service)].slice(0, 3);
 
   return (
     <article
@@ -179,7 +181,7 @@ function CleanerCard({
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {company.categories.slice(0, 3).map((category) => (
+        {serviceTags.map((category) => (
           <span key={category} className="rounded-full border border-border bg-muted/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
             {getCategoryName(category)}
           </span>
@@ -187,7 +189,7 @@ function CleanerCard({
       </div>
 
       <div className="mt-auto">
-        <p className="font-data text-lg font-bold text-foreground">{companyPriceLabel(company)}</p>
+        <p className="font-data text-lg font-bold text-foreground">{cleanerCardPrice(company, serviceUnit)}</p>
         <div className="mt-3 flex gap-2">
           {company.phone && (
             <a

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Ban, Building2, FlaskConical, ListChecks, MapPinned, Phone, Send, Sparkles } from "lucide-react";
@@ -249,7 +249,7 @@ export function PlatformHero({
                       Как убрать
                       <ArrowRight className="size-4" aria-hidden />
                     </Link>
-                    <a href="#pros" className="text-sm font-semibold text-teal hover:underline">
+                    <a href="#cleaners" className="text-sm font-semibold text-teal hover:underline">
                       Мастера в городе
                     </a>
                   </div>
@@ -380,11 +380,13 @@ export function PlatformHero({
         <dl className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-panel bg-white/10 sm:grid-cols-4">
           {metrics.map((m) => (
             <div key={m.label} className="flex items-center gap-3 bg-ink px-4 py-4">
-              <m.icon className="size-5 shrink-0 text-lime" aria-hidden />
-              <dd className="min-w-0">
-                <dt className="sr-only">{m.label}</dt>
-                <span className="font-data text-2xl font-bold text-ink-foreground">{m.value}</span>
-                <span className="mt-0.5 block text-xs text-ink-foreground/60">{m.label}</span>
+              <dt className="sr-only">{m.label}</dt>
+              <dd className="flex min-w-0 items-center gap-3">
+                <m.icon className="size-5 shrink-0 text-lime" aria-hidden />
+                <span>
+                  <span className="font-data text-2xl font-bold text-ink-foreground">{m.value}</span>
+                  <span className="mt-0.5 block text-xs text-ink-foreground/60">{m.label}</span>
+                </span>
               </dd>
             </div>
           ))}

@@ -78,7 +78,7 @@ export default async function Home() {
             <SeasonalBrandBanner ads={editorialAdByCountry} shelfProducts={shelf} />
           </div>
 
-          {/* Краш-тесты и разборы протоколов 9:16 */}
+          {/* Разборы протоколов 9:16 */}
           <VideoLabSection solutions={published} products={shelf} />
 
           {/* Клинеры города по видам работ: цены, спонсор + органика */}

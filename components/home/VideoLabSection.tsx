@@ -46,7 +46,7 @@ function buildSlides(solution: Solution, hasProduct: boolean): Slide[] {
 }
 
 /**
- * «Видеолаборатория»: вертикальные карточки 9:16 с краш-тестами и разборами протоколов.
+ * «Видеолаборатория»: вертикальные карточки 9:16 с разборами протоколов.
  * По клику — сторис-плеер 9:16 в модалке: таймлайн «Не делайте» → шаги →
  * карточка протестированного средства с кнопкой покупки. Если у протокола есть
  * videoUrl, вместо слайдов встраивается сам ролик (YouTube/VK/Rutube/mp4).
@@ -67,7 +67,7 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
         <div>
           <p className="font-data text-[11px] font-bold uppercase tracking-[0.16em] text-teal">ChistoLab / Video</p>
           <h2 id="videolab-title" className="mt-2 max-w-xl text-balance font-display text-3xl font-bold tracking-[-0.03em] text-foreground sm:text-4xl">
-            Видеолаборатория: краш-тесты вживую
+            Видеолаборатория: разборы протоколов
           </h2>
           <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
             Короткие разборы: реальное пятно, реальное средство, честный результат.
@@ -80,7 +80,7 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
       </div>
 
       <ul className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        {items.map((solution, index) => {
+        {items.map((solution) => {
           const product = products.find((p) => p.solutionSlug === solution.slug);
           const price = product?.price !== undefined ? displayPrice(product.price, market.currency) : null;
           return (
@@ -103,11 +103,13 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
 
                   <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-[6px] bg-ink/80 px-2 py-1 font-data text-[10px] font-bold text-white">
                     <Play className="size-3 fill-white" aria-hidden />
-                    {solution.videoUrl ? "Видео" : `${String(solution.diySteps.length).padStart(2, "0")} шага`}
+                    {solution.videoUrl ? "Видео" : `Разбор · ${pluralize(solution.diySteps.length, ["шаг", "шага", "шагов"])}`}
                   </span>
-                  <span className="absolute right-2.5 top-2.5 rounded-[6px] bg-lime px-2 py-1 font-data text-[10px] font-bold uppercase tracking-wide text-ink">
-                    {index % 2 === 0 ? "Краш-тест" : "Обзор"}
-                  </span>
+                  {!solution.videoUrl && (
+                    <span className="absolute right-2.5 top-2.5 rounded-[6px] bg-ink/80 px-2 py-1 font-data text-[10px] font-bold text-white">
+                      Видео скоро
+                    </span>
+                  )}
 
                   <span className="absolute bottom-3 right-3 grid size-11 place-items-center rounded-full bg-lime text-ink shadow-lg transition-transform group-hover:scale-110">
                     <Play className="size-4 fill-ink" aria-hidden />
@@ -396,7 +398,7 @@ function StoryBody({
                 <div className="rounded-control bg-card p-4 text-foreground">
                   <p className="flex items-center gap-1.5 font-data text-[11px] font-bold uppercase tracking-[0.14em] text-teal">
                     <FlaskConical className="size-3.5" aria-hidden />
-                    Протестировано в лаборатории
+                    Средство из протокола
                   </p>
                   <p className="mt-2 text-base font-bold leading-snug">{product.name}</p>
                   {product.brandName && <p className="mt-0.5 text-xs text-muted-foreground">{product.brandName}</p>}

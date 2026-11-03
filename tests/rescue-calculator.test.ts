@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  RESCUE_RISK_LABELS,
   RESCUE_SCENARIO_ORDER,
   buildRescueComparison,
   buildRescueScenarios,
@@ -12,23 +13,26 @@ const allEstimates = getFallbackPriceEstimates();
 const wine = solutions.find((s) => s.slug === "vino-na-divane")!;
 
 describe("RescueCalculator scenarios", () => {
-  it("exposes 3 scenarios in order: fresh (85%), dried (40%), rubbed (15%)", () => {
+  it("exposes 3 scenarios in order: fresh (low), dried (medium), rubbed (high risk)", () => {
     assert.deepEqual(RESCUE_SCENARIO_ORDER, ["fresh", "dried", "rubbed"]);
     const scenarios = buildRescueScenarios(wine, "60 Br");
 
     assert.equal(scenarios.fresh.buttonLabel, "Только что (свежее)");
-    assert.equal(scenarios.fresh.chancePercent, 85);
+    assert.equal(scenarios.fresh.riskLevel, 1);
+    assert.equal(RESCUE_RISK_LABELS[scenarios.fresh.riskLevel], "Низкий риск");
     assert.equal(scenarios.fresh.ctaHref, "#diy-steps");
     assert.equal(scenarios.fresh.recommendProCall, false);
 
     assert.equal(scenarios.dried.buttonLabel, "Засохло (вчера и раньше)");
-    assert.equal(scenarios.dried.chancePercent, 40);
+    assert.equal(scenarios.dried.riskLevel, 2);
+    assert.equal(RESCUE_RISK_LABELS[scenarios.dried.riskLevel], "Средний риск");
     assert.equal(scenarios.dried.ctaHref, "#diy-products");
     assert.equal(scenarios.dried.recommendProCall, false);
 
     assert.equal(scenarios.rubbed.buttonLabel, "Уже тёрли бытовой химией / содой / горячей водой");
-    assert.equal(scenarios.rubbed.chancePercent, 15);
-    assert.match(scenarios.rubbed.headline, /Стоп! Шанс дома: 15%/);
+    assert.equal(scenarios.rubbed.riskLevel, 3);
+    assert.equal(RESCUE_RISK_LABELS[scenarios.rubbed.riskLevel], "Высокий риск");
+    assert.match(scenarios.rubbed.headline, /Стоп! Высокий риск/);
     assert.match(scenarios.rubbed.explanation, /экстрактор/);
     assert.match(scenarios.rubbed.ctaLabel, /60 Br/);
     assert.equal(scenarios.rubbed.recommendProCall, true);

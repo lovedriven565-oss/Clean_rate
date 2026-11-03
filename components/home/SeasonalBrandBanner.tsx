@@ -39,7 +39,7 @@ export function SeasonalBrandBanner({
   // Редакционный выбор: бренд активной кампании, иначе — протестированный товар
   // витрины (приоритет — товару с бейджем и привязкой к протоколу).
   const fallback = [...shelfProducts]
-    .sort((a, b) => Number(Boolean(b.badge && b.solutionSlug)) - Number(Boolean(a.badge && a.solutionSlug)) || (b.rating ?? 0) - (a.rating ?? 0))
+    .sort((a, b) => Number(Boolean(b.solutionSlug)) - Number(Boolean(a.solutionSlug)) || (b.rating ?? 0) - (a.rating ?? 0))
     .find((p) => Boolean(visible ? p.brandId === ad!.brandId : p.affiliateUrl || p.solutionSlug));
 
   if (!visible && !fallback) return null;
@@ -49,7 +49,7 @@ export function SeasonalBrandBanner({
   const title = visible ? ad!.title : `${fallback!.name} — выбор лаборатории сезона`;
   const description = visible
     ? ad!.description
-    : fallback!.pros[0] ?? "Состав прошёл наши краш-тесты и используется в пошаговых протоколах ChistoLab.";
+    : fallback!.pros[0] ?? "Состав подобран по типу поверхности и используется в пошаговых протоколах ChistoLab.";
   const price =
     !visible && fallback!.price !== undefined
       ? displayPrice(fallback!.price, market.currency)
@@ -107,7 +107,7 @@ export function SeasonalBrandBanner({
               {price && (
                 <p className="mt-3 flex items-center gap-2 font-data text-sm font-bold text-lime">
                   <Star className="size-3.5 fill-lime" aria-hidden />
-                  {`≈ ${formatMarketCurrency(price.value, market.currency)} · проверен в протоколах ChistoLab`}
+                  {`≈ ${formatMarketCurrency(price.value, market.currency)} · входит в протоколы ChistoLab`}
                 </p>
               )}
 

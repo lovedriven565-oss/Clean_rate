@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { seedCompanies, seedPriceEstimates } from "../db/seed-data";
-import { CLEANING_SERVICES, pickCategoryEstimate, pickTopCompany } from "../lib/home/cleaning-services";
+import { CLEANING_SERVICES, cleanerCardPrice, pickCategoryEstimate, pickTopCompany } from "../lib/home/cleaning-services";
 import type { Company, PriceEstimate } from "../lib/types";
 
 describe("cleaning-services", () => {
@@ -25,6 +25,16 @@ describe("cleaning-services", () => {
       assert.ok(top.categories.includes("apartments"));
     }
     assert.equal(pickTopCompany(companies, "apartments", "Нигде"), null);
+  });
+
+  it("цена в карточке — только когда единица прайса совпадает с единицей услуги", () => {
+    const companies = seedCompanies as unknown as Company[];
+    const perMeter = companies.find((c) => c.priceFrom && c.priceUnit === "м²")!;
+    assert.match(cleanerCardPrice(perMeter, "м²"), /^от /);
+    assert.equal(cleanerCardPrice(perMeter, "уборку"), "Цена по запросу");
+    assert.equal(cleanerCardPrice(perMeter, null), "Цена по запросу");
+    const noUnit = companies.find((c) => c.priceFrom && !c.priceUnit)!;
+    assert.equal(cleanerCardPrice(noUnit, "уборку"), "Цена по запросу");
   });
 
   it("в каждом открытом городе есть топ-компания по всем 6 услугам — блок клинеров не пуст", () => {

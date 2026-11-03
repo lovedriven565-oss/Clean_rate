@@ -141,7 +141,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         </section>
 
         <section className="container grid gap-6 py-14 lg:grid-cols-[1fr_340px] lg:py-20">
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             <article className="data-surface rounded-panel p-7 sm:p-9">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-control bg-teal/10 text-teal"><BriefcaseBusiness className="h-5 w-5" /></span>
@@ -195,7 +195,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             )}
           </div>
 
-          <aside className="space-y-5">
+          <aside className="min-w-0 space-y-5">
             <div className="data-surface rounded-panel p-6">
               <h2 className="font-display text-lg font-bold text-foreground">Основные условия</h2>
               <dl className="mt-5 space-y-4 text-sm">
