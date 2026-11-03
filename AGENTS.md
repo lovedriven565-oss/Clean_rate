@@ -330,6 +330,14 @@
 - **`/solutions/[slug]`:** шаги `DiyChecklist` — бирюзовые квадраты `bg-teal rounded-control` (checked → lime). Из `DiyPanel` убраны 3 захардкоженных статичных жёлто-красных чипа «светофора» (повторялись на всех решениях) — осталась марка материала и теги безопасности у каждого средства.
 - **Проверки:** typecheck 0, lint 0, test 213/213, build 160 страниц; dev:3111 — все маршруты 200, порядок секций в SSR-HTML верный. `curl` к localhost требует `--noproxy "*"` (системный прокси VPN перехватывает loopback).
 
+## Пострелизные фиксы прода (сделано)
+- **Маппер компаний терял данные D1:** `getAllCompanies`/`getCompanyBySlug` кастовали drizzle-строку `as unknown as CompanyRow` и читали snake_case, а drizzle отдаёт camelCase + boolean (`verified`/`promoted` — `integer({mode:"boolean"})`). На проде пропадали: «Профиль проверен», спонсорский слот, `priceFrom/priceUnit` («Цена по запросу»), `telegramUrl/websiteUrl/email`, `coverImage`, `experienceYears`. Лечится `toCompanyRow()` в `lib/db/queries.ts` — перегоняет drizzle-строку в контракт маппера (как у брендов). При смене схемы держать в синхроне.
+- **Посадочные `/[city]/[category]` были 404 в воркере:** `export const dynamicParams = false` + пустой incremental cache (Cache API не наполняется билдом) → `NoFallbackError` → закешированный 404 (`x-nextjs-cache: HIT`). `dynamicParams` убран — валидность по-прежнему режет `resolveLandingParams → notFound()`.
+- **OG/icon/apple-icon 500 в воркере:** `ogFonts()` читал TTF из `node_modules` через fs — в бандле воркера файлов нет. Теперь цепочка fs → `env.ASSETS` → fetch `SITE_URL/fonts/*`; шрифты Geist лежат в `public/fonts/`.
+- **Incremental cache:** ключ теперь включает `NEXT_BUILD_ID` (зашит в бандл, `OPEN_NEXT_BUILD_ID` не выставляется) — записи прошлых деплоев недостижимы; `set()` пропускает записи со `status >= 400` — закешированный notFound больше не бессмертен.
+- `#special` (SeasonalBrandBanner) — без `Reveal`: блок под hero виден в SSR, не ждёт гидрацию (устраняет «белое поле» на первом экране).
+- **Прод-D1:** применены миграции 0006 (campaigns media_*) и 0007 (`campaigns.erid`); `price_estimates.unit` «уборка» → «уборку» (3 строки).
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

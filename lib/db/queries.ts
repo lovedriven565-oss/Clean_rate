@@ -55,6 +55,33 @@ import {
 } from "./fallback";
 import { mapBrandRow, mapCompanyRow, parseJsonArray, parseJsonGeneric, type CompanyRow } from "./mappers";
 
+type DrizzleCompanyRow = typeof cleaningCompanies.$inferSelect;
+
+/** drizzle отдаёт camelCase-поля и boolean-флаги — приводим к snake_case контракту маппера. */
+function toCompanyRow(row: DrizzleCompanyRow): CompanyRow {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    legal_name: row.legalName,
+    city: row.city,
+    address: row.address,
+    description: row.description,
+    website_url: row.websiteUrl,
+    phone: row.phone,
+    email: row.email,
+    telegram_url: row.telegramUrl,
+    price_from: row.priceFrom,
+    price_unit: row.priceUnit,
+    experience_years: row.experienceYears,
+    cover_image: row.coverImage,
+    tags: row.tags,
+    guarantees: row.guarantees,
+    verified: row.verified ? 1 : 0,
+    promoted: row.promoted ? 1 : 0,
+  };
+}
+
 /**
  * Ошибка чтения D1. Локально (частично засеянная D1, next start) — лог и откат на seed.
  * В проде (`STRICT_DB=1` в wrangler vars) ошибка всплывает: устаревший seed не должен
@@ -93,7 +120,7 @@ export async function getAllCompanies(): Promise<Company[]> {
         .filter((r) => r.companyId === row.id)
         .map((r) => ({ source: r.source, source_url: r.sourceUrl, rating: r.rating, review_count: r.reviewCount }));
       const equip = equipmentRows.filter((e) => e.companyId === row.id).map((e) => ({ brand_id: e.brandId }));
-      return mapCompanyRow(row as unknown as CompanyRow, cats, ratings, equip);
+      return mapCompanyRow(toCompanyRow(row), cats, ratings, equip);
     });
   } catch (err) {
     reportDbError("[db:companies_error]", err);
@@ -121,7 +148,7 @@ export async function getCompanyBySlug(slug: string): Promise<Company | null> {
     ]);
 
     return mapCompanyRow(
-      row as unknown as CompanyRow,
+      toCompanyRow(row),
       cats.map((c) => ({ category_id: c.categoryId })),
       ratings.map((r) => ({ source: r.source, source_url: r.sourceUrl, rating: r.rating, review_count: r.reviewCount })),
       equip.map((e) => ({ brand_id: e.brandId }))

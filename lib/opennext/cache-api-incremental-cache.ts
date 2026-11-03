@@ -21,9 +21,18 @@ type StoredEntry = { value: CacheEntryValue; lastModified: number };
 const CACHE_HOST = "https://opennext-incache.chistolab.internal";
 
 function entryUrl(key: string, cacheType?: string): string {
-  const buildId = process.env.OPEN_NEXT_BUILD_ID ?? "local";
+  // NEXT_BUILD_ID зашивается в серверный бандл при сборке (патч OpenNext);
+  // без него ключ был бы константным и устаревшие/отравленные записи
+  // жили бы между деплоями бесконечно.
+  const buildId = process.env.NEXT_BUILD_ID ?? process.env.OPEN_NEXT_BUILD_ID ?? "local";
   const safeKey = key.split("/").map(encodeURIComponent).join("/");
   return `${CACHE_HOST}/${encodeURIComponent(buildId)}/${cacheType ?? "cache"}/${safeKey}`;
+}
+
+/** Ответы с ошибкой (404/5xx) не кладём в кеш: иначе одна неудачная отрисовка становится постоянным ответом для всех. */
+function isErrorEntry(value: CacheEntryValue): boolean {
+  const status = (value as { status?: number } | null | undefined)?.status;
+  return typeof status === "number" && status >= 400;
 }
 
 function store(): Cache | null {
@@ -52,7 +61,7 @@ const cacheApiIncrementalCache: IncrementalCache = {
 
   async set(key, value, cacheType) {
     const cache = store();
-    if (!cache) return;
+    if (!cache || isErrorEntry(value)) return;
     try {
       const entry: StoredEntry = { value, lastModified: Date.now() };
       await cache.put(

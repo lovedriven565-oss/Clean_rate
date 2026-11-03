@@ -21,7 +21,9 @@ import type { PriceEstimate } from "@/lib/types";
  * ориентир цены из смет платформы, связанные протоколы. Страница индексируется только
  * при наличии ≥2 компаний — тонкие страницы получают noindex и не попадают в sitemap.
  */
-export const dynamicParams = false;
+// dynamicParams намеренно не отключаем: при кеш-миссе в OpenNext воркере
+// статический маршрут с dynamicParams=false падает с NoFallbackError → 404.
+// Невалидные пары город/услуга закрывает resolveLandingParams → notFound().
 
 export function generateStaticParams() {
   return landingStaticParams();

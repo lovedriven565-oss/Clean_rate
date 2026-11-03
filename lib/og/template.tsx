@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
-import { BRAND_COLORS, SITE_MONOGRAM, SITE_NAME, SITE_TAGLINE, SITE_TLD } from "@/lib/site";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { BRAND_COLORS, SITE_MONOGRAM, SITE_NAME, SITE_TAGLINE, SITE_TLD, SITE_URL } from "@/lib/site";
 
 /**
  * Общий шаблон OG-картинок (1200×630). Картинки генерируются на этапе сборки (SSG),
@@ -14,10 +15,33 @@ export const OG_CONTENT_TYPE = "image/png";
 const fontDir = join(process.cwd(), "node_modules/geist/dist/fonts/geist-sans");
 let fontsPromise: Promise<{ regular: Buffer; bold: Buffer }> | undefined;
 
+/**
+ * На сборке (SSG) шрифт читается с диска. Если страница всё же рендерится
+ * в рантайме воркера (кеш-мисс incremental cache), node_modules недоступен —
+ * тогда берём TTF из public/fonts через ASSETS-биндинг, запасной путь —
+ * обычный fetch с публичного домена.
+ */
+async function loadFont(name: string): Promise<Buffer> {
+  try {
+    return await readFile(join(fontDir, name));
+  } catch {
+    try {
+      const { env } = await getCloudflareContext({ async: true });
+      const res = await (env.ASSETS as Fetcher).fetch(`https://assets.internal/fonts/${name}`);
+      if (res.ok) return Buffer.from(await res.arrayBuffer());
+    } catch {
+      // вне воркера или без ASSETS — остаётся публичный fetch
+    }
+    const res = await fetch(`${SITE_URL}/fonts/${name}`);
+    if (!res.ok) throw new Error(`OG-шрифт ${name}: HTTP ${res.status}`);
+    return Buffer.from(await res.arrayBuffer());
+  }
+}
+
 function loadFonts() {
   fontsPromise ??= Promise.all([
-    readFile(join(fontDir, "Geist-Regular.ttf")),
-    readFile(join(fontDir, "Geist-Bold.ttf")),
+    loadFont("Geist-Regular.ttf"),
+    loadFont("Geist-Bold.ttf"),
   ]).then(([regular, bold]) => ({ regular, bold }));
   return fontsPromise;
 }

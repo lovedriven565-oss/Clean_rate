@@ -7,7 +7,6 @@ import { AdBadge } from "@/components/ads/AdBadge";
 import { AdCta } from "@/components/ads/AdCta";
 import { AdImpression } from "@/components/ads/AdImpression";
 import { BrandMark } from "@/components/ads/BrandMark";
-import { Reveal } from "@/components/home/Reveal";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { isAdVisibleInCountry } from "@/lib/ads/presentation";
 import { HOME_ZONES, displayPrice, type ShelfProduct } from "@/lib/products/zone-shelf";
@@ -164,5 +163,7 @@ export function SeasonalBrandBanner({
         </section>
   );
 
-  return <Reveal>{visible ? <AdImpression ad={ad!}>{section}</AdImpression> : section}</Reveal>;
+  // Без Reveal-обёртки: блок идёт сразу под hero — до гидрации opacity:0
+  // выглядит как пустое поле на первом экране.
+  return visible ? <AdImpression ad={ad!}>{section}</AdImpression> : section;
 }
