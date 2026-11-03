@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, FlaskConical, Star } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Star } from "lucide-react";
 import { AdBadge } from "@/components/ads/AdBadge";
 import { AdCta } from "@/components/ads/AdCta";
 import { AdImpression } from "@/components/ads/AdImpression";
@@ -17,13 +17,15 @@ import type { EligibleAd } from "@/lib/types";
 
 const SPRAY_IMAGE = "/lovable/spray.jpg";
 
+function formatEndsAt(ts: number): string {
+  return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" }).format(new Date(ts));
+}
+
 /**
- * «Спецпроект сезона»: тёмный контрастный блок главной в стиле Lovable —
- * фото флакона слева, оффер по центру, быстрые кнопки задач справа.
- * Активная кампания показывается с маркировкой «Реклама» и трекингом
- * (AdImpression/AdCta). Без кампании блок показывает редакционный выбор
- * лаборатории — средство, реально протестированное в протоколах, без
- * пометок «партнёр» и «реклама».
+ * «Спецпроект сезона» — светлая карточка в стиле Lovable: фото флакона слева,
+ * оффер по центру, быстрые кнопки реальных зон справа. Активная кампания
+ * показывается с маркировкой «Реклама», badgeText, ценой товара и честным
+ * сроком «до {endsAt}». Без кампании — редакционный выбор без скидок и сроков.
  */
 export function SeasonalBrandBanner({
   ads,
@@ -36,8 +38,8 @@ export function SeasonalBrandBanner({
   const ad = ads[countryCode] ?? null;
   const visible = ad && isAdVisibleInCountry(ad, countryCode);
 
-  // Редакционный выбор: бренд активной кампании, иначе — протестированный товар
-  // витрины (приоритет — товару с бейджем и привязкой к протоколу).
+  // Редакционный выбор: бренд активной кампании, иначе — товар витрины,
+  // реально фигурирующий в протоколах (приоритет — связанному с решением).
   const fallback = [...shelfProducts]
     .sort((a, b) => Number(Boolean(b.solutionSlug)) - Number(Boolean(a.solutionSlug)) || (b.rating ?? 0) - (a.rating ?? 0))
     .find((p) => Boolean(visible ? p.brandId === ad!.brandId : p.affiliateUrl || p.solutionSlug));
@@ -50,33 +52,37 @@ export function SeasonalBrandBanner({
   const description = visible
     ? ad!.description
     : fallback!.pros[0] ?? "Состав подобран по типу поверхности и используется в пошаговых протоколах ChistoLab.";
+  const priceProduct = visible
+    ? shelfProducts.find((p) => p.id === ad!.productId || p.slug === ad!.productSlug)
+    : fallback!;
   const price =
-    !visible && fallback!.price !== undefined
-      ? displayPrice(fallback!.price, market.currency)
-      : null;
+    priceProduct?.price !== undefined ? displayPrice(priceProduct.price, market.currency) : null;
 
+  // Зоны — только реальные зоны товара кампании; без товара — зоны бренда.
+  const zoneSource = visible && priceProduct ? [priceProduct] : shelfProducts.filter((p) => p.brandId === (visible ? ad!.brandId : fallback!.brandId));
   const chips = [
-    ...new Set(
-      shelfProducts
-        .filter((p) => p.brandId === (visible ? ad!.brandId : fallback!.brandId))
-        .flatMap((p) => p.zones.map((z) => HOME_ZONES.find((h) => h.id === z)?.label ?? z)),
-    ),
+    ...new Set(zoneSource.flatMap((p) => p.zones.map((z) => HOME_ZONES.find((h) => h.id === z)?.label ?? z))),
   ].slice(0, 3);
+
+  const meta: string[] = [];
+  if (visible && price) meta.push(`от ${formatMarketCurrency(price.value, market.currency)}`);
+  if (visible && ad!.endsAt) meta.push(`до ${formatEndsAt(ad!.endsAt)}`);
 
   const section = (
         <section
+          id="special"
           aria-label={visible ? `Реклама: спецпроект сезона ${brandName}` : `Выбор лаборатории: ${brandName}`}
-          className="relative my-4 overflow-hidden rounded-panel border border-lime/25 bg-ink p-6 text-ink-foreground sm:p-8 lg:p-10"
+          className="relative my-4 overflow-hidden rounded-panel border border-lime/40 bg-card p-6 sm:p-8 lg:p-10"
         >
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 45% 75% at 100% 0%, hsl(var(--lime) / 0.16), transparent 65%)" }}
+            style={{ background: "radial-gradient(ellipse 45% 75% at 100% 0%, hsl(var(--lime) / 0.22), transparent 65%)" }}
           />
 
           <div className="relative grid items-center gap-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.5fr)_minmax(0,0.9fr)]">
             {/* Левая колонка — карточка флакона */}
-            <div className="relative mx-auto w-full max-w-xs overflow-hidden rounded-panel border border-white/10 bg-white/5 lg:mx-0">
+            <div className="relative mx-auto w-full max-w-xs overflow-hidden rounded-panel border border-border bg-muted lg:mx-0">
               <div className="relative aspect-[4/3]">
                 <Image src={SPRAY_IMAGE} alt={brandName} fill sizes="(min-width: 1024px) 320px, 90vw" className="object-cover" />
               </div>
@@ -89,31 +95,37 @@ export function SeasonalBrandBanner({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
                 {visible && <AdBadge text={ad!.badgeText} />}
-                <span className="font-data text-[11px] font-bold uppercase tracking-[0.16em] text-lime">
+                <span className="font-data text-[11px] font-bold uppercase tracking-[0.16em] text-teal">
                   {visible ? `Спецпроект сезона · Партнёр ${brandName}` : "Выбор лаборатории"}
                 </span>
               </div>
 
               <div className="mt-5 flex items-center gap-3">
                 <BrandMark name={brandName} accent={visible ? ad!.brandAccent : undefined} size="md" />
-                <span className="font-display text-lg font-bold tracking-[-0.02em]">{brandName}</span>
+                <span className="font-display text-lg font-bold tracking-[-0.02em] text-foreground">{brandName}</span>
               </div>
 
-              <h2 className="mt-4 text-balance font-display text-2xl font-bold leading-[1.1] tracking-[-0.035em] sm:text-4xl">
+              <h2 className="mt-4 text-balance font-display text-2xl font-bold leading-[1.1] tracking-[-0.035em] text-foreground sm:text-4xl">
                 {title}
               </h2>
-              <p className="mt-4 max-w-xl text-base leading-7 text-ink-foreground/70">{description}</p>
+              <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">{description}</p>
 
-              {price && (
-                <p className="mt-3 flex items-center gap-2 font-data text-sm font-bold text-lime">
-                  <Star className="size-3.5 fill-lime" aria-hidden />
+              {meta.length > 0 && (
+                <p className="mt-3 flex items-center gap-2 font-data text-sm font-bold text-teal">
+                  <Star className="size-3.5 fill-teal" aria-hidden />
+                  {meta.join(" · ")}
+                </p>
+              )}
+              {!visible && price && (
+                <p className="mt-3 flex items-center gap-2 font-data text-sm font-bold text-teal">
+                  <Star className="size-3.5 fill-teal" aria-hidden />
                   {`≈ ${formatMarketCurrency(price.value, market.currency)} · входит в протоколы ChistoLab`}
                 </p>
               )}
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
                 {visible ? (
-                  <AdCta ad={ad!} variant="onDark" size="lg" />
+                  <AdCta ad={ad!} variant="primary" size="lg" />
                 ) : null}
                 <Link
                   href={`/brands/${brandSlug}`}
@@ -123,27 +135,27 @@ export function SeasonalBrandBanner({
                   <ArrowUpRight className="h-4 w-4" />
                 </Link>
               </div>
-              <p className="mt-4 text-xs leading-5 text-ink-foreground/50">
+              <p className="mt-4 text-xs leading-5 text-muted-foreground">
                 {visible
                   ? "Размещение оплачено брендом и не влияет на рейтинг компаний и подбор средств в протоколах."
                   : "Редакционный выбор: средство реально фигурирует в протоколах лаборатории. Оплата на подбор не влияет."}
               </p>
             </div>
 
-            {/* Правая колонка — быстрые кнопки задач/зон */}
+            {/* Правая колонка — быстрые кнопки реальных зон товара */}
             {chips.length > 0 && (
               <div className="flex flex-col gap-2.5">
-                <p className="font-data text-[10px] font-bold uppercase tracking-[0.16em] text-ink-foreground/50">
+                <p className="font-data text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                   Где применяется
                 </p>
                 {chips.map((chip) => (
                   <Link
                     key={chip}
                     href={`/brands/${brandSlug}`}
-                    className="group flex min-h-11 items-center justify-between gap-2 rounded-control border border-white/15 bg-white/5 px-4 text-sm font-medium text-ink-foreground/90 transition-colors hover:border-lime/50 hover:text-ink-foreground"
+                    className="group flex min-h-11 items-center justify-between gap-2 rounded-control border border-border bg-muted/50 px-4 text-sm font-medium text-foreground transition-colors hover:border-lime/60"
                   >
                     {chip}
-                    <ArrowRight className="size-4 text-lime transition-transform group-hover:translate-x-0.5" aria-hidden />
+                    <ArrowRight className="size-4 text-teal transition-transform group-hover:translate-x-0.5" aria-hidden />
                   </Link>
                 ))}
               </div>

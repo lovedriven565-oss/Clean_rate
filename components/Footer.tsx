@@ -20,7 +20,7 @@ const columns = [
     links: [
       { href: "/for-partners", label: "Разместить компанию" },
       { href: "/for-partners", label: "Подтвердить профиль" },
-      { href: "/for-brands", label: "Брендам и поставщикам" },
+      { href: "/for-brands", label: "Брендам" },
     ],
   },
   {
@@ -34,7 +34,7 @@ const columns = [
 ];
 
 /** Колонка прямых ссылок на индексируемые посадочные «услуга × город» — хаб перелинковки. */
-const FOOTER_CITY_COLUMN_TITLE = "Города";
+const FOOTER_CITY_COLUMN_TITLE = "Услуги по городам";
 
 export function Footer() {
   const cityLinks = getFooterLandingLinks(3);
@@ -55,7 +55,7 @@ export function Footer() {
             <BrandLogo />
           </Link>
           <p className="max-w-sm text-sm leading-6 text-cta-foreground/70">
-            Профессиональная платформа индустрии чистоты: компании, бренды, поставщики и знания в единой структуре рынка.
+            Профессиональная платформа индустрии чистоты: компании, бренды и знания в единой структуре рынка.
           </p>
           <Link
             href="/for-partners"

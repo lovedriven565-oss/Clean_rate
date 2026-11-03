@@ -1,23 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, FlaskConical, Sparkles, Star, Wrench } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ProductCard } from "@/components/products/ProductCard";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { trackEvent } from "@/lib/analytics";
 import { formatMarketCurrency } from "@/lib/format";
 import { CLEANING_SERVICES, pickCategoryEstimate } from "@/lib/home/cleaning-services";
-import { HOME_ZONES, displayPrice, productsInZone, type HomeZoneId, type ShelfProduct } from "@/lib/products/zone-shelf";
+import { HOME_ZONES, productsInZone, type HomeZoneId, type ShelfProduct } from "@/lib/products/zone-shelf";
 import { cn } from "@/lib/utils";
 import type { PriceEstimate } from "@/lib/types";
 
-const SPRAY_IMAGE = "/lovable/spray.jpg";
-
 /**
- * Витрина «Лучшие средства и техника по зонам дома»: табы по пяти зонам спроса,
- * товарные карточки с фото, человеческими тегами безопасности (без цифр pH),
- * рейтингом, ценой в валюте региона и кнопкой покупки (трекинг, rel="sponsored").
+ * Витрина «Лучшие средства и техника по зонам дома»: табы по пяти зонам спроса
+ * и единые товарные карточки ProductCard. На мобильном — горизонтальная
+ * лента со snap, карточки ≈75% ширины; со смолы — сетка.
  */
 export function ProductZoneShelf({ products, estimates }: { products: ShelfProduct[]; estimates: PriceEstimate[] }) {
   const { market, city } = useRegion();
@@ -64,9 +61,11 @@ export function ProductZoneShelf({ products, estimates }: { products: ShelfProdu
       </div>
       <p className="mt-2 text-xs text-muted-foreground">{zoneInfo.tagline}</p>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="no-scrollbar -mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
         {items.map((p) => (
-          <ProductCard key={p.slug} product={p} zone={zone} currency={market.currency} countryCode={market.countryCode} />
+          <div key={p.slug} className="w-[75%] shrink-0 snap-start sm:w-auto sm:shrink">
+            <ProductCard product={p} currency={market.currency} countryCode={market.countryCode} placement="home.zone_shelf" />
+          </div>
         ))}
       </div>
 
@@ -97,124 +96,5 @@ export function ProductZoneShelf({ products, estimates }: { products: ShelfProdu
         </div>
       </div>
     </section>
-  );
-}
-
-function ProductCard({
-  product: p,
-  zone,
-  currency,
-  countryCode,
-}: {
-  product: ShelfProduct;
-  zone: HomeZoneId;
-  currency: "BYN" | "RUB" | "KZT";
-  countryCode: string;
-}) {
-  const price = p.price !== undefined ? displayPrice(p.price, currency) : null;
-  const isEquipment = p.zones.length === 1 && p.zones[0] === "equipment";
-
-  return (
-    <article className="data-surface flex flex-col overflow-hidden rounded-panel">
-      {/* Товарное фото с бейджем и рейтингом — как в прототипе Lovable */}
-      <div className="relative aspect-[4/3] bg-muted">
-        {isEquipment ? (
-          <div className="flex h-full w-full items-center justify-center bg-ink">
-            <Wrench className="size-12 text-lime" aria-hidden />
-          </div>
-        ) : (
-          <Image
-            src={SPRAY_IMAGE}
-            alt={p.name}
-            fill
-            sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
-            className="object-cover"
-          />
-        )}
-        {p.rating !== undefined && (
-          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-[6px] bg-ink/85 px-2 py-1 font-data text-[11px] font-bold text-white">
-            <Star className="size-3 fill-star text-star" aria-hidden />
-            {p.rating.toFixed(1)}
-          </span>
-        )}
-      </div>
-
-      <div className="flex flex-1 flex-col p-5">
-        <p className="truncate font-data text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {p.brandName ?? p.brandId}
-        </p>
-        <h3 className="mt-1 text-pretty font-display text-base font-bold leading-snug text-foreground">
-          {p.name}
-        </h3>
-
-        {p.safetyTags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {p.safetyTags.map((tag) => (
-              <span
-                key={tag}
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium",
-                  tag.startsWith("Не для") || tag.startsWith("Сильн")
-                    ? "border-star/30 bg-star/10 text-foreground"
-                    : "border-success/25 bg-success/10 text-foreground",
-                )}
-              >
-                <FlaskConical className="size-3 opacity-60" aria-hidden />
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <ul className="mt-3 space-y-1 text-[13px] leading-snug text-muted-foreground">
-          {p.pros.slice(0, 3).map((pro) => (
-            <li key={pro} className="flex gap-2">
-              <span aria-hidden className="mt-1.5 size-1 shrink-0 rounded-full bg-teal" />
-              {pro}
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-          <p className="font-data text-xl font-bold text-foreground">
-            {price ? `${price.approx ? "≈ " : ""}${formatMarketCurrency(price.value, currency)}` : "Цена у дилера"}
-          </p>
-          {p.affiliateUrl ? (
-            <a
-              href={p.affiliateUrl}
-              target="_blank"
-              rel="noopener noreferrer sponsored"
-              onClick={() =>
-                trackEvent({
-                  entityType: "product",
-                  entityId: p.id,
-                  eventType: "website",
-                  countryCode,
-                  metadata: { placement: "home.zone_shelf", zone },
-                })
-              }
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-ink px-4 text-sm font-semibold text-ink-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
-            >
-              Купить
-              <ArrowUpRight className="size-3.5" aria-hidden />
-            </a>
-          ) : (
-            <Link
-              href={`/brands/${p.brandId}`}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-ink/40"
-            >
-              У бренда
-              <ArrowUpRight className="size-3.5" aria-hidden />
-            </Link>
-          )}
-        </div>
-
-        {p.solutionSlug && (
-          <Link href={`/solutions/${p.solutionSlug}`} className="mt-3 border-t border-border pt-3 text-xs font-semibold text-teal hover:underline">
-            В протоколе лаборатории →
-          </Link>
-        )}
-      </div>
-    </article>
   );
 }

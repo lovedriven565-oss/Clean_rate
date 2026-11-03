@@ -513,6 +513,7 @@ export function resolveEligibleAd(
     ctaType,
     badgeText: campaign.badgeText || defaultBadgeText(campaign.placement),
     reasonText,
+    endsAt: campaign.endsAt ? campaign.endsAt.getTime() : undefined,
     targetCountries: campaign.targetCountries ?? null,
     mediaType: campaign.mediaType ?? null,
     mediaUrl: campaign.mediaUrl ?? null,

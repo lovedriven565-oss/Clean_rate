@@ -38,15 +38,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: BRAND_COLORS.paper },
-    { media: "(prefers-color-scheme: dark)", color: BRAND_COLORS.ink },
-  ],
+  themeColor: BRAND_COLORS.paper,
   width: "device-width",
   initialScale: 1,
 };
 
-const themeScript = `(function(){try{var t=localStorage.getItem("ch_theme");var d=window.matchMedia("(prefers-color-scheme: dark)").matches;if(t==="dark"||(!t&&d)){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else{document.documentElement.classList.remove("dark");document.documentElement.style.colorScheme="light"}}catch(e){}})()`;
+const themeScript = `(function(){try{var t=localStorage.getItem("ch_theme");if(t==="dark"){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else{document.documentElement.classList.remove("dark");document.documentElement.style.colorScheme="light"}}catch(e){}})()`;
 
 export default function RootLayout({
   children,

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Ban, ChevronDown, Hand, ShieldAlert, Sparkles } from "lucide-react";
+import { ChevronDown, Hand, ShieldAlert, Sparkles } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -77,28 +77,6 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
 
-      {/* Десктопная якорная навигация — заметна при скролле длинного решения, дублирует мобильный переключатель */}
-      <div className="sticky top-17 z-30 hidden border-b border-border bg-card/90 backdrop-blur lg:block">
-        <div className="container flex items-center gap-1 py-2 text-sm">
-          <a href="#diy" className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-            <Hand className="h-3.5 w-3.5" />
-            Сделать самому
-          </a>
-          <a href="#pro" className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-            <Sparkles className="h-3.5 w-3.5" />
-            Вызвать мастера
-          </a>
-          <a href="#faq" className="rounded-full px-3 py-1.5 font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-            Вопросы
-          </a>
-          {related.length > 0 && (
-            <a href="#related" className="rounded-full px-3 py-1.5 font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-              Похожие
-            </a>
-          )}
-        </div>
-      </div>
-
       <main className="flex-1">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
 
@@ -140,16 +118,6 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
                   sizes="(min-width: 1024px) 560px, 100vw"
                   className="object-cover"
                 />
-                <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
-                {solution.warnings[0] && (
-                  <p className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-start gap-2.5 p-5 pb-7 text-[13px] leading-snug text-white sm:p-6 sm:pb-8">
-                    <Ban className="mt-0.5 size-4 shrink-0 text-lime" aria-hidden />
-                    <span>
-                      <span className="font-semibold">Не делайте: </span>
-                      {solution.warnings[0]}
-                    </span>
-                  </p>
-                )}
               </div>
 
               <div className="min-w-0 lg:col-start-1">
@@ -181,7 +149,9 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
         <section className="container py-10 sm:py-14">
           <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
             <DiyPanel solution={solution} brands={brands} estimates={estimates} companies={companies} />
-            <ProPanel solution={solution} companies={companies} estimates={estimates} />
+            <div className="lg:sticky lg:top-24">
+              <ProPanel solution={solution} companies={companies} estimates={estimates} />
+            </div>
           </div>
 
           <div className="mt-6 flex items-center gap-2.5 rounded-control border border-border/70 bg-muted/30 px-4 py-3 text-xs leading-5 text-muted-foreground">

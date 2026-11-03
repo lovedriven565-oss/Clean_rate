@@ -8,10 +8,13 @@ import { ArrowRight, ArrowUpRight, Loader2, Menu, Search, Sparkles, X } from "lu
 import { BrandLogo } from "@/components/BrandLogo";
 import { NavSearch } from "@/components/NavSearch";
 import { RegionSelector } from "@/components/RegionSelector";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { useRegion } from "@/components/providers/RegionProvider";
 import { SearchSuggestions, useSmartSearch } from "@/components/SmartSearch";
 import { Input } from "@/components/ui/primitives";
+import { isAdVisibleInCountry } from "@/lib/ads/presentation";
 import { cn } from "@/lib/utils";
+import type { CountryCode } from "@/lib/markets";
+import type { EligibleAd } from "@/lib/types";
 
 /**
  * Шапка в стиле Lovable: тонкий промо-бар, первый этаж с широкой строкой поиска,
@@ -19,11 +22,10 @@ import { cn } from "@/lib/utils";
  * и из поиска («Спросить ИИ-консультанта»), и отдельной кнопкой.
  */
 const navLinks = [
-  { href: "/solutions", label: "Протоколы", match: ["/solutions"] },
-  { href: "/#shelf", label: "Средства по зонам", match: [] },
-  { href: "/#videolab", label: "Разборы", match: [] },
+  { href: "/solutions", label: "Как убрать", match: ["/solutions"] },
+  { href: "/#shelf", label: "Средства", match: [] },
   { href: "/#cleaners", label: "Клинеры рядом", match: [] },
-  { href: "/rating", label: "Рейтинг компаний", match: ["/rating", "/companies"] },
+  { href: "/rating", label: "Рейтинг", match: ["/rating", "/companies"] },
   { href: "/brands", label: "Бренды", match: ["/brands", "/for-brands"] },
 ];
 
@@ -32,11 +34,18 @@ function subscribeScroll(onChange: () => void) {
   return () => window.removeEventListener("scroll", onChange);
 }
 
-export function Navbar() {
+function formatEndsAt(ts: number): string {
+  return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" }).format(new Date(ts));
+}
+
+export function Navbar({ promoAds }: { promoAds?: Partial<Record<CountryCode, EligibleAd | null>> }) {
   const pathname = usePathname();
+  const { countryCode } = useRegion();
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const scrolled = useSyncExternalStore(subscribeScroll, () => window.scrollY > 24, () => false);
+
+  const promo = pathname === "/" ? promoAds?.[countryCode] : null;
 
   useEffect(() => {
     if (!open) return;
@@ -55,25 +64,27 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40">
-      {/* Промо-бар */}
-      <div className="bg-ink text-ink-foreground">
-        <div className="container flex h-9 items-center justify-between gap-3 text-xs">
-          <p className="flex min-w-0 items-center gap-2">
-            <span aria-hidden className="relative flex size-1.5 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-75" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-lime" />
-            </span>
-            <span className="truncate">
-              <span className="font-semibold text-lime">Неделя чистоты:</span>{" "}
-              <span className="text-ink-foreground/80">разборы протоколов и сметы мастеров в Минске, Москве и Алматы</span>
-            </span>
-          </p>
-          <Link href="/solutions" className="hidden shrink-0 items-center gap-1 font-semibold text-lime hover:underline sm:inline-flex">
-            Все протоколы
-            <ArrowRight className="size-3.5" aria-hidden />
-          </Link>
+      {/* Промо-бар — только при активной кампании home.editorial_partner с датой конца */}
+      {promo && promo.endsAt && isAdVisibleInCountry(promo, countryCode) && (
+        <div className="bg-ink text-ink-foreground">
+          <div className="container flex h-9 items-center justify-between gap-3 text-xs">
+            <p className="flex min-w-0 items-center gap-2">
+              <span aria-hidden className="relative flex size-1.5 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-75" />
+                <span className="relative inline-flex size-1.5 rounded-full bg-lime" />
+              </span>
+              <span className="truncate">
+                <span className="font-semibold text-lime">{promo.badgeText}:</span>{" "}
+                <span className="text-ink-foreground/80">{promo.title} · до {formatEndsAt(promo.endsAt)}</span>
+              </span>
+            </p>
+            <a href="#special" className="hidden shrink-0 items-center gap-1 font-semibold text-lime hover:underline sm:inline-flex">
+              Смотреть акцию
+              <ArrowRight className="size-3.5" aria-hidden />
+            </a>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Первый этаж: логотип, широкий поиск, регион, ИИ-технолог, CTA */}
       <div className="glass border-x-0 border-t-0">
@@ -82,14 +93,13 @@ export function Navbar() {
             <BrandLogo markClassName="transition-transform group-hover:scale-105" />
           </Link>
 
-          <HeaderSearch />
+          {pathname !== "/" && <HeaderSearch />}
 
           <div className="flex items-center gap-2">
             <div className="lg:hidden">
               <NavSearch />
             </div>
             <RegionSelector className="hidden md:inline-flex" />
-            <ThemeToggle className="hidden sm:inline-flex" />
             <Link
               href="/assistant"
               aria-current={pathname === "/assistant" ? "page" : undefined}
@@ -102,9 +112,9 @@ export function Navbar() {
             <Link
               href="/for-partners"
               aria-current={pathname === "/for-partners" ? "page" : undefined}
-              className="hidden h-11 items-center gap-2 rounded-control bg-lime px-4 text-xs font-semibold text-ink transition-transform hover:-translate-y-0.5 active:scale-[0.98] xl:inline-flex"
+              className="hidden h-11 items-center gap-1.5 text-sm font-semibold text-foreground transition-colors hover:text-teal xl:inline-flex"
             >
-              Подключить компанию
+              Для бизнеса
               <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
             <button
@@ -166,9 +176,6 @@ export function Navbar() {
               <div className="min-w-0 flex-1">
                 <span className="mb-1.5 block px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ваш регион</span>
                 <RegionSelector variant="block" />
-              </div>
-              <div className="pt-5">
-                <ThemeToggle className="h-12 w-12" />
               </div>
             </div>
             {navLinks.map((link) => {

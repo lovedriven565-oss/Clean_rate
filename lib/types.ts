@@ -342,6 +342,8 @@ export interface EligibleAd {
   ctaType: AdCtaType;
   badgeText: string;
   reasonText?: string;
+  /** Конец кампании (epoch ms) — для честной пометки срока акции «до …» */
+  endsAt?: number;
   /** Страны кампании — клиентский гейт для SSG-страниц, где страна известна только из cookie */
   targetCountries?: string[] | null;
   /** Медиа-креатив: фото или видео бренда — только проверенные материалы */

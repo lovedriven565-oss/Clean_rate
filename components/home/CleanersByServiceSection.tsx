@@ -43,7 +43,7 @@ export function CleanersByServiceSection({
     const promoted = rankOrganicCompanies(inCity.filter((c) => c.promoted));
     return {
       sponsor: promoted[0] ?? null,
-      organic: rankOrganicCompanies(inCity.filter((c) => !c.promoted)).slice(0, ORGANIC_LIMIT),
+      organic: rankOrganicCompanies(inCity.filter((c) => !c.promoted)).slice(0, promoted[0] ? ORGANIC_LIMIT - 1 : ORGANIC_LIMIT),
     };
   }, [companies, city.name, service]);
 
@@ -65,7 +65,7 @@ export function CleanersByServiceSection({
             href={categoryLandingHref(city.slug, service)}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal hover:underline"
           >
-            Вся категория
+            Весь рейтинг: {serviceInfo.label}
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>
