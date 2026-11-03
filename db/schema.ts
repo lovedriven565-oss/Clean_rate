@@ -218,6 +218,8 @@ export const campaigns = sqliteTable(
       enum: ["where_to_buy", "request_quote", "training", "demo", "website"],
     }),
     badgeText: text("badge_text"),
+    /** Токен маркировки erid (ОРД) — обязателен для показа рекламы в РФ */
+    erid: text("erid"),
     /** Тип медиа-креатива: image|video — только для проверенных материалов бренда */
     mediaType: text("media_type", { enum: ["image", "video"] }),
     /** URL проверенного медиа-креатива (https: фото или видео/плеер) */

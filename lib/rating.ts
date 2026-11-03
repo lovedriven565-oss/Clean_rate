@@ -57,8 +57,14 @@ export interface SponsoredSplit {
  * Разделяет уже отфильтрованный/отсортированный список: promoted-компании уходят
  * в верхний спонсорский блок («Рекламное размещение»), органический порядок и ранги
  * не трогаются. Порядок внутри каждой группы сохраняет сортировку входного списка.
+ *
+ * `options.countryCode === "RU"`: платных размещений без erid в РФ нет — promoted
+ * возвращаются в общий органический список без спонсорской маркировки.
  */
-export function splitSponsors(companies: Company[]): SponsoredSplit {
+export function splitSponsors(companies: Company[], options?: { countryCode?: string }): SponsoredSplit {
+  if (options?.countryCode?.toUpperCase() === "RU") {
+    return { sponsors: [], organic: companies.map((c) => (c.promoted ? { ...c, promoted: false } : c)) };
+  }
   return {
     sponsors: companies.filter((c) => c.promoted),
     organic: companies.filter((c) => !c.promoted),

@@ -9,6 +9,8 @@ export interface ClickPayload {
   path?: string;
   campaignId?: string;
   countryCode?: string;
+  /** Плейсмент блока (home.cleaners, solution.pro_panel…) — сквозная воронка для спонсоров */
+  placement?: string;
 }
 
 export interface AnalyticsPayload {
@@ -118,6 +120,10 @@ export function trackEvent(payload: AnalyticsPayload) {
  * Обезличенная аналитика кликов по контактам компаний (обратная совместимость).
  */
 export function trackClick(payload: ClickPayload) {
+  const metadata: Record<string, string> = {};
+  if (payload.categoryId) metadata.categoryId = payload.categoryId;
+  if (payload.placement) metadata.placement = payload.placement;
+
   trackEvent({
     entityType: "company",
     entityId: payload.companyId,
@@ -125,6 +131,6 @@ export function trackClick(payload: ClickPayload) {
     campaignId: payload.campaignId,
     path: payload.path,
     countryCode: payload.countryCode,
-    metadata: payload.categoryId ? { categoryId: payload.categoryId } : undefined,
+    metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
   });
 }

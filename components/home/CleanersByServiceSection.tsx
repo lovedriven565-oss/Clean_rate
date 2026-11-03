@@ -6,6 +6,7 @@ import { ArrowRight, BadgeCheck, MessageCircle, Phone, Star } from "lucide-react
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { trackClick } from "@/lib/analytics";
+import { isCompanySponsorVisible } from "@/lib/ads/presentation";
 import { getCategoryName, categoryLandingHref } from "@/lib/categories";
 import { formatMarketCurrency } from "@/lib/format";
 import { CLEANING_SERVICES, cleanerCardPrice, pickCategoryEstimate } from "@/lib/home/cleaning-services";
@@ -40,12 +41,17 @@ export function CleanersByServiceSection({
 
   const { sponsor, organic } = useMemo(() => {
     const inCity = companies.filter((c) => c.city === city.name && c.categories.includes(service));
-    const promoted = rankOrganicCompanies(inCity.filter((c) => c.promoted));
+    // В РФ платных размещений без erid нет — promoted идут в общий органический порядок.
+    const sponsorAllowed = isCompanySponsorVisible(market.countryCode);
+    const promoted = sponsorAllowed ? rankOrganicCompanies(inCity.filter((c) => c.promoted)) : [];
     return {
       sponsor: promoted[0] ?? null,
-      organic: rankOrganicCompanies(inCity.filter((c) => !c.promoted)).slice(0, promoted[0] ? ORGANIC_LIMIT - 1 : ORGANIC_LIMIT),
+      organic: rankOrganicCompanies(inCity.filter((c) => !c.promoted || !sponsorAllowed)).slice(
+        0,
+        promoted[0] ? ORGANIC_LIMIT - 1 : ORGANIC_LIMIT
+      ),
     };
-  }, [companies, city.name, service]);
+  }, [companies, city.name, service, market.countryCode]);
 
   return (
     <section id="cleaners" aria-labelledby="cleaners-title" className="scroll-mt-24 border-y border-border bg-muted/40 py-12 sm:py-16">
@@ -194,7 +200,7 @@ function CleanerCard({
           {company.phone && (
             <a
               href={telHref(company.phone)}
-              onClick={() => trackClick({ companyId: company.id, categoryId: service, clickType: "phone", countryCode })}
+              onClick={() => trackClick({ companyId: company.id, categoryId: service, clickType: "phone", countryCode, placement: "home.cleaners" })}
               className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-control bg-lime px-4 text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
             >
               <Phone className="size-4" aria-hidden />
@@ -207,7 +213,7 @@ function CleanerCard({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Telegram ${company.name}`}
-              onClick={() => trackClick({ companyId: company.id, categoryId: service, clickType: "telegram", countryCode })}
+              onClick={() => trackClick({ companyId: company.id, categoryId: service, clickType: "telegram", countryCode, placement: "home.cleaners" })}
               className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-control bg-ink px-4 text-sm font-semibold text-ink-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
             >
               <MessageCircle className="size-4" aria-hidden />

@@ -20,7 +20,11 @@
   "vars": {
     // 0: мягкий откат на seed-данные если D1 ещё не засеяна или пуста
     "STRICT_DB": "0",
-    "NEXT_PUBLIC_SITE_URL": "https://chistolab.pro"
+    "NEXT_PUBLIC_SITE_URL": "https://chistolab.pro",
+    // Внешняя аналитика (грузится только после ch_consent="all" — см. ConsentBanner).
+    // Пустые значения = счётчики выключены; задать реальные перед запуском рекламы.
+    "NEXT_PUBLIC_CF_BEACON_TOKEN": "",
+    "NEXT_PUBLIC_YM_ID": ""
   },
   // Публичный домен: Workers Builds при деплое привяжет его к воркеру
   // (зона chistolab.pro должна быть активна на этом Cloudflare-аккаунте).

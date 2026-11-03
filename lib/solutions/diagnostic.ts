@@ -264,11 +264,12 @@ export interface ProCompanies {
 export function buildProCompanies(
   list: Company[],
   solution: Solution,
-  options: { limit?: number; cities?: readonly string[] } = {},
+  options: { limit?: number; cities?: readonly string[]; countryCode?: string } = {},
 ): ProCompanies {
   const cities = options.cities ?? [DIAGNOSTIC_CONTEXT.city];
   const inRegion = list.filter((c) => cities.includes(c.city));
-  const sponsor = pickSponsor(inRegion, solution, cities);
+  // В РФ платных размещений без erid нет — спонсорский слот отключён, promoted идут в органику.
+  const sponsor = options.countryCode?.toUpperCase() === "RU" ? null : pickSponsor(inRegion, solution, cities);
   const organic = rankOrganicCompanies(inRegion, solution)
     .filter((c) => c.id !== sponsor?.id)
     .slice(0, options.limit ?? PRO_COMPANY_LIMIT);

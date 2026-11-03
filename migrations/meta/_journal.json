@@ -50,6 +50,13 @@
       "when": 1793355821600,
       "tag": "0006_rapid_polaris",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1793706013516,
+      "tag": "0007_chief_fallen_one",
+      "breakpoints": true
     }
   ]
 }

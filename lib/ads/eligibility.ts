@@ -309,6 +309,15 @@ export function checkCampaignEligibility(params: {
     };
   }
 
+  // 4b. Маркировка РФ (ОРД): без токена erid интернет-реклама в Россию не показывается
+  if (context.countryCode?.toUpperCase() === "RU" && !campaign.erid?.trim()) {
+    return {
+      eligible: false,
+      reason: "Нет токена erid — реклама в РФ не показывается",
+      matchScore: 0,
+    };
+  }
+
   // 5. Категорийный таргетинг
   if (
     campaign.targetCategories &&
@@ -513,6 +522,7 @@ export function resolveEligibleAd(
     ctaType,
     badgeText: campaign.badgeText || defaultBadgeText(campaign.placement),
     reasonText,
+    erid: campaign.erid ?? null,
     endsAt: campaign.endsAt ? campaign.endsAt.getTime() : undefined,
     targetCountries: campaign.targetCountries ?? null,
     mediaType: campaign.mediaType ?? null,

@@ -835,3 +835,59 @@ export async function getCompanyEventStats(windowDays = 30, now = Date.now()): P
     return [];
   }
 }
+
+export interface PlacementStats {
+  /** Ключ блока из metadata.placement: home.cleaners, home.zone_shelf, solution.pro_panel… */
+  placement: string;
+  impressions: number;
+  views: number;
+  phone: number;
+  telegram: number;
+  website: number;
+  /** phone + telegram + website — контактные действия из блока. */
+  contacts: number;
+}
+
+/**
+ * Сводка событий по плейсментам за N дней — воронка «показы → контакты» для
+ * разговора со спонсорами. Без D1 (dev/тесты) — пусто.
+ */
+export async function getPlacementStats(windowDays = 30, now = Date.now()): Promise<PlacementStats[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const start = now - windowDays * 24 * 60 * 60 * 1000;
+
+  try {
+    const rows = await db
+      .prepare(
+        `SELECT json_extract(metadata, '$.placement') AS placement, event_type AS eventType, COUNT(*) AS count
+         FROM analytics_events
+         WHERE occurred_at >= ? AND metadata IS NOT NULL
+         GROUP BY placement, event_type`
+      )
+      .bind(start)
+      .all<{ placement: string | null; eventType: string; count: number }>();
+
+    const byPlacement = new Map<string, PlacementStats>();
+    for (const row of rows.results) {
+      if (!row.placement) continue;
+      const entry =
+        byPlacement.get(row.placement) ??
+        { placement: row.placement, impressions: 0, views: 0, phone: 0, telegram: 0, website: 0, contacts: 0 };
+      const count = Number(row.count);
+      if (row.eventType === "impression") entry.impressions += count;
+      else if (row.eventType === "view") entry.views += count;
+      else if (row.eventType === "phone") entry.phone += count;
+      else if (row.eventType === "telegram") entry.telegram += count;
+      else if (row.eventType === "website") entry.website += count;
+      byPlacement.set(row.placement, entry);
+    }
+    for (const entry of byPlacement.values()) {
+      entry.contacts = entry.phone + entry.telegram + entry.website;
+    }
+    return [...byPlacement.values()].sort((a, b) => b.contacts - a.contacts || b.impressions - a.impressions);
+  } catch (err) {
+    reportDbError("[db:placement_stats_error]", err);
+    return [];
+  }
+}

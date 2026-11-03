@@ -1753,6 +1753,8 @@ export interface SeedCampaign {
   ctaUrl: string;
   ctaType: AdCtaType;
   badgeText?: string;
+  /** Токен маркировки erid (ОРД) — без него кампания не показывается в РФ */
+  erid?: string;
   mediaType?: "image" | "video";
   mediaUrl?: string;
   mediaPoster?: string;

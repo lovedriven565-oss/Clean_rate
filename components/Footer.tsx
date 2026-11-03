@@ -29,6 +29,7 @@ const columns = [
       { href: "/rating", label: "Открытый рейтинг" },
       { href: "/rating/methodology", label: "Методология оценки" },
       { href: "/privacy", label: "Конфиденциальность" },
+      { href: "/terms", label: "Соглашение" },
     ],
   },
 ];

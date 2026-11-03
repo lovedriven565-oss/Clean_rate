@@ -71,14 +71,26 @@ export default async function Home() {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: SITE_NAME,
-    url: absoluteUrl("/"),
-    potentialAction: {
-      "@type": "SearchAction",
-      target: { "@type": "EntryPoint", urlTemplate: absoluteUrl("/rating?q={search_term_string}") },
-      "query-input": "required name=search_term_string",
-    },
+    "@graph": [
+      {
+        "@type": "WebSite",
+        name: SITE_NAME,
+        url: absoluteUrl("/"),
+        potentialAction: {
+          "@type": "SearchAction",
+          target: { "@type": "EntryPoint", urlTemplate: absoluteUrl("/rating?q={search_term_string}") },
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "Organization",
+        name: SITE_NAME,
+        url: absoluteUrl("/"),
+        logo: absoluteUrl("/icon.svg"),
+        description:
+          "Лаборатория решений чистоты: пошаговые протоколы, честный рейтинг клининговых компаний и бренды для профи.",
+      },
+    ],
   };
 
   return (
@@ -86,7 +98,7 @@ export default async function Home() {
       <div className="flex min-h-screen flex-col bg-background">
         <Navbar promoAds={editorialAdByCountry} />
 
-        <main className="flex-1">
+        <main id="content" className="flex-1">
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}

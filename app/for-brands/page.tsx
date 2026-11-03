@@ -48,7 +48,7 @@ export default async function ForBrandsPage({
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative grid gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
             <div>

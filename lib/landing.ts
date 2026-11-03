@@ -35,8 +35,22 @@ export interface LandingCompanies {
   sponsors: Company[];
 }
 
-export function pickLandingCompanies(companies: Company[], cityName: string, categoryId: CategoryId): LandingCompanies {
+export function pickLandingCompanies(
+  companies: Company[],
+  cityName: string,
+  categoryId: CategoryId,
+  options?: { countryCode?: string },
+): LandingCompanies {
   const inCity = companies.filter((c) => c.city === cityName && c.categories.includes(categoryId));
+  // РФ: платные размещения без erid-маркировки не показываются — все идут в органику.
+  if (options?.countryCode?.toUpperCase() === "RU") {
+    return {
+      sponsors: [],
+      organic: inCity
+        .map((c) => (c.promoted ? { ...c, promoted: false } : c))
+        .sort((a, b) => calculateRelevanceScore(b) - calculateRelevanceScore(a)),
+    };
+  }
   return {
     sponsors: inCity.filter((c) => c.promoted),
     organic: inCity
@@ -50,7 +64,9 @@ export function getIndexableLandings(companies: Company[]): { city: string; cate
   return landingStaticParams().filter(({ city, category }) => {
     const resolved = resolveLandingParams(city, category);
     if (!resolved) return false;
-    const { organic, sponsors } = pickLandingCompanies(companies, resolved.city.name, resolved.category.id);
+    const { organic, sponsors } = pickLandingCompanies(companies, resolved.city.name, resolved.category.id, {
+      countryCode: resolved.market.countryCode,
+    });
     return organic.length + sponsors.length >= LANDING_INDEX_MIN_COMPANIES;
   });
 }

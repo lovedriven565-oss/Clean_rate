@@ -19,6 +19,8 @@ interface StickyCallBarProps {
   fallbackLabel?: string;
   /** Порог скролла в px, после которого панель появляется */
   showAfter?: number;
+  /** Плейсмент для сквозной воронки */
+  placement?: string;
 }
 
 /**
@@ -34,6 +36,7 @@ export function StickyCallBar({
   fallbackHref,
   fallbackLabel = "Смотреть рейтинг",
   showAfter = 420,
+  placement,
 }: StickyCallBarProps) {
   const [visible, setVisible] = useState(false);
   const { scrollY } = useScroll();
@@ -63,7 +66,7 @@ export function StickyCallBar({
             {phone && (
               <a
                 href={`tel:${phone.replace(/[^\d+]/g, "")}`}
-                onClick={() => companyId && trackClick({ companyId, categoryId, clickType: "phone" })}
+                onClick={() => companyId && trackClick({ companyId, categoryId, clickType: "phone", placement })}
                 className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
               >
                 <Phone className="h-4 w-4" />
@@ -76,7 +79,7 @@ export function StickyCallBar({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Telegram ${label}`}
-                onClick={() => companyId && trackClick({ companyId, categoryId, clickType: "telegram" })}
+                onClick={() => companyId && trackClick({ companyId, categoryId, clickType: "telegram", placement })}
                 className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:text-primary"
               >
                 <MessageCircle className="h-4 w-4" />

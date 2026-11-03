@@ -288,6 +288,8 @@ export interface Campaign {
   ctaUrl?: string | null;
   ctaType?: AdCtaType | null;
   badgeText?: string | null;
+  /** Токен маркировки erid (ОРД) — без него кампания не показывается в РФ */
+  erid?: string | null;
   mediaType?: AdMediaType | null;
   mediaUrl?: string | null;
   mediaPoster?: string | null;
@@ -342,6 +344,8 @@ export interface EligibleAd {
   ctaType: AdCtaType;
   badgeText: string;
   reasonText?: string;
+  /** Токен erid для вывода рядом с маркировкой «Реклама» — обязателен для слотов в РФ */
+  erid?: string | null;
   /** Конец кампании (epoch ms) — для честной пометки срока акции «до …» */
   endsAt?: number;
   /** Страны кампании — клиентский гейт для SSG-страниц, где страна известна только из cookie */

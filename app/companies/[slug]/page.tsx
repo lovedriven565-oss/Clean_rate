@@ -67,7 +67,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
@@ -108,7 +108,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 </div>
                 <p className="mt-7 max-w-3xl text-base leading-7 text-muted-foreground sm:text-lg">{company.description}</p>
                 <div className="mt-7 flex flex-wrap items-center gap-3">
-                  <CompanyContactActions company={company} />
+                  <CompanyContactActions company={company} placement="company.profile" />
                   <ShareButton url={`/companies/${company.slug}`} title={`${company.name} — ${company.city}`} />
                 </div>
               </div>
@@ -273,6 +273,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         companyId={company.id}
         categoryId={company.categories[0]}
         showAfter={320}
+        placement="company.sticky_bar"
       />
     </div>
   );

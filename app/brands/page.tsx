@@ -16,7 +16,7 @@ export default async function BrandsPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
 
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-12 sm:py-18">
             <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Бренды" }]} />

@@ -25,7 +25,10 @@ export function ProPanel({
 }) {
   const { market, city } = useRegion();
   // Органический порядок по доверию (как на главной); спонсор — отдельной помеченной строкой сверху.
-  const { sponsor, organic } = buildProCompanies(companies, solution, { cities: market.cities.map((c) => c.name) });
+  const { sponsor, organic } = buildProCompanies(companies, solution, {
+    cities: market.cities.map((c) => c.name),
+    countryCode: market.countryCode,
+  });
   const picked = sponsor ? [sponsor, ...organic] : organic;
   const primary = organic[0] ?? sponsor;
   const ratingHref = solution.relatedCategory ? categoryLandingHref(city.slug, solution.relatedCategory) : "/rating";
@@ -102,6 +105,7 @@ export function ProPanel({
         categoryId={primary?.categories[0]}
         fallbackHref={ratingHref}
         fallbackLabel="Смотреть рейтинг"
+        placement="solution.sticky_bar"
       />
     </section>
   );
@@ -138,7 +142,7 @@ function CompanyRow({ company, sponsor = false }: { company: Company; sponsor?: 
 
       <div className="flex shrink-0 items-center gap-2">
         {company.phone && (
-          <PhoneButton phone={company.phone} companyId={company.id} categoryId={categoryId} compact />
+          <PhoneButton phone={company.phone} companyId={company.id} categoryId={categoryId} compact placement="solution.pro_panel" />
         )}
         {company.telegramUrl && (
           <a
@@ -146,8 +150,8 @@ function CompanyRow({ company, sponsor = false }: { company: Company; sponsor?: 
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Telegram ${company.name}`}
-            onClick={() => trackClick({ companyId: company.id, categoryId, clickType: "telegram" })}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-teal/40 hover:text-teal"
+            onClick={() => trackClick({ companyId: company.id, categoryId, clickType: "telegram", placement: "solution.pro_panel" })}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-teal/40 hover:text-teal"
           >
             <MessageCircle className="h-4 w-4" />
           </a>

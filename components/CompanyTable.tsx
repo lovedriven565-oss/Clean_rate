@@ -26,10 +26,13 @@ const ROW_GRID = "lg:grid-cols-[2.5rem_3rem_minmax(0,1fr)_5.5rem_8.5rem_auto]";
 export function CompanyTable({
   companies,
   ranked = true,
+  placement,
   className,
 }: {
   companies: Company[];
   ranked?: boolean;
+  /** Плейсмент сквозной воронки для кликов по контактам */
+  placement?: string;
   className?: string;
 }) {
   return (
@@ -50,14 +53,14 @@ export function CompanyTable({
       </div>
       <ol className="divide-y divide-border">
         {companies.map((company, index) => (
-          <CompanyTableRow key={company.id} company={company} rank={ranked ? index + 1 : undefined} />
+          <CompanyTableRow key={company.id} company={company} rank={ranked ? index + 1 : undefined} placement={placement} />
         ))}
       </ol>
     </div>
   );
 }
 
-function CompanyTableRow({ company, rank }: { company: Company; rank?: number }) {
+function CompanyTableRow({ company, rank, placement }: { company: Company; rank?: number; placement?: string }) {
   const score = calculateOrganicScore(company);
   const published = hasPublishedRating(company);
   const categoryLabels = company.categories.map(getCategoryName).slice(0, 3);
@@ -133,7 +136,7 @@ function CompanyTableRow({ company, rank }: { company: Company; rank?: number })
           <span className="font-data text-base font-semibold text-foreground">
             {company.priceFrom !== undefined ? `от ${formatCompanyPriceFrom(company.priceFrom, company)}` : "По запросу"}
           </span>
-          <CompanyContactActions company={company} compact />
+          <CompanyContactActions company={company} compact placement={placement} />
         </div>
       </div>
     </li>

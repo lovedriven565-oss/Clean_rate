@@ -63,6 +63,15 @@
 - `npm run build` — 47 страниц, `/solutions/[slug]` ● SSG ×10, `/sitemap.xml` и `/robots.txt` ○
 - JSON-LD на `/solutions/vino-na-divane`: HowTo (3 step) + FAQPage (5) + BreadcrumbList (3); canonical + 5 hreflang на всех проверенных страницах
 
+## Этап 3 (Запуск, Такт 3) — метрики, SEO, юридический минимум (сделано)
+- **erid / маркировка РФ:** `campaigns.erid` + миграция `0007_chief_fallen_one.sql`. Гейт в `checkCampaignEligibility` (RU без erid → не eligible) и в клиентском `isAdVisibleInCountry`. Токен выводится под креативом в `AdImpression`. Promoted-компании: `splitSponsors`, `pickLandingCompanies`, `buildProCompanies`, `CleanersByServiceSection` — для RU платные слоты отключены, компании идут в органику без бейджа (хелпер `isCompanySponsorVisible` в lib/ads/presentation.ts).
+- **Юридический минимум:** `lib/consent.ts` (cookie ch_consent: all|essential + CustomEvent `ch:consent`), `components/legal/ConsentBanner.tsx`, `components/analytics/ConsentGatedAnalytics.tsx` — YM/CF beacon только после «Принять»; серверная обёртка `ExternalAnalytics` читает env в рантайме → wrangler vars работают. `app/terms/page.tsx` + ссылка в футере. Дисклеймер «партнёрская ссылка» у «Где купить» (ProductCard оба варианта, StoryPlayer).
+- **Воронка плейсментов:** `placement` проброшен в `trackClick`/`PhoneButton`/`StickyCallBar`/`CompanyContactActions`/`CompanyTable` → metadata.placement (home.cleaners, solution.pro_panel, solution.diy_escalation, company.profile, rating.table, landing.table…). `zones` добавлен в METADATA_ALLOWLIST; ключ `solution` → `solutionId` в StoryPlayer. `getPlacementStats(days)` (json_extract по metadata) + секция «Плейсменты» в /admin.
+- **SEO:** Organization в @graph главной, ItemList топ-50 на /rating; `proxy.ts` (Next 16: middleware.ts переименован) ставит `X-Robots-Tag: noindex, follow` на /rating|/solutions|/brands при параметрах фильтров.
+- **Скорость/A11y:** сторис-плеер вынесен в `components/home/StoryPlayer.tsx` через `next/dynamic` (ssr:false). Skip-link в layout + `id="content"` на всех `<main>`. Тач-таргеты: compact-кнопки контактов 40→44px.
+- **CI/env:** `lighthouserc.json` (Perf≥90, A11y≥95, SEO=100, LCP<2.5с, TBT<200мс — lab-прокси INP, CLS<0.1) + job `lighthouse` в ci.yml. wrangler vars: `NEXT_PUBLIC_CF_BEACON_TOKEN`, `NEXT_PUBLIC_YM_ID` (пустые = выключено). Реальные токены задать владельцу.
+- **Проверки:** typecheck 0, lint 0, test 214/214, build 161 страница. TODO владельца: применить миграцию 0007 в проде (`wrangler d1 migrations apply cleaning-rating-db --remote`).
+
 ## Следующее (вне Спринта 1)
 - Применить миграцию `0002` в проде: `wrangler d1 migrations apply cleaning-rating-db --remote`, засеять `solutions`/`intent_keywords`/`price_estimates`.
 - Задать `NEXT_PUBLIC_SITE_URL` в `wrangler.jsonc` (`vars`) под реальный домен.

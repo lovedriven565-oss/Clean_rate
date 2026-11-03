@@ -78,10 +78,25 @@ export function adTrackingEntity(ad: Pick<EligibleAd, "productId" | "brandId">):
 /**
  * Клиентский гео-гейт для SSG-страниц: на сервере страна неизвестна, поэтому кампания с
  * ограниченным списком стран скрывается, если регион пользователя (cookie) в него не входит.
+ * Зеркалит серверный гейт: для RU дополнительно требуется токен erid.
  */
-export function isAdVisibleInCountry(ad: Pick<EligibleAd, "targetCountries">, countryCode?: string): boolean {
-  if (!ad.targetCountries || ad.targetCountries.length === 0 || !countryCode) return true;
-  return ad.targetCountries.includes(countryCode.toUpperCase());
+export function isAdVisibleInCountry(
+  ad: Pick<EligibleAd, "targetCountries" | "erid">,
+  countryCode?: string
+): boolean {
+  if (ad.targetCountries && ad.targetCountries.length > 0 && countryCode && !ad.targetCountries.includes(countryCode.toUpperCase())) {
+    return false;
+  }
+  if (countryCode?.toUpperCase() === "RU" && !ad.erid?.trim()) return false;
+  return true;
+}
+
+/**
+ * Платное размещение компании (promoted) видно не во всех странах: для РФ нужна
+ * erid-маркировка, которой у спонсорских компаний нет — слот превращается в органику.
+ */
+export function isCompanySponsorVisible(countryCode?: string): boolean {
+  return countryCode?.toUpperCase() !== "RU";
 }
 
 export interface EmptySlotPitchMeta {

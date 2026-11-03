@@ -13,6 +13,7 @@ import {
   getDemandSignals,
   getIntentKeywords,
   getPartnerLeads,
+  getPlacementStats,
 } from "@/lib/db/queries";
 import { SURFACE_LABELS } from "@/lib/solutions/meta";
 import { cn } from "@/lib/utils";
@@ -48,7 +49,7 @@ function formatDate(date?: Date | null): string {
 export default async function AdminPage() {
   if (!isAdminAllowed(await headers())) notFound();
 
-  const [brandLeads, partnerLeads, solutions, campaigns, brands, keywords, categories, companies, signals, companyStats] =
+  const [brandLeads, partnerLeads, solutions, campaigns, brands, keywords, categories, companies, signals, companyStats, placementStats] =
     await Promise.all([
       getBrandLeads(),
       getPartnerLeads(),
@@ -60,6 +61,7 @@ export default async function AdminPage() {
       getAllCompanies(),
       getDemandSignals(DEMAND_WINDOW_DAYS),
       getCompanyEventStats(DEMAND_WINDOW_DAYS),
+      getPlacementStats(DEMAND_WINDOW_DAYS),
     ]);
   const brandName = new Map(brands.map((b) => [b.id, b.name]));
   const radar = buildDemandRadar({ keywords, solutions, categories, companies, ...signals });
@@ -73,7 +75,7 @@ export default async function AdminPage() {
     partnerLeads.filter((l) => l.status === "new").length;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <main id="content" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight">Админка</h1>
@@ -240,6 +242,44 @@ export default async function AdminPage() {
                   </tr>
                 );
               })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="font-display text-lg font-semibold">Плейсменты ({DEMAND_WINDOW_DAYS} дн)</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Сквозная воронка «показы → контакты» по блокам — материал для питча спонсорам.
+        </p>
+        <div className="mt-3 overflow-x-auto rounded-panel border border-border">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2">Плейсмент</th>
+                <th className="px-3 py-2 text-right">Показы</th>
+                <th className="px-3 py-2 text-right">Просмотры</th>
+                <th className="px-3 py-2 text-right">Звонки</th>
+                <th className="px-3 py-2 text-right">Telegram</th>
+                <th className="px-3 py-2 text-right">Сайт</th>
+                <th className="px-3 py-2 text-right">Контакты</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {placementStats.length === 0 && (
+                <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">Событий по плейсментам пока нет</td></tr>
+              )}
+              {placementStats.map((stat) => (
+                <tr key={stat.placement}>
+                  <td className="px-3 py-2 font-mono text-xs">{stat.placement}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs tabular-nums">{stat.impressions}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs tabular-nums">{stat.views}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs tabular-nums">{stat.phone}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs tabular-nums">{stat.telegram}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs tabular-nums">{stat.website}</td>
+                  <td className="px-3 py-2 text-right font-data text-xs font-semibold tabular-nums">{stat.contacts}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

@@ -10,17 +10,17 @@ import { cn } from "@/lib/utils";
  * Контакты компании. Один главный CTA (телефон, иначе Telegram) — заполненная кнопка,
  * остальные каналы вторичны. `compact` — для карточек: короче кнопка, вторичные каналы только иконками.
  */
-export function CompanyContactActions({ company, compact = false, className }: { company: Company; compact?: boolean; className?: string }) {
+export function CompanyContactActions({ company, compact = false, placement, className }: { company: Company; compact?: boolean; placement?: string; className?: string }) {
   const categoryId = company.categories[0];
-  const track = (clickType: "phone" | "website" | "telegram") => () => trackClick({ companyId: company.id, categoryId, clickType });
+  const track = (clickType: "phone" | "website" | "telegram") => () => trackClick({ companyId: company.id, categoryId, clickType, placement });
 
   const primaryClass = cn(
     "inline-flex items-center justify-center gap-2 rounded-full bg-brand font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5",
-    compact ? "h-10 flex-1 px-4 text-xs sm:flex-none" : "h-11 px-5 text-sm"
+    compact ? "h-11 flex-1 px-4 text-xs sm:flex-none" : "h-11 px-5 text-sm"
   );
   const secondaryClass = cn(
     "inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card font-semibold text-foreground transition-colors hover:border-brand/60 hover:text-primary",
-    compact ? "h-10 w-10" : "h-11 px-4 text-sm"
+    compact ? "h-11 w-11" : "h-11 px-4 text-sm"
   );
   const iconClass = compact ? "h-3.5 w-3.5" : "h-4 w-4";
   const phoneIsPrimary = Boolean(company.phone);
@@ -28,7 +28,7 @@ export function CompanyContactActions({ company, compact = false, className }: {
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
       {company.phone && (
-        <PhoneButton phone={company.phone} companyId={company.id} categoryId={categoryId} compact={compact} />
+        <PhoneButton phone={company.phone} companyId={company.id} categoryId={categoryId} compact={compact} placement={placement} />
       )}
       {company.telegramUrl && (
         <a

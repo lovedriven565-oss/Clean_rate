@@ -27,6 +27,7 @@ const METADATA_ALLOWLIST = new Set([
   "categoryId",
   "solutionId",
   "supplierId",
+  "zones",
   "surface",
   "intent",
   "targetKind",

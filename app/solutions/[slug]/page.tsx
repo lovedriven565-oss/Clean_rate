@@ -77,7 +77,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
 
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
 
         {/* Hero */}

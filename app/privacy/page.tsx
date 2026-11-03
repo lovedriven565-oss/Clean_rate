@@ -15,7 +15,7 @@ export default function PrivacyPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
 
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <section className="container py-16 sm:py-20">
           <div className="mx-auto max-w-3xl">
             <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">

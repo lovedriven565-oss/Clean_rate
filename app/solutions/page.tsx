@@ -21,7 +21,7 @@ export default async function SolutionsPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
 
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-12 sm:py-16">
             <nav aria-label="Хлебные крошки" className="text-xs text-muted-foreground">

@@ -99,6 +99,9 @@ export function ProductCard({
             {price ? `${price.approx ? "≈ " : ""}${formatMarketCurrency(price.value, currency)}` : "—"}
           </p>
           {buy}
+          {p.affiliateUrl && (
+            <span className="text-[9px] leading-3 text-muted-foreground/80">партнёрская ссылка</span>
+          )}
         </div>
       </article>
     );
@@ -168,7 +171,12 @@ export function ProductCard({
           <p className="font-data text-xl font-bold text-foreground">
             {price ? `${price.approx ? "≈ " : ""}${formatMarketCurrency(price.value, currency)}` : "Цена у дилера"}
           </p>
-          {buy}
+          <span className="flex flex-col items-end gap-1">
+            {buy}
+            {p.affiliateUrl && (
+              <span className="text-[10px] leading-3 text-muted-foreground/80">партнёрская ссылка</span>
+            )}
+          </span>
         </div>
 
         {p.solutionSlug && (

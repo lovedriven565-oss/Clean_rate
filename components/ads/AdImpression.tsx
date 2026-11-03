@@ -101,6 +101,11 @@ export function AdImpression({
       className={className}
     >
       {children}
+      {ad.erid && (
+        <p className="mt-1 font-data text-[10px] leading-4 text-muted-foreground/70">
+          Реклама. erid: {ad.erid}
+        </p>
+      )}
     </div>
   );
 }

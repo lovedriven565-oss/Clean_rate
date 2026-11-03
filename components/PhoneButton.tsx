@@ -13,6 +13,8 @@ interface PhoneButtonProps {
   compact?: boolean;
   /** Подпись кнопки звонка на мобильных (по умолчанию номер или «Позвонить» в compact) */
   label?: string;
+  /** Плейсмент для сквозной воронки (solution.pro_panel, company.profile…) */
+  placement?: string;
   className?: string;
 }
 
@@ -25,10 +27,10 @@ function telHref(phone: string) {
  * На десктопе tel: не работает, поэтому кнопка показывает сам номер,
  * а клик копирует его в буфер — клик учитывается как событие phone.
  */
-export function PhoneButton({ phone, companyId, categoryId, compact = false, label, className }: PhoneButtonProps) {
+export function PhoneButton({ phone, companyId, categoryId, compact = false, label, placement, className }: PhoneButtonProps) {
   const [copied, setCopied] = useState(false);
 
-  const track = () => companyId && trackClick({ companyId, categoryId, clickType: "phone" });
+  const track = () => companyId && trackClick({ companyId, categoryId, clickType: "phone", placement });
 
   async function copy() {
     track();
@@ -43,7 +45,7 @@ export function PhoneButton({ phone, companyId, categoryId, compact = false, lab
 
   const primaryClass = cn(
     "inline-flex items-center justify-center gap-2 rounded-full bg-brand font-semibold text-brand-foreground shadow-sm shadow-brand/30 transition-transform hover:-translate-y-0.5",
-    compact ? "h-10 flex-1 px-4 text-xs sm:flex-none" : "h-11 px-5 text-sm",
+    compact ? "h-11 flex-1 px-4 text-xs sm:flex-none" : "h-11 px-5 text-sm",
     className
   );
   const iconClass = compact ? "h-3.5 w-3.5" : "h-4 w-4";

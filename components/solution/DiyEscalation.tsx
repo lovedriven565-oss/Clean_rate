@@ -78,6 +78,7 @@ export function DiyEscalation({
                 companyId={company.id}
                 categoryId={solution.relatedCategory ?? company.categories[0]}
                 label="Позвонить мастеру"
+                placement="solution.diy_escalation"
               />
             ) : company?.telegramUrl ? (
               <a
@@ -85,7 +86,7 @@ export function DiyEscalation({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() =>
-                  trackClick({ companyId: company.id, categoryId: solution.relatedCategory, clickType: "telegram" })
+                  trackClick({ companyId: company.id, categoryId: solution.relatedCategory, clickType: "telegram", placement: "solution.diy_escalation" })
                 }
                 className="inline-flex h-11 items-center gap-2 rounded-full bg-lime px-5 text-sm font-semibold text-ink shadow-sm shadow-lime/30 transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
               >

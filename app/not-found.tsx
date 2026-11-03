@@ -7,7 +7,7 @@ export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <main className="flex flex-1 items-center">
+      <main id="content" className="flex flex-1 items-center">
         <section className="container py-20 sm:py-28">
           <div className="data-surface mx-auto max-w-xl rounded-panel p-8 text-center sm:p-12">
             <SearchX className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden />

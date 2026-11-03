@@ -127,11 +127,15 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
 
   // Платные размещения выходят из органического списка в спонсорскую полку сверху:
   // как в ProPanel и на посадочных — спонсор на первом экране, но без ранга #1.
-  const { sponsors, organic } = useMemo(() => splitSponsors(filtered), [filtered]);
+  // В РФ платных размещений без erid нет — все компании остаются в органике.
+  const { sponsors, organic } = useMemo(
+    () => splitSponsors(filtered, { countryCode: market.countryCode }),
+    [filtered, market.countryCode]
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-12 sm:py-18">
             <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Рейтинг компаний" }]} />
@@ -189,11 +193,11 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
                   <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     Рекламное размещение — не участвует в рейтинге
                   </span>
-                  <CompanyTable companies={sponsors} ranked={false} />
+                  <CompanyTable companies={sponsors} ranked={false} placement="rating.sponsors" />
                 </div>
               )}
               {organic.length > 0 && (
-                <CompanyTable companies={organic} ranked={sortKey === "relevance"} />
+                <CompanyTable companies={organic} ranked={sortKey === "relevance"} placement="rating.table" />
               )}
             </>
           )}

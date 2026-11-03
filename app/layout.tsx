@@ -3,6 +3,7 @@ import { ViewTransition } from "react";
 import { Golos_Text, JetBrains_Mono } from "next/font/google";
 import { ExternalAnalytics } from "@/components/analytics/ExternalAnalytics";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
+import { ConsentBanner } from "@/components/legal/ConsentBanner";
 import { MotionProvider } from "@/components/providers/MotionProvider";
 import { RegionProvider } from "@/components/providers/RegionProvider";
 import { SpeculationRules } from "@/components/SpeculationRules";
@@ -57,6 +58,12 @@ export default function RootLayout({
         <SpeculationRules />
       </head>
       <body>
+        <a
+          href="#content"
+          className="sr-only z-[90] rounded-control bg-ink px-4 py-2 text-sm font-semibold text-ink-foreground focus:not-sr-only focus:absolute focus:left-4 focus:top-4"
+        >
+          К содержимому
+        </a>
         <MotionProvider>
           <RegionProvider>
             <ViewTransition>{children}</ViewTransition>
@@ -64,6 +71,7 @@ export default function RootLayout({
         </MotionProvider>
         <PageViewTracker />
         <ExternalAnalytics />
+        <ConsentBanner />
       </body>
     </html>
   );

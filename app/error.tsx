@@ -10,7 +10,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
   }, [error]);
 
   return (
-    <main className="flex min-h-screen items-center bg-background">
+    <main id="content" className="flex min-h-screen items-center bg-background">
       <section className="container py-20">
         <div role="alert" className="data-surface mx-auto max-w-xl rounded-panel p-8 text-center sm:p-12">
           <TriangleAlert className="mx-auto h-8 w-8 text-danger" aria-hidden />

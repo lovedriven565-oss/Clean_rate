@@ -36,7 +36,7 @@ export default function RatingMethodologyPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-16 sm:py-24">
             <Link href="/rating" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">

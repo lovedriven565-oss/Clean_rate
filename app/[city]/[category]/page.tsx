@@ -34,7 +34,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const resolved = resolveLandingParams(city, category);
   if (!resolved) return {};
   const companies = await getAllCompanies();
-  const { organic, sponsors } = pickLandingCompanies(companies, resolved.city.name, resolved.category.id);
+  const { organic, sponsors } = pickLandingCompanies(companies, resolved.city.name, resolved.category.id, {
+    countryCode: resolved.market.countryCode,
+  });
   const indexable = organic.length + sponsors.length >= LANDING_INDEX_MIN_COMPANIES;
   const title = `${resolved.category.name} в ${resolved.city.nameIn}: цены и компании`;
   return {
@@ -77,7 +79,9 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
     getEligibleAd("rating.category_partner", { categoryId: category.id }),
   ]);
 
-  const { organic, sponsors } = pickLandingCompanies(companies, city.name, category.id);
+  const { organic, sponsors } = pickLandingCompanies(companies, city.name, category.id, {
+    countryCode: market.countryCode,
+  });
   const related = solutions.filter((s) => s.relatedCategory === category.id).slice(0, 3);
   const estimate = estimates.find((e) => e.city === city.name) ?? estimates[0];
   const faq = categoryFaq(city.nameIn, category.name, estimate);
@@ -115,7 +119,7 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
@@ -165,12 +169,12 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
               <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Рекламное размещение — не участвует в рейтинге
               </span>
-              <CompanyTable companies={sponsors} ranked={false} />
+              <CompanyTable companies={sponsors} ranked={false} placement="landing.sponsors" />
             </div>
           )}
 
           {organic.length > 0 ? (
-            <CompanyTable companies={organic} />
+            <CompanyTable companies={organic} placement="landing.table" />
           ) : (
             <div className="rounded-panel border border-dashed border-border bg-card/60 p-8 text-sm leading-6 text-muted-foreground">
               Пока здесь нет компаний. Если вы оказываете «{category.name.toLowerCase()}» в {city.nameIn},{" "}

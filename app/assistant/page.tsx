@@ -29,7 +29,7 @@ export default async function AssistantPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <main className="flex-1">
+      <main id="content" className="flex-1">
         <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
           <header className="max-w-2xl">
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-teal">
