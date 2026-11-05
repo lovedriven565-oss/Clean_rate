@@ -148,7 +148,19 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
         {/* Two paths */}
         <section className="container py-10 sm:py-14">
           <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-            <DiyPanel solution={solution} brands={brands} estimates={estimates} companies={companies} />
+            <DiyPanel
+              solution={solution}
+              brands={brands}
+              estimates={estimates}
+              companies={companies}
+              dealerSlot={
+                <AdPlacement
+                  placement="dealer.local_partner"
+                  context={adContext}
+                  className="mt-4"
+                />
+              }
+            />
             <div className="lg:sticky lg:top-24">
               <ProPanel solution={solution} companies={companies} estimates={estimates} />
             </div>

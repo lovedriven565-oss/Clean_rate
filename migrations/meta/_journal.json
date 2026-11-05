@@ -57,6 +57,13 @@
       "when": 1793706013516,
       "tag": "0007_chief_fallen_one",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793750198712,
+      "tag": "0008_nosy_greymalkin",
+      "breakpoints": true
     }
   ]
 }

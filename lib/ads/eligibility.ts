@@ -529,6 +529,7 @@ export function resolveEligibleAd(
     mediaUrl: campaign.mediaUrl ?? null,
     mediaPoster: campaign.mediaPoster ?? null,
     mediaAlt: campaign.mediaAlt ?? null,
+    promoCode: campaign.promoCode ?? null,
   };
 }
 

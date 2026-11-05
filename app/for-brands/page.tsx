@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { BarChart3, Boxes, FileText, MousePointerClick, Network, Presentation, Target, Users } from "lucide-react";
+import { BarChart3, Boxes, Clapperboard, FlaskConical, MousePointerClick, ShoppingCart, Sparkles, Target, Users } from "lucide-react";
 import { BrandLeadForm } from "@/components/BrandLeadForm";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { AD_FORMATS, AD_TERMS_NOTE, type AdFormat } from "@/lib/ads/media-kit";
 import { getSolutionBySlug } from "@/lib/db/queries";
 import { absoluteUrl, pageAlternates } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -28,12 +29,13 @@ const outcomes = [
   { icon: BarChart3, title: "Прозрачный отчёт", text: "Только фактические показы и действия. На старте мы не обещаем охват, которого ещё нет." },
 ];
 
-const formats = [
-  { icon: Boxes, title: "Профиль решения", text: "Бренд, продукты, дилеры, сервис и подтверждённые сценарии применения.", featured: true },
-  { icon: FileText, title: "Экспертный материал", text: "Практический разбор технологии с открытой рекламной маркировкой." },
-  { icon: Presentation, title: "Демо и обучение", text: "Регистрация профессионалов на вебинар, тест-драйв или запрос образца." },
-  { icon: Network, title: "Исследование рынка", text: "Спонсорство отраслевого отчёта без влияния на его выводы и рейтинг компаний." },
-];
+/** Иконки форматов — презентационный слой, данные и цены живут в lib/ads/media-kit.ts. */
+const FORMAT_ICONS: Record<AdFormat["id"], typeof ShoppingCart> = {
+  "dealer-slot": ShoppingCart,
+  "protocol-product": FlaskConical,
+  "editorial-partner": Sparkles,
+  "sponsored-video": Clapperboard,
+};
 
 export default async function ForBrandsPage({
   searchParams,
@@ -109,25 +111,53 @@ export default async function ForBrandsPage({
           </div>
         </section>
 
-        {/* Formats */}
-        <section className="border-y border-border bg-muted/30 py-16 sm:py-24">
+        {/* Formats & pricing — продаём время размещения нативных слотов, не лиды */}
+        <section id="formats" className="border-y border-border bg-muted/30 py-16 sm:py-24">
           <div className="container">
             <h2 className="max-w-3xl font-display text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-5xl">
-              Реклама, которая добавляет рынку полезность
+              Форматы и цены
             </h2>
+            <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
+              Продаём время размещения нативных слотов — без обещаний кликов и звонков и без места в органическом рейтинге.
+            </p>
             <div className="mt-10 grid gap-5 sm:grid-cols-2">
-              {formats.map((format) => (
-                <article
-                  key={format.title}
-                  className="data-surface rounded-panel p-7 transition-[border-color,box-shadow] hover:border-lime/50"
-                >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-teal/10 text-teal">
-                    <format.icon className="h-5 w-5" />
-                  </span>
-                  <h3 className="mt-5 font-display text-lg font-bold text-foreground">{format.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{format.text}</p>
-                </article>
-              ))}
+              {AD_FORMATS.map((format) => {
+                const Icon = FORMAT_ICONS[format.id] ?? Sparkles;
+                return (
+                  <article
+                    key={format.id}
+                    className="data-surface flex flex-col rounded-panel p-7 transition-[border-color,box-shadow] hover:border-lime/50"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-teal/10 text-teal">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      {format.comingSoon && (
+                        <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-semibold text-muted-foreground">
+                          Скоро
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="mt-5 font-display text-lg font-bold text-foreground">{format.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{format.description}</p>
+                    <div className="mt-auto pt-5">
+                      <p className="font-data text-lg font-bold text-foreground">{format.priceLabel}</p>
+                      {format.note && (
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">{format.note}</p>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+              <p className="max-w-3xl text-xs leading-5 text-muted-foreground">{AD_TERMS_NOTE}</p>
+              <a
+                href="#brand-lead-form"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-lime px-6 text-sm font-semibold text-ink transition hover:opacity-95"
+              >
+                Запросить слот
+              </a>
             </div>
           </div>
         </section>

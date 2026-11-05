@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  ANSWER_MODEL,
+  FALLBACK_ANSWER_MODEL,
   buildAssistantHref,
   buildGroundedPrompt,
   buildProtocolAnswer,
@@ -25,6 +27,11 @@ if (!wine) throw new Error("seed solution missing");
 const emptySafety = new Map<string, ProductSafetyProfile>();
 
 describe("assistant consultant", () => {
+  it("pins llama-4-scout as primary answer model with 8B fp8 fallback", () => {
+    assert.match(ANSWER_MODEL, /llama-4-scout-17b-16e-instruct/);
+    assert.match(FALLBACK_ANSWER_MODEL, /llama-3\.1-8b-instruct-fp8-fast/);
+  });
+
   it("answers in protocol mode with full Two-Paths structure without AI bindings", async () => {
     const answer = await consult({
       env: null,

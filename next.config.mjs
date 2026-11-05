@@ -1,3 +1,13 @@
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+// Подключает AI/D1/ratelimit-биндинги из wrangler.jsonc в `next dev`
+// (без этого getCloudflareContext/getSearchBindings локально возвращают null).
+// Только dev: на `next build`/`opennextjs-cloudflare build` вызов поднимает
+// remote-прокси wrangler и сборка падает без CLOUDFLARE_API_TOKEN.
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev();
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   allowedDevOrigins: ["127.0.0.1"],

@@ -221,8 +221,8 @@ export const seedCompanies: SeedCompany[] = [
     promoted: true,
     categories: ["offices", "post-renovation", "deep-cleaning", "windows", "upholstery", "apartments"],
     equipment: ["karcher"],
-    ratingSource: "google",
-    rating: { source: "google", sourceUrl: "https://www.google.com/maps", rating: 4.8, reviewCount: 12 },
+    // Внешний рейтинг скрыт до ручной проверки источника.
+    ratingSource: "unverified",
   },
   {
     id: "freshclean",
@@ -242,8 +242,8 @@ export const seedCompanies: SeedCompany[] = [
     promoted: false,
     categories: ["apartments", "offices", "post-renovation", "deep-cleaning"],
     equipment: [],
-    ratingSource: "yandex",
-    rating: { source: "yandex", sourceUrl: "https://yandex.by/maps", rating: 4.5, reviewCount: 8 },
+    // Внешний рейтинг скрыт до ручной проверки источника.
+    ratingSource: "unverified",
   },
   {
     id: "kitt",
@@ -333,8 +333,8 @@ export const seedCompanies: SeedCompany[] = [
     promoted: false,
     categories: ["offices", "post-renovation", "deep-cleaning", "windows", "upholstery"],
     equipment: [],
-    ratingSource: "google",
-    rating: { source: "google", sourceUrl: "https://zoon.by/minsk/utility_service/kliningovaya_kompaniya_sauber/", rating: 4.6, reviewCount: 24 },
+    // Внешний рейтинг скрыт до ручной проверки источника.
+    ratingSource: "unverified",
   },
   // --- Новые компании из веб-исследования ---
   {
@@ -1759,6 +1759,8 @@ export interface SeedCampaign {
   mediaUrl?: string;
   mediaPoster?: string;
   mediaAlt?: string;
+  /** Промокод дилера — выводится чипом в дилерских слотах */
+  promoCode?: string;
   priority: number;
 }
 

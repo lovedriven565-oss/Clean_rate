@@ -5,6 +5,7 @@ import {
   getAllSolutions,
   getIntentKeywords,
   getPriceEstimates,
+  recordAnalyticsEvent,
 } from "@/lib/db/queries";
 import { getProductsSafetyMap } from "@/lib/ads/queries";
 import { checkRateLimit, tooManyRequests } from "@/lib/security/guard";
@@ -65,6 +66,19 @@ export async function POST(request: Request): Promise<Response> {
     safetyMap,
     estimates,
   });
+
+  // Промахи консультанта — дорожная карта новых протоколов: видны в «Радаре
+  // спроса» /admin (placement=assistant.miss), запрос обрезан до 120 символов.
+  if (answer.mode === "empty") {
+    await recordAnalyticsEvent({
+      entityType: "page",
+      entityId: "assistant",
+      eventType: "view",
+      path: "/assistant",
+      countryCode: parsed.data.context?.countryCode,
+      metadata: { placement: "assistant.miss", query: parsed.data.message.slice(0, 120) },
+    });
+  }
 
   return NextResponse.json(answer, {
     headers: { "Cache-Control": "private, no-store" },

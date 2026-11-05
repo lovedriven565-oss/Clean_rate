@@ -28,6 +28,11 @@ export function DealerLocalPartnerCard({ ad }: { ad: EligibleAd }) {
             </div>
             <h3 className="mt-2 font-display text-base font-bold text-foreground sm:text-lg">{ad.title}</h3>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">{ad.description}</p>
+            {ad.promoCode && (
+              <span className="mt-2.5 inline-flex items-center rounded-full border border-teal/25 bg-teal/10 px-3 py-1 text-xs font-semibold text-teal">
+                Промокод {ad.promoCode}
+              </span>
+            )}
           </div>
         </div>
 

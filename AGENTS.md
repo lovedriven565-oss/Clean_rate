@@ -338,6 +338,16 @@
 - `#special` (SeasonalBrandBanner) — без `Reveal`: блок под hero виден в SSR, не ждёт гидрацию (устраняет «белое поле» на первом экране).
 - **Прод-D1:** применены миграции 0006 (campaigns media_*) и 0007 (`campaigns.erid`); `price_estimates.unit` «уборка» → «уборку» (3 строки).
 
+## Монетизация «время размещения, не лиды» + ИИ-технолог на Scout (сделано)
+- **Модель:** `ANSWER_MODEL` → `@cf/meta/llama-4-scout-17b-16e-instruct` (~×7 дешевле 70B на выходе, мультимодальная — задел под фото-диагностику); фолбэк `llama-3.1-8b-instruct-fp8-fast`. `matchSolutionWithLlm` использует ту же константу.
+- **Dev-биндинги:** `initOpenNextCloudflareForDev()` в `next.config.mjs` → `getSearchBindings()` работает и в `next dev` (AI/D1 из wrangler.jsonc; раньше локально жил только словарь и любой вопрос вне базы давал `empty`).
+- **Misses-лог:** `POST /api/assistant` при `mode === "empty"` пишет `recordAnalyticsEvent` `{ entityType: "page", entityId: "assistant", path: "/assistant", metadata: { placement: "assistant.miss", query ≤120 } }` → промахи видны в «Радаре спроса» /admin как дорожная карта новых протоколов.
+- **Мобильный UX AssistantPanel:** скелетон «Технолог разбирает задачу…» сразу после отправки + `scrollIntoView` к нему, по готовности ответа — к `answerRef`; `aria-live` реплики «Анализирую запрос…»/«Ответ готов».
+- **Честность данных:** у `spectrclean`, `freshclean`, `sauber` внешние рейтинги скрыты (`ratingSource: "unverified"`, объект `rating` убран; seed.sql — 0 rating_sources до ручной проверки). Тесты рейтингов перешли на синтетические фикстуры.
+- **Дилерские поля:** `AffiliateProduct.dealerName/promoCode` → `ShelfProduct` → `ProductCard`/`StoryPlayer`: подпись «сайт бренда» вместо «партнёрская ссылка»; при `promoCode` — чип «Промокод {code}» + «партнёрский дилер {dealerName}». `campaigns.promo_code` (миграция `0008_nosy_greymalkin.sql`) → `Campaign/EligibleAd.promoCode` → чип в `DealerLocalPartnerCard`.
+- **Медиакит:** `lib/ads/media-kit.ts` — `AD_FORMATS` (4 формата, цены-плейсхолдеры для владельца) + `AD_TERMS_NOTE`; секция «Форматы и цены» на `/for-brands` с CTA → `#brand-lead-form`. `AdPlacement placement="dealer.local_partner"` на `/solutions/[slug]` через `DiyPanel dealerSlot` сразу после блока средств.
+- **TODO владельца:** применить миграцию 0008 в проде (`wrangler d1 migrations apply cleaning-rating-db --remote`) и пересидить (0 rating_sources), утвердить цены в `media-kit.ts`.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

@@ -44,6 +44,23 @@ export function ProductCard({
     });
   }
 
+  // Подпись под кнопкой покупки: без договора с дилером ссылки ведут просто
+  // на сайт бренда; при promoCode — честная пометка партнёрского дилера.
+  const buyMeta = !p.affiliateUrl
+    ? null
+    : p.promoCode ? (
+        <>
+          <span className="inline-flex items-center rounded-full border border-teal/25 bg-teal/10 px-2 py-0.5 text-[9px] font-semibold text-teal">
+            Промокод {p.promoCode}
+          </span>
+          <span className="text-[9px] leading-3 text-muted-foreground/80">
+            партнёрский дилер{p.dealerName ? ` ${p.dealerName}` : ""}
+          </span>
+        </>
+      ) : (
+        <span className="text-[9px] leading-3 text-muted-foreground/80">сайт бренда</span>
+      );
+
   const buy = p.affiliateUrl ? (
     <a
       href={p.affiliateUrl}
@@ -99,9 +116,7 @@ export function ProductCard({
             {price ? `${price.approx ? "≈ " : ""}${formatMarketCurrency(price.value, currency)}` : "—"}
           </p>
           {buy}
-          {p.affiliateUrl && (
-            <span className="text-[9px] leading-3 text-muted-foreground/80">партнёрская ссылка</span>
-          )}
+          {buyMeta && <span className="flex flex-col items-end gap-1">{buyMeta}</span>}
         </div>
       </article>
     );
@@ -173,9 +188,7 @@ export function ProductCard({
           </p>
           <span className="flex flex-col items-end gap-1">
             {buy}
-            {p.affiliateUrl && (
-              <span className="text-[10px] leading-3 text-muted-foreground/80">партнёрская ссылка</span>
-            )}
+            {buyMeta}
           </span>
         </div>
 

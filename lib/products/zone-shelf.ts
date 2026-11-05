@@ -32,6 +32,9 @@ export interface ShelfProduct {
   badge?: string;
   pros: string[];
   affiliateUrl?: string;
+  /** Дилер и промокод по прямой договорённости (проброшены из AffiliateProduct). */
+  dealerName?: string;
+  promoCode?: string;
   ph?: number;
   zones: HomeZoneId[];
   /** Человеческие теги безопасности — без сырых цифр pH */
@@ -194,6 +197,8 @@ export function buildShelfProducts(
       badge: p.badge,
       pros: p.pros,
       affiliateUrl: p.affiliateUrl,
+      dealerName: p.dealerName,
+      promoCode: p.promoCode,
       ph: existing?.ph,
       zones: existing?.zones.length ? existing.zones : zonesFor({ ...p, description: "" }),
       safetyTags: existing ? existing.safetyTags : [],

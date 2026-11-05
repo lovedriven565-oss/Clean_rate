@@ -30,10 +30,14 @@ import type {
 } from "@/lib/types";
 import { classifyIntent } from "@/lib/search/intent-router";
 
-/** LLM переформулирует и адаптирует строго факты протокола под ситуацию пользователя. */
-export const ANSWER_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
-/** Быстрая резервная модель Workers AI на случай перегрузки или таймаута 70B. */
-export const FALLBACK_ANSWER_MODEL = "@cf/meta/llama-3.1-8b-instruct-fast";
+/**
+ * LLM переформулирует и адаптирует строго факты протокола под ситуацию пользователя.
+ * Llama 4 Scout: ~×7 дешевле 70B на выходе при сопоставимом качестве суммаризации
+ * и мультимодальная (задел под фото-диагностику).
+ */
+export const ANSWER_MODEL = "@cf/meta/llama-4-scout-17b-16e-instruct";
+/** Быстрая резервная модель Workers AI на случай перегрузки или таймаута основной. */
+export const FALLBACK_ANSWER_MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8-fast";
 
 export type AssistantTiming = "fresh" | "dried" | "washed";
 
@@ -206,8 +210,8 @@ function extractAiText(result: unknown): string | null {
 }
 
 /**
- * Вызывает Workers AI с каскадным переключением на быструю модель 8B,
- * если основная модель 70B вернула ошибку или пустой ответ.
+ * Вызывает Workers AI с каскадным переключением на быструю резервную модель,
+ * если основная модель вернула ошибку или пустой ответ.
  */
 async function runChatCompletionWithFallback(
   ai: Ai,

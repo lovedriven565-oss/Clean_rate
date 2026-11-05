@@ -310,7 +310,18 @@ function StoryBody({
                           Где купить
                           <ArrowUpRight className="size-3.5" aria-hidden />
                         </a>
-                        <span className="text-[10px] leading-3 text-muted-foreground/80">партнёрская ссылка</span>
+                        {product.promoCode ? (
+                          <>
+                            <span className="inline-flex items-center rounded-full border border-teal/25 bg-teal/10 px-2 py-0.5 text-[9px] font-semibold text-teal">
+                              Промокод {product.promoCode}
+                            </span>
+                            <span className="text-[10px] leading-3 text-muted-foreground/80">
+                              партнёрский дилер{product.dealerName ? ` ${product.dealerName}` : ""}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-[10px] leading-3 text-muted-foreground/80">сайт бренда</span>
+                        )}
                       </span>
                     )}
                   </div>

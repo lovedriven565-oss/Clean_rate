@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { AlertTriangle, ArrowUpRight, FlaskConical, Hand, ShieldCheck, ShoppingCart, Wallet } from "lucide-react";
 import { buildHumanSafetyBadge, findSeedProduct } from "@/lib/ph";
 import type { Brand, Company, PriceEstimate, Solution } from "@/lib/types";
@@ -15,11 +16,14 @@ export function DiyPanel({
   brands,
   estimates,
   companies,
+  dealerSlot,
 }: {
   solution: Solution;
   brands: Brand[];
   estimates: PriceEstimate[];
   companies: Company[];
+  /** Серверный рекламный слот dealer.local_partner — рендерится после блока средств. */
+  dealerSlot?: ReactNode;
 }) {
   const products = solution.recommendedProducts ?? [];
   const recommended = products.filter((p) => p.role === "recommended");
@@ -190,6 +194,7 @@ export function DiyPanel({
           <p className="mt-3 text-xs leading-5 text-muted-foreground">
             Кнопки «Купить» ведут на официальные сайты брендов и маркетплейсы. По ним платформа может получать партнёрское вознаграждение. Дилеров и наличие в вашем городе смотрите на странице бренда.
           </p>
+          {dealerSlot}
         </div>
       )}
     </section>

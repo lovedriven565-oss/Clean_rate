@@ -112,6 +112,10 @@ export interface AffiliateProduct {
   badge?: "Выбор профи" | "Новинка" | "Хит продаж";
   pros: string[];
   affiliateUrl: string;
+  /** Дилер по прямой договорённости — подписывается рядом с промокодом. */
+  dealerName?: string;
+  /** Промокод дилера: измеримая конверсия для партнёра без отчётности с нашей стороны. */
+  promoCode?: string;
 }
 
 /** @deprecated reserved for future marketplace expansion, not used in core CLEANHUB */
@@ -294,6 +298,8 @@ export interface Campaign {
   mediaUrl?: string | null;
   mediaPoster?: string | null;
   mediaAlt?: string | null;
+  /** Промокод дилера — выводится чипом в дилерских слотах */
+  promoCode?: string | null;
   priority: number;
   createdAt: Date;
   updatedAt?: Date | null;
@@ -355,4 +361,6 @@ export interface EligibleAd {
   mediaUrl?: string | null;
   mediaPoster?: string | null;
   mediaAlt?: string | null;
+  /** Промокод дилера из кампании — чип «Промокод …» рядом с CTA */
+  promoCode?: string | null;
 }

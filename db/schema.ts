@@ -228,6 +228,8 @@ export const campaigns = sqliteTable(
     mediaPoster: text("media_poster"),
     /** Альтернативный текст медиа для доступности */
     mediaAlt: text("media_alt"),
+    /** Промокод дилера: измеримая конверсия для партнёра без отчётности с нашей стороны */
+    promoCode: text("promo_code"),
     priority: integer("priority").notNull().default(0),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }),

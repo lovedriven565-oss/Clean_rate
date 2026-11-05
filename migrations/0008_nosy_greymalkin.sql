@@ -1,0 +1,1 @@
+ALTER TABLE `campaigns` ADD `promo_code` text;

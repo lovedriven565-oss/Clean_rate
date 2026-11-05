@@ -248,10 +248,20 @@ describe("pro companies", () => {
     const verifiedFlags = relevant.map((c) => c.verified);
     assert.deepEqual(verifiedFlags, [...verifiedFlags].sort((a, b) => Number(b) - Number(a)));
     const unverified = relevant.filter((c) => !c.verified);
-    const withRating = unverified.filter((c) => externalRating(c));
-    const withoutRating = unverified.filter((c) => !externalRating(c));
-    assert.ok(withRating.length > 0 && withoutRating.length > 0, "seed has both kinds");
-    assert.ok(unverified.indexOf(withRating[0]) < unverified.indexOf(withoutRating[0]));
+    assert.ok(unverified.length > 1, "seed has several unverified companies");
+    // В seed внешние рейтинги скрыты до проверки — оценённую компанию добавляем синтетически.
+    const rated = {
+      ...unverified[unverified.length - 1],
+      ratingSource: "google" as const,
+      baseRating: 4.7,
+      reviewCount: 30,
+    };
+    const boostedUnverified = rankOrganicCompanies(
+      companies.map((c) => (c.id === rated.id ? rated : c)),
+      wine
+    ).filter((c) => c.categories.includes(wine.relatedCategory!) && !c.verified);
+    assert.equal(boostedUnverified[0].id, rated.id, "confirmed external rating outranks unverified peers");
+    const withoutRating = boostedUnverified.filter((c) => !externalRating(c));
     const experienced = withoutRating.filter((c) => c.experienceYears);
     const unknown = withoutRating.filter((c) => !c.experienceYears);
     if (experienced.length && unknown.length) {

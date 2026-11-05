@@ -11,10 +11,11 @@ import {
 
 const companies = getFallbackCompanies();
 
-const ratedCompany = companies.find((company) => company.reviewCount > 0);
+// В seed внешние рейтинги скрыты до ручной проверки — оценённую компанию собираем синтетически.
+const ratedCompany = { ...companies[0], ratingSource: "google" as const, baseRating: 4.8, reviewCount: 12 };
 const unratedCompany = companies.find((company) => company.reviewCount === 0);
 
-if (!ratedCompany || !unratedCompany) throw new Error("Rating fixtures are incomplete");
+if (!unratedCompany) throw new Error("Rating fixtures are incomplete");
 
 describe("organic rating", () => {
   it("publishes a score only with a supported review source", () => {

@@ -85,6 +85,7 @@ export function AssistantPanel({
   const [answer, setAnswer] = useState<AssistantAnswer | null>(null);
   const [loading, setLoading] = useState(false);
   const answerRef = useRef<HTMLDivElement>(null);
+  const pendingRef = useRef<HTMLDivElement>(null);
   const autoSubmittedRef = useRef<string | null>(null);
 
   const runConsultation = useCallback(
@@ -138,6 +139,16 @@ export function AssistantPanel({
     },
     [countryCode]
   );
+
+  // Мобильный UX: ответ рендерится ниже формы — при отправке прокручиваем
+  // к скелетону «Технолог разбирает задачу…», по готовности — к ответу.
+  useEffect(() => {
+    if (loading) {
+      pendingRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+    } else if (answer) {
+      answerRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+    }
+  }, [loading, answer]);
 
   // Авто-запуск при переходе из умного поиска или экспресс-триажа (/assistant?q=...&timing=...)
   useEffect(() => {
@@ -343,6 +354,31 @@ export function AssistantPanel({
           </div>
         </form>
       </Panel>
+
+      {/* Реплики состояния для скринридеров */}
+      <p className="sr-only" role="status" aria-live="polite">
+        {loading ? "Анализирую запрос…" : answer ? "Ответ готов" : ""}
+      </p>
+
+      {/* Скелетон ожидания: виден сразу после отправки, до прихода ответа */}
+      {loading && (
+        <div ref={pendingRef} className="mt-6 scroll-mt-24" aria-hidden="true">
+          <Panel variant="card" className="p-5 sm:p-7">
+            <div className="flex items-center gap-2.5">
+              <Loader2 className="h-4 w-4 animate-spin text-teal" />
+              <p className="text-sm font-semibold text-foreground">
+                Технолог разбирает задачу…
+              </p>
+            </div>
+            <div className="mt-4 space-y-2.5">
+              <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-full animate-pulse rounded bg-muted" />
+              <div className="h-3 w-5/6 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
+            </div>
+          </Panel>
+        </div>
+      )}
 
       {/* Полный ответ «Два пути» */}
       {answer && (

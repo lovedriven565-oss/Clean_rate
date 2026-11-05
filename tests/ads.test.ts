@@ -425,8 +425,8 @@ describe("Ad Engine & Eligibility Gate", () => {
 
   describe("разделение данных: рекламные кампании НЕ меняют органический рейтинг", () => {
     const companies = getFallbackCompanies();
-    const ratedCompany = companies.find((c) => c.reviewCount > 0);
-    if (!ratedCompany) throw new Error("No rated company found for test");
+    // В seed внешние рейтинги скрыты до ручной проверки — оценённую компанию собираем синтетически.
+    const ratedCompany = { ...companies[0], ratingSource: "google" as const, baseRating: 4.8, reviewCount: 12 };
 
     it("органический балл компании не зависит от коммерческого продвижения", () => {
       const organicScore = calculateOrganicScore({ ...ratedCompany, promoted: false });
