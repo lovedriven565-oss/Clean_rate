@@ -26,6 +26,22 @@ const STAGE4_PROTOCOLS: {
   { slug: "sledy-reziny-kleya-laminat", surface: "floor", problemType: "postrenovation", sampleKeyword: "клей на ламинате" },
 ];
 
+const STAGE5_PROTOCOLS: {
+  slug: string;
+  surface: SolutionSurface;
+  problemType: SolutionProblemType;
+  sampleKeyword: string;
+}[] = [
+  { slug: "zheltyy-nalet-unitaz", surface: "bathroom", problemType: "scale", sampleKeyword: "желтый налет в унитазе" },
+  { slug: "chay-na-obivke", surface: "upholstery", problemType: "stain", sampleKeyword: "чай на диване" },
+  { slug: "sok-na-kovre", surface: "carpet", problemType: "stain", sampleKeyword: "сок на ковре" },
+  { slug: "shokolad-na-kovre", surface: "carpet", problemType: "stain", sampleKeyword: "шоколад на ковре" },
+  { slug: "krov-na-kovre", surface: "carpet", problemType: "stain", sampleKeyword: "кровь на ковре" },
+  { slug: "plesen-na-stenah", surface: "bathroom", problemType: "scale", sampleKeyword: "плесень на стене" },
+  { slug: "zhir-na-kuhonnyh-fasadah", surface: "kitchen", problemType: "stain", sampleKeyword: "жир на кухонных фасадах" },
+  { slug: "pota-na-obivke", surface: "upholstery", problemType: "odor", sampleKeyword: "пот на диване" },
+];
+
 describe("howToTitle", () => {
   it("turns a noun phrase into a search-style «Как убрать …» question", () => {
     assert.equal(
@@ -41,9 +57,9 @@ describe("howToTitle", () => {
 });
 
 describe("solutions graph and data layer", () => {
-  it("loads 16 published solutions with complete protocol data", async () => {
+  it("loads 24 published solutions with complete protocol data", async () => {
     const solutions = await getAllSolutions();
-    assert.equal(solutions.length, 16);
+    assert.equal(solutions.length, 24);
 
     for (const sol of solutions) {
       assert.ok(sol.id, "solution must have an id");
@@ -84,6 +100,33 @@ describe("solutions graph and data layer", () => {
     }
   });
 
+  it("includes all 8 stage-5 protocols with surfaces, products and BY/RU/KZ estimates", async () => {
+    const keywords = await getIntentKeywords();
+
+    for (const expected of STAGE5_PROTOCOLS) {
+      const solution = await getSolutionBySlug(expected.slug);
+      assert.ok(solution, `missing protocol ${expected.slug}`);
+      assert.equal(solution.surface, expected.surface);
+      assert.equal(solution.problemType, expected.problemType);
+      assert.ok(
+        solution.recommendedProducts?.some((p) => p.role === "recommended"),
+        `${expected.slug} must have a primary recommended product`
+      );
+      assert.ok(
+        solution.recommendedProducts?.some((p) => p.role === "alternative"),
+        `${expected.slug} must have an alternative product`
+      );
+
+      const estimates = await getPriceEstimates({ solutionId: expected.slug });
+      const countries = estimates.map((e) => e.countryCode).sort();
+      assert.deepEqual(countries, ["BY", "KZ", "RU"], `${expected.slug} must have BY, RU, KZ estimates`);
+
+      const classified = classifyIntent(expected.sampleKeyword, keywords);
+      assert.equal(classified.target?.kind, "solution");
+      assert.equal(classified.target?.slug, expected.slug);
+    }
+  });
+
   it("finds a specific solution by slug with resolved brand recommendations", async () => {
     const solution = await getSolutionBySlug("vino-na-divane");
     assert.ok(solution);
@@ -95,10 +138,10 @@ describe("solutions graph and data layer", () => {
 
   it("returns unique solution slugs for SSG generateStaticParams", async () => {
     const slugs = await getSolutionSlugs();
-    assert.equal(slugs.length, 16);
+    assert.equal(slugs.length, 24);
     assert.ok(slugs.includes("vino-na-divane"));
     assert.ok(slugs.includes("poslestroy-zatirka-plitka"));
-    for (const { slug } of STAGE4_PROTOCOLS) {
+    for (const { slug } of [...STAGE4_PROTOCOLS, ...STAGE5_PROTOCOLS]) {
       assert.ok(slugs.includes(slug), `slugs must include ${slug}`);
     }
   });

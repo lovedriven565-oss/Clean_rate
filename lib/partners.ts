@@ -5,8 +5,17 @@ import type { CategoryId } from "@/lib/types";
 
 export type PartnerPlan = "base" | "pro";
 
-/** Ориентир медиа-бюджета PRO Спонсор по рынку (плейсхолдер: утверждает владелец). */
+/** Ориентир медиа-бюджета PRO Спонсор по рынку — стартовая цена запуска (плейсхолдер: утверждает владелец). */
 export const PRO_BUDGET_FROM: Record<CountryCode, number> = { BY: 149, RU: 4500, KZ: 24000 };
+
+/**
+ * Плановый стандартный тариф после промо-периода. Показывается как якорь
+ * «далее — от X», чтобы ранний партнёр видел выгоду фиксированной ставки.
+ */
+export const PRO_BUDGET_REGULAR: Record<CountryCode, number> = { BY: 199, RU: 5900, KZ: 30000 };
+
+/** Сколько месяцев держится цена основателя для раннего партнёра в слоте. */
+export const PRO_FOUNDER_MONTHS = 3;
 
 export const NON_OFFER_DISCLAIMER =
   "Не является публичной офертой. Информационный ориентир медиа-бюджета; размещение оформляется прямым B2B-договором вне сайта.";
@@ -14,6 +23,16 @@ export const NON_OFFER_DISCLAIMER =
 /** «от 149 Br/мес», «от 4 500 ₽/мес», «от 24 000 ₸/мес» — в валюте рынка (Intl, неразрывные пробелы). */
 export function formatProBudget(countryCode: CountryCode): string {
   return `от ${formatMarketCurrency(PRO_BUDGET_FROM[countryCode], MARKETS[countryCode])}/мес`;
+}
+
+/** Плановый тариф после промо-периода: «от 199 Br/мес». */
+export function formatProRegularBudget(countryCode: CountryCode): string {
+  return `от ${formatMarketCurrency(PRO_BUDGET_REGULAR[countryCode], MARKETS[countryCode])}/мес`;
+}
+
+/** Подпись к цене PRO: «первые 3 мес · далее от 199 Br/мес». */
+export function proBudgetCaption(countryCode: CountryCode): string {
+  return `первые ${PRO_FOUNDER_MONTHS} мес · далее ${formatProRegularBudget(countryCode)}`;
 }
 
 export interface PartnerPrefill {

@@ -3,9 +3,13 @@ import { describe, it } from "node:test";
 import {
   NON_OFFER_DISCLAIMER,
   PRO_BUDGET_FROM,
+  PRO_BUDGET_REGULAR,
+  PRO_FOUNDER_MONTHS,
   formatProBudget,
+  formatProRegularBudget,
   parsePartnerPrefill,
   partnerClaimHref,
+  proBudgetCaption,
 } from "../lib/partners.js";
 
 /** Intl ставит неразрывные пробелы — сравниваем после нормализации. */
@@ -22,6 +26,16 @@ describe("formatProBudget — мультивалютный ориентир PRO"
     assert.deepEqual(Object.keys(PRO_BUDGET_FROM).sort(), ["BY", "KZ", "RU"]);
     assert.match(NON_OFFER_DISCLAIMER, /Не является публичной офертой/);
     assert.match(NON_OFFER_DISCLAIMER, /B2B-договором/);
+  });
+
+  it("shows a higher regular tariff as the post-promo anchor", () => {
+    assert.deepEqual(Object.keys(PRO_BUDGET_REGULAR).sort(), ["BY", "KZ", "RU"]);
+    for (const country of ["BY", "RU", "KZ"] as const) {
+      assert.ok(PRO_BUDGET_REGULAR[country] > PRO_BUDGET_FROM[country], `${country}: regular must exceed founder price`);
+    }
+    assert.equal(PRO_FOUNDER_MONTHS, 3);
+    assert.equal(plain(formatProRegularBudget("BY")), "от 199 Br/мес");
+    assert.equal(plain(proBudgetCaption("BY")), "первые 3 мес · далее от 199 Br/мес");
   });
 });
 

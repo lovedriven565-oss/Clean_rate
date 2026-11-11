@@ -35,6 +35,9 @@ export interface LandingCompanies {
   sponsors: Company[];
 }
 
+/** Спонсорских мест на посадочной «город × категория» — одно, остальным promoted остаётся органика. */
+export const LANDING_SPONSOR_LIMIT = 1;
+
 export function pickLandingCompanies(
   companies: Company[],
   cityName: string,
@@ -51,10 +54,15 @@ export function pickLandingCompanies(
         .sort((a, b) => calculateRelevanceScore(b) - calculateRelevanceScore(a)),
     };
   }
+  // Слот один: побеждает самый релевантный promoted, остальные promoted честно уходят в органику.
+  const promoted = inCity
+    .filter((c) => c.promoted)
+    .sort((a, b) => calculateRelevanceScore(b) - calculateRelevanceScore(a));
+  const sponsors = promoted.slice(0, LANDING_SPONSOR_LIMIT);
+  const overflow = promoted.slice(LANDING_SPONSOR_LIMIT).map((c) => ({ ...c, promoted: false }));
   return {
-    sponsors: inCity.filter((c) => c.promoted),
-    organic: inCity
-      .filter((c) => !c.promoted)
+    sponsors,
+    organic: [...inCity.filter((c) => !c.promoted), ...overflow]
       .sort((a, b) => calculateRelevanceScore(b) - calculateRelevanceScore(a)),
   };
 }

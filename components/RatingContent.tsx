@@ -128,9 +128,14 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
   // Платные размещения выходят из органического списка в спонсорскую полку сверху:
   // как в ProPanel и на посадочных — спонсор на первом экране, но без ранга #1.
   // В РФ платных размещений без erid нет — все компании остаются в органике.
+  // Лимит полки: 1 место на выбранную категорию, до 3 — в общей выдаче «все категории».
   const { sponsors, organic } = useMemo(
-    () => splitSponsors(filtered, { countryCode: market.countryCode }),
-    [filtered, market.countryCode]
+    () =>
+      splitSponsors(filtered, {
+        countryCode: market.countryCode,
+        maxSponsors: activeCategory === "all" ? 3 : 1,
+      }),
+    [filtered, market.countryCode, activeCategory]
   );
 
   return (

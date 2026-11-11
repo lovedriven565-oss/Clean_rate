@@ -61,13 +61,23 @@ export interface SponsoredSplit {
  * `options.countryCode === "RU"`: платных размещений без erid в РФ нет — promoted
  * возвращаются в общий органический список без спонсорской маркировки.
  */
-export function splitSponsors(companies: Company[], options?: { countryCode?: string }): SponsoredSplit {
+export function splitSponsors(
+  companies: Company[],
+  options?: { countryCode?: string; maxSponsors?: number }
+): SponsoredSplit {
   if (options?.countryCode?.toUpperCase() === "RU") {
     return { sponsors: [], organic: companies.map((c) => (c.promoted ? { ...c, promoted: false } : c)) };
   }
+  const promoted = companies.filter((c) => c.promoted);
+  // Лимит спонсорской полки: вытесненные promoted не исчезают — уходят в органику
+  // без бейджа (слот один, второй платный показ в этой выдаче не продаётся).
+  const sponsors = options?.maxSponsors === undefined ? promoted : promoted.slice(0, options.maxSponsors);
+  const shown = new Set(sponsors.map((c) => c.id));
   return {
-    sponsors: companies.filter((c) => c.promoted),
-    organic: companies.filter((c) => !c.promoted),
+    sponsors,
+    organic: companies
+      .filter((c) => !c.promoted || !shown.has(c.id))
+      .map((c) => (c.promoted ? { ...c, promoted: false } : c)),
   };
 }
 

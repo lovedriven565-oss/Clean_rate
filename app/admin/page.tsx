@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getAllCampaigns } from "@/lib/ads/queries";
 import { isAdminAllowed } from "@/lib/admin/guard";
 import { DEMAND_WINDOW_DAYS, buildDemandRadar, percentDelta, type DemandRadar } from "@/lib/admin/demand-radar";
+import { CampaignStatusSelect, LeadStatusSelect, SponsorManager } from "@/components/admin/controls";
+import { landingStaticParams, pickLandingCompanies, resolveLandingParams } from "@/lib/landing";
 import {
   getAllBrands,
   getAllCategories,
@@ -65,6 +67,29 @@ export default async function AdminPage() {
     ]);
   const brandName = new Map(brands.map((b) => [b.id, b.name]));
   const radar = buildDemandRadar({ keywords, solutions, categories, companies, ...signals });
+  // Кто сейчас выигрывает каждое спонсорское место «город × категория» —
+  // тот же pickLandingCompanies, что рендерит публичные посадочные.
+  const slotWinners = new Map<string, string[]>();
+  for (const { city, category } of landingStaticParams()) {
+    const resolved = resolveLandingParams(city, category);
+    if (!resolved) continue;
+    const { sponsors } = pickLandingCompanies(companies, resolved.city.name, resolved.category.id, {
+      countryCode: resolved.market.countryCode,
+    });
+    const winner = sponsors[0];
+    if (winner) {
+      const label = `${resolved.city.name} · ${resolved.category.name}`;
+      slotWinners.set(winner.id, [...(slotWinners.get(winner.id) ?? []), label]);
+    }
+  }
+  const sponsorRows = companies.map((c) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    city: c.city,
+    promoted: c.promoted,
+    slots: slotWinners.get(c.id) ?? [],
+  }));
   // entityId событий — id или slug компании; показываем только известные профили.
   const companyByKey = new Map(companies.flatMap((c) => [[c.id, c] as const, [c.slug, c] as const]));
   const companyRows = companyStats
@@ -134,7 +159,7 @@ export default async function AdminPage() {
                   <td className="px-3 py-2 font-medium">{lead.brandName}</td>
                   <td className="px-3 py-2 font-mono text-xs">{lead.contact}</td>
                   <td className="px-3 py-2">{LEAD_ROLE_LABELS[lead.role] ?? lead.role}</td>
-                  <td className="px-3 py-2">{LEAD_STATUS_LABELS[lead.status] ?? lead.status}</td>
+                  <td className="px-3 py-2"><LeadStatusSelect kind="brand" id={lead.id} status={lead.status} /></td>
                 </tr>
               ))}
             </tbody>
@@ -165,7 +190,7 @@ export default async function AdminPage() {
                   <td className="px-3 py-2 font-medium">{lead.companyName}</td>
                   <td className="px-3 py-2 font-mono text-xs">{lead.phone}</td>
                   <td className="px-3 py-2">{lead.city ?? "—"}</td>
-                  <td className="px-3 py-2">{LEAD_STATUS_LABELS[lead.status] ?? lead.status}</td>
+                  <td className="px-3 py-2"><LeadStatusSelect kind="partner" id={lead.id} status={lead.status} /></td>
                 </tr>
               ))}
             </tbody>
@@ -231,7 +256,7 @@ export default async function AdminPage() {
                     <td className="px-3 py-2 font-medium">{camp.name}</td>
                     <td className="px-3 py-2">{brandName.get(camp.brandId) ?? camp.brandId}</td>
                     <td className="px-3 py-2 font-mono text-xs">{camp.placement}</td>
-                    <td className="px-3 py-2">{CAMPAIGN_STATUS_LABELS[camp.status] ?? camp.status}</td>
+                    <td className="px-3 py-2"><CampaignStatusSelect id={camp.id} status={camp.status} /></td>
                     <td className="px-3 py-2 text-right font-mono text-xs tabular-nums">
                       {camp.currentImpressions}{camp.maxImpressions ? ` / ${camp.maxImpressions}` : ""}
                     </td>
@@ -245,6 +270,15 @@ export default async function AdminPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="font-display text-lg font-semibold">Спонсорские места</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Одно место на «город × категория»: включайте promoted только у компании, которая должна слот.
+          В РФ платные места не показываются без erid — там все идут в органику.
+        </p>
+        <SponsorManager companies={sponsorRows} />
       </section>
 
       <section className="mt-10">

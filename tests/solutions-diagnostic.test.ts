@@ -70,9 +70,9 @@ describe("diagnostic: surfaces and problems", () => {
     const problems = listProblems(solutions, "upholstery");
     assert.deepEqual(
       problems.map((p) => p.id),
-      ["stain"],
+      ["stain", "odor"],
     );
-    assert.equal(problems[0].count, 3);
+    assert.equal(problems[0].count, 4);
     assert.deepEqual(
       listProblems(solutions, "mattress").map((p) => p.id),
       ["stain", "odor"],
@@ -86,7 +86,7 @@ describe("diagnostic: surfaces and problems", () => {
       bathroomProblems.map((p) => p.id),
       ["scale"],
     );
-    assert.equal(bathroomProblems[0].count, 3);
+    assert.equal(bathroomProblems[0].count, 5);
     const floorProblems = listProblems(solutions, "floor");
     assert.deepEqual(
       floorProblems.map((p) => p.id),
@@ -112,7 +112,7 @@ describe("diagnostic: surfaces and problems", () => {
 describe("diagnostic: selection", () => {
   it("combination without a protocol yields null solution and no protocols", () => {
     assert.deepEqual(findProtocols(solutions, "facade", "stain"), []);
-    assert.deepEqual(findProtocols(solutions, "upholstery", "odor"), []);
+    assert.deepEqual(findProtocols(solutions, "kitchen", "odor"), []);
     const resolved = resolveSelection([], {});
     assert.equal(resolved.solution, null);
     assert.equal(resolved.surface, null);
@@ -128,14 +128,14 @@ describe("diagnostic: selection", () => {
   });
 
   it("invalid problem for a surface falls back to the first available problem", () => {
-    const resolved = resolveSelection(solutions, { surface: "upholstery", problem: "odor" });
+    const resolved = resolveSelection(solutions, { surface: "kitchen", problem: "odor" });
     assert.equal(resolved.problem, "stain");
-    assert.equal(resolved.solution!.surface, "upholstery");
+    assert.equal(resolved.solution!.surface, "kitchen");
   });
 
   it("variant picks among several protocols for the same combination, unknown variant falls back", () => {
     const base = resolveSelection(solutions, { surface: "upholstery", problem: "stain" });
-    assert.equal(base.protocols.length, 3);
+    assert.equal(base.protocols.length, 4);
     const other = base.protocols[1];
     assert.equal(resolveSelection(solutions, { surface: "upholstery", problem: "stain", variant: other.slug }).solution!.slug, other.slug);
     assert.equal(resolveSelection(solutions, { surface: "upholstery", problem: "stain", variant: "nope" }).solution!.slug, base.protocols[0].slug);

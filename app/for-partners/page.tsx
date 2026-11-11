@@ -20,6 +20,7 @@ import {
   NON_OFFER_DISCLAIMER,
   formatProBudget,
   parsePartnerPrefill,
+  proBudgetCaption,
   type PartnerPlan,
   type PartnerPrefill,
 } from "@/lib/partners";
@@ -250,10 +251,11 @@ export default function ForPartnersPage() {
                     Максимум охвата
                   </span>
                 </div>
-                <p className="mt-6 text-xs font-medium text-muted-foreground">ориентир бюджета:</p>
+                <p className="mt-6 text-xs font-medium text-muted-foreground">цена основателя:</p>
                 <p className="mt-1 font-data text-4xl font-semibold tracking-tight text-foreground" aria-live="polite">
                   {proBudget}
                 </p>
+                <p className="mt-1 text-xs text-muted-foreground">{proBudgetCaption(budgetCountry)}</p>
                 <ul className="mt-7 flex flex-1 flex-col gap-3.5">
                   {partnerFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-foreground">

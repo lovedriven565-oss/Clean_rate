@@ -144,7 +144,7 @@ export function PartnerLeadForm({
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Тариф размещения">
           {([
             { value: "base", title: "Базовый", note: "Бесплатно навсегда" },
-            { value: "pro", title: "PRO Спонсор", note: `${proBudget} — бейдж «Спонсор» и приоритетный охват` },
+            { value: "pro", title: "PRO Спонсор", note: `${proBudget} — цена основателя, бейдж «Спонсор» и приоритетный охват` },
           ] as const).map((option) => (
             <button
               key={option.value}
