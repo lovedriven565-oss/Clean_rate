@@ -409,6 +409,13 @@
 - **Проверки:** typecheck 0, lint 0, test 231/231; dev: `/media/*` — 200/206/304/404/416, `<video>` + VideoObject `contentUrl` в SSR `/solutions/vino-na-divane`.
 - **Фикс типов:** `cf:typegen` теперь пишет литералы из `vars` (`STRICT_DB: "0"`) → сравнения `process.env.X === "lit"` ломают tsc; читать в `string | undefined` переменную (см. `reportDbError`).
 
+## Этап 6 — протокол «Мел или фломастер на обоях» + поверхность wall (сделано)
+- **Новая поверхность `wall` («Стены и обои»)** добавлена во все точки перечисления: `lib/types.ts` `SolutionSurface`, `db/schema.ts` enum, `lib/solutions/meta.ts` (`SURFACE_LABELS`/`SURFACE_RISK_LABELS` — `SURFACES` выводится из ключей автоматически), `lib/solutions/covers.ts` (`/shelves/renovation.jpg`), `lib/assistant/engine.ts` (`SURFACE_MATERIAL_OPTIONS`, `VALID_SURFACES`, промпт open-expert). В `lib/ads/eligibility.ts` ничего не добавлялось — wall не кислото/щелоче-чувствительная поверхность в модели pH.
+- **Протокол `mel-flomaster-na-oboyah`** (решение 25): DIY по типам покрытий (бумага/флизелин/винил/покраска), сухое удаление мела, спирт только на виниле, запреты (вода до удаления мела, ацетон/646/хлорка, мокрая тряпка), эскалация при перманентном маркере в флизелине/большой площади. Сметы BY 40–90 / RU 1500–3500 / KZ 8000–18000 за стену; продукты Prochem Solvent Spotter + Kiehl Tablefit; 7 intent-ключей (ik-108…114).
+- **Прод-D1:** `migrations/seed-stage6.sql` — 13 INSERT'ов (1 solution + 2 solution_products + 7 intent_keywords + 3 price_estimates), применён `wrangler d1 execute --remote` (13 changes). Полный `seed.sql` на проде по-прежнему ЗАПРЕЩЁН (DELETE аналитики).
+- **Инцидент apex:** `chistolab.pro` был NXDOMAIN при живом www — починено `npx wrangler triggers deploy --name cleaning-rating` (custom domain на apex был отвязан); DNS-записи Cloudflare поднялись после перепривязки.
+- **Проверки:** typecheck 0, lint 0, test 232/232, build 185 страниц (25 протоколов SSG).
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
