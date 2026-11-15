@@ -7,7 +7,8 @@ import { CheckCircle2, FlaskConical, Loader2, Send } from "lucide-react";
 import { Button, Input } from "@/components/ui/primitives";
 import { Select } from "@/components/ui/Select";
 import { TurnstileWidget, turnstileEnabled } from "@/components/TurnstileWidget";
-import { formatBrandLeadGoalPrefill } from "@/lib/ads/presentation";
+import { buildBrandLeadGoalWithFormat, formatAdFormatLabel, formatBrandLeadGoalPrefill } from "@/lib/ads/presentation";
+import { getAdFormat } from "@/lib/ads/media-kit";
 import { parseApiResult } from "@/lib/api-result";
 import { SURFACE_LABELS, isSurface } from "@/lib/solutions/meta";
 
@@ -34,11 +35,15 @@ export function BrandLeadForm({
   const querySurface = searchParams.get("surface") ?? initialSurface ?? "";
   const resolvedSolutionTitle =
     querySolution && querySolution === initialSolutionSlug ? initialSolutionTitle : undefined;
-  const prefilledGoal = formatBrandLeadGoalPrefill({
-    solutionSlug: querySolution,
-    solutionTitle: resolvedSolutionTitle,
-    surface: querySurface,
-  });
+  const format = getAdFormat(searchParams.get("format"));
+  const prefilledGoal = buildBrandLeadGoalWithFormat(
+    formatBrandLeadGoalPrefill({
+      solutionSlug: querySolution,
+      solutionTitle: resolvedSolutionTitle,
+      surface: querySurface,
+    }),
+    formatAdFormatLabel(format)
+  );
 
   const [brandName, setBrandName] = useState("");
   const [website, setWebsite] = useState("");
@@ -122,6 +127,11 @@ export function BrandLeadForm({
           <FlaskConical className="h-4 w-4 shrink-0 text-primary" aria-hidden />
           <span className="font-semibold">Выбранный слот:</span>
           {contextLabel && <span className="font-medium text-foreground">протокол «{contextLabel}»</span>}
+          {format && (
+            <span className="rounded-full bg-card px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+              Формат: {format.title}
+            </span>
+          )}
           {surfaceBadge && (
             <span className="rounded-full bg-card px-2.5 py-0.5 text-[11px] font-semibold text-primary">
               Совместимость: {surfaceBadge}

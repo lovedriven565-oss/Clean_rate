@@ -73,7 +73,7 @@ export function TaskRibbon({ solutions, estimates }: { solutions: Solution[]; es
                 <div className="relative aspect-[3/4] overflow-hidden rounded-panel bg-muted shadow-sm ring-1 ring-inset ring-border">
                   <Image
                     src={solutionCover(solution)}
-                    alt=""
+                    alt={howToTitle(solution)}
                     fill
                     sizes="(min-width: 1024px) 240px, (min-width: 640px) 216px, 184px"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -87,6 +87,7 @@ export function TaskRibbon({ solutions, estimates }: { solutions: Solution[]; es
                   {price && (
                     <span>
                       мастер от <b className="font-data font-bold text-success">{price.min}</b>
+                      {price.unit && <span className="text-muted-foreground"> / {price.unit}</span>}
                     </span>
                   )}
                 </p>

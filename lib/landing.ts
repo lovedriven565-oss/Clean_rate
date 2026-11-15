@@ -28,6 +28,39 @@ export function landingStaticParams(): { city: string; category: string }[] {
   );
 }
 
+/** Параметры городского хаба `/{city}` — только открытые города включённых рынков. */
+export function cityStaticParams(): { city: string }[] {
+  return ENABLED_MARKETS.flatMap((market) => openCities(market).map((city) => ({ city: city.slug })));
+}
+
+/** Валидирует `/{city}`: город открытого рынка (без категории). */
+export function resolveCityParams(citySlug: string): { market: Market; city: City } | undefined {
+  return getCityBySlug(citySlug);
+}
+
+/** Города с достаточным числом компаний для индексации городского хаба. */
+export function getIndexableCities(companies: Company[]): { city: string }[] {
+  return cityStaticParams().filter(({ city }) => {
+    const resolved = getCityBySlug(city);
+    if (!resolved) return false;
+    return companies.filter((c) => c.city === resolved.city.name).length >= LANDING_INDEX_MIN_COMPANIES;
+  });
+}
+
+/** Slug'и городов, где конкретная категория набирает порог индексации. */
+export function getIndexableLandingCitySlugs(companies: Company[], categoryId: CategoryId): Set<string> {
+  const slugs = new Set<string>();
+  for (const market of ENABLED_MARKETS) {
+    for (const city of openCities(market)) {
+      const { organic, sponsors } = pickLandingCompanies(companies, city.name, categoryId, {
+        countryCode: market.countryCode,
+      });
+      if (organic.length + sponsors.length >= LANDING_INDEX_MIN_COMPANIES) slugs.add(city.slug);
+    }
+  }
+  return slugs;
+}
+
 export interface LandingCompanies {
   /** Органический список по убыванию релевантности — им достаются ранги. */
   organic: Company[];
@@ -88,7 +121,7 @@ export interface FooterLandingLink {
  * Прямые SEO-ссылки на посадочные для футера: до `perCityLimit`
  * первых категорий на каждый открытый город — хаб перелинковки для роботов.
  */
-export function getFooterLandingLinks(perCityLimit = 3): FooterLandingLink[] {
+export function getFooterLandingLinks(perCityLimit = CATEGORIES.length): FooterLandingLink[] {
   const topCategories = CATEGORIES.slice(0, perCityLimit);
   return ENABLED_MARKETS.flatMap((market) =>
     openCities(market).flatMap((city) =>
@@ -100,5 +133,28 @@ export function getFooterLandingLinks(perCityLimit = 3): FooterLandingLink[] {
         };
       })
     )
+  );
+}
+
+/** Посадочные, сгруппированные по городам — для компактного блока футера. */
+export function getFooterLandingLinksByCity(): { cityName: string; links: FooterLandingLink[] }[] {
+  return ENABLED_MARKETS.flatMap((market) =>
+    openCities(market).map((city) => ({
+      cityName: city.nameIn,
+      links: CATEGORIES.map((category) => ({
+        href: `/${city.slug}/${getCategorySlug(category.id)}`,
+        label: category.name,
+      })),
+    }))
+  );
+}
+
+/** Прямые ссылки на городские хабы `/{city}` — верхний уровень региональной иерархии. */
+export function getFooterCityLinks(): FooterLandingLink[] {
+  return ENABLED_MARKETS.flatMap((market) =>
+    openCities(market).map((city) => ({
+      href: `/${city.slug}`,
+      label: `Клининговые компании в ${city.nameIn}`,
+    }))
   );
 }

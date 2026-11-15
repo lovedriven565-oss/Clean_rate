@@ -4,9 +4,11 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, MessageCircle, Phone, Star } from "lucide-react";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
+import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { trackClick } from "@/lib/analytics";
-import { isCompanySponsorVisible } from "@/lib/ads/presentation";
+import { isCompanySponsorVisible, buildSlotPlaceholder } from "@/lib/ads/presentation";
+import { formatProBudget } from "@/lib/partners";
 import { getCategoryName, categoryLandingHref } from "@/lib/categories";
 import { formatMarketCurrency } from "@/lib/format";
 import { CLEANING_SERVICES, cleanerCardPrice, pickCategoryEstimate } from "@/lib/home/cleaning-services";
@@ -39,19 +41,33 @@ export function CleanersByServiceSection({
   const serviceInfo = CLEANING_SERVICES.find((s) => s.id === service) ?? CLEANING_SERVICES[0];
   const estimate = pickCategoryEstimate(estimates, service, ctx);
 
-  const { sponsor, organic } = useMemo(() => {
+  const { sponsor, sponsorAllowed, organic } = useMemo(() => {
     const inCity = companies.filter((c) => c.city === city.name && c.categories.includes(service));
     // В РФ платных размещений без erid нет — promoted идут в общий органический порядок.
     const sponsorAllowed = isCompanySponsorVisible(market.countryCode);
     const promoted = sponsorAllowed ? rankOrganicCompanies(inCity.filter((c) => c.promoted)) : [];
     return {
       sponsor: promoted[0] ?? null,
+      sponsorAllowed,
       organic: rankOrganicCompanies(inCity.filter((c) => !c.promoted || !sponsorAllowed)).slice(
         0,
         promoted[0] ? ORGANIC_LIMIT - 1 : ORGANIC_LIMIT
       ),
     };
   }, [companies, city.name, service, market.countryCode]);
+
+  // Свободный спонсорский слот показываем только там, где продажа спонсорства
+  // вообще возможна (не РФ) и только когда спонсора в этой услуге нет.
+  const sponsorPlaceholder =
+    !sponsor && sponsorAllowed
+      ? buildSlotPlaceholder({
+          placement: "home.cleaners",
+          format: { id: "pro-sponsor", title: "PRO Спонсор", priceLabel: formatProBudget(market.countryCode) },
+          label: `Спонсор · ${serviceInfo.label} · ${city.name}`,
+          city: city.name,
+          categoryIds: [service],
+        })
+      : null;
 
   return (
     <section id="cleaners" aria-labelledby="cleaners-title" className="scroll-mt-24 border-y border-border bg-muted/40 py-12 sm:py-16">
@@ -122,6 +138,7 @@ export function CleanersByServiceSection({
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sponsor && <CleanerCard key={sponsor.id} company={sponsor} service={service} serviceUnit={estimate?.unit ?? null} countryCode={market.countryCode} sponsor />}
+          {sponsorPlaceholder && <AdSlotPlaceholder meta={sponsorPlaceholder} variant="card" className="sm:col-span-2 lg:col-span-3" />}
           {organic.map((company) => (
             <CleanerCard key={company.id} company={company} service={service} serviceUnit={estimate?.unit ?? null} countryCode={market.countryCode} />
           ))}

@@ -2,9 +2,10 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { BarChart3, Boxes, Clapperboard, FlaskConical, MousePointerClick, ShoppingCart, Sparkles, Target, Users } from "lucide-react";
 import { BrandLeadForm } from "@/components/BrandLeadForm";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { AD_FORMATS, AD_TERMS_NOTE, type AdFormat } from "@/lib/ads/media-kit";
+import { AD_FORMATS, AD_TERMS_NOTE, getAdFormat, type AdFormat } from "@/lib/ads/media-kit";
 import { getSolutionBySlug } from "@/lib/db/queries";
 import { absoluteUrl, pageAlternates } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -40,21 +41,36 @@ const FORMAT_ICONS: Record<AdFormat["id"], typeof ShoppingCart> = {
 export default async function ForBrandsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ solution?: string; surface?: string }>;
+  searchParams?: Promise<{ solution?: string; surface?: string; format?: string }>;
 }) {
   const resolvedParams = searchParams ? await searchParams : undefined;
   const solutionSlug = typeof resolvedParams?.solution === "string" ? resolvedParams.solution.trim() : undefined;
   const surface = typeof resolvedParams?.surface === "string" ? resolvedParams.surface.trim() : undefined;
+  const format = getAdFormat(typeof resolvedParams?.format === "string" ? resolvedParams.format : null);
   const matchedSolution = solutionSlug ? await getSolutionBySlug(solutionSlug) : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main id="content" className="flex-1">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Главная", item: absoluteUrl("/") },
+                { "@type": "ListItem", position: 2, name: "Брендам и поставщикам", item: absoluteUrl("/for-brands") },
+              ],
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative grid gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
             <div>
-              <span className="inline-flex items-center gap-2 data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-teal">
+              <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Брендам и поставщикам" }]} />
+              <span className="mt-4 inline-flex items-center gap-2 data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-teal">
                 <Boxes className="h-3.5 w-3.5" />
                 Брендам и поставщикам
               </span>
@@ -121,29 +137,38 @@ export default async function ForBrandsPage({
               Продаём время размещения нативных слотов — без обещаний кликов и звонков и без места в органическом рейтинге.
             </p>
             <div className="mt-10 grid gap-5 sm:grid-cols-2">
-              {AD_FORMATS.map((format) => {
-                const Icon = FORMAT_ICONS[format.id] ?? Sparkles;
+              {AD_FORMATS.map((f) => {
+                const Icon = FORMAT_ICONS[f.id] ?? Sparkles;
+                const selected = format?.id === f.id;
                 return (
                   <article
-                    key={format.id}
-                    className="data-surface flex flex-col rounded-panel p-7 transition-[border-color,box-shadow] hover:border-lime/50"
+                    key={f.id}
+                    id={`format-${f.id}`}
+                    aria-current={selected ? "true" : undefined}
+                    className={cn(
+                      "data-surface relative flex scroll-mt-24 flex-col rounded-panel p-7 transition-[border-color,box-shadow] hover:border-lime/50",
+                      selected && "border-lime ring-2 ring-lime/50"
+                    )}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-teal/10 text-teal">
                         <Icon className="h-5 w-5" />
                       </span>
-                      {format.comingSoon && (
+                      {f.comingSoon && (
                         <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-semibold text-muted-foreground">
-                          Скоро
+                          Предзаказ
                         </span>
                       )}
+                      {selected && (
+                        <span className="rounded-full bg-lime px-3 py-1 text-xs font-bold text-ink">Выбрано</span>
+                      )}
                     </div>
-                    <h3 className="mt-5 font-display text-lg font-bold text-foreground">{format.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{format.description}</p>
+                    <h3 className="mt-5 font-display text-lg font-bold text-foreground">{f.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{f.description}</p>
                     <div className="mt-auto pt-5">
-                      <p className="font-data text-lg font-bold text-foreground">{format.priceLabel}</p>
-                      {format.note && (
-                        <p className="mt-1 text-xs leading-5 text-muted-foreground">{format.note}</p>
+                      <p className="font-data text-lg font-bold text-foreground">{f.priceLabel}</p>
+                      {f.note && (
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">{f.note}</p>
                       )}
                     </div>
                   </article>
@@ -169,7 +194,7 @@ export default async function ForBrandsPage({
               Соберём формат под один проверяемый результат
             </h2>
             <p className="mt-4 max-w-xl leading-7 text-muted-foreground">
-              Не публикуем выдуманный медиакит и не продаём место в рейтинге. Определим аудиторию, действие и отчёт до запуска пилота.
+              Не продаём место в органическом рейтинге. Цены и форматы — на карточках выше, обсудим аудиторию, действие и отчёт до запуска.
             </p>
           </div>
           <Suspense fallback={<div className="min-h-96 rounded-panel border border-border bg-card p-6 sm:p-8" />}>

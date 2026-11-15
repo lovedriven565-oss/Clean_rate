@@ -348,6 +348,67 @@
 - **Медиакит:** `lib/ads/media-kit.ts` — `AD_FORMATS` (4 формата, цены-плейсхолдеры для владельца) + `AD_TERMS_NOTE`; секция «Форматы и цены» на `/for-brands` с CTA → `#brand-lead-form`. `AdPlacement placement="dealer.local_partner"` на `/solutions/[slug]` через `DiyPanel dealerSlot` сразу после блока средств.
 - **TODO владельца:** применить миграцию 0008 в проде (`wrangler d1 migrations apply cleaning-rating-db --remote`) и пересидить (0 rating_sources), утвердить цены в `media-kit.ts`.
 
+## SEO/GEO-спринт: региональные посадочные, E-E-A-T, llms.txt (сделано)
+Полный план и ревью — в истории сессии; здесь фиксация «что и где».
+
+### Региональная архитектура и перелинковка
+- `app/[city]/page.tsx` — хабы `/minsk`, `/moscow`, `/almaty` (SSG, `generateStaticParams`, `dynamicParams` НЕ отключать — NoFallbackError в OpenNext).
+- `app/[city]/[category]/page.tsx` — посадочные `/{city}/{category}`: порог `LANDING_INDEX_MIN_COMPANIES = 2` (`lib/landing.ts`) → `noindex` + исключение из sitemap; блоки «Другие услуги в {город}» (5 смежных категорий, indexableByCategory считается один раз через `Map`) и «Другие города» (только при `indexableSlugs.size > 1`); гайд-блоки «От чего зависит стоимость» + «Чек-лист перед оплатой».
+- `lib/landings/category-guides.ts` — `CATEGORY_GUIDES` для всех 6 `CategoryId`: `priceFactors`, `checklist`, `faq` (плейсхолдер `{city}` → `city.nameIn`; валюты в текстах НЕТ — страницы мульти-рыночные).
+- `lib/site.ts`: `pageAlternates` (canonical+ru+x-default), `cityAlternates` (перекрёстный hreflang ru-BY→minsk, ru-RU→moscow, ru-KZ→almaty; **x-default = URL первого индексируемого рынка кластера**, не canonical страницы), `ORGANIZATION_ID` (`SITE_URL + "/#organization"`), `buildOrganizationNode()`.
+- `components/Footer.tsx` — верхний ряд (бренд + 4 колонки + «Города»-хабы) и отдельный блок «Услуги по городам»: `getFooterLandingLinksByCity()` (`lib/landing.ts`) — все 6 категорий × 3 города компактной сеткой.
+- `app/[city]/opengraph-image.tsx`, `app/[city]/[category]/opengraph-image.tsx` — OG-картинки региональных страниц.
+
+### E-E-A-T протоколов (D1-миграция 0009)
+- `solutions.reviewed_by` + `solutions.sources` (JSON string[]) — миграция `migrations/0009_flawless_silk_fever.sql`; `db/seed.ts` пишет `reviewed_by`/`sources`, `migrations/seed.sql` перегенерирован.
+- `lib/solutions/editorial.ts` — `SOLUTION_REVIEWER` («Редакция технологов ChistoLab»), `SOLUTION_DEFAULT_SOURCES` (техкарты Kiehl/Prochem + методология), `SOLUTION_SEED_DATE = "2026-01-15T00:00:00.000Z"` — фиксированная дата fallback (НЕ Date.now(): dateModified «прыгала» бы при каждом билде).
+- `lib/types.ts` `Solution`: `reviewedBy`, `sources`, `datePublished`, `dateModified`; маппинг в `lib/db/queries.ts` (`mapSolutionEditorial`, даты из `createdAt`/`updatedAt` D1-строки) и `lib/db/fallback.ts`.
+- UI: блок «Проверено: … Актуализировано … Источники: …» на `app/solutions/[slug]/page.tsx`.
+- `lib/solutions/structured-data.ts` `buildSolutionJsonLd`: HowTo теперь `author`/`publisher` = `{ "@id": ORGANIZATION_ID }`, `reviewedBy` (Organization), `datePublished`/`dateModified`, `citation` только для http(s)-источников; `estimatedCost` свободным текстом УБРАН (был невалиден).
+- `app/page.tsx` @graph: `WebSite` с `@id` + `publisher: {"@id": ORGANIZATION_ID}`, Organization через `buildOrganizationNode()`.
+
+### Прочая Schema.org-докрутка
+- `app/companies/[slug]/page.tsx` — `priceRange` («от N за unit») в LocalBusiness; `aggregateRating` по-прежнему НЕ размечается (внешние рейтинги).
+- `app/brands/[slug]/page.tsx` — `Brand` с `@id`+`sameAs` (`Brand.websiteUrl` проброшен: `lib/types.ts`, `lib/db/mappers.ts` `mapBrandRow`, `lib/db/fallback.ts` `seedBrandToBrand`) + узлы `Product` для `seedProducts` (с `additionalProperty` pH).
+- `app/for-partners/page.tsx` — UI `Breadcrumbs` + `BreadcrumbList` JSON-LD (layout уже отдаёт metadata).
+
+### /llms.txt и тесты
+- `app/llms.txt/route.ts` — `GET` → `text/plain; charset=utf-8`: описание, принципы, разделы, городские хабы, индексируемые посадочные (`getIndexableLandings`), все published-протоколы. `dynamic = "force-dynamic"`.
+- `tests/seo.test.ts` — +тесты: x-default стабильность, E-E-A-T поля HowTo, покрытие `CATEGORY_GUIDES` (≥4/≥5/≥4 элементов, без BYN), футер 6×города, `/llms.txt`. Итого **227/227**.
+
+### Проверки (пройдены)
+- `typecheck` 0, `lint` 0, `test` 227/227, `build` 183 страницы + `/llms.txt` (ƒ dynamic).
+- SSR `next start`: `/`, `/solutions/vino-na-divane`, `/moscow/uborka-kvartir`, `/minsk/uborka-ofisov`, `/for-partners`, `/llms.txt`, `/brands/kiehl`, `/companies/spectrclean` — 200; в HTML подтверждены dateModified/reviewedBy/гайды/priceRange/sameAs/крошки/x-default.
+
+### Статус прод-деплоя (2026-11-15)
+- Задеплоено: Worker `cleaning-rating`, version `ce3acc28-0192-476f-85ff-7496af954da6`, домены `chistolab.pro` + `www.chistolab.pro`. Проверено в проде: `/llms.txt`, E-E-A-T JSON-LD, x-default — всё отдаётся.
+- Миграции: применены все pending включая `0009` (колонки `solutions.reviewed_by`/`sources`); у 24 решений проставлены дефолтные `reviewed_by`/`sources` UPDATE'ом. `seed-stage5.sql` помечена применённой в `d1_migrations` — её данные уже были в БД через `seed.sql`, файл остался в `migrations/` как история.
+- **`migrations/seed.sql` на проде НЕ запускать**: DELETE'ит `analytics_events`, `campaigns`, `profile_claims`, `rating_sources` — сотрёт реальные данные.
+
+### TODO владельца (вне кода)
+- Cloudflare: 301 `www.chistolab.pro` → `chistolab.pro`; заполнить `NEXT_PUBLIC_CF_BEACON_TOKEN`, `NEXT_PUBLIC_YM_ID` в wrangler vars.
+- Реальные `rating_sources` для компаний (сейчас все `unverified`) и внешние упоминания — без этого коммерческие топы не дадутся.
+- Lighthouse CI (`lighthouserc.json` + job в ci.yml) прогнать на проде.
+
+## Упрощение главной + заглушки рекламных слотов + новые тарифы (сделано)
+- **Тарифы.** `lib/partners.ts`: PRO Спонсор — цена основателя BY 290 / RU 9 000 / KZ 49 000, далее 390 / 12 000 / 65 000, `PRO_FOUNDER_MONTHS = 6`; на `/for-partners` стандартная цена показана зачёркнутой (`<s>`), добавлена строка про «Эксклюзив города — по запросу». `lib/ads/media-kit.ts`: 6 форматов с ценами в BYN — editorial 490, category-partner 290, dealer 190, protocol-product 120, brand-shelf 190 BYN/мес и sponsored-video 600 BYN/ролик (`comingSoon` → бейдж «Предзаказ»). `getAdFormat(id)` — поиск формата.
+- **`/for-brands?format=`** — подсвечивает карточку формата (ring-lime + «Выбрано»), `BrandLeadForm` читает `?format=` и дописывает «Формат: …» в цель заявки (`buildBrandLeadGoalWithFormat`, `formatAdFormatLabel` в `lib/ads/presentation.ts`).
+- **Заглушки «место свободно».** `buildSlotPlaceholder({placement, format, label, solutionSlug, surface, city, categoryIds})` → `SlotPlaceholderMeta` (audience brand|company, priceLabel, href, surface); `search.sponsored_result` → null. `components/ads/AdSlotPlaceholder.tsx` — 3 варианта: `strip` / `card` / `poster` (9:16). `components/ads/AdPlacement.tsx`: без кампании рендерит заглушку по умолчанию (`placeholder={false}` отключает); `pitchOnly`/`showPitchWhenEmpty` + `solution.sponsored_product` → старый `EmptySlotPitch` (его href теперь с `format=protocol-product`). `home.cleaners` — слот спонсора клинера вне схемы кампаний (только не-RU, через `isCompanySponsorVisible`).
+- **Где заглушки:** главная — `SeasonalBrandBanner` (strip «Спецпроект сезона», editorial-fallback удалён), `CleanersByServiceSection` (card спонсора услуги, `sm:col-span-2 lg:col-span-3`), `VideoLabSection` (poster «Спонсорский видео-разбор»); `/rating` и `/[city]/[category]` — strip партнёра категории; `/solutions/[slug]` — `dealer.local_partner` card в DiyPanel + `EmptySlotPitch` после FAQ (дубль выключен `placeholder={false}`); `/brands` (`products.sponsored_slot`) и `/brands/[slug]` (`brand.profile_campaign`, `dealer.local_partner`) — card.
+- **Главная 7→6 блоков:** `PlatformHero` (новый H1 «Уберите любое пятно — сами или с мастером», `<SmartSearch bare />` — на главной шапочный поиск скрыт, фото только lg+) → `StainRescue` → `VideoLabSection` → `CleanersByServiceSection` → `SeasonalBrandBanner` → `TaskRibbon` → B2B. `ProductZoneShelf` переехал на `/brands` (нужны `seedAffiliateProducts/seedProducts/seedSolutionProducts` + `buildShelfProducts` + `getPriceEstimates`). Navbar: «Как убрать / Видеоразборы / Клинеры рядом / Рейтинг / Бренды и средства».
+- **Честный видеохаб:** без «Видео скоро» — бейдж «Пошаговый разбор · N шагов» (видео только при `videoUrl`); подзаголовок без «реального теста»; `StainRescue` — кнопка «Открыть пошаговый разбор» вместо заглушки видео.
+- **Цены и визуал:** `TaskRibbon` показывает `мастер от {min} / {unit}`; `cleanerCardPrice` выводит прайс компании с её единицей всегда (был гейт по совпадению единиц → «Цена по запросу»); `ProductCard`/`VideoLabSection`/`SeasonalBrandBanner` — вместо одного стокового `/lovable/spray.jpg` на все товары `BrandMark` (инициал бренда).
+- **Тесты:** 230/230 (partners — новые суммы, ads-ui — +describe buildSlotPlaceholder, cleaning-services — новая логика цены).
+
+## Видеохостинг на R2 через воркер (сделано)
+- **Бакет `chisyolab`** (тот же CF-аккаунт): биндинг `MEDIA` в `wrangler.jsonc` (`r2_buckets`). **Кастомный домен у бакета не привязывать** — конфликтует с `chistolab.pro` воркера; владелец удалил привязку.
+- **`app/media/[...key]/route.ts`** — `GET /media/<key>`: `bucket.head` → валидация ключа (белый список расширений в `MEDIA_TYPES`: видео/аудио/растр; svg/html не отдаём — XSS на основном домене) → ручной разбор Range (206/416) + If-None-Match (304) → `bucket.get` со стримом. Заголовки: `content-type` по расширению, `etag` = `httpEtag`, `cache-control: immutable`. **Не передавать `Headers` в `get()`/`writeHttpMetadata()`** — dev-прокси getPlatformProxy падает с `DevalueError`; `httpMetadata` читаем как POJO.
+- **Вертикаль:** file-источник `VideoSource` получил `vertical` по имени файла (`9x16|9:16|vertical|portrait`); `SolutionVideo` рендерит `aspect-[9/16] max-w-[320px]` и для file тоже. Конвенция имён: `{slug}-9x16.mp4`.
+- **Первый ролик:** `vino-na-divane-9x16.mp4` (12.4 МБ, Kling) → `video_url` в seed (`seed-data.ts`, `seed.sql`) и в прод-D1 (UPDATE'ом, seed.sql на проде не гонять). Отдаётся на `https://chistolab.pro/media/vino-na-divane-9x16.mp4` после деплоя.
+- **Загрузка новых роликов:** `npx wrangler r2 object put "chisyolab/<slug>-9x16.mp4" --file=<file> --content-type="video/mp4" --remote` → `videoUrl` в `seed-data.ts` + UPDATE прод-D1.
+- **Проверки:** typecheck 0, lint 0, test 231/231; dev: `/media/*` — 200/206/304/404/416, `<video>` + VideoObject `contentUrl` в SSR `/solutions/vino-na-divane`.
+- **Фикс типов:** `cf:typegen` теперь пишет литералы из `vars` (`STRICT_DB: "0"`) → сравнения `process.env.X === "lit"` ломают tsc; читать в `string | undefined` переменную (см. `reportDbError`).
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

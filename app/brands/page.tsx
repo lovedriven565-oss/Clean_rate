@@ -5,10 +5,14 @@ import { Footer } from "@/components/Footer";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AdPlacement } from "@/components/ads/AdPlacement";
 import { BrandLeaderboard } from "@/components/brands/BrandLeaderboard";
-import { getBrandsByScore } from "@/lib/db/queries";
+import { ProductZoneShelf } from "@/components/home/ProductZoneShelf";
+import { seedAffiliateProducts, seedProducts, seedSolutionProducts } from "@/db/seed-data";
+import { getBrandsByScore, getPriceEstimates } from "@/lib/db/queries";
+import { buildShelfProducts } from "@/lib/products/zone-shelf";
 
 export default async function BrandsPage() {
-  const brands = await getBrandsByScore();
+  const [brands, estimates] = await Promise.all([getBrandsByScore(), getPriceEstimates()]);
+  const shelf = buildShelfProducts(seedAffiliateProducts, seedProducts, seedSolutionProducts, brands);
   const verifiedLinks = brands.reduce((acc, b) => acc + b.metrics.verifiedCompanyCount, 0);
   const protocolLinks = brands.reduce((acc, b) => acc + b.metrics.recommendedCount + b.metrics.alternativeCount, 0);
 
@@ -47,6 +51,9 @@ export default async function BrandsPage() {
           <BrandLeaderboard brands={brands} />
           <AdPlacement placement="products.sponsored_slot" context={{}} className="mt-8" />
         </section>
+
+        {/* Витрина средств и техники по зонам дома — переехала с главной */}
+        <ProductZoneShelf products={shelf} estimates={estimates} />
 
         <section className="container pb-16 sm:pb-24">
           <div className="grid gap-6 rounded-panel bg-ink p-8 text-ink-foreground sm:p-12 lg:grid-cols-[1fr_auto] lg:items-end">

@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ArrowUpRight, Play, Star } from "lucide-react";
+import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
+import { BrandMark } from "@/components/ads/BrandMark";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { formatMarketCurrency, pluralize } from "@/lib/format";
 import { displayPrice, type ShelfProduct } from "@/lib/products/zone-shelf";
@@ -31,6 +33,15 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
   const active = items.find((s) => s.slug === openSlug) ?? null;
   const testedProduct = active ? products.find((p) => p.solutionSlug === active.slug) : undefined;
 
+  // Продаваемый слот видеохаба: спонсорский видео-разбор (предзаказ, только реальная съёмка).
+  const sponsoredSlot = {
+    audience: "brand" as const,
+    label: "Спонсорский видео-разбор протокола",
+    priceLabel: "600 BYN за ролик",
+    href: "/for-brands?format=sponsored-video#brand-lead-form",
+    ctaLabel: "Забронировать",
+  };
+
   if (items.length === 0) return null;
 
   return (
@@ -42,7 +53,7 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
             Видеолаборатория: разборы протоколов
           </h2>
           <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
-            Короткие разборы: реальное пятно, реальное средство, честный результат.
+            Короткие разборы протоколов: шаги, ошибки и подходящие средства. Видео добавляем по мере съёмки.
           </p>
         </div>
         <Link href="/solutions" className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal hover:underline">
@@ -51,7 +62,7 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
         </Link>
       </div>
 
-      <ul className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      <ul className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {items.map((solution) => {
           const product = products.find((p) => p.solutionSlug === solution.slug);
           const price = product?.price !== undefined ? displayPrice(product.price, market.currency) : null;
@@ -66,7 +77,7 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
                 <span className="relative block aspect-[9/16] w-full bg-ink">
                   <Image
                     src={solutionCover(solution)}
-                    alt=""
+                    alt={howToTitle(solution)}
                     fill
                     sizes="(min-width: 1024px) 240px, (min-width: 640px) 33vw, 50vw"
                     className="object-cover opacity-85 transition-transform duration-500 group-hover:scale-105"
@@ -74,14 +85,15 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
                   <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent" />
 
                   <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-[6px] bg-ink/80 px-2 py-1 font-data text-[10px] font-bold text-white">
-                    <Play className="size-3 fill-white" aria-hidden />
-                    {solution.videoUrl ? "Видео" : `Разбор · ${pluralize(solution.diySteps.length, ["шаг", "шага", "шагов"])}`}
+                    {solution.videoUrl ? (
+                      <>
+                        <Play className="size-3 fill-white" aria-hidden />
+                        Видео
+                      </>
+                    ) : (
+                      `Пошаговый разбор · ${pluralize(solution.diySteps.length, ["шаг", "шага", "шагов"])}`
+                    )}
                   </span>
-                  {!solution.videoUrl && (
-                    <span className="absolute right-2.5 top-2.5 rounded-[6px] bg-ink/80 px-2 py-1 font-data text-[10px] font-bold text-white">
-                      Видео скоро
-                    </span>
-                  )}
 
                   <span className="absolute bottom-3 right-3 grid size-11 place-items-center rounded-full bg-lime text-ink shadow-lg transition-transform group-hover:scale-110">
                     <Play className="size-4 fill-ink" aria-hidden />
@@ -97,9 +109,7 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
                 <span className="flex w-full items-center gap-3 border-t border-border bg-card p-3">
                   {product ? (
                     <>
-                      <span className="relative size-11 shrink-0 overflow-hidden rounded-control bg-muted">
-                        <Image src="/lovable/spray.jpg" alt="" fill sizes="44px" className="object-cover" />
-                      </span>
+                      <BrandMark name={product.brandName ?? product.name} size="sm" className="size-11 shrink-0 rounded-control" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-xs font-semibold text-foreground">{product.name}</span>
                         <span className="mt-0.5 flex items-center gap-1.5 font-data text-[11px] text-muted-foreground">
@@ -131,6 +141,7 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
             </li>
           );
         })}
+        <AdSlotPlaceholder meta={sponsoredSlot} variant="poster" />
       </ul>
 
       <StoryModal

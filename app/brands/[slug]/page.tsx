@@ -8,12 +8,13 @@ import { BrandHero } from "@/components/brands/BrandHero";
 import { AdPlacement } from "@/components/ads/AdPlacement";
 import { ProductCard } from "@/components/gear/ProductCard";
 import { CompanyTable } from "@/components/CompanyTable";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getAllCompanies, getAllSolutions, getBrandSlugs, getBrandsByScore } from "@/lib/db/queries";
 import { prosChoiceIds } from "@/lib/brand-score";
 import { seedAffiliateProducts, seedProducts } from "@/db/seed-data";
 import { buildHumanSafetyBadge } from "@/lib/ph";
-import { pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export async function generateStaticParams() {
@@ -52,6 +53,56 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
       <Navbar />
 
       <main id="content" className="flex-1">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Brand",
+                  "@id": `${absoluteUrl(`/brands/${brand.slug}`)}#brand`,
+                  name: brand.name,
+                  description: brand.description,
+                  url: absoluteUrl(`/brands/${brand.slug}`),
+                  sameAs: brand.websiteUrl ? [brand.websiteUrl] : undefined,
+                },
+                ...proProducts.map((product) => ({
+                  "@type": "Product",
+                  name: product.name,
+                  description: product.description,
+                  brand: { "@id": `${absoluteUrl(`/brands/${brand.slug}`)}#brand` },
+                  ...(product.ph !== undefined
+                    ? {
+                        additionalProperty: {
+                          "@type": "PropertyValue",
+                          name: "pH состава",
+                          value: product.ph,
+                        },
+                      }
+                    : {}),
+                })),
+                {
+                  "@type": "BreadcrumbList",
+                  itemListElement: [
+                    { "@type": "ListItem", position: 1, name: "Главная", item: absoluteUrl("/") },
+                    { "@type": "ListItem", position: 2, name: "Бренды", item: absoluteUrl("/brands") },
+                    { "@type": "ListItem", position: 3, name: brand.name, item: absoluteUrl(`/brands/${brand.slug}`) },
+                  ],
+                },
+              ],
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
+        <div className="container pt-6">
+          <Breadcrumbs
+            items={[
+              { label: "Главная", href: "/" },
+              { label: "Бренды", href: "/brands" },
+              { label: brand.name },
+            ]}
+          />
+        </div>
         <BrandHero brand={brand} />
 
         {/* Индекс доверия профи */}

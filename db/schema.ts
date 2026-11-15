@@ -316,7 +316,7 @@ export const solutions = sqliteTable(
       enum: ["stain", "odor", "scale", "postrenovation", "general"],
     }).notNull(),
     surface: text("surface", {
-      enum: ["upholstery", "mattress", "carpet", "floor", "window", "facade", "kitchen", "bathroom", "other"],
+      enum: ["upholstery", "mattress", "carpet", "floor", "window", "facade", "kitchen", "bathroom", "wall", "other"],
     }).notNull(),
     material: text("material"),
     severity: text("severity", { enum: ["fresh", "set", "extreme"] }).notNull().default("fresh"),
@@ -333,6 +333,10 @@ export const solutions = sqliteTable(
     relatedCategory: text("related_category"),
     /** Ссылка на короткий видеоразбор протокола (YouTube Shorts / VK Клипы / Rutube / mp4) */
     videoUrl: text("video_url"),
+    /** Кто проверил протокол (E-E-A-T): текстовое имя редакции/технолога */
+    reviewedBy: text("reviewed_by"),
+    /** JSON-массив источников и референсов протокола: string[] */
+    sources: text("sources"),
     status: text("status", { enum: ["draft", "published", "archived"] }).notNull().default("draft"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),

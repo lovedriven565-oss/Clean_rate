@@ -90,7 +90,7 @@ export function StainRescue({
             Спасатель пятен
           </h2>
           <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
-            Точный протокол. Правильное средство. Чистый результат.
+            Выберите, что случилось и на чём — покажем проверенный протокол и средства.
           </p>
         </div>
         <Link href="/solutions" className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal hover:underline">
@@ -209,12 +209,15 @@ export function StainRescue({
                   <span className="text-sm font-semibold">Смотреть видеоразбор протокола</span>
                 </Link>
               ) : (
-                <div className="mt-4 flex items-center gap-3 rounded-control bg-ink p-4 text-ink-foreground" aria-label="Видео появится позже">
+                <Link
+                  href={`/solutions/${active.slug}`}
+                  className="mt-4 flex items-center gap-3 rounded-control bg-ink p-4 text-ink-foreground transition-transform hover:-translate-y-0.5"
+                >
                   <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/10">
                     <Play className="size-4 text-lime" aria-hidden />
                   </span>
-                  <span className="text-sm font-semibold text-ink-foreground/80">Видео скоро — пока пошаговый протокол выше</span>
-                </div>
+                  <span className="text-sm font-semibold text-ink-foreground/80">Открыть пошаговый разбор протокола</span>
+                </Link>
               )}
             </div>
           ) : (

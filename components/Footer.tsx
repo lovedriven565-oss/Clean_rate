@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { getFooterLandingLinks } from "@/lib/landing";
+import { getFooterCityLinks, getFooterLandingLinksByCity } from "@/lib/landing";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
-import { cn } from "@/lib/utils";
 
 const columns = [
   {
@@ -35,22 +34,17 @@ const columns = [
 ];
 
 /** Колонка прямых ссылок на индексируемые посадочные «услуга × город» — хаб перелинковки. */
-const FOOTER_CITY_COLUMN_TITLE = "Услуги по городам";
-
 export function Footer() {
-  const cityLinks = getFooterLandingLinks(3);
-  const allColumns = cityLinks.length
-    ? [...columns, { title: FOOTER_CITY_COLUMN_TITLE, links: cityLinks }]
-    : columns;
+  const cityHubLinks = getFooterCityLinks();
+  const cityLandingColumns = getFooterLandingLinksByCity();
+  const allColumns = [
+    ...columns,
+    ...(cityHubLinks.length ? [{ title: "Города", links: cityHubLinks }] : []),
+  ];
 
   return (
     <footer className="border-t border-border bg-cta text-cta-foreground">
-      <div
-        className={cn(
-          "container grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 lg:py-18",
-          cityLinks.length > 0 ? "lg:grid-cols-[1.4fr_repeat(4,1fr)]" : "lg:grid-cols-[1.4fr_repeat(3,1fr)]"
-        )}
-      >
+      <div className="container grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,1fr)] lg:py-18">
         <div className="flex flex-col items-start gap-5">
           <Link href="/" className="font-display font-bold tracking-tight text-cta-foreground">
             <BrandLogo />
@@ -71,8 +65,8 @@ export function Footer() {
           <div key={column.title} className="flex flex-col gap-4">
             <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-cta-foreground/50">{column.title}</h3>
             <ul className="flex flex-col gap-3 text-sm text-cta-foreground/75">
-              {column.links.map((link) => (
-                <li key={`${link.href}-${link.label}`}>
+              {column.links.map((link, i) => (
+                <li key={`${link.href}-${link.label}-${i}`}>
                   <Link href={link.href} className="transition-colors hover:text-cta-foreground">
                     {link.label}
                   </Link>
@@ -82,6 +76,30 @@ export function Footer() {
           </div>
         ))}
       </div>
+
+      {cityLandingColumns.length > 0 && (
+        <div className="container border-t border-cta-foreground/10 pb-14">
+          <div className="pt-8">
+            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-cta-foreground/50">Услуги по городам</h3>
+            <div className="mt-5 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {cityLandingColumns.map((city) => (
+                <div key={city.cityName} className="flex flex-col gap-3">
+                  <p className="text-sm font-semibold text-cta-foreground">{city.cityName}</p>
+                  <ul className="grid grid-cols-1 gap-2 text-sm text-cta-foreground/70 sm:grid-cols-2">
+                    {city.links.map((link) => (
+                      <li key={link.href}>
+                        <Link href={link.href} className="transition-colors hover:text-cta-foreground">
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="border-t border-cta-foreground/15">
         <div className="container flex flex-col gap-2 py-6 text-xs text-cta-foreground/50 md:flex-row md:items-center md:justify-between">

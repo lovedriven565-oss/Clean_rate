@@ -1,4 +1,4 @@
-import type { AdCtaType, EligibleAd, SolutionSurface } from "@/lib/types";
+import type { AdCtaType, AdPlacement, EligibleAd, SolutionSurface } from "@/lib/types";
 import { SURFACE_LABELS, isSurface } from "@/lib/solutions/meta";
 
 /**
@@ -115,6 +115,7 @@ export function buildEmptySlotPitch(input: { solutionSlug?: string; surface?: So
   const params = new URLSearchParams();
   if (input.solutionSlug) params.set("solution", input.solutionSlug);
   if (input.surface) params.set("surface", input.surface);
+  params.set("format", "protocol-product");
   const query = params.toString();
 
   return {
@@ -155,4 +156,86 @@ export function formatBrandLeadGoalPrefill(input: {
   }
 
   return `${parts.join(". ")}.`;
+}
+
+/** Подпись формата медиакита в цели заявки `/for-brands?format=...`. */
+export function formatAdFormatLabel(format: { id: string; title: string } | undefined): string | null {
+  return format ? `Формат: ${format.title}` : null;
+}
+
+/**
+ * Задача заявки из `?format=` (и/или протокола): формат медиакита дописывается к цели
+ * слота, чтобы при передаче менеджеру было видно, какой именно блок забронировали.
+ */
+export function buildBrandLeadGoalWithFormat(base: string, formatLabel: string | null): string {
+  if (!formatLabel) return base;
+  if (!base) return `${formatLabel}.`;
+  return `${base.replace(/\.$/, "")} — ${formatLabel.toLowerCase()}.`;
+}
+
+// --- Заглушки свободных рекламных слотов («место свободно») ---
+
+export type SlotAudience = "brand" | "company";
+
+export interface SlotPlaceholderMeta {
+  /** Чья сторона: производитель/дилер бренда или клининговая компания. */
+  audience: SlotAudience;
+  /** Короткое имя места, например «Спонсорский состав в протоколе». */
+  label: string;
+  /** Цена из медиакита/тарифов или null, если формат без фиксированной цены. */
+  priceLabel: string | null;
+  /** Ссылка на форму заявки: /for-brands?format=... или /for-partners?plan=pro&... */
+  href: string;
+  /** CTA-кнопка заглушки. */
+  ctaLabel: string;
+  /** Поверхность для подписи совместимости (только бренды). */
+  surface?: string;
+}
+
+/**
+ * Свободный слот → мета заглушки. `format` — формат медиакита (цена и id), `label`
+ * — короткое имя места; без `label` берём `format.title`. Для `home.cleaners`
+ * (спонсор клининговой компании) audience = "company", ссылка ведёт на /for-partners.
+ */
+export function buildSlotPlaceholder(input: {
+  /** Плейсмент Ad Engine; "home.cleaners" — спонсорский слот клинера на главной (вне схемы кампаний). */
+  placement: AdPlacement | "home.cleaners";
+  format?: { id: string; title: string; priceLabel: string } | null;
+  label?: string;
+  solutionSlug?: string;
+  surface?: string;
+  city?: string;
+  categoryIds?: readonly string[];
+}): SlotPlaceholderMeta | null {
+  if (input.placement === "search.sponsored_result") return null;
+
+  const params = new URLSearchParams();
+  if (input.solutionSlug) params.set("solution", input.solutionSlug);
+  if (input.surface) params.set("surface", input.surface);
+  if (input.format) params.set("format", input.format.id);
+  const qs = params.toString();
+
+  if (input.placement === "home.cleaners") {
+    const p = new URLSearchParams({ plan: "pro" });
+    if (input.city) p.set("city", input.city);
+    if (input.categoryIds?.length) p.set("categories", input.categoryIds.join(","));
+    const suffix = input.categoryIds?.length ? `?${p}` : "";
+    return {
+      audience: "company",
+      label: input.label ?? "Спонсорский слот клинера",
+      priceLabel: input.format?.priceLabel ?? null,
+      href: `/for-partners${suffix}`,
+      ctaLabel: "Забронировать место",
+      surface: input.surface,
+    };
+  }
+
+  return {
+    audience: "brand",
+    label: input.label ?? input.format?.title ?? "Рекламный слот",
+    priceLabel: input.format?.priceLabel ?? null,
+    href: qs ? `/for-brands?${qs}` : "/for-brands",
+    ctaLabel: "Забронировать место",
+    surface: input.surface,
+  };
 }

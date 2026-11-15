@@ -106,9 +106,24 @@ function ExplorerInner({ solutions }: { solutions: Solution[] }) {
   );
 }
 
+function ExplorerFallback({ solutions }: { solutions: Solution[] }) {
+  return (
+    <div>
+      <p className="text-sm text-muted-foreground">
+        {solutions.length} решений — фильтры по типу задачи и поверхности
+      </p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {solutions.map((solution) => (
+          <SolutionCard key={solution.id} solution={solution} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function SolutionsExplorer({ solutions }: { solutions: Solution[] }) {
   return (
-    <Suspense fallback={<div className="h-64 animate-pulse rounded-panel bg-muted/50" />}>
+    <Suspense fallback={<ExplorerFallback solutions={solutions} />}>
       <ExplorerInner solutions={solutions} />
     </Suspense>
   );

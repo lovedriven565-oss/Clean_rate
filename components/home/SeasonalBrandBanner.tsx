@@ -6,9 +6,11 @@ import { ArrowRight, ArrowUpRight, Star } from "lucide-react";
 import { AdBadge } from "@/components/ads/AdBadge";
 import { AdCta } from "@/components/ads/AdCta";
 import { AdImpression } from "@/components/ads/AdImpression";
+import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
 import { BrandMark } from "@/components/ads/BrandMark";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { isAdVisibleInCountry } from "@/lib/ads/presentation";
+import { isAdVisibleInCountry, buildSlotPlaceholder } from "@/lib/ads/presentation";
+import { getAdFormat } from "@/lib/ads/media-kit";
 import { HOME_ZONES, displayPrice, type ShelfProduct } from "@/lib/products/zone-shelf";
 import { formatMarketCurrency } from "@/lib/format";
 import type { CountryCode } from "@/lib/markets";
@@ -21,10 +23,10 @@ function formatEndsAt(ts: number): string {
 }
 
 /**
- * «Спецпроект сезона» — светлая карточка в стиле Lovable: фото флакона слева,
- * оффер по центру, быстрые кнопки реальных зон справа. Активная кампания
- * показывается с маркировкой «Реклама», badgeText, ценой товара и честным
- * сроком «до {endsAt}». Без кампании — редакционный выбор без скидок и сроков.
+ * «Спецпроект сезона» — единственный коммерческий блок главной.
+ * Активная кампания показывается с маркировкой «Реклама»; без кампании —
+ * компактная заглушка «место свободно» со ссылкой на `/for-brands?format=editorial-partner`,
+ * чтобы бренды видели продаваемый слот.
  */
 export function SeasonalBrandBanner({
   ads,
@@ -37,40 +39,43 @@ export function SeasonalBrandBanner({
   const ad = ads[countryCode] ?? null;
   const visible = ad && isAdVisibleInCountry(ad, countryCode);
 
-  // Редакционный выбор: бренд активной кампании, иначе — товар витрины,
-  // реально фигурирующий в протоколах (приоритет — связанному с решением).
-  const fallback = [...shelfProducts]
-    .sort((a, b) => Number(Boolean(b.solutionSlug)) - Number(Boolean(a.solutionSlug)) || (b.rating ?? 0) - (a.rating ?? 0))
-    .find((p) => Boolean(visible ? p.brandId === ad!.brandId : p.affiliateUrl || p.solutionSlug));
+  if (!visible) {
+    const meta = buildSlotPlaceholder({
+      placement: "home.editorial_partner",
+      format: getAdFormat("editorial-partner") ?? null,
+      label: "Спецпроект сезона на главной",
+    });
+    if (!meta) return null;
+    return (
+      <section id="special" aria-label="Свободный рекламный слот" className="my-4">
+        <AdSlotPlaceholder meta={meta} variant="strip" className="w-full" />
+      </section>
+    );
+  }
 
-  if (!visible && !fallback) return null;
-
-  const brandName = visible ? ad!.brandName : fallback!.brandName ?? fallback!.brandId;
-  const brandSlug = visible ? ad!.brandSlug : fallback!.brandId;
-  const title = visible ? ad!.title : `${fallback!.name} — выбор лаборатории сезона`;
-  const description = visible
-    ? ad!.description
-    : fallback!.pros[0] ?? "Состав подобран по типу поверхности и используется в пошаговых протоколах ChistoLab.";
-  const priceProduct = visible
-    ? shelfProducts.find((p) => p.id === ad!.productId || p.slug === ad!.productSlug)
-    : fallback!;
+  const ad_ = ad!;
+  const brandName = ad_.brandName;
+  const brandSlug = ad_.brandSlug;
+  const title = ad_.title;
+  const description = ad_.description;
+  const priceProduct = shelfProducts.find((p) => p.id === ad_.productId || p.slug === ad_.productSlug);
   const price =
     priceProduct?.price !== undefined ? displayPrice(priceProduct.price, market.currency) : null;
 
   // Зоны — только реальные зоны товара кампании; без товара — зоны бренда.
-  const zoneSource = visible && priceProduct ? [priceProduct] : shelfProducts.filter((p) => p.brandId === (visible ? ad!.brandId : fallback!.brandId));
+  const zoneSource = priceProduct ? [priceProduct] : shelfProducts.filter((p) => p.brandId === ad_.brandId);
   const chips = [
     ...new Set(zoneSource.flatMap((p) => p.zones.map((z) => HOME_ZONES.find((h) => h.id === z)?.label ?? z))),
   ].slice(0, 3);
 
   const meta: string[] = [];
-  if (visible && price) meta.push(`от ${formatMarketCurrency(price.value, market.currency)}`);
-  if (visible && ad!.endsAt) meta.push(`до ${formatEndsAt(ad!.endsAt)}`);
+  if (price) meta.push(`от ${formatMarketCurrency(price.value, market.currency)}`);
+  if (ad_.endsAt) meta.push(`до ${formatEndsAt(ad_.endsAt)}`);
 
   const section = (
         <section
           id="special"
-          aria-label={visible ? `Реклама: спецпроект сезона ${brandName}` : `Выбор лаборатории: ${brandName}`}
+          aria-label={`Реклама: спецпроект сезона ${brandName}`}
           className="relative my-4 overflow-hidden rounded-panel border border-lime/40 bg-card p-6 sm:p-8 lg:p-10"
         >
           <div
@@ -86,21 +91,21 @@ export function SeasonalBrandBanner({
                 <Image src={SPRAY_IMAGE} alt={brandName} fill sizes="(min-width: 1024px) 320px, 90vw" className="object-cover" />
               </div>
               <span className="absolute left-3 top-3 rounded-[6px] bg-lime px-2.5 py-1 font-data text-xs font-bold text-ink">
-                {visible ? "Спецпроект" : "Тест месяца"}
+                Спецпроект
               </span>
             </div>
 
             {/* Центр — оффер */}
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                {visible && <AdBadge text={ad!.badgeText} />}
+                <AdBadge text={ad_.badgeText} />
                 <span className="font-data text-[11px] font-bold uppercase tracking-[0.16em] text-teal">
-                  {visible ? `Спецпроект сезона · Партнёр ${brandName}` : "Выбор лаборатории"}
+                  Спецпроект сезона · Партнёр {brandName}
                 </span>
               </div>
 
               <div className="mt-5 flex items-center gap-3">
-                <BrandMark name={brandName} accent={visible ? ad!.brandAccent : undefined} size="md" />
+                <BrandMark name={brandName} accent={ad_.brandAccent} size="md" />
                 <span className="font-display text-lg font-bold tracking-[-0.02em] text-foreground">{brandName}</span>
               </div>
 
@@ -115,29 +120,19 @@ export function SeasonalBrandBanner({
                   {meta.join(" · ")}
                 </p>
               )}
-              {!visible && price && (
-                <p className="mt-3 flex items-center gap-2 font-data text-sm font-bold text-teal">
-                  <Star className="size-3.5 fill-teal" aria-hidden />
-                  {`≈ ${formatMarketCurrency(price.value, market.currency)} · входит в протоколы ChistoLab`}
-                </p>
-              )}
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-                {visible ? (
-                  <AdCta ad={ad!} variant="primary" size="lg" />
-                ) : null}
+                <AdCta ad={ad_} variant="primary" size="lg" />
                 <Link
                   href={`/brands/${brandSlug}`}
                   className="inline-flex h-12 items-center justify-center gap-1.5 rounded-control bg-lime px-6 text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
                 >
-                  {visible ? "Смотреть линейку" : "Вся линейка бренда"}
+                  Смотреть линейку
                   <ArrowUpRight className="h-4 w-4" />
                 </Link>
               </div>
               <p className="mt-4 text-xs leading-5 text-muted-foreground">
-                {visible
-                  ? "Размещение оплачено брендом и не влияет на рейтинг компаний и подбор средств в протоколах."
-                  : "Редакционный выбор: средство реально фигурирует в протоколах лаборатории. Оплата на подбор не влияет."}
+                Размещение оплачено брендом и не влияет на рейтинг компаний и подбор средств в протоколах.
               </p>
             </div>
 
@@ -165,5 +160,5 @@ export function SeasonalBrandBanner({
 
   // Без Reveal-обёртки: блок идёт сразу под hero — до гидрации opacity:0
   // выглядит как пустое поле на первом экране.
-  return visible ? <AdImpression ad={ad!}>{section}</AdImpression> : section;
+  return <AdImpression ad={ad_}>{section}</AdImpression>;
 }

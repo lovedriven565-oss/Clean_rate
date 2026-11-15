@@ -26,6 +26,7 @@ import {
   seedTimestamp,
 } from "./seed-data";
 import { getMarketByCity } from "../lib/markets";
+import { SOLUTION_DEFAULT_SOURCES, SOLUTION_REVIEWER } from "../lib/solutions/editorial";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const migrationsDir = join(__dirname, "..", "migrations");
@@ -133,7 +134,7 @@ for (const camp of seedCampaigns) {
 // --- Продуктовый граф решений (Solutions) ---
 for (const sol of seedSolutions) {
   statements.push(
-    `INSERT INTO \`solutions\` (\`id\`, \`slug\`, \`title\`, \`problem_type\`, \`surface\`, \`material\`, \`severity\`, \`audience\`, \`diy_steps\`, \`warnings\`, \`when_to_call_pro\`, \`diy_cost_note\`, \`pro_time_note\`, \`search_keywords\`, \`related_category\`, \`video_url\`, \`status\`, \`created_at\`, \`updated_at\`) VALUES (${esc(sol.id)}, ${esc(sol.slug)}, ${esc(sol.title)}, '${sol.problemType}', '${sol.surface}', ${esc(sol.material)}, '${sol.severity}', '${sol.audience}', ${esc(JSON.stringify(sol.diySteps))}, ${jsonArray(sol.warnings)}, ${esc(sol.whenToCallPro)}, ${esc(sol.diyCostNote)}, ${esc(sol.proTimeNote)}, ${jsonArray(sol.searchKeywords)}, ${esc(sol.relatedCategory)}, ${esc(sol.videoUrl)}, '${sol.status}', ${num(seedTimestamp)}, ${num(seedTimestamp)});`
+    `INSERT INTO \`solutions\` (\`id\`, \`slug\`, \`title\`, \`problem_type\`, \`surface\`, \`material\`, \`severity\`, \`audience\`, \`diy_steps\`, \`warnings\`, \`when_to_call_pro\`, \`diy_cost_note\`, \`pro_time_note\`, \`search_keywords\`, \`related_category\`, \`video_url\`, \`reviewed_by\`, \`sources\`, \`status\`, \`created_at\`, \`updated_at\`) VALUES (${esc(sol.id)}, ${esc(sol.slug)}, ${esc(sol.title)}, '${sol.problemType}', '${sol.surface}', ${esc(sol.material)}, '${sol.severity}', '${sol.audience}', ${esc(JSON.stringify(sol.diySteps))}, ${jsonArray(sol.warnings)}, ${esc(sol.whenToCallPro)}, ${esc(sol.diyCostNote)}, ${esc(sol.proTimeNote)}, ${jsonArray(sol.searchKeywords)}, ${esc(sol.relatedCategory)}, ${esc(sol.videoUrl)}, ${esc(sol.reviewedBy ?? SOLUTION_REVIEWER)}, ${jsonArray(sol.sources ?? SOLUTION_DEFAULT_SOURCES)}, '${sol.status}', ${num(seedTimestamp)}, ${num(seedTimestamp)});`
   );
 }
 

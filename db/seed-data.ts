@@ -712,6 +712,10 @@ export interface SeedSolution {
   /** Короткий видеоразбор протокола (YouTube Shorts / VK Клипы / Rutube / mp4) */
   videoUrl?: string;
   status: "draft" | "published" | "archived";
+  /** Кто проверил протокол — при отсутствии подставляется SOLUTION_REVIEWER */
+  reviewedBy?: string;
+  /** Источники протокола — при отсутствии подставляются SOLUTION_DEFAULT_SOURCES */
+  sources?: string[];
 }
 
 export interface SeedSolutionProduct {
@@ -781,6 +785,7 @@ export const seedSolutions: SeedSolution[] = [
     proTimeNote: "30 – 50 минут (химчистка на дому)",
     searchKeywords: ["вино на диване", "красное вино", "пятно от вина", "шенилл", "вино обивка", "пятновыводитель вино"],
     relatedCategory: "upholstery",
+    videoUrl: "https://chistolab.pro/media/vino-na-divane-9x16.mp4",
     status: "published",
   },
   {
@@ -1634,6 +1639,47 @@ export const seedSolutions: SeedSolution[] = [
     relatedCategory: "upholstery",
     status: "published",
   },
+  {
+    id: "mel-flomaster-na-oboyah",
+    slug: "mel-flomaster-na-oboyah",
+    title: "Мел или фломастер на обоях",
+    problemType: "stain",
+    surface: "wall",
+    material: "бумажные / флизелиновые / виниловые обои, окрашенные стены",
+    severity: "set",
+    audience: "b2c",
+    diySteps: [
+      {
+        order: 1,
+        instruction: "Определите тип покрытия и маркера: бумажные и флизелиновые обои переносят только сухое удаление и слабый мыльный раствор, винил допускает спирт. Сначала проверьте выбранное средство на скрытом участке — за плинтусом или за мебелью.",
+        tip: "Мел и вода — плохая пара: сначала уберите мел полностью сухим способом, иначе он превратится в серое пятно.",
+      },
+      {
+        order: 2,
+        instruction: "Мел смахните мягкой сухой щёткой или ластиком для обоев по направлению рисунка, затем пропылесосьте стену — не мочите её до полного удаления мела.",
+      },
+      {
+        order: 3,
+        instruction: "Фломастер: свежие чернила промокните сухой салфеткой, не размазывая. Водные маркеры ототрите чуть влажной микрофиброй с мыльной пеной pH 7. Перманентные маркеры выводятся изопропиловым спиртом точечно — только на виниловых и плотных обоях.",
+        tip: "Спирт наносите на ватную палочку, а не на стену: чем меньше жидкости, тем меньше риск подтёка клея.",
+      },
+      {
+        order: 4,
+        instruction: "Промокните обработанное место чистой сухой салфеткой, дайте стене высохнуть и при необходимости повторите процедуру. Не трите круговыми движениями — так чернила только глубже въедутся в бумагу.",
+      },
+    ],
+    warnings: [
+      "Не мочите обои и не трите щёткой: размокает клей, чернила расплывутся ореолом, а край обои может отклеиться от стены.",
+      "Не используйте ацетон, растворитель 646 и хлорку на бумажных и флизелиновых обоях — растворится верхний слой и краска рисунка.",
+      "Не применяйте спирт и агрессивные составы без теста на скрытом участке: цвет и фактура обоев могут измениться необратимо.",
+    ],
+    whenToCallPro: "Закрашена большая площадь стены, перманентный маркер въелся в флизелин или бумагу, обои уже отходят от стены, либо это не обои, а фактурная краска — специалист подберёт состав под конкретное покрытие и снимет след без подтёков клея.",
+    diyCostNote: "0 – 30 BYN (ластик для обоев, мыльная пена, изопропиловый спирт)",
+    proTimeNote: "30 – 60 минут на стену",
+    searchKeywords: ["мел на обоях", "фломастер на стене", "маркер на обоях", "как отмыть мел", "ручка на стене", "пятно от фломастера", "детские рисунки на обоях", "отмыть маркер со стены"],
+    relatedCategory: "apartments",
+    status: "published",
+  },
 ];
 
 export const seedSolutionProducts: SeedSolutionProduct[] = [
@@ -1685,6 +1731,8 @@ export const seedSolutionProducts: SeedSolutionProduct[] = [
   { id: "sp-46", solutionId: "zhir-na-kuhonnyh-fasadah", brandId: "kiehl", role: "alternative", note: "Kiehl Grasset-plus (обезжиривание фасадов)" },
   { id: "sp-47", solutionId: "pota-na-obivke", brandId: "prochem", role: "recommended", note: "Prochem Stain Pro (энзимный вывод пота)" },
   { id: "sp-48", solutionId: "pota-na-obivke", brandId: "kiehl", role: "alternative", note: "Kiehl Arenas-exet 3 (нейтрализация запаха)" },
+  { id: "sp-49", solutionId: "mel-flomaster-na-oboyah", brandId: "prochem", role: "recommended", note: "Prochem Solvent Spotter (сольвент для чернил и пигментов)" },
+  { id: "sp-50", solutionId: "mel-flomaster-na-oboyah", brandId: "kiehl", role: "alternative", note: "Kiehl Tablefit (растворитель красителей и следов клея)" },
 ];
 
 export const seedIntentKeywords: SeedIntentKeyword[] = [
@@ -1804,6 +1852,15 @@ export const seedIntentKeywords: SeedIntentKeyword[] = [
   { id: "ik-105", keyword: "желтые пятна на обивке", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "pota-na-obivke" },
   { id: "ik-106", keyword: "запах пота мебель", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "pota-na-obivke" },
   { id: "ik-107", keyword: "пятна на изголовье", intent: "b2c", weight: 8, targetKind: "solution", targetSlug: "pota-na-obivke" },
+
+  // Этап 6: протокол «Мел или фломастер на обоях»
+  { id: "ik-108", keyword: "мел на обоях", intent: "b2c", weight: 10, targetKind: "solution", targetSlug: "mel-flomaster-na-oboyah" },
+  { id: "ik-109", keyword: "фломастер на стене", intent: "b2c", weight: 10, targetKind: "solution", targetSlug: "mel-flomaster-na-oboyah" },
+  { id: "ik-110", keyword: "маркер на обоях", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "mel-flomaster-na-oboyah" },
+  { id: "ik-111", keyword: "как отмыть мел", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "mel-flomaster-na-oboyah" },
+  { id: "ik-112", keyword: "ручка на стене", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "mel-flomaster-na-oboyah" },
+  { id: "ik-113", keyword: "пятно от фломастера", intent: "b2c", weight: 9, targetKind: "solution", targetSlug: "mel-flomaster-na-oboyah" },
+  { id: "ik-114", keyword: "детские рисунки на стене", intent: "b2c", weight: 8, targetKind: "solution", targetSlug: "mel-flomaster-na-oboyah" },
 ];
 
 export const seedPriceEstimates: SeedPriceEstimate[] = [
@@ -1912,6 +1969,11 @@ export const seedPriceEstimates: SeedPriceEstimate[] = [
   { id: "pe-70", solutionId: "pota-na-obivke", countryCode: "BY", city: "Минск", currency: "BYN", priceMin: 60, priceMax: 130, unit: "место", note: "Вывод пота и запаха с обивки" },
   { id: "pe-71", solutionId: "pota-na-obivke", countryCode: "RU", city: "Москва", currency: "RUB", priceMin: 2500, priceMax: 5500, unit: "место", note: "Химчистка от пота" },
   { id: "pe-72", solutionId: "pota-na-obivke", countryCode: "KZ", city: "Алматы", currency: "KZT", priceMin: 12000, priceMax: 26000, unit: "место", note: "Удаление запаха с мебели" },
+
+  // Решение 25: mel-flomaster-na-oboyah
+  { id: "pe-73", solutionId: "mel-flomaster-na-oboyah", countryCode: "BY", city: "Минск", currency: "BYN", priceMin: 40, priceMax: 90, unit: "стена", note: "Удаление следов мела и маркера с обоев с проверкой покрытия" },
+  { id: "pe-74", solutionId: "mel-flomaster-na-oboyah", countryCode: "RU", city: "Москва", currency: "RUB", priceMin: 1500, priceMax: 3500, unit: "стена", note: "Вывод маркера и мела со стен и обоев" },
+  { id: "pe-75", solutionId: "mel-flomaster-na-oboyah", countryCode: "KZ", city: "Алматы", currency: "KZT", priceMin: 8000, priceMax: 18000, unit: "стена", note: "Чистка обоев от детских рисунков" },
 
   // Сметы по категориям для быстрого вывода
   { id: "pe-cat-1", categoryId: "apartments", countryCode: "BY", city: "Минск", currency: "BYN", priceMin: 80, priceMax: 200, unit: "уборку", note: "Поддерживающая уборка 1–3-комнатной квартиры" },

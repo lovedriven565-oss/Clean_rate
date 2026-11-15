@@ -17,9 +17,9 @@ const plain = (value: string) => value.replace(/\s/g, " ");
 
 describe("formatProBudget — мультивалютный ориентир PRO", () => {
   it("formats the budget in the currency of each market", () => {
-    assert.equal(plain(formatProBudget("BY")), "от 149 Br/мес");
-    assert.equal(plain(formatProBudget("RU")), "от 4 500 ₽/мес");
-    assert.equal(plain(formatProBudget("KZ")), "от 24 000 ₸/мес");
+    assert.equal(plain(formatProBudget("BY")), "от 290 Br/мес");
+    assert.equal(plain(formatProBudget("RU")), "от 9 000 ₽/мес");
+    assert.equal(plain(formatProBudget("KZ")), "от 49 000 ₸/мес");
   });
 
   it("keeps a budget for every market and a non-offer disclaimer", () => {
@@ -33,9 +33,9 @@ describe("formatProBudget — мультивалютный ориентир PRO"
     for (const country of ["BY", "RU", "KZ"] as const) {
       assert.ok(PRO_BUDGET_REGULAR[country] > PRO_BUDGET_FROM[country], `${country}: regular must exceed founder price`);
     }
-    assert.equal(PRO_FOUNDER_MONTHS, 3);
-    assert.equal(plain(formatProRegularBudget("BY")), "от 199 Br/мес");
-    assert.equal(plain(proBudgetCaption("BY")), "первые 3 мес · далее от 199 Br/мес");
+    assert.equal(PRO_FOUNDER_MONTHS, 6);
+    assert.equal(plain(formatProRegularBudget("BY")), "от 390 Br/мес");
+    assert.equal(plain(proBudgetCaption("BY")), "первые 6 мес · далее от 390 Br/мес");
   });
 });
 

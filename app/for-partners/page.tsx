@@ -7,6 +7,7 @@ import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { BadgeCheck, Building2, Check, Phone, ShieldCheck, Users } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PartnerLeadForm } from "@/components/PartnerLeadForm";
 import { StatCounter } from "@/components/StatCounter";
 import { useRegion } from "@/components/providers/RegionProvider";
@@ -16,9 +17,11 @@ import { CATEGORIES } from "@/lib/categories";
 import { seedCompanies } from "@/db/seed-data";
 import { ENABLED_MARKETS, getCityByName, openCities } from "@/lib/markets";
 import { pluralize } from "@/lib/format";
+import { absoluteUrl } from "@/lib/site";
 import {
   NON_OFFER_DISCLAIMER,
   formatProBudget,
+  formatProRegularBudget,
   parsePartnerPrefill,
   proBudgetCaption,
   type PartnerPlan,
@@ -100,6 +103,19 @@ export default function ForPartnersPage() {
       <Navbar />
 
       <main id="content" className="flex-1">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Главная", item: absoluteUrl("/") },
+                { "@type": "ListItem", position: 2, name: "Для компаний", item: absoluteUrl("/for-partners") },
+              ],
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
         {/* Split Hero */}
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative grid gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
@@ -109,7 +125,13 @@ export default function ForPartnersPage() {
               transition={{ duration: 0.5 }}
               className="flex flex-col items-start"
             >
-              <span className="inline-flex items-center gap-2 data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-teal">
+              <Breadcrumbs
+                items={[
+                  { label: "Главная", href: "/" },
+                  { label: "Для компаний" },
+                ]}
+              />
+              <span className="mt-5 inline-flex items-center gap-2 data-surface rounded-full px-3.5 py-1.5 text-xs font-semibold text-teal">
                 <Building2 className="h-3.5 w-3.5" />
                 Клининговым компаниям
               </span>
@@ -252,8 +274,9 @@ export default function ForPartnersPage() {
                   </span>
                 </div>
                 <p className="mt-6 text-xs font-medium text-muted-foreground">цена основателя:</p>
-                <p className="mt-1 font-data text-4xl font-semibold tracking-tight text-foreground" aria-live="polite">
+                <p className="mt-1 flex flex-wrap items-baseline gap-x-3 font-data text-4xl font-semibold tracking-tight text-foreground" aria-live="polite">
                   {proBudget}
+                  <s className="text-base font-medium text-muted-foreground">{formatProRegularBudget(budgetCountry)}</s>
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">{proBudgetCaption(budgetCountry)}</p>
                 <ul className="mt-7 flex flex-1 flex-col gap-3.5">
@@ -268,7 +291,7 @@ export default function ForPartnersPage() {
                   Подключить PRO
                 </Button>
                 <p className="mt-4 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
-                  Стоимость зависит от города и категорий. Не влияет на органический рейтинг: только охват и позиция в спонсорском блоке.
+                  Стоимость зависит от города и категорий. Эксклюзив города по всем категориям — по запросу. Не влияет на органический рейтинг: только охват и позиция в спонсорском блоке.
                 </p>
               </SpotlightCard>
             </div>

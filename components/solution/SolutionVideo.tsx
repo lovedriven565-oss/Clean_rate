@@ -85,7 +85,7 @@ export function SolutionVideo({
         <div
           className={cn(
             "data-surface relative overflow-hidden rounded-panel",
-            source.kind === "iframe" && source.vertical
+            source.vertical
               ? "mx-auto aspect-[9/16] w-full max-w-[320px]"
               : "aspect-video w-full"
           )}

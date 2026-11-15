@@ -54,14 +54,38 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
     .filter((brand): brand is (typeof allBrands)[number] => Boolean(brand));
   // aggregateRating намеренно не размечается: оценка взята из Google/Яндекса, а правила Google
   // запрещают разметку отзывов, собранных на сторонних сайтах. Вернуть — когда появятся свои отзывы.
+  const companyCity = getCityByName(company.city);
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: company.name,
-    description: company.description,
-    address: company.address ? { "@type": "PostalAddress", addressLocality: company.city, streetAddress: company.address } : undefined,
-    telephone: company.phone,
-    url: company.websiteUrl,
+    "@graph": [
+      {
+        "@type": "LocalBusiness",
+        name: company.name,
+        description: company.description,
+        url: absoluteUrl(`/companies/${company.slug}`),
+        sameAs: company.websiteUrl ? [company.websiteUrl] : undefined,
+        address: company.address
+          ? { "@type": "PostalAddress", addressLocality: company.city, streetAddress: company.address }
+          : undefined,
+        areaServed: { "@type": "City", name: company.city },
+        telephone: company.phone,
+        priceRange:
+          company.priceFrom !== undefined
+            ? `от ${company.priceFrom}${company.priceUnit ? ` за ${company.priceUnit}` : ""}`
+            : undefined,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Главная", item: absoluteUrl("/") },
+          { "@type": "ListItem", position: 2, name: "Рейтинг компаний", item: absoluteUrl("/rating") },
+          ...(companyCity
+            ? [{ "@type": "ListItem", position: 3, name: companyCity.city.nameIn, item: absoluteUrl(`/${companyCity.city.slug}`) }]
+            : []),
+          { "@type": "ListItem", position: companyCity ? 4 : 3, name: company.name, item: absoluteUrl(`/companies/${company.slug}`) },
+        ],
+      },
+    ],
   };
 
   return (
@@ -74,7 +98,14 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         />
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-12 sm:py-18">
-            <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Рейтинг компаний", href: "/rating" }, { label: company.name }]} />
+            <Breadcrumbs
+              items={[
+                { label: "Главная", href: "/" },
+                { label: "Рейтинг компаний", href: "/rating" },
+                ...(companyCity ? [{ label: companyCity.city.nameIn, href: `/${companyCity.city.slug}` }] : []),
+                { label: company.name },
+              ]}
+            />
             <Link href="/rating" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-teal">
               <ArrowLeft className="h-4 w-4" />
               Все компании

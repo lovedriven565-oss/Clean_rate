@@ -54,6 +54,23 @@ import {
   initScoreInputs,
 } from "./fallback";
 import { mapBrandRow, mapCompanyRow, parseJsonArray, parseJsonGeneric, type CompanyRow } from "./mappers";
+import { SOLUTION_DEFAULT_SOURCES, SOLUTION_REVIEWER } from "@/lib/solutions/editorial";
+
+/** E-E-A-T поля решения: проверяющий и источники с честными дефолтами редакции. */
+function mapSolutionEditorial(row: {
+  reviewedBy: string | null;
+  sources: string | null;
+  createdAt: Date | number | null;
+  updatedAt: Date | number | null;
+}): Pick<Solution, "reviewedBy" | "sources" | "datePublished" | "dateModified"> {
+  const sources = parseJsonArray(row.sources);
+  return {
+    reviewedBy: row.reviewedBy ?? SOLUTION_REVIEWER,
+    sources: sources.length > 0 ? sources : SOLUTION_DEFAULT_SOURCES,
+    datePublished: row.createdAt ? new Date(row.createdAt).toISOString() : undefined,
+    dateModified: row.updatedAt ? new Date(row.updatedAt).toISOString() : undefined,
+  };
+}
 
 type DrizzleCompanyRow = typeof cleaningCompanies.$inferSelect;
 
@@ -89,7 +106,8 @@ function toCompanyRow(row: DrizzleCompanyRow): CompanyRow {
  */
 function reportDbError(label: string, err: unknown): void {
   console.error(label, err);
-  if (process.env.STRICT_DB === "1") throw err;
+  const strictDb: string | undefined = process.env.STRICT_DB;
+  if (strictDb === "1") throw err;
 }
 
 // --- Публичные функции ---
@@ -353,6 +371,7 @@ export async function getAllSolutions(): Promise<Solution[]> {
         videoUrl: row.videoUrl ?? undefined,
         status: row.status as Solution["status"],
         recommendedProducts: products,
+        ...mapSolutionEditorial(row),
       };
     });
   } catch (err) {
@@ -412,6 +431,7 @@ export async function getSolutionBySlug(slug: string): Promise<Solution | null> 
       videoUrl: row.videoUrl ?? undefined,
       status: row.status as Solution["status"],
       recommendedProducts: products,
+      ...mapSolutionEditorial(row),
     };
   } catch (err) {
     reportDbError("[db:solution_by_slug_error]", err);

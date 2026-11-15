@@ -8,10 +8,13 @@ import { RatingToolbar, type SortKey } from "@/components/RatingToolbar";
 import { RatingEmptyState } from "@/components/RatingEmptyState";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AdCreative } from "@/components/ads/AdCreative";
+import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
 import { useRegion } from "@/components/providers/RegionProvider";
+import { getAdFormat } from "@/lib/ads/media-kit";
+import { buildSlotPlaceholder } from "@/lib/ads/presentation";
 import { calculateOrganicScore, calculateRelevanceScore, splitSponsors } from "@/lib/rating";
 import { formatMarketCurrency } from "@/lib/format";
-import type { Market } from "@/lib/markets";
+import { ENABLED_MARKETS, openCities, type Market } from "@/lib/markets";
 import type { Category, CategoryId, Company, EligibleAd } from "@/lib/types";
 
 /** Строит 3-4 порога цены из реальных данных рынка, чтобы не хардкодить суммы в валютах */
@@ -124,6 +127,15 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
   // Партнёр категории показывается только при выбранной категории и не участвует в сортировке
   // списка — органический порядок компаний остаётся нетронутым.
   const categoryAd = activeCategory !== "all" ? categoryAds?.[activeCategory] ?? null : null;
+  const categoryPartnerPlaceholder =
+    activeCategory !== "all" && !categoryAd
+      ? buildSlotPlaceholder({
+          placement: "rating.category_partner",
+          format: getAdFormat("category-partner") ?? null,
+          label: `Генеральный партнёр · ${categories.find((c) => c.id === activeCategory)?.name ?? activeCategory}`,
+          categoryIds: [activeCategory],
+        })
+      : null;
 
   // Платные размещения выходят из органического списка в спонсорскую полку сверху:
   // как в ProPanel и на посадочных — спонсор на первом экране, но без ранга #1.
@@ -158,6 +170,19 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
                 Как рассчитывается рейтинг
               </Link>
             </div>
+            <nav aria-label="Рейтинги по городам" className="mt-8 flex flex-wrap gap-2">
+              {ENABLED_MARKETS.flatMap((m) =>
+                openCities(m).map((city) => (
+                  <Link
+                    key={city.slug}
+                    href={`/${city.slug}`}
+                    className="inline-flex min-h-11 items-center rounded-full border border-border bg-card/80 px-4 text-sm font-semibold text-foreground transition-colors hover:border-teal/40"
+                  >
+                    Компании в {city.nameIn}
+                  </Link>
+                ))
+              )}
+            </nav>
           </div>
         </section>
 
@@ -183,7 +208,13 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
         />
 
         <section className="container py-8 sm:py-12">
-          {categoryAd && <AdCreative key={categoryAd.campaignId} ad={categoryAd} className="mb-6" />}
+          {categoryAd ? (
+            <AdCreative key={categoryAd.campaignId} ad={categoryAd} className="mb-6" />
+          ) : (
+            categoryPartnerPlaceholder && (
+              <AdSlotPlaceholder meta={categoryPartnerPlaceholder} variant="strip" className="mb-6" />
+            )
+          )}
 
           {filtered.length === 0 ? (
             <RatingEmptyState

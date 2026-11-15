@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllBrands, getAllCompanies, getCompanySlugs, getSolutionSlugs } from "@/lib/db/queries";
-import { getIndexableLandings } from "@/lib/landing";
+import { getIndexableCities, getIndexableLandings } from "@/lib/landing";
 import { absoluteUrl } from "@/lib/site";
 
 /**
@@ -15,7 +15,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getAllCompanies(),
   ]);
   const landings = getIndexableLandings(companies);
-  const lastModified = new Date();
+  const cityHubs = getIndexableCities(companies);
+  // Стабильная дата вместо new Date() на каждый запрос: lastmod отражает дату
+  // контентного среза, а не момент генерации sitemap.
+  const lastModified = new Date("2026-02-14T00:00:00.000Z");
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), lastModified, changeFrequency: "daily", priority: 1 },
@@ -27,10 +30,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/for-partners"), lastModified, changeFrequency: "monthly", priority: 0.5 },
     { url: absoluteUrl("/for-brands"), lastModified, changeFrequency: "monthly", priority: 0.5 },
     { url: absoluteUrl("/privacy"), lastModified, changeFrequency: "yearly", priority: 0.2 },
+    { url: absoluteUrl("/terms"), lastModified, changeFrequency: "yearly", priority: 0.2 },
   ];
 
   return [
     ...staticPages,
+    // Городские хабы — только города с достаточным числом компаний.
+    ...cityHubs.map(({ city }) => ({
+      url: absoluteUrl(`/${city}`),
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
     ...solutionSlugs.map((slug) => ({
       url: absoluteUrl(`/solutions/${slug}`),
       lastModified,

@@ -112,7 +112,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
                 {/* Тематическая обложка протокола — иллюстрация, не «доказательство результата» */}
                 <Image
                   src={solutionCover(solution)}
-                  alt=""
+                  alt={`${solution.title} — тематическая обложка протокола`}
                   fill
                   priority
                   sizes="(min-width: 1024px) 560px, 100vw"
@@ -173,9 +173,23 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
             </p>
           </div>
 
+          {/* E-E-A-T: авторство, дата актуализации и источники протокола */}
+          <div className="mt-4 rounded-control border border-border/70 bg-card px-4 py-3 text-xs leading-5 text-muted-foreground">
+            <p>
+              {solution.reviewedBy ? `Проверено: ${solution.reviewedBy}.` : "Проверено редакцией ChistoLab."}
+              {solution.dateModified &&
+                ` Актуализировано ${new Date(solution.dateModified).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}`}
+            </p>
+            {solution.sources && solution.sources.length > 0 && (
+              <p className="mt-1.5">
+                <span className="font-semibold text-foreground">Источники:</span> {solution.sources.join("; ")}.
+              </p>
+            )}
+          </div>
+
           {/* Спонсорский состав — строго после независимого протокола; рендерится на сервере (CLS=0).
-              Паспорт свободного слота для брендов (без кампании) вынесен ниже FAQ, чтобы не перебивать читателя */}
-          <AdPlacement placement="solution.sponsored_product" context={adContext} className="mt-6" />
+              Заглушка слота одна — после FAQ (pitchOnly ниже), здесь кампания или ничего */}
+          <AdPlacement placement="solution.sponsored_product" context={adContext} placeholder={false} className="mt-6" />
         </section>
 
         {/* FAQ */}

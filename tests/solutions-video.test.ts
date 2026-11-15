@@ -53,8 +53,19 @@ describe("parseVideoSource", () => {
 
   it("passes through direct video files and rejects unknown hosts", () => {
     const file = parseVideoSource("https://cdn.example.com/guides/wine.mp4");
-    assert.deepEqual(file, { kind: "file", url: "https://cdn.example.com/guides/wine.mp4" });
+    assert.deepEqual(file, { kind: "file", url: "https://cdn.example.com/guides/wine.mp4", vertical: false });
     assert.equal(parseVideoSource("https://vimeo.com/12345"), null);
     assert.equal(parseVideoSource("https://youtube.com/"), null);
+  });
+
+  it("marks file videos as vertical by filename marker", () => {
+    const vertical = parseVideoSource("https://chistolab.pro/media/vino-na-divane-9x16.mp4");
+    assert.deepEqual(vertical, {
+      kind: "file",
+      url: "https://chistolab.pro/media/vino-na-divane-9x16.mp4",
+      vertical: true,
+    });
+    const kling = parseVideoSource("https://chistolab.pro/media/1/Kling_VIDEO_Vertical_9.mp4");
+    assert.equal(kling?.kind === "file" && kling.vertical, true);
   });
 });

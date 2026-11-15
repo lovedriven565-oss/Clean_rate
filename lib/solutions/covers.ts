@@ -32,6 +32,7 @@ const SURFACE_COVERS: Partial<Record<Solution["surface"], string>> = {
   window: "/covers/poslestroy-okna-skotch.jpg",
   carpet: "/shelves/odors.jpg",
   floor: "/covers/poslestroy-zatirka-plitka.jpg",
+  wall: "/shelves/renovation.jpg",
 };
 
 const TYPE_COVERS: Partial<Record<Solution["problemType"], string>> = {

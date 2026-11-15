@@ -140,6 +140,7 @@ const SURFACE_MATERIAL_OPTIONS: Record<SolutionSurface, string[]> = {
   facade: ["Керамогранит / камень", "Оштукатуренный фасад", "Витринное остекление"],
   kitchen: ["Нержавеющая сталь", "Алюминиевая сетка фильтра", "Глянцевый / МДФ фасад", "Керамический фартук"],
   bathroom: ["Стекло и хромированная латунь", "Чёрная матовая сантехника (PVD)", "Цементные швы и силикон", "Акрил / эмаль ванны"],
+  wall: ["Бумажные обои", "Флизелиновые обои", "Виниловые / моющиеся обои", "Окрашенные стены"],
   other: ["Коммерческий ковролин", "Офисная мебель и оргтехника", "Стеклянные перегородки"],
 };
 
@@ -599,7 +600,7 @@ export const OPEN_EXPERT_SYSTEM_PROMPT = [
   "{",
   '  "isCleaningTopic": true,',
   '  "title": "Краткое и точное название задачи",',
-  '  "surface": "upholstery" | "mattress" | "carpet" | "floor" | "window" | "kitchen" | "bathroom" | "other",',
+  '  "surface": "upholstery" | "mattress" | "carpet" | "floor" | "window" | "kitchen" | "bathroom" | "wall" | "other",',
   '  "material": "уточнённый материал поверхности",',
   '  "problemType": "stain" | "odor" | "scale" | "postrenovation" | "general",',
   '  "relatedCategory": "apartments" | "offices" | "upholstery" | "windows" | "post-renovation" | "deep-cleaning",',
@@ -618,7 +619,7 @@ export const OPEN_EXPERT_SYSTEM_PROMPT = [
 ].join("\n");
 
 const VALID_SURFACES = new Set<SolutionSurface>([
-  "upholstery", "mattress", "carpet", "floor", "window", "facade", "kitchen", "bathroom", "other",
+  "upholstery", "mattress", "carpet", "floor", "window", "facade", "kitchen", "bathroom", "wall", "other",
 ]);
 const VALID_PROBLEM_TYPES = new Set<SolutionProblemType>([
   "stain", "odor", "scale", "postrenovation", "general",

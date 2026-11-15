@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArrowLeft, BadgeCheck, BarChart3, CircleDollarSign, Database } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { pageAlternates } from "@/lib/site";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { absoluteUrl, pageAlternates } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Методология рейтинга",
@@ -37,9 +38,30 @@ export default function RatingMethodologyPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main id="content" className="flex-1">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Главная", item: absoluteUrl("/") },
+                { "@type": "ListItem", position: 2, name: "Рейтинг компаний", item: absoluteUrl("/rating") },
+                { "@type": "ListItem", position: 3, name: "Методология", item: absoluteUrl("/rating/methodology") },
+              ],
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-16 sm:py-24">
-            <Link href="/rating" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+            <Breadcrumbs
+              items={[
+                { label: "Главная", href: "/" },
+                { label: "Рейтинг компаний", href: "/rating" },
+                { label: "Методология" },
+              ]}
+            />
+            <Link href="/rating" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
               <ArrowLeft className="h-4 w-4" />
               Вернуться к рейтингу
             </Link>

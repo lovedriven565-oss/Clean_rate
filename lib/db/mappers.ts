@@ -120,6 +120,7 @@ export function mapBrandRow(row: BrandRow): Brand {
     focus: row.focus as Brand["focus"],
     description: row.description,
     affiliateUrl: row.affiliate_url ?? row.website_url ?? "#",
+    websiteUrl: row.website_url ?? undefined,
     isSponsor: row.is_sponsor === 1,
   };
 }

@@ -7,7 +7,6 @@ import { HomeMotion, Reveal } from "@/components/home/Reveal";
 import { PlatformHero } from "@/components/home/PlatformHero";
 import { StainRescue } from "@/components/home/StainRescue";
 import { TaskRibbon } from "@/components/home/TaskRibbon";
-import { ProductZoneShelf } from "@/components/home/ProductZoneShelf";
 import { SeasonalBrandBanner } from "@/components/home/SeasonalBrandBanner";
 import { VideoLabSection } from "@/components/home/VideoLabSection";
 import { CleanersByServiceSection } from "@/components/home/CleanersByServiceSection";
@@ -16,14 +15,14 @@ import { seedAffiliateProducts, seedProducts, seedSolutionProducts } from "@/db/
 import { getAllBrands, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
 import { ENABLED_MARKETS } from "@/lib/markets";
 import { buildShelfProducts } from "@/lib/products/zone-shelf";
-import { SITE_NAME, absoluteUrl, pageAlternates } from "@/lib/site";
+import { SITE_NAME, ORGANIZATION_ID, absoluteUrl, buildOrganizationNode, pageAlternates } from "@/lib/site";
 import type { HeroStatsData } from "@/components/home/HeroStats";
 import type { CurrencyCode } from "@/lib/markets";
 
 export const metadata: Metadata = {
-  title: `Пятновыводители, протоколы уборки и клинеры | ${SITE_NAME}`,
+  title: `Убрать пятно самому или с мастером: протоколы и клинеры | ${SITE_NAME}`,
   description:
-    "Пятно на диване, офис после корпоратива или выбор профессиональной химии — одна строка поиска. Пошаговые протоколы ChistoLab, честный рейтинг клининговых компаний и бренды для профи.",
+    "Опишите пятно — подберём пошаговый протокол со средствами или проверенного клинера в вашем городе. Пятновыводители, кратеры чистоты и честный рейтинг клининговых компаний.",
   alternates: pageAlternates("/"),
 };
 
@@ -74,22 +73,17 @@ export default async function Home() {
     "@graph": [
       {
         "@type": "WebSite",
+        "@id": `${absoluteUrl("/")}#website`,
         name: SITE_NAME,
         url: absoluteUrl("/"),
+        publisher: { "@id": ORGANIZATION_ID },
         potentialAction: {
           "@type": "SearchAction",
           target: { "@type": "EntryPoint", urlTemplate: absoluteUrl("/rating?q={search_term_string}") },
           "query-input": "required name=search_term_string",
         },
       },
-      {
-        "@type": "Organization",
-        name: SITE_NAME,
-        url: absoluteUrl("/"),
-        logo: absoluteUrl("/icon.svg"),
-        description:
-          "Лаборатория решений чистоты: пошаговые протоколы, честный рейтинг клининговых компаний и бренды для профи.",
-      },
+      buildOrganizationNode(),
     ],
   };
 
@@ -107,11 +101,6 @@ export default async function Home() {
           {/* Первый экран: светлый hero + 4 реальные цифры */}
           <PlatformHero stats={stats} />
 
-          {/* Спецпроект сезона: активная кампания региона или редакционный выбор лаборатории */}
-          <div className="container">
-            <SeasonalBrandBanner ads={editorialAdByCountry} shelfProducts={shelf} />
-          </div>
-
           {/* Спасатель пятен: диагностика проблема → поверхность → протокол */}
           <StainRescue solutions={published} products={shelf} estimates={estimates} />
 
@@ -121,8 +110,10 @@ export default async function Home() {
           {/* Клинеры города по видам работ: цены, спонсор + органика */}
           <CleanersByServiceSection companies={companies} estimates={estimates} />
 
-          {/* Средства и техника по зонам дома */}
-          <ProductZoneShelf products={shelf} estimates={estimates} />
+          {/* Спецпроект сезона: активная кампания региона, иначе слот-заглушка */}
+          <div className="container">
+            <SeasonalBrandBanner ads={editorialAdByCountry} shelfProducts={shelf} />
+          </div>
 
           {/* Лента всех протоколов — каталог и SEO-вес внизу страницы */}
           <TaskRibbon solutions={published} estimates={estimates} />

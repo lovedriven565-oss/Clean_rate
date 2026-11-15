@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ENABLED_MARKETS } from "@/lib/markets";
+import { ENABLED_MARKETS, openCities } from "@/lib/markets";
 
 /**
  * Публичный адрес сайта для canonical/sitemap/OpenGraph.
@@ -58,10 +58,32 @@ export function absoluteUrl(path = "/"): string {
   return new URL(path, `${SITE_URL}/`).toString();
 }
 
+/** Стабильный @id организации — связывает WebSite, HowTo, LocalBusiness в @graph. */
+export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+
+/** Единый узел Organization для Schema.org-графов сайта. */
+export function buildOrganizationNode(): Record<string, unknown> {
+  return {
+    "@type": "Organization",
+    "@id": ORGANIZATION_ID,
+    name: SITE_NAME,
+    url: absoluteUrl("/"),
+    logo: {
+      "@type": "ImageObject",
+      url: absoluteUrl("/logo.png"),
+      width: 512,
+      height: 512,
+    },
+    description:
+      "Лаборатория решений чистоты: пошаговые протоколы, честный рейтинг клининговых компаний и бренды для профи.",
+  };
+}
+
 /**
- * canonical + hreflang-заготовка для страницы. Регион живёт в cookie, поэтому все локали
- * открытых рынков (ENABLED_MARKETS) указывают на один URL. При переезде на /{country}/{city}/ —
- * подставить региональные адреса здесь, вызывающий код менять не придётся.
+ * canonical + hreflang для глобальных страниц (решения, бренды, сервисные разделы).
+ * Региональных URL у этих страниц нет — все рынки читают один канонический адрес,
+ * поэтому дублирующие ru-BY/ru-RU/ru-KZ на один URL не выводим: для Google это
+ * сигнал «страницы идентичны», а не региональное разделение.
  *
  * Next.js не мерджит вложенный `alternates` из layout и page — поэтому хелпер обязателен
  * везде, где страница задаёт собственный canonical.
@@ -70,10 +92,43 @@ export function pageAlternates(path = "/"): NonNullable<Metadata["alternates"]> 
   const url = absoluteUrl(path);
   return {
     canonical: url,
-    languages: Object.fromEntries([
-      ...ENABLED_MARKETS.map((market) => [market.locale, url]),
-      ["ru", url],
-      ["x-default", url],
-    ]),
+    languages: {
+      ru: url,
+      "x-default": url,
+    },
   };
+}
+
+/**
+ * canonical + перекрёстный hreflang для региональных URL `/{city}` и `/{city}/{category}`.
+ * Каждому открытому рынку соответствует его первый открытый город: BY→minsk,
+ * RU→moscow, KZ→almaty. `includeCitySlugs` позволяет не отдавать hreflang на
+ * региональную страницу, которая сама noindex (тонкая посадочная).
+ */
+export function cityAlternates(
+  citySlug: string,
+  categorySlug?: string,
+  options?: { includeCitySlugs?: ReadonlySet<string> }
+): NonNullable<Metadata["alternates"]> {
+  const pathFor = (slug: string) => (categorySlug ? `/${slug}/${categorySlug}` : `/${slug}`);
+  const canonical = absoluteUrl(pathFor(citySlug));
+  const languages: Record<string, string> = {};
+  let xDefault: string | undefined;
+
+  for (const market of ENABLED_MARKETS) {
+    const cities = openCities(market);
+    const city = cities.find((c) => c.slug === citySlug) ?? cities[0];
+    if (!city) continue;
+    if (options?.includeCitySlugs && !options.includeCitySlugs.has(city.slug)) continue;
+    const url = absoluteUrl(pathFor(city.slug));
+    languages[market.locale] = url;
+    // x-default один на весь hreflang-кластер: URL первого индексируемого рынка,
+    // а не canonical текущей страницы (иначе он «плавает» от города к городу).
+    xDefault ??= url;
+  }
+
+  languages.ru = canonical;
+  languages["x-default"] = xDefault ?? canonical;
+
+  return { canonical, languages };
 }

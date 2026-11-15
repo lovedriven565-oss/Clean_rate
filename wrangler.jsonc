@@ -17,6 +17,15 @@
       "migrations_dir": "migrations"
     }
   ],
+  // Медиафайлы (видеоразборы протоколов). Отдаются роутом app/media/[...key]
+  // на chistolab.pro/media/* — кастомный домен у бакета НЕ привязывать
+  // (конфликт с хостом воркера).
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "chisyolab"
+    }
+  ],
   "vars": {
     // 0: мягкий откат на seed-данные если D1 ещё не засеяна или пуста
     "STRICT_DB": "0",

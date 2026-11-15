@@ -42,6 +42,15 @@ const STAGE5_PROTOCOLS: {
   { slug: "pota-na-obivke", surface: "upholstery", problemType: "odor", sampleKeyword: "пот на диване" },
 ];
 
+const STAGE6_PROTOCOLS: {
+  slug: string;
+  surface: SolutionSurface;
+  problemType: SolutionProblemType;
+  sampleKeyword: string;
+}[] = [
+  { slug: "mel-flomaster-na-oboyah", surface: "wall", problemType: "stain", sampleKeyword: "мел на обоях" },
+];
+
 describe("howToTitle", () => {
   it("turns a noun phrase into a search-style «Как убрать …» question", () => {
     assert.equal(
@@ -57,9 +66,9 @@ describe("howToTitle", () => {
 });
 
 describe("solutions graph and data layer", () => {
-  it("loads 24 published solutions with complete protocol data", async () => {
+  it("loads 25 published solutions with complete protocol data", async () => {
     const solutions = await getAllSolutions();
-    assert.equal(solutions.length, 24);
+    assert.equal(solutions.length, 25);
 
     for (const sol of solutions) {
       assert.ok(sol.id, "solution must have an id");
@@ -127,6 +136,40 @@ describe("solutions graph and data layer", () => {
     }
   });
 
+  it("includes the stage-6 wall protocol with products, BY/RU/KZ estimates and intent routing", async () => {
+    const keywords = await getIntentKeywords();
+
+    for (const expected of STAGE6_PROTOCOLS) {
+      const solution = await getSolutionBySlug(expected.slug);
+      assert.ok(solution, `missing protocol ${expected.slug}`);
+      assert.equal(solution.surface, expected.surface);
+      assert.equal(solution.problemType, expected.problemType);
+      assert.ok(
+        solution.recommendedProducts?.some((p) => p.role === "recommended"),
+        `${expected.slug} must have a primary recommended product`
+      );
+      assert.ok(
+        solution.recommendedProducts?.some((p) => p.role === "alternative"),
+        `${expected.slug} must have an alternative product`
+      );
+
+      const estimates = await getPriceEstimates({ solutionId: expected.slug });
+      const countries = estimates.map((e) => e.countryCode).sort();
+      assert.deepEqual(countries, ["BY", "KZ", "RU"], `${expected.slug} must have BY, RU, KZ estimates`);
+
+      const classified = classifyIntent(expected.sampleKeyword, keywords);
+      assert.equal(classified.target?.kind, "solution");
+      assert.equal(classified.target?.slug, expected.slug);
+
+      // Варианты запроса тоже должны попадать в этот протокол
+      for (const variant of ["фломастер на стене", "как отмыть мел"]) {
+        const result = classifyIntent(variant, keywords);
+        assert.equal(result.target?.kind, "solution", `variant "${variant}" must route to a solution`);
+        assert.equal(result.target?.slug, expected.slug, `variant "${variant}" must route to ${expected.slug}`);
+      }
+    }
+  });
+
   it("finds a specific solution by slug with resolved brand recommendations", async () => {
     const solution = await getSolutionBySlug("vino-na-divane");
     assert.ok(solution);
@@ -138,10 +181,10 @@ describe("solutions graph and data layer", () => {
 
   it("returns unique solution slugs for SSG generateStaticParams", async () => {
     const slugs = await getSolutionSlugs();
-    assert.equal(slugs.length, 24);
+    assert.equal(slugs.length, 25);
     assert.ok(slugs.includes("vino-na-divane"));
     assert.ok(slugs.includes("poslestroy-zatirka-plitka"));
-    for (const { slug } of [...STAGE4_PROTOCOLS, ...STAGE5_PROTOCOLS]) {
+    for (const { slug } of [...STAGE4_PROTOCOLS, ...STAGE5_PROTOCOLS, ...STAGE6_PROTOCOLS]) {
       assert.ok(slugs.includes(slug), `slugs must include ${slug}`);
     }
   });

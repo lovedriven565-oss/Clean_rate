@@ -33,14 +33,14 @@ export function pickTopCompany(companies: Company[], categoryId: CategoryId, cit
 }
 
 /**
- * Цена в карточке клинера: «от X» только когда единица прайса компании совпадает
- * с единицей сметы выбранной услуги — иначе честная «Цена по запросу».
+ * Цена в карточке клинера: показываем собственный прайс компании с её единицей
+ * («от 2 Br/м²»), если цена есть; без неё — честная «Цена по запросу».
+ * Смета выбранной услуги остаётся рядом отдельной строкой.
  */
 export function cleanerCardPrice(
   company: Pick<Company, "priceFrom" | "priceUnit" | "city">,
-  serviceUnit: string | null | undefined,
+  _serviceUnit?: string | null,
 ): string {
-  const unit = company.priceUnit?.replace(/^(BYN|Br|руб\.?)\s*\//i, "");
-  if (!company.priceFrom || !serviceUnit || unit !== serviceUnit) return "Цена по запросу";
+  if (!company.priceFrom) return "Цена по запросу";
   return companyPriceLabel(company);
 }

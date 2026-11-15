@@ -27,14 +27,15 @@ describe("cleaning-services", () => {
     assert.equal(pickTopCompany(companies, "apartments", "Нигде"), null);
   });
 
-  it("цена в карточке — только когда единица прайса совпадает с единицей услуги", () => {
+  it("цена в карточке — собственный прайс компании с её единицей, без цены — «Цена по запросу»", () => {
     const companies = seedCompanies as unknown as Company[];
     const perMeter = companies.find((c) => c.priceFrom && c.priceUnit === "м²")!;
+    // Единица прайса компании видна в подписи — несовпадение с единицей услуги её не скрывает.
     assert.match(cleanerCardPrice(perMeter, "м²"), /^от /);
-    assert.equal(cleanerCardPrice(perMeter, "уборку"), "Цена по запросу");
-    assert.equal(cleanerCardPrice(perMeter, null), "Цена по запросу");
+    assert.match(cleanerCardPrice(perMeter, "уборку"), /м²/);
+    assert.equal(cleanerCardPrice({ ...perMeter, priceFrom: undefined }, "уборку"), "Цена по запросу");
     const noUnit = companies.find((c) => c.priceFrom && !c.priceUnit)!;
-    assert.equal(cleanerCardPrice(noUnit, "уборку"), "Цена по запросу");
+    assert.match(cleanerCardPrice(noUnit, "уборку"), /^от /);
   });
 
   it("в каждом открытом городе есть топ-компания по всем 6 услугам — блок клинеров не пуст", () => {

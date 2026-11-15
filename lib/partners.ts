@@ -6,16 +6,16 @@ import type { CategoryId } from "@/lib/types";
 export type PartnerPlan = "base" | "pro";
 
 /** Ориентир медиа-бюджета PRO Спонсор по рынку — стартовая цена запуска (плейсхолдер: утверждает владелец). */
-export const PRO_BUDGET_FROM: Record<CountryCode, number> = { BY: 149, RU: 4500, KZ: 24000 };
+export const PRO_BUDGET_FROM: Record<CountryCode, number> = { BY: 290, RU: 9000, KZ: 49000 };
 
 /**
  * Плановый стандартный тариф после промо-периода. Показывается как якорь
  * «далее — от X», чтобы ранний партнёр видел выгоду фиксированной ставки.
  */
-export const PRO_BUDGET_REGULAR: Record<CountryCode, number> = { BY: 199, RU: 5900, KZ: 30000 };
+export const PRO_BUDGET_REGULAR: Record<CountryCode, number> = { BY: 390, RU: 12000, KZ: 65000 };
 
 /** Сколько месяцев держится цена основателя для раннего партнёра в слоте. */
-export const PRO_FOUNDER_MONTHS = 3;
+export const PRO_FOUNDER_MONTHS = 6;
 
 export const NON_OFFER_DISCLAIMER =
   "Не является публичной офертой. Информационный ориентир медиа-бюджета; размещение оформляется прямым B2B-договором вне сайта.";

@@ -7,7 +7,7 @@ import { SITE_NAME } from "@/lib/site";
 export const alt = `Услуга по городу — ${SITE_NAME}`;
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return landingStaticParams();
@@ -20,7 +20,9 @@ export default async function Image({ params }: { params: Promise<{ city: string
     return renderOgCard({ title: "Клининговые услуги" });
   }
   const companies = await getAllCompanies();
-  const { organic, sponsors } = pickLandingCompanies(companies, resolved.city.name, resolved.category.id);
+  const { organic, sponsors } = pickLandingCompanies(companies, resolved.city.name, resolved.category.id, {
+    countryCode: resolved.market.countryCode,
+  });
   const count = organic.length + sponsors.length;
   return renderOgCard({
     eyebrow: `${resolved.city.name} · прямые контакты`,

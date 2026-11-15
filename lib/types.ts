@@ -25,6 +25,8 @@ export interface Brand {
   focus: BrandFocus;
   description: string;
   affiliateUrl: string;
+  /** Официальный сайт бренда — для sameAs в Schema.org и проверки аффилиат-ссылок. */
+  websiteUrl?: string;
   discountCode?: string;
   isSponsor?: boolean;
 }
@@ -152,6 +154,7 @@ export type SolutionSurface =
   | "facade"
   | "kitchen"
   | "bathroom"
+  | "wall"
   | "other";
 
 export type SolutionSeverity = "fresh" | "set" | "extreme";
@@ -195,6 +198,13 @@ export interface Solution {
   videoUrl?: string;
   status: "draft" | "published" | "archived";
   recommendedProducts?: SolutionProduct[];
+  /** Кто проверил протокол (E-E-A-T): по умолчанию «Редакция технологов ChistoLab». */
+  reviewedBy?: string;
+  /** Источники и референсы, на которые опирается протокол (техкарты, стандарты ухода). */
+  sources?: string[];
+  /** ISO-даты публикации и последней актуализации — для datePublished/dateModified в JSON-LD. */
+  datePublished?: string;
+  dateModified?: string;
 }
 
 export type SearchIntent = "b2c" | "b2b" | "pro";

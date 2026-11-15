@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AssistantPanel } from "@/components/assistant/AssistantPanel";
 import {
   getAllBrands,
@@ -9,7 +10,7 @@ import {
   getAllSolutions,
   getPriceEstimates,
 } from "@/lib/db/queries";
-import { pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "ИИ-технолог и консультант по чистке",
@@ -30,8 +31,22 @@ export default async function AssistantPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main id="content" className="flex-1">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Главная", item: absoluteUrl("/") },
+                { "@type": "ListItem", position: 2, name: "ИИ-консультант", item: absoluteUrl("/assistant") },
+              ],
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
         <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-          <header className="max-w-2xl">
+          <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "ИИ-консультант" }]} />
+          <header className="mt-6 max-w-2xl">
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-teal">
               Два пути решения · Проверенные протоколы
             </span>

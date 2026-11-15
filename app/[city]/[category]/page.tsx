@@ -9,11 +9,17 @@ import { ShareButton } from "@/components/ShareButton";
 import { CompanyTable } from "@/components/CompanyTable";
 import { SolutionCard } from "@/components/solution/SolutionCard";
 import { AdCreative } from "@/components/ads/AdCreative";
+import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
 import { getEligibleAd } from "@/lib/ads/queries";
+import { getAdFormat } from "@/lib/ads/media-kit";
+import { buildSlotPlaceholder } from "@/lib/ads/presentation";
 import { getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
-import { LANDING_INDEX_MIN_COMPANIES, landingStaticParams, pickLandingCompanies, resolveLandingParams } from "@/lib/landing";
+import { getCityBySlug } from "@/lib/markets";
+import { CATEGORIES, getCategorySlug } from "@/lib/categories";
+import { getIndexableLandingCitySlugs, landingStaticParams, pickLandingCompanies, resolveLandingParams } from "@/lib/landing";
+import { getCategoryGuide } from "@/lib/landings/category-guides";
 import { formatMarketCurrency, pluralize } from "@/lib/format";
-import { absoluteUrl, pageAlternates, SITE_NAME } from "@/lib/site";
+import { absoluteUrl, cityAlternates, SITE_NAME } from "@/lib/site";
 import type { PriceEstimate } from "@/lib/types";
 
 /**
@@ -39,12 +45,13 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { organic, sponsors } = pickLandingCompanies(companies, resolved.city.name, resolved.category.id, {
     countryCode: resolved.market.countryCode,
   });
-  const indexable = organic.length + sponsors.length >= LANDING_INDEX_MIN_COMPANIES;
+  const indexableSlugs = getIndexableLandingCitySlugs(companies, resolved.category.id);
+  const indexable = indexableSlugs.has(resolved.city.slug);
   const title = `${resolved.category.name} в ${resolved.city.nameIn}: цены и компании`;
   return {
     title,
     description: `${resolved.category.name} в ${resolved.city.nameIn}: проверенные компании с прямыми контактами, ориентир цены и открытый источник оценки. ${SITE_NAME}.`,
-    alternates: pageAlternates(`/${city}/${category}`),
+    alternates: cityAlternates(city, category, { includeCitySlugs: indexableSlugs }),
     robots: indexable ? undefined : { index: false, follow: true },
   };
 }
@@ -84,9 +91,28 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
   const { organic, sponsors } = pickLandingCompanies(companies, city.name, category.id, {
     countryCode: market.countryCode,
   });
+  // Свободный слот «генеральный партнёр категории» — заглушка для брендов.
+  const categoryPartnerPlaceholder = buildSlotPlaceholder({
+    placement: "rating.category_partner",
+    format: getAdFormat("category-partner") ?? null,
+    label: `Генеральный партнёр · ${category.name}`,
+    categoryIds: [category.id],
+  });
+  const indexableSlugs = getIndexableLandingCitySlugs(companies, category.id);
+  // Один проход по всем категориям — для ссылок на смежные услуги этого города.
+  const indexableByCategory = new Map(
+    CATEGORIES.map((c) => [c.id, getIndexableLandingCitySlugs(companies, c.id)])
+  );
   const related = solutions.filter((s) => s.relatedCategory === category.id).slice(0, 3);
   const estimate = estimates.find((e) => e.city === city.name) ?? estimates[0];
-  const faq = categoryFaq(city.nameIn, category.name, estimate);
+  const guide = getCategoryGuide(category.id);
+  const faq = [
+    ...categoryFaq(city.nameIn, category.name, estimate),
+    ...(guide?.faq ?? []).map((item) => ({
+      question: item.question,
+      answer: item.answer.replaceAll("{city}", city.nameIn),
+    })),
+  ];
   const url = absoluteUrl(`/${city.slug}/${raw.category}`);
 
   const minPrice = organic
@@ -112,8 +138,17 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Главная", item: absoluteUrl("/") },
           { "@type": "ListItem", position: 2, name: "Рейтинг компаний", item: absoluteUrl("/rating") },
-          { "@type": "ListItem", position: 3, name: `${category.name} в ${city.nameIn}`, item: url },
+          { "@type": "ListItem", position: 3, name: city.nameIn, item: absoluteUrl(`/${city.slug}`) },
+          { "@type": "ListItem", position: 4, name: `${category.name} в ${city.nameIn}`, item: url },
         ],
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faq.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
+        })),
       },
     ],
   };
@@ -133,6 +168,7 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
               items={[
                 { label: "Главная", href: "/" },
                 { label: "Рейтинг компаний", href: "/rating" },
+                { label: city.nameIn, href: `/${city.slug}` },
                 { label: `${category.name} · ${city.name}` },
               ]}
             />
@@ -162,7 +198,13 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
         </section>
 
         <section className="container py-10 sm:py-14">
-          {categoryAd && <AdCreative ad={categoryAd} className="mb-6" />}
+          {categoryAd ? (
+            <AdCreative ad={categoryAd} className="mb-6" />
+          ) : (
+            categoryPartnerPlaceholder && (
+              <AdSlotPlaceholder meta={categoryPartnerPlaceholder} variant="strip" className="mb-6" />
+            )
+          )}
 
           {/* Спонсорская полка — первой строкой над органикой (как в ProPanel решений),
               но без ранга: место #1 остаётся честным органическим лидером */}
@@ -184,7 +226,14 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
             </div>
           )}
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href={`/${city.slug}`}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
+            >
+              Все услуги в {city.nameIn}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
             <Link
               href={`/rating?category=${category.id}`}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
@@ -211,6 +260,88 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
                 {related.map((solution) => (
                   <SolutionCard key={solution.id} solution={solution} />
                 ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {(indexableSlugs.size > 1 || CATEGORIES.length > 1) && (
+          <section className="container py-14 sm:py-18">
+            <div className="grid gap-8 lg:grid-cols-2">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Другие услуги</span>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {CATEGORIES.filter((c) => c.id !== category.id).map((c) => {
+                    const slug = getCategorySlug(c.id);
+                    const siblingIndexable = indexableByCategory.get(c.id)?.has(city.slug) ?? false;
+                    return (
+                      <Link
+                        key={c.id}
+                        href={siblingIndexable ? `/${city.slug}/${slug}` : `/rating?category=${c.id}`}
+                        className="inline-flex h-10 items-center rounded-full border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
+                      >
+                        {c.name} в {city.nameIn}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+              {indexableSlugs.size > 1 && (
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Другие города</span>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {[...indexableSlugs].map((slug) => {
+                      const other = getCityBySlug(slug);
+                      if (!other || slug === city.slug) return null;
+                      return (
+                        <Link
+                          key={slug}
+                          href={`/${slug}/${raw.category}`}
+                          className="inline-flex h-10 items-center rounded-full border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
+                        >
+                          {other.city.nameIn}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {guide && (
+          <section className="border-t border-border bg-muted/35 py-14 sm:py-18">
+            <div className="container">
+              <div className="grid gap-10 lg:grid-cols-2">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Гид по услуге</span>
+                  <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
+                    От чего зависит стоимость
+                  </h2>
+                  <ul className="mt-5 space-y-3">
+                    {guide.priceFactors.map((factor) => (
+                      <li key={factor} className="flex gap-3 text-sm leading-6 text-muted-foreground">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                        {factor}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Приёмка работ</span>
+                  <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
+                    Чек-лист перед оплатой
+                  </h2>
+                  <ul className="mt-5 space-y-3">
+                    {guide.checklist.map((item) => (
+                      <li key={item} className="flex gap-3 text-sm leading-6 text-muted-foreground">
+                        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           </section>

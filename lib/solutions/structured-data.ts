@@ -1,7 +1,7 @@
 import type { PriceEstimate, Solution } from "@/lib/types";
 import { formatMarketCurrency } from "@/lib/format";
 import { isCountryCode, getMarket } from "@/lib/markets";
-import { absoluteUrl } from "@/lib/site";
+import { ORGANIZATION_ID, absoluteUrl } from "@/lib/site";
 import { solutionCover } from "./covers";
 import { SEVERITY_LABELS, SURFACE_LABELS, solutionSummary } from "./meta";
 import { parseVideoSource } from "./video";
@@ -70,12 +70,31 @@ export function buildSolutionJsonLd(
   faq: FaqItem[],
   breadcrumbs: { name: string; url: string }[]
 ) {
-  const howTo = {
+  // Источники → citation только для реальных URL; текстовые референсы
+  // (техкарты, стандарты) остаются в UI и не попадают в schema.
+  const citations = (solution.sources ?? []).filter((s) => /^https?:\/\//.test(s));
+
+  const howTo: Record<string, unknown> = {
     "@type": "HowTo",
     "@id": `${url}#howto`,
     name: solution.title,
     description: solution.whenToCallPro,
-    ...(solution.diyCostNote ? { estimatedCost: { "@type": "MonetaryAmount", currency: "BYN", value: solution.diyCostNote } } : {}),
+    image: [absoluteUrl(solutionCover(solution))],
+    author: { "@id": ORGANIZATION_ID },
+    publisher: { "@id": ORGANIZATION_ID },
+    ...(solution.reviewedBy
+      ? {
+          reviewedBy: {
+            "@type": "Organization",
+            "@id": ORGANIZATION_ID,
+            name: solution.reviewedBy,
+            url: absoluteUrl("/"),
+          },
+        }
+      : {}),
+    ...(solution.datePublished ? { datePublished: solution.datePublished } : {}),
+    ...(solution.dateModified ? { dateModified: solution.dateModified } : {}),
+    ...(citations.length > 0 ? { citation: citations.map((url) => ({ "@type": "CreativeWork", url })) } : {}),
     supply: (solution.recommendedProducts ?? []).map((product) => ({
       "@type": "HowToSupply",
       name: product.note ?? product.productName ?? product.brandName ?? "Профессиональное средство",

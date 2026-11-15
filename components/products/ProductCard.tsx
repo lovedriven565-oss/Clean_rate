@@ -1,14 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, FlaskConical, Star, Wrench } from "lucide-react";
+import { BrandMark } from "@/components/ads/BrandMark";
 import { trackEvent } from "@/lib/analytics";
 import { formatMarketCurrency } from "@/lib/format";
 import { displayPrice, type ShelfProduct } from "@/lib/products/zone-shelf";
 import { cn } from "@/lib/utils";
-
-const SPRAY_IMAGE = "/lovable/spray.jpg";
 
 type Currency = "BYN" | "RUB" | "KZT";
 
@@ -91,7 +89,7 @@ export function ProductCard({
               <Wrench className="size-5 text-lime" aria-hidden />
             </span>
           ) : (
-            <Image src={SPRAY_IMAGE} alt={p.name} fill sizes="56px" className="object-cover" />
+            <BrandMark name={p.brandName ?? p.name} size="sm" className="h-full w-full rounded-none text-sm" />
           )}
         </span>
         <div className="min-w-0 flex-1">
@@ -130,13 +128,9 @@ export function ProductCard({
             <Wrench className="size-12 text-lime" aria-hidden />
           </div>
         ) : (
-          <Image
-            src={SPRAY_IMAGE}
-            alt={p.name}
-            fill
-            sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 75vw"
-            className="object-cover"
-          />
+          <div className="flex h-full w-full items-center justify-center bg-muted">
+            <BrandMark name={p.brandName ?? p.name} size="lg" className="h-20 w-20 rounded-panel text-3xl" />
+          </div>
         )}
         {p.rating !== undefined && (
           <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-[6px] bg-ink/85 px-2 py-1 font-data text-[11px] font-bold text-white">

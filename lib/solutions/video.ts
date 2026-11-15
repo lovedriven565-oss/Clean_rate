@@ -7,7 +7,7 @@
 
 export type VideoSource =
   | { kind: "iframe"; provider: "youtube" | "vk" | "rutube"; embedUrl: string; vertical: boolean }
-  | { kind: "file"; url: string };
+  | { kind: "file"; url: string; vertical: boolean };
 
 const YOUTUBE_HOSTS = new Set(["youtube.com", "www.youtube.com", "m.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"]);
 
@@ -83,7 +83,12 @@ export function parseVideoSource(raw: string | null | undefined): VideoSource | 
     return { kind: "iframe", provider: "vk", embedUrl, vertical: url.pathname.includes("/clip") };
   }
   if (/\.(mp4|webm|mov)$/i.test(url.pathname)) {
-    return { kind: "file", url: url.toString() };
+    return { kind: "file", url: url.toString(), vertical: isVerticalFile(url.pathname) };
   }
   return null;
+}
+
+/** Вертикальность файлового ролика определяем по имени: 9x16 / 9:16 / vertical / portrait. */
+function isVerticalFile(pathname: string): boolean {
+  return /9x16|9:16|vertical|portrait/i.test(pathname);
 }

@@ -20,8 +20,9 @@ describe("solution structured data", () => {
   });
 
   it("emits a valid HowTo + FAQPage + BreadcrumbList graph", async () => {
-    const solution = await getSolutionBySlug("vino-na-divane");
-    assert.ok(solution);
+    const seeded = await getSolutionBySlug("vino-na-divane");
+    assert.ok(seeded);
+    const solution = { ...seeded, videoUrl: undefined };
     const faq = buildSolutionFaq(solution);
     const url = "https://example.test/solutions/vino-na-divane";
     const jsonLd = buildSolutionJsonLd(solution, url, faq, [

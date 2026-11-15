@@ -23,10 +23,10 @@ import type { EligibleAd } from "@/lib/types";
  */
 const navLinks = [
   { href: "/solutions", label: "Как убрать", match: ["/solutions"] },
-  { href: "/#shelf", label: "Средства", match: [] },
+  { href: "/#videolab", label: "Видеоразборы", match: [] },
   { href: "/#cleaners", label: "Клинеры рядом", match: [] },
   { href: "/rating", label: "Рейтинг", match: ["/rating", "/companies"] },
-  { href: "/brands", label: "Бренды", match: ["/brands", "/for-brands"] },
+  { href: "/brands", label: "Бренды и средства", match: ["/brands", "/for-brands"] },
 ];
 
 function subscribeScroll(onChange: () => void) {

@@ -19,6 +19,7 @@ export const SURFACE_LABELS: Record<SolutionSurface, string> = {
   facade: "Фасад",
   kitchen: "Кухня",
   bathroom: "Ванная",
+  wall: "Стены и обои",
   other: "Другое",
 };
 
@@ -32,6 +33,7 @@ export const SURFACE_RISK_LABELS: Record<SolutionSurface, string> = {
   facade: "фасад",
   kitchen: "поверхность",
   bathroom: "плитку или сантехнику",
+  wall: "обои или стену",
   other: "поверхность",
 };
 

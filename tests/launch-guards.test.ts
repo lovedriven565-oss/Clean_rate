@@ -161,12 +161,11 @@ describe("market focus", () => {
     assert.match(formatMarketCurrency(2500, getMarket("RU")), /₽|RUB/);
   });
 
-  it("emits hreflang only for enabled markets", () => {
+  it("emits a single canonical for global pages without fake regional hreflang", () => {
     const alternates = pageAlternates("/");
-    const languages = Object.keys(alternates.languages ?? {});
-    assert.ok(languages.includes("ru-BY"));
-    assert.ok(languages.includes("ru-RU"));
-    assert.ok(languages.includes("ru-KZ"));
+    const languages = alternates.languages ?? {};
+    assert.deepEqual(Object.keys(languages).sort(), ["ru", "x-default"]);
+    assert.equal(languages.ru, "https://chistolab.pro/");
     assert.equal(alternates.canonical, "https://chistolab.pro/");
   });
 

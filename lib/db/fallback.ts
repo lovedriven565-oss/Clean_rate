@@ -19,6 +19,7 @@ import {
   seedSolutionProducts,
   seedSolutions,
 } from "@/db/seed-data";
+import { SOLUTION_DEFAULT_SOURCES, SOLUTION_REVIEWER, SOLUTION_SEED_DATE } from "@/lib/solutions/editorial";
 
 // --- Маппинг seed-data в типы UI ---
 
@@ -60,6 +61,7 @@ function seedBrandToBrand(seed: (typeof seedBrands)[number]): Brand {
     focus: seed.focus,
     description: seed.description,
     affiliateUrl: seed.affiliateUrl,
+    websiteUrl: seed.websiteUrl,
     isSponsor: seed.isSponsor,
   };
 }
@@ -109,6 +111,10 @@ function seedSolutionToSolution(seed: (typeof seedSolutions)[number]): Solution 
     videoUrl: seed.videoUrl,
     status: seed.status,
     recommendedProducts: products,
+    reviewedBy: seed.reviewedBy ?? SOLUTION_REVIEWER,
+    sources: seed.sources?.length ? seed.sources : SOLUTION_DEFAULT_SOURCES,
+    datePublished: SOLUTION_SEED_DATE,
+    dateModified: SOLUTION_SEED_DATE,
   };
 }
 

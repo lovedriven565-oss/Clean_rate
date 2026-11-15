@@ -7,6 +7,7 @@ import {
   adTrackingEntity,
   buildAdReasons,
   buildEmptySlotPitch,
+  buildSlotPlaceholder,
   describePh,
   formatBrandLeadGoalPrefill,
   isAdVisibleInCountry,
@@ -154,13 +155,13 @@ describe("Блок 3 — презентационный слой рекламы"
       assert.equal(pitch.eyebrow, "Свободный слот для бренда · Совместимость: Мебель");
       assert.equal(pitch.surfaceLabel, "Мебель");
       assert.equal(pitch.ctaLabel, "Занять слот в этом протоколе");
-      assert.equal(pitch.href, "/for-brands?solution=vino-na-divane&surface=upholstery");
+      assert.equal(pitch.href, "/for-brands?solution=vino-na-divane&surface=upholstery&format=protocol-product");
     });
 
     it("корректно отрабатывает пустой слот без параметров или с неизвестной поверхностью", () => {
       const pitch = buildEmptySlotPitch({});
       assert.equal(pitch.eyebrow, "Свободный слот для бренда · Совместимость: Любое покрытие");
-      assert.equal(pitch.href, "/for-brands");
+      assert.equal(pitch.href, "/for-brands?format=protocol-product");
     });
 
     it("предзаполняет поле задачи в BrandLeadForm по query-параметрам solution и surface", () => {
@@ -182,6 +183,44 @@ describe("Блок 3 — презентационный слой рекламы"
       assert.match(prefillSlugOnly, /Совместимость с поверхностью: Мебель/);
 
       assert.equal(formatBrandLeadGoalPrefill({}), "");
+    });
+  });
+
+  describe("заглушки свободных слотов (buildSlotPlaceholder)", () => {
+    const format = { id: "editorial-partner", title: "Редакционный партнёр на главной", priceLabel: "от 490 BYN/мес" };
+
+    it("брендовый слот ведёт на /for-brands с format и контекстом протокола", () => {
+      const meta = buildSlotPlaceholder({
+        placement: "solution.sponsored_product",
+        format: { id: "protocol-product", title: "Средство из протокола", priceLabel: "от 120 BYN/мес" },
+        label: "Спонсорский состав в протоколе",
+        solutionSlug: "vino-na-divane",
+        surface: "upholstery",
+      });
+      assert.ok(meta);
+      assert.equal(meta.audience, "brand");
+      assert.equal(meta.priceLabel, "от 120 BYN/мес");
+      assert.equal(meta.href, "/for-brands?solution=vino-na-divane&surface=upholstery&format=protocol-product");
+      assert.equal(meta.surface, "upholstery");
+    });
+
+    it("слот клинера ведёт на /for-partners с городом и категориями", () => {
+      const meta = buildSlotPlaceholder({
+        placement: "home.cleaners",
+        format: { id: "pro-sponsor", title: "PRO Спонсор", priceLabel: "от 290 Br/мес" },
+        label: "Спонсор · Уборка квартир · Минск",
+        city: "Минск",
+        categoryIds: ["apartments"],
+      });
+      assert.ok(meta);
+      assert.equal(meta.audience, "company");
+      assert.equal(decodeURIComponent(meta.href), "/for-partners?plan=pro&city=Минск&categories=apartments");
+    });
+
+    it("без контекста — общий /for-brands; поиск никогда не заглушается", () => {
+      const meta = buildSlotPlaceholder({ placement: "home.editorial_partner", format });
+      assert.equal(meta?.href, "/for-brands?format=editorial-partner");
+      assert.equal(buildSlotPlaceholder({ placement: "search.sponsored_result", format }), null);
     });
   });
 });
