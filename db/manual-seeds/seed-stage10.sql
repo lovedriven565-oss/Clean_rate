@@ -2,7 +2,7 @@
 -- Источник данных: db/seed-data.ts на main cbb4123; контекст дрейфа зафиксирован в CHANGELOG 2026-11-26.
 -- Идемпотентно: INSERT OR IGNORE по primary key id. Не содержит DELETE и не трогает analytics/campaigns/leads.
 -- Перед применением сверить d1_migrations и выполнуть read-only backup/export. Применять только после подтверждения владельца:
---   npx wrangler d1 execute cleaning-rating-db --remote --file=migrations/seed-stage10.sql
+--   npx wrangler d1 execute cleaning-rating-db --remote --file=db/manual-seeds/seed-stage10.sql
 
 -- Prochem Neutral Pro-Spotter (prod-prochem-spotter)
 INSERT OR IGNORE INTO `products` (`id`, `brand_id`, `slug`, `name`, `category`, `description`, `image_key`, `external_url`, `ph`, `compatible_surfaces`, `prohibited_surfaces`, `compatible_materials`, `compatibility_verified`, `compatibility_source`, `status`, `created_at`, `updated_at`) VALUES (

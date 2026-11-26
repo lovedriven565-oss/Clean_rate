@@ -56,7 +56,7 @@ npx wrangler d1 migrations list cleaning-rating-db --remote
 - `seed.sql` — запрещён на проде
 - `all_in_one_init.sql` — не использовать на проде без отдельного решения
 - `seed-stage5.sql` … `seed-stage9.sql`
-- `seed-stage10.sql` — создан как проект синхронизации каталога, **не применён и не зарегистрирован**
+- `seed-stage10.sql` — создан как проект синхронизации каталога вне `migrations/`, **не применён и не зарегистрирован**
 
 По `CHANGELOG.md` от 2026-11-26: миграция `0011` и `seed-stage9.sql` уже применены в прод-D1 через `execute --file`; все прежние `seed-stageN` вручную зарегистрированы в `d1_migrations`. Это последнее подтверждённое состояние, но требует повторной live-сверки после выдачи D1 permission.
 
@@ -105,7 +105,7 @@ npx wrangler d1 migrations list cleaning-rating-db --remote
 
 ## Проект безопасной синхронизации
 
-Создан файл `migrations/seed-stage10.sql`:
+Создан файл `db/manual-seeds/seed-stage10.sql` (намеренно вне `migrations/`, чтобы `wrangler d1 migrations apply` не мог случайно выполнить draft как schema-миграцию):
 
 - только `INSERT OR IGNORE` 13 отсутствующих products;
 - не содержит `DELETE`;
@@ -122,8 +122,8 @@ npx wrangler d1 migrations list cleaning-rating-db --remote
 3. Проверить `d1_migrations` и сверить со списком файлов.
 4. Проверить counts: `products`, `companies`, `campaigns`, `solutions`, `solution_products`.
 5. Проверить references устаревших products перед любой архивацией.
-6. Применить `migrations/seed-stage10.sql` через `execute --file`.
-7. Вручную зарегистрировать `seed-stage10.sql` в `d1_migrations`, как делалось для stage5–9.
+6. Применить `db/manual-seeds/seed-stage10.sql` через `execute --file`.
+7. Не регистрировать `seed-stage10.sql` в `d1_migrations`, пока файл находится вне `migrations/`; регистрация нужна только если операционный seed когда-либо будет лежать в migration directory.
 8. Проверить prod: спонсорский слот на подходящем протоколе, отсутствие SSR/CLS регрессий, счётчик products = 21.
 
 До исправления permission и подтверждения владельца данные в D1 не менять.
