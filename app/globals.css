@@ -267,6 +267,46 @@ svg.lucide {
     pointer-events: none;
     background: linear-gradient(90deg, transparent, hsl(var(--brand) / 0.7), hsl(var(--mint) / 0.6), transparent);
   }
+
+  /* Появление секций главной без motion/react: IntersectionObserver переключает класс. */
+  .reveal-base {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-base {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+}
+
+/* Hover-пилюля навигации вместо motion layoutId: лёгкое появление без JS-анимации. */
+@keyframes navpill {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[navpill_0\.18s_ease-out\] {
+    animation: none;
+  }
 }
 
 /* Матовое стекло — только ИИ-панель, поиск и навигация. */

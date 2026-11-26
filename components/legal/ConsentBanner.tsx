@@ -35,8 +35,8 @@ export function ConsentBanner() {
           <ShieldCheck className="mt-0.5 size-5 shrink-0 text-teal" aria-hidden />
           <p className="text-sm leading-6 text-muted-foreground">
             Мы используем обезличенную статистику без cookies и идентификаторов.
-            Внешние счётчики (Яндекс Метрика, Cloudflare Web Analytics) включаются только
-            с вашего согласия.{" "}
+            Внешние счётчики (Яндекс Метрика, Cloudflare Web Analytics, Google Tag
+            Manager) включаются только с вашего согласия.{" "}
             <Link href="/privacy" className="font-semibold text-teal hover:underline">
               Подробнее
             </Link>

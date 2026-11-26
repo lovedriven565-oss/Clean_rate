@@ -34,7 +34,7 @@ describe("cleaning-services", () => {
     assert.match(cleanerCardPrice(perMeter, "м²"), /^от /);
     assert.match(cleanerCardPrice(perMeter, "уборку"), /м²/);
     assert.equal(cleanerCardPrice({ ...perMeter, priceFrom: undefined }, "уборку"), "Цена по запросу");
-    const noUnit = companies.find((c) => c.priceFrom && !c.priceUnit)!;
+    const noUnit = { ...perMeter, priceUnit: undefined };
     assert.match(cleanerCardPrice(noUnit, "уборку"), /^от /);
   });
 

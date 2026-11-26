@@ -19,7 +19,7 @@ const items = groups.flatMap(({ market, cities }) =>
  * поэтому смена региона мгновенно меняет валюту смет и список компаний без перезагрузки.
  */
 export function RegionSelector({ className, variant = "pill" }: { className?: string; variant?: "pill" | "block" }) {
-  const { countryCode, citySlug, city, market, setRegion } = useRegion();
+  const { countryCode, citySlug, city, market, resolved, setRegion } = useRegion();
   const value: RegionValue = `${countryCode}:${citySlug}`;
 
   function handleChange(next: string | null) {
@@ -40,8 +40,8 @@ export function RegionSelector({ className, variant = "pill" }: { className?: st
       >
         <MapPin className="h-4 w-4 shrink-0 text-primary" />
         <span className="min-w-0 flex-1 truncate text-left">
-          {city.name}
-          <span className="hidden text-muted-foreground sm:inline"> · {market.countryCode}</span>
+          {resolved ? city.name : "Регион"}
+          {resolved && <span className="hidden text-muted-foreground sm:inline"> · {market.countryCode}</span>}
         </span>
         <BaseSelect.Icon className="text-muted-foreground transition-transform group-data-[popup-open]:rotate-180">
           <ChevronDown className="h-4 w-4" />

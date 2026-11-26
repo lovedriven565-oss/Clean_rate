@@ -161,7 +161,7 @@ export function RescueCalculator({
   companies: Company[];
 }) {
   const [selected, setSelected] = useState<RescueScenarioId>("fresh");
-  const { market, city } = useRegion();
+  const { market, city, resolved } = useRegion();
 
   const offer = buildEscalation(solution, estimates, companies, {
     countryCode: market.countryCode,
@@ -337,7 +337,9 @@ export function RescueCalculator({
                 className="inline-flex h-10 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-foreground transition-colors hover:border-teal/35 hover:text-teal sm:text-sm"
               >
                 <Sparkles className="h-3.5 w-3.5 text-lime" aria-hidden />
-                {offer.priceFrom ? `Мастера в ${city.nameIn} (от ${offer.priceFrom})` : `Выбрать мастера в ${city.nameIn}`}
+                {offer.priceFrom
+                  ? `Мастера ${resolved ? `в ${city.nameIn}` : "в вашем городе"} (от ${offer.priceFrom})`
+                  : `Выбрать мастера${resolved ? ` в ${city.nameIn}` : ""}`}
               </a>
             </>
           ) : (
@@ -367,7 +369,7 @@ export function RescueCalculator({
         <div className="flex items-center justify-between gap-2">
           <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
             <Wallet className="h-3.5 w-3.5" aria-hidden />
-            Сравнение в деньгах и времени ({city.name})
+            Сравнение в деньгах и времени{resolved ? ` (${city.name})` : ""}
           </span>
         </div>
 

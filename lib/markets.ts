@@ -78,7 +78,10 @@ export const MARKETS: Record<CountryCode, Market> = {
     currency: "KZT",
     phoneCode: "+7",
     mapsHost: "yandex.kz",
-    enabled: true,
+    // Рынок закрыт до выхода BY/RU на стабильный трафик: в Алматы всего 3 компании
+    // без оценок — пустой рынок размывает рейтинг и посадочные. Данные (сметы KZT,
+    // компании) остаются в seed и вернутся вместе с enabled: true.
+    enabled: false,
     cities: [
       { slug: "almaty", name: "Алматы", nameIn: "Алматы" },
       // Астана закрыта до появления компаний: пустой город ломает рейтинг и ProPanel

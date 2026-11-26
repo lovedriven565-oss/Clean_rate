@@ -20,11 +20,11 @@ describe("zone-shelf", () => {
   });
 
   it("аффилиат и паспорт продукта сливаются по slug", () => {
-    const arenas = shelf.find((p) => p.slug === "kiehl-arenas-exet-3");
-    assert.ok(arenas);
-    assert.equal(arenas.price, 68); // из аффилиат-витрины
-    assert.equal(arenas.ph, 7.0);   // из паспорта
-    assert.ok(arenas.zones.includes("furniture"));
+    const stainPro = shelf.find((p) => p.slug === "prochem-stain-pro");
+    assert.ok(stainPro);
+    assert.equal(stainPro.price, undefined); // цена скрыта без подтверждённого источника
+    assert.equal(stainPro.ph, 10.5);         // из паспорта
+    assert.ok(stainPro.zones.includes("furniture"));
   });
 
   it("человеческие теги не содержат сырых цифр pH", () => {

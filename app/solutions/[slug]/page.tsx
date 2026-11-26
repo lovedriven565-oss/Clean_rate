@@ -20,7 +20,7 @@ import {
   getSolutionSlugs,
 } from "@/lib/db/queries";
 import { solutionCover } from "@/lib/solutions/covers";
-import { absoluteUrl, pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates, pageSocialMeta } from "@/lib/site";
 import {
   AUDIENCE_LABELS,
   PROBLEM_TYPE_LABELS,
@@ -40,14 +40,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const solution = await getSolutionBySlug(slug);
   if (!solution) return {};
-  const url = absoluteUrl(`/solutions/${solution.slug}`);
   const title = `${solution.title}: убрать самому или вызвать мастера`;
   const description = `${solutionSummary(solution, 120)} Пошаговый протокол, чего нельзя делать, и смета мастера в вашем городе.`;
   return {
     title,
     description,
     alternates: pageAlternates(`/solutions/${solution.slug}`),
-    openGraph: { title, description, url, type: "article" },
+    ...pageSocialMeta(`/solutions/${solution.slug}`, title, description, "article"),
   };
 }
 
@@ -157,6 +156,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
                 <AdPlacement
                   placement="dealer.local_partner"
                   context={adContext}
+                  placeholder={false}
                   className="mt-4"
                 />
               }
@@ -188,7 +188,7 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
           </div>
 
           {/* Спонсорский состав — строго после независимого протокола; рендерится на сервере (CLS=0).
-              Заглушка слота одна — после FAQ (pitchOnly ниже), здесь кампания или ничего */}
+              Показываем только активную кампанию, без заглушек в потребительской части. */}
           <AdPlacement placement="solution.sponsored_product" context={adContext} placeholder={false} className="mt-6" />
         </section>
 
@@ -217,10 +217,6 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
             </div>
           </div>
         </section>
-
-        <div className="container pt-10 sm:pt-14">
-          <AdPlacement placement="solution.sponsored_product" context={adContext} pitchOnly />
-        </div>
 
         {/* Related */}
         {related.length > 0 && (

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { getAllCompanies } from "@/lib/db/queries";
 import { getFooterCityLinks, getFooterLandingLinksByCity } from "@/lib/landing";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 
@@ -34,9 +35,10 @@ const columns = [
 ];
 
 /** Колонка прямых ссылок на индексируемые посадочные «услуга × город» — хаб перелинковки. */
-export function Footer() {
-  const cityHubLinks = getFooterCityLinks();
-  const cityLandingColumns = getFooterLandingLinksByCity();
+export async function Footer() {
+  const companies = await getAllCompanies();
+  const cityHubLinks = getFooterCityLinks(companies);
+  const cityLandingColumns = getFooterLandingLinksByCity(companies);
   const allColumns = [
     ...columns,
     ...(cityHubLinks.length ? [{ title: "Города", links: cityHubLinks }] : []),

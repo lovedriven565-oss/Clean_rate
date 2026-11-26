@@ -29,7 +29,7 @@ const SPECULATION_RULES = JSON.stringify({
           { not: { selector_matches: "[target=_blank]" } },
         ],
       },
-      eagerness: "moderate",
+      eagerness: "conservative",
     },
   ],
 });

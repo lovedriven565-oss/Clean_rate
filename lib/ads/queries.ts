@@ -79,6 +79,9 @@ function seedProductToProfile(seed: SeedProduct): ProductSafetyProfile {
     ph: seed.ph,
     compatibleSurfaces: seed.compatibleSurfaces,
     prohibitedSurfaces: seed.prohibitedSurfaces,
+    compatibleMaterials: seed.compatibleMaterials,
+    compatibilityVerified: seed.compatibilityVerified,
+    compatibilitySource: seed.compatibilitySource,
   };
 }
 
@@ -167,6 +170,9 @@ export async function getProductsSafetyMap(): Promise<Map<string, ProductSafetyP
             ph: r.ph ?? undefined,
             compatibleSurfaces: parseJsonArray(r.compatibleSurfaces) ?? undefined,
             prohibitedSurfaces: parseJsonArray(r.prohibitedSurfaces) ?? undefined,
+            compatibleMaterials: parseJsonArray(r.compatibleMaterials) ?? undefined,
+            compatibilityVerified: r.compatibilityVerified === 1 ? true : undefined,
+            compatibilitySource: r.compatibilitySource ?? undefined,
           });
         }
         return map;

@@ -32,7 +32,6 @@ import { trackClick } from "@/lib/analytics";
 import {
   parseAssistantTiming,
   type AssistantAnswer,
-  type AssistantContext,
   type AssistantTiming,
 } from "@/lib/assistant/engine";
 import { categoryLandingHref } from "@/lib/categories";
@@ -40,6 +39,8 @@ import { formatRating } from "@/lib/format";
 import { buildHumanSafetyBadge, findSeedProduct } from "@/lib/ph";
 import { buildProCompanies } from "@/lib/solutions/diagnostic";
 import { SURFACE_LABELS } from "@/lib/solutions/meta";
+import { useAssistantConsult } from "@/lib/assistant/useAssistantConsult";
+import { PhotoAssist } from "@/components/assistant/PhotoAssist";
 import type { Brand, Company, PriceEstimate, Solution, SolutionSurface } from "@/lib/types";
 import { cn, scrollBehavior } from "@/lib/utils";
 
@@ -65,7 +66,8 @@ export interface AssistantPanelProps {
   solutions?: Solution[];
 }
 
-/** Панель ИИ-технолога ChistoLab: точечный диагноз + полный ответ «Два пути» на одном экране. */
+/** Панель ИИ-технолога ChistoLab: точечный диагноз + полный ответ «Два пути» на одном экране.
+ * Читает `?q=`, `?timing=` и `?material=` из URL (автозапуск при переходе из поиска или hero). */
 export function AssistantPanel({
   companies = [],
   brands = [],
@@ -73,71 +75,31 @@ export function AssistantPanel({
   solutions = [],
 }: AssistantPanelProps) {
   const params = useSearchParams();
-  const { market, city, countryCode } = useRegion();
+  const { market, city } = useRegion();
   const initialQuery = params.get("q")?.trim() ?? "";
   const initialTiming = parseAssistantTiming(params.get("timing"));
+  const initialMaterial = params.get("material")?.trim().slice(0, 120) || undefined;
 
   const [query, setQuery] = useState(initialQuery);
   const [timing, setTiming] = useState<AssistantTiming | undefined>(initialTiming);
-  const [material, setMaterial] = useState<string | undefined>(undefined);
+  const [material, setMaterial] = useState<string | undefined>(initialMaterial);
   const [selectedSlug, setSelectedSlug] = useState<string | undefined>(undefined);
   const [checkedSteps, setCheckedSteps] = useState<Record<number, boolean>>({});
-  const [answer, setAnswer] = useState<AssistantAnswer | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { answer, loading, received, consult, applyAnswer } = useAssistantConsult();
   const answerRef = useRef<HTMLDivElement>(null);
   const pendingRef = useRef<HTMLDivElement>(null);
   const autoSubmittedRef = useRef<string | null>(null);
 
   const runConsultation = useCallback(
-    async (
+    (
       targetQuery: string,
       nextContext?: {
         timing?: AssistantTiming;
         material?: string;
         solutionSlug?: string;
       }
-    ) => {
-      const message = targetQuery.trim();
-      if (message.length < 2) return;
-      setLoading(true);
-      try {
-        const contextPayload: AssistantContext = {
-          timing: nextContext?.timing,
-          material: nextContext?.material,
-          solutionSlug: nextContext?.solutionSlug,
-          countryCode,
-        };
-        const res = await fetch("/api/assistant", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message, context: contextPayload }),
-        });
-        if (!res.ok) throw new Error("assistant failed");
-        const data: AssistantAnswer = await res.json();
-        setAnswer(data);
-        setCheckedSteps({});
-      } catch {
-        setAnswer({
-          mode: "empty",
-          text: "Не удалось получить ответ. Проверьте соединение и попробуйте ещё раз.",
-          verdict: {
-            recommendation: "caution",
-            badge: "Временная ошибка связи",
-            summary: "Попробуйте отправить запрос повторно или выберите один из готовых сценариев ниже.",
-          },
-          steps: [],
-          products: [],
-          warnings: [],
-          alternatives: [],
-          materialOptions: [],
-          followUpQuestions: QUICK_SCENARIOS.slice(0, 3),
-          confidence: 0,
-        });
-      } finally {
-        setLoading(false);
-      }
-    },
-    [countryCode]
+    ) => consult({ message: targetQuery, ...nextContext }),
+    [consult]
   );
 
   // Мобильный UX: ответ рендерится ниже формы — при отправке прокручиваем
@@ -145,10 +107,10 @@ export function AssistantPanel({
   useEffect(() => {
     if (loading) {
       pendingRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
-    } else if (answer) {
+    } else if (answer && received) {
       answerRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
     }
-  }, [loading, answer]);
+  }, [loading, answer, received]);
 
   // Авто-запуск при переходе из умного поиска или экспресс-триажа (/assistant?q=...&timing=...)
   useEffect(() => {
@@ -169,6 +131,7 @@ export function AssistantPanel({
     event.preventDefault();
     if (!query.trim() || loading) return;
     setSelectedSlug(undefined);
+    setCheckedSteps({});
     void runConsultation(query, { timing, material, solutionSlug: undefined });
   }
 
@@ -176,6 +139,7 @@ export function AssistantPanel({
     setQuery(scenario);
     setSelectedSlug(undefined);
     setMaterial(undefined);
+    setCheckedSteps({});
     void runConsultation(scenario, { timing, material: undefined, solutionSlug: undefined });
   }
 
@@ -191,6 +155,7 @@ export function AssistantPanel({
     const resolved = material === nextMaterial ? undefined : nextMaterial;
     setMaterial(resolved);
     if (query.trim().length >= 2) {
+      setCheckedSteps({});
       void runConsultation(query, { timing, material: resolved, solutionSlug: selectedSlug });
     }
   }
@@ -200,11 +165,13 @@ export function AssistantPanel({
     setMaterial(undefined);
     const activeQuery = query.trim().length >= 2 ? query : title;
     setQuery(activeQuery);
+    setCheckedSteps({});
     void runConsultation(activeQuery, { timing, material: undefined, solutionSlug: slug });
   }
 
   function handleFollowUpClick(question: string) {
     setQuery(question);
+    setCheckedSteps({});
     void runConsultation(question, {
       timing,
       material,
@@ -351,6 +318,20 @@ export function AssistantPanel({
                 {scenario}
               </button>
             ))}
+          </div>
+
+          {/* Фото-триаж (бета, за NEXT_PUBLIC_PHOTO_BETA): ответ идёт в общий рендер */}
+          <div className="border-t border-border/60 pt-3">
+            <PhotoAssist
+              timing={timing}
+              onAnswer={(next) => {
+                setQuery("По фото загрязнения");
+                setSelectedSlug(undefined);
+                setCheckedSteps({});
+                applyAnswer(next);
+                answerRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+              }}
+            />
           </div>
         </form>
       </Panel>

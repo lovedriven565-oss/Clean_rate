@@ -4,13 +4,17 @@ import { Footer } from "@/components/Footer";
 import { RatingContent } from "@/components/RatingContent";
 import { getEligibleAdsForCategories } from "@/lib/ads/queries";
 import { getAllCategories, getAllCompanies } from "@/lib/db/queries";
-import { absoluteUrl, pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates, pageSocialMeta } from "@/lib/site";
+
+const title = "Рейтинг клининговых компаний: цены, контакты, источник оценки";
+const description =
+  "Каталог клининговых компаний с открытым источником рейтинга, реальными ценами и прямыми контактами. Уборка квартир, офисов, химчистка мебели, мытьё окон, после ремонта.";
 
 export const metadata: Metadata = {
-  title: "Рейтинг клининговых компаний: цены, контакты, источник оценки",
-  description:
-    "Каталог клининговых компаний с открытым источником рейтинга, реальными ценами и прямыми контактами. Уборка квартир, офисов, химчистка мебели, мытьё окон, после ремонта.",
+  title,
+  description,
   alternates: pageAlternates("/rating"),
+  ...pageSocialMeta("/rating", title, description),
 };
 
 export default async function RatingPage() {

@@ -136,25 +136,33 @@ export function getFooterLandingLinks(perCityLimit = CATEGORIES.length): FooterL
   );
 }
 
-/** Посадочные, сгруппированные по городам — для компактного блока футера. */
-export function getFooterLandingLinksByCity(): { cityName: string; links: FooterLandingLink[] }[] {
+/**
+ * Посадочные, сгруппированные по городам — для компактного блока футера.
+ * Ссылки ведут только на индексируемые страницы: внутренняя перелинковка на
+ * noindex-посадочные расходует краул-бюджет без пользы.
+ */
+export function getFooterLandingLinksByCity(companies: Company[]): { cityName: string; links: FooterLandingLink[] }[] {
+  const indexable = new Set(getIndexableLandings(companies).map((l) => `${l.city}/${l.category}`));
   return ENABLED_MARKETS.flatMap((market) =>
-    openCities(market).map((city) => ({
-      cityName: city.nameIn,
-      links: CATEGORIES.map((category) => ({
-        href: `/${city.slug}/${getCategorySlug(category.id)}`,
-        label: category.name,
-      })),
-    }))
+    openCities(market).flatMap((city) => {
+      const links = CATEGORIES.filter((category) => indexable.has(`${city.slug}/${getCategorySlug(category.id)}`)).map(
+        (category) => ({
+          href: `/${city.slug}/${getCategorySlug(category.id)}`,
+          label: category.name,
+        })
+      );
+      return links.length > 0 ? [{ cityName: city.nameIn, links }] : [];
+    })
   );
 }
 
-/** Прямые ссылки на городские хабы `/{city}` — верхний уровень региональной иерархии. */
-export function getFooterCityLinks(): FooterLandingLink[] {
-  return ENABLED_MARKETS.flatMap((market) =>
-    openCities(market).map((city) => ({
-      href: `/${city.slug}`,
-      label: `Клининговые компании в ${city.nameIn}`,
-    }))
-  );
+/**
+ * Прямые ссылки на городские хабы `/{city}` — только хабы, проходящие порог
+ * индексации (тонкий хаб получает noindex и не должен получать footer-ссылки).
+ */
+export function getFooterCityLinks(companies: Company[]): FooterLandingLink[] {
+  return getIndexableCities(companies).flatMap(({ city }) => {
+    const resolved = getCityBySlug(city);
+    return resolved ? [{ href: `/${city}`, label: `Клининговые компании в ${resolved.city.nameIn}` }] : [];
+  });
 }

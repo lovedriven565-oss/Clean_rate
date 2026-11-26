@@ -104,14 +104,14 @@ describe("human safety traffic light badges", () => {
   });
 
   it("resolves seedProducts by productId or by product name inside solution note", () => {
-    const byId = findSeedProduct({ productId: "prod-kiehl-arenas" });
-    assert.equal(byId?.name, "Kiehl Arenas-exet 3");
+    const byId = findSeedProduct({ productId: "prod-prochem-stainpro" });
+    assert.equal(byId?.name, "Prochem Stain Pro");
 
     const byNote = findSeedProduct({
-      brandId: "kiehl",
-      note: "Kiehl Arenas-exet 3 (удаление танинов и растительных пигментов)",
+      brandId: "prochem",
+      note: "Prochem Stain Pro — щелочной пятновыводитель для вина (pH 10.5)",
     });
-    assert.equal(byNote?.id, "prod-kiehl-arenas");
-    assert.equal(byNote?.ph, 7.0);
+    assert.equal(byNote?.id, "prod-prochem-stainpro");
+    assert.equal(byNote?.ph, 10.5);
   });
 });

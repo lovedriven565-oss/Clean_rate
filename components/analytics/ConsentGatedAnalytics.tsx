@@ -11,7 +11,7 @@ import { CONSENT_EVENT, readConsent, type ConsentValue } from "@/lib/consent";
  * PageViewTracker. webvisor включён, т.к. скрипт грузится только при явном
  * согласии на аналитику.
  */
-export function ConsentGatedAnalytics({ ymId, cfToken }: { ymId?: number; cfToken?: string }) {
+export function ConsentGatedAnalytics({ ymId, cfToken, gtmId }: { ymId?: number; cfToken?: string; gtmId?: string }) {
   const [consent, setConsent] = useState<ConsentValue | null>(null);
 
   useEffect(() => {
@@ -40,6 +40,19 @@ export function ConsentGatedAnalytics({ ymId, cfToken }: { ymId?: number; cfToke
           strategy="afterInteractive"
           src="https://static.cloudflareinsights.com/beacon.min.js"
           data-cf-beacon={JSON.stringify({ token: cfToken, spa: true })}
+        />
+      ) : null}
+      {gtmId ? (
+        // Google-тег для GTM-контейнера: dataLayer/gtag поднимаются синхронно,
+        // затем gtm.js инжектируется вручную — порядок гарантирован вне зависимости
+        // от того, как next/script расставит теги. gtag('config') не нужен:
+        // контейнеры gtm.js инициализируются при загрузке (формат 2025+).
+        <Script
+          id="google-tag-manager"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());var s=document.createElement('script');s.async=1;s.src='https://www.googletagmanager.com/gtm.js?id=${gtmId}';document.head.appendChild(s);`,
+          }}
         />
       ) : null}
     </>

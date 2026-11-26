@@ -7,7 +7,7 @@ import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { AD_FORMATS, AD_TERMS_NOTE, getAdFormat, type AdFormat } from "@/lib/ads/media-kit";
 import { getSolutionBySlug } from "@/lib/db/queries";
-import { absoluteUrl, pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates, pageSocialMeta } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const title = "Брендам и поставщикам";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: pageAlternates("/for-brands"),
-  openGraph: { title, description, url: absoluteUrl("/for-brands"), type: "website" },
+  ...pageSocialMeta("/for-brands", title, description),
 };
 
 /** Принципы вместо счётчиков каталога: на пилотной стадии цифры охвата ещё не аргумент. */
@@ -167,6 +167,7 @@ export default async function ForBrandsPage({
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">{f.description}</p>
                     <div className="mt-auto pt-5">
                       <p className="font-data text-lg font-bold text-foreground">{f.priceLabel}</p>
+                      <p className="mt-0.5 font-data text-sm font-semibold text-muted-foreground">{f.priceLabelRu}</p>
                       {f.note && (
                         <p className="mt-1 text-xs leading-5 text-muted-foreground">{f.note}</p>
                       )}

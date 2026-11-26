@@ -14,7 +14,7 @@ import { getAllCompanies, getAllSolutions, getBrandSlugs, getBrandsByScore } fro
 import { prosChoiceIds } from "@/lib/brand-score";
 import { seedAffiliateProducts, seedProducts } from "@/db/seed-data";
 import { buildHumanSafetyBadge } from "@/lib/ph";
-import { absoluteUrl, pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates, pageSocialMeta } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export async function generateStaticParams() {
@@ -26,10 +26,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const brand = (await getBrandsByScore()).find((b) => b.slug === slug);
   if (!brand) return {};
+  const title = `${brand.name} — техника и химия для клининга`;
   return {
-    title: `${brand.name} — техника и химия для клининга`,
+    title,
     description: brand.description,
     alternates: pageAlternates(`/brands/${brand.slug}`),
+    ...pageSocialMeta(`/brands/${brand.slug}`, title, brand.description),
   };
 }
 
@@ -69,6 +71,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
                 },
                 ...proProducts.map((product) => ({
                   "@type": "Product",
+                  "@id": `${absoluteUrl(`/brands/${brand.slug}`)}#product-${product.slug}`,
                   name: product.name,
                   description: product.description,
                   brand: { "@id": `${absoluteUrl(`/brands/${brand.slug}`)}#brand` },
@@ -127,6 +130,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
         <AdPlacement
           placement="brand.profile_campaign"
           context={{}}
+          placeholder={false}
           className="container pt-8"
         />
 
@@ -152,7 +156,8 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
                 return (
                   <li
                     key={item.id}
-                    className="data-surface flex h-full flex-col justify-between gap-4 rounded-panel border border-border p-5"
+                    id={`product-${item.slug}`}
+                    className="data-surface flex h-full scroll-mt-24 flex-col justify-between gap-4 rounded-panel border border-border p-5"
                   >
                     <div>
                       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -276,6 +281,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
             <AdPlacement
               placement="dealer.local_partner"
               context={{}}
+              placeholder={false}
               className="mt-8"
             />
           </section>

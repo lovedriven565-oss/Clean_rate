@@ -16,6 +16,14 @@ let testDbOverride: D1Database | null | undefined;
 
 export async function getDb(): Promise<D1Database | null> {
   if (testDbOverride !== undefined) return testDbOverride;
+  // На production-билде D1 не используем: локальный Miniflare/remote-биндинг
+  // недетерминирован (SQLITE_BUSY, «Failed to parse body as JSON») и всё равно
+  // падает в seed-fallback — но медленно, после таймаутов. Эта задержка растягивает
+  // generateMetadata, и Next.js запечатывает в статический HTML служебный
+  // <meta robots noindex> streaming-шелла рядом с настоящим robots-тегом —
+  // при конфликте поисковик берёт restrictive. Контент билда при этом идентичен:
+  // seed-data.ts — зеркало прод-D1 (обновляется парой с seed-stageN.sql).
+  if (process.env.NEXT_PHASE === "phase-production-build") return null;
   try {
     const ctx = await getCloudflareContext({ async: true });
     return (ctx.env as CfEnv).DB ?? null;

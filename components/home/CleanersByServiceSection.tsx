@@ -4,14 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, MessageCircle, Phone, Star } from "lucide-react";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
-import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { trackClick } from "@/lib/analytics";
-import { isCompanySponsorVisible, buildSlotPlaceholder } from "@/lib/ads/presentation";
-import { formatProBudget } from "@/lib/partners";
+import { isCompanySponsorVisible } from "@/lib/ads/presentation";
 import { getCategoryName, categoryLandingHref } from "@/lib/categories";
 import { formatMarketCurrency } from "@/lib/format";
 import { CLEANING_SERVICES, cleanerCardPrice, pickCategoryEstimate } from "@/lib/home/cleaning-services";
+import { ENABLED_MARKETS, getCity } from "@/lib/markets";
 import {
   externalRating,
   rankOrganicCompanies,
@@ -21,6 +20,9 @@ import { cn } from "@/lib/utils";
 import type { CategoryId, Company, PriceEstimate } from "@/lib/types";
 
 const ORGANIC_LIMIT = 3;
+
+/** Имена городов всех открытых рынков — для нейтрального SSR без выбранного региона. */
+const OPEN_CITY_NAMES = new Set(ENABLED_MARKETS.flatMap((m) => m.cities.map((c) => c.name)));
 
 /**
  * «Проверенные клинеры рядом»: табы шести услуг, смета города (pe-cat-*)
@@ -34,15 +36,28 @@ export function CleanersByServiceSection({
   companies: Company[];
   estimates: PriceEstimate[];
 }) {
-  const { market, city } = useRegion();
+  const { market, city, resolved } = useRegion();
   const [service, setService] = useState<CategoryId>(CLEANING_SERVICES[0].id);
 
   const ctx = { countryCode: market.countryCode, city: city.name };
   const serviceInfo = CLEANING_SERVICES.find((s) => s.id === service) ?? CLEANING_SERVICES[0];
   const estimate = pickCategoryEstimate(estimates, service, ctx);
+  // Нейтральный SSR: смета «от X» по каждому открытому рынку через « / ».
+  const neutralEstimateText = ENABLED_MARKETS.map((m) => {
+    const e = pickCategoryEstimate(estimates, service, {
+      countryCode: m.countryCode,
+      city: getCity(m.countryCode).name,
+    });
+    return e ? `от ${formatMarketCurrency(e.priceMin, e.currency as "BYN" | "RUB" | "KZT")}` : null;
+  })
+    .filter((t): t is string => t !== null)
+    .join(" / ");
 
   const { sponsor, sponsorAllowed, organic } = useMemo(() => {
-    const inCity = companies.filter((c) => c.city === city.name && c.categories.includes(service));
+    // До разрешения региона (SSR) показываем компании всех открытых городов — нейтрально для краулеров.
+    const inCity = companies.filter(
+      (c) => (resolved ? c.city === city.name : OPEN_CITY_NAMES.has(c.city)) && c.categories.includes(service),
+    );
     // В РФ платных размещений без erid нет — promoted идут в общий органический порядок.
     const sponsorAllowed = isCompanySponsorVisible(market.countryCode);
     const promoted = sponsorAllowed ? rankOrganicCompanies(inCity.filter((c) => c.promoted)) : [];
@@ -54,20 +69,7 @@ export function CleanersByServiceSection({
         promoted[0] ? ORGANIC_LIMIT - 1 : ORGANIC_LIMIT
       ),
     };
-  }, [companies, city.name, service, market.countryCode]);
-
-  // Свободный спонсорский слот показываем только там, где продажа спонсорства
-  // вообще возможна (не РФ) и только когда спонсора в этой услуге нет.
-  const sponsorPlaceholder =
-    !sponsor && sponsorAllowed
-      ? buildSlotPlaceholder({
-          placement: "home.cleaners",
-          format: { id: "pro-sponsor", title: "PRO Спонсор", priceLabel: formatProBudget(market.countryCode) },
-          label: `Спонсор · ${serviceInfo.label} · ${city.name}`,
-          city: city.name,
-          categoryIds: [service],
-        })
-      : null;
+  }, [companies, city.name, service, market.countryCode, resolved]);
 
   return (
     <section id="cleaners" aria-labelledby="cleaners-title" className="scroll-mt-24 border-y border-border bg-muted/40 py-12 sm:py-16">
@@ -76,7 +78,7 @@ export function CleanersByServiceSection({
           <div>
             <p className="font-data text-[11px] font-bold uppercase tracking-[0.16em] text-teal">ChistoLab / Pro</p>
             <h2 id="cleaners-title" className="mt-2 max-w-xl text-balance font-display text-3xl font-bold tracking-[-0.03em] text-foreground sm:text-4xl">
-              Проверенные клинеры рядом ({city.name})
+              Проверенные клинеры рядом{resolved ? ` (${city.name})` : ""}
             </h2>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
               Компании с проверенным профилем. Звоните напрямую — без посредников.
@@ -115,14 +117,21 @@ export function CleanersByServiceSection({
         {/* Смета выбранной услуги в городе */}
         <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-1 rounded-panel border border-border bg-card p-5">
           <p className="font-data text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-            {serviceInfo.label} · {city.name}
+            {serviceInfo.label}
+            {resolved ? ` · ${city.name}` : ""}
           </p>
           {estimate ? (
             <>
               <p className="font-data text-2xl font-bold tracking-tight text-teal sm:text-3xl">
-                {formatMarketCurrency(estimate.priceMin, estimate.currency as "BYN" | "RUB" | "KZT")}
-                <span className="text-muted-foreground"> – </span>
-                {formatMarketCurrency(estimate.priceMax, estimate.currency as "BYN" | "RUB" | "KZT")}
+                {resolved ? (
+                  <>
+                    {formatMarketCurrency(estimate.priceMin, estimate.currency as "BYN" | "RUB" | "KZT")}
+                    <span className="text-muted-foreground"> – </span>
+                    {formatMarketCurrency(estimate.priceMax, estimate.currency as "BYN" | "RUB" | "KZT")}
+                  </>
+                ) : (
+                  neutralEstimateText || "—"
+                )}
               </p>
               <p className="text-sm text-muted-foreground">
                 {estimate.unit ? `за ${estimate.unit}` : ""}
@@ -138,7 +147,6 @@ export function CleanersByServiceSection({
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sponsor && <CleanerCard key={sponsor.id} company={sponsor} service={service} serviceUnit={estimate?.unit ?? null} countryCode={market.countryCode} sponsor />}
-          {sponsorPlaceholder && <AdSlotPlaceholder meta={sponsorPlaceholder} variant="card" className="sm:col-span-2 lg:col-span-3" />}
           {organic.map((company) => (
             <CleanerCard key={company.id} company={company} service={service} serviceUnit={estimate?.unit ?? null} countryCode={market.countryCode} />
           ))}
@@ -146,7 +154,7 @@ export function CleanersByServiceSection({
 
         {!sponsor && organic.length === 0 && (
           <p className="mt-6 rounded-panel border border-dashed border-border bg-card p-5 text-sm text-muted-foreground">
-            В городе «{city.name}» компаний по услуге «{serviceInfo.label}» пока нет — случайные не подставляем.{" "}
+            В городе «{resolved ? city.name : "вашем городе"}» компаний по услуге «{serviceInfo.label}» пока нет — случайные не подставляем.{" "}
             <Link href="/for-partners" className="font-semibold text-teal">
               Разместить компанию
             </Link>

@@ -1,33 +1,55 @@
 "use client";
 
-import { MotionConfig } from "motion/react";
-import { InView } from "@/components/ui/in-view";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/** Плавное появление секции при скролле (InView из реестра). Уважает prefers-reduced-motion через MotionConfig в HomeMotion. */
+/**
+ * Плавное появление секции при скролле на нативном IntersectionObserver +
+ * CSS-переходе. Не тянет motion/react в критический бандл главной (TBT).
+ * prefers-reduced-motion учитывается медиа-запросом в globals.css (.reveal-*).
+ */
 export function Reveal({
   children,
   className,
   delay = 0,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   delay?: number;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.disconnect();
+          }
+        }
+      },
+      { rootMargin: "-10% 0px" }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <InView
-      className={cn(className)}
-      variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
-      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
-      viewOptions={{ margin: "-10% 0px" }}
-      once
+    <div
+      ref={ref}
+      className={cn("reveal-base", visible && "reveal-visible", className)}
+      style={delay > 0 ? { transitionDelay: `${delay}s` } : undefined}
     >
       {children}
-    </InView>
+    </div>
   );
 }
 
-/** Корневая конфигурация motion для главной: отключает анимации, если пользователь просил меньше движения. */
-export function HomeMotion({ children }: { children: React.ReactNode }) {
-  return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
+/** Корневая обёртка главной: сохранена как семантический маркер, motion не тянет. */
+export function HomeMotion({ children }: { children: ReactNode }) {
+  return <>{children}</>;
 }

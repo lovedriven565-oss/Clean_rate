@@ -143,10 +143,31 @@ export function checkProductSafety(params: {
 
   // 4. Проверка текстовых предупреждений протокола решения
   if (solution?.warnings && solution.warnings.length > 0) {
-    const lowerWarnings = solution.warnings.join(" ").toLowerCase();
+    // Предупреждение действует только если запрет и «кислот/щелоч» стоят
+    // в одном предложении, и либо оно общее, либо его материал совпадает
+    // с материалом/поверхностью решения («не наносите кислоту на мрамор»
+    // не запрещает кислоту на керамограните).
+    const solutionWarnings = solution.warnings;
+    const PROHIBITION_RE = /не\s+(используй|наносите|применяй|допускай|добавляй)/;
+    const FRAGILE_MATERIAL_RE = /мрамор|известняк|травертин|терраццо|эмал|натуральн|кож|шелк|шёлк|шерст/;
+    const warningApplies = (w: string) => {
+      const l = w.toLowerCase();
+      if (!FRAGILE_MATERIAL_RE.test(l)) return true;
+      return Boolean(
+        (targetMaterial && FRAGILE_MATERIAL_RE.test(targetMaterial)) ||
+          (targetSurface && FRAGILE_MATERIAL_RE.test(targetSurface))
+      );
+    };
+    const prohibits = (keyword: string, ph: number, cmp: (a: number, b: number) => boolean) =>
+      product.ph !== undefined &&
+      cmp(product.ph, ph) &&
+      solutionWarnings.some((w) => {
+        const l = w.toLowerCase();
+        return l.includes(keyword) && PROHIBITION_RE.test(l) && warningApplies(w);
+      });
 
     // Запрет кислот в протоколе
-    if (lowerWarnings.includes("кислот") && lowerWarnings.includes("не используй") && product.ph !== undefined && product.ph < 6.5) {
+    if (prohibits("кислот", 6.5, (a, b) => a < b)) {
       return {
         safe: false,
         reason: "Протокол решения запрещает использование кислотных составов для этого пятна/материала",
@@ -155,7 +176,7 @@ export function checkProductSafety(params: {
     }
 
     // Запрет щелочей в протоколе
-    if (lowerWarnings.includes("щелоч") && lowerWarnings.includes("не используй") && product.ph !== undefined && product.ph > 8.5) {
+    if (prohibits("щелоч", 8.5, (a, b) => a > b)) {
       return {
         safe: false,
         reason: "Протокол решения запрещает использование щелочных составов для этого пятна/материала",
@@ -164,6 +185,7 @@ export function checkProductSafety(params: {
     }
 
     // Запрет хлора/отбеливателей
+    const lowerWarnings = solution.warnings.join(" ").toLowerCase();
     if (
       lowerWarnings.includes("хлор") &&
       product.hazards?.some((h) => h.toLowerCase().includes("chlorine") || h.toLowerCase().includes("хлор"))

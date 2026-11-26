@@ -5,7 +5,7 @@ import { ArrowUpRight, FlaskConical, Star, Wrench } from "lucide-react";
 import { BrandMark } from "@/components/ads/BrandMark";
 import { trackEvent } from "@/lib/analytics";
 import { formatMarketCurrency } from "@/lib/format";
-import { displayPrice, type ShelfProduct } from "@/lib/products/zone-shelf";
+import { displayPrice, isBrandSiteLink, type ShelfProduct } from "@/lib/products/zone-shelf";
 import { cn } from "@/lib/utils";
 
 type Currency = "BYN" | "RUB" | "KZT";
@@ -31,6 +31,7 @@ export function ProductCard({
 }) {
   const price = p.price !== undefined ? displayPrice(p.price, currency) : null;
   const isEquipment = p.zones.length === 1 && p.zones[0] === "equipment";
+  const brandSite = isBrandSiteLink(p.affiliateUrl, p.brandWebsiteUrl);
 
   function trackBuy() {
     trackEvent({
@@ -55,8 +56,10 @@ export function ProductCard({
             партнёрский дилер{p.dealerName ? ` ${p.dealerName}` : ""}
           </span>
         </>
-      ) : (
+      ) : brandSite ? (
         <span className="text-[9px] leading-3 text-muted-foreground/80">сайт бренда</span>
+      ) : (
+        <span className="text-[9px] leading-3 text-muted-foreground/80">ритейлер или маркетплейс</span>
       );
 
   const buy = p.affiliateUrl ? (
@@ -67,7 +70,7 @@ export function ProductCard({
       onClick={trackBuy}
       className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-ink px-4 text-sm font-semibold text-ink-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
     >
-      Где купить
+      {brandSite && !p.promoCode ? "Сайт бренда" : "Где купить"}
       <ArrowUpRight className="size-3.5" aria-hidden />
     </a>
   ) : (

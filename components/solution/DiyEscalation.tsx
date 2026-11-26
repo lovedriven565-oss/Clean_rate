@@ -24,7 +24,7 @@ export function DiyEscalation({
   companies: Company[];
 }) {
   const reduce = usePrefersReducedMotion();
-  const { market, city } = useRegion();
+  const { market, city, resolved } = useRegion();
   const offer = buildEscalation(solution, estimates, companies, {
     countryCode: market.countryCode,
     city: city.name,
@@ -62,10 +62,10 @@ export function DiyEscalation({
           </h3>
           <p className="mt-1.5 max-w-[60ch] text-pretty text-sm leading-6 text-muted-foreground">
             {company ? (
-              <>Не рискуйте: мастер в {city.nameIn} сделает это профессиональным оборудованием{price}.</>
+              <>Не рискуйте: мастер {resolved ? `в ${city.nameIn}` : "в вашем городе"} сделает это профессиональным оборудованием{price}.</>
             ) : (
               <>
-                Мастера в {city.nameIn} только подключаются к платформе.
+                Мастера {resolved ? `в ${city.nameIn}` : "в вашем городе"} только подключаются к платформе.
                 {price && <> Ориентир цены у профессионалов:{price}.</>}
               </>
             )}

@@ -110,7 +110,8 @@ export interface AffiliateProduct {
   image?: string;
   category: ProductCategory;
   price?: number;
-  rating: number;
+  /** Оценка показывается только при подтверждённом источнике. */
+  rating?: number;
   badge?: "Выбор профи" | "Новинка" | "Хит продаж";
   pros: string[];
   affiliateUrl: string;

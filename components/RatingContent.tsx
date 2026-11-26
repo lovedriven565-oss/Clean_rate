@@ -8,10 +8,7 @@ import { RatingToolbar, type SortKey } from "@/components/RatingToolbar";
 import { RatingEmptyState } from "@/components/RatingEmptyState";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AdCreative } from "@/components/ads/AdCreative";
-import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { getAdFormat } from "@/lib/ads/media-kit";
-import { buildSlotPlaceholder } from "@/lib/ads/presentation";
 import { calculateOrganicScore, calculateRelevanceScore, splitSponsors } from "@/lib/rating";
 import { formatMarketCurrency } from "@/lib/format";
 import { ENABLED_MARKETS, openCities, type Market } from "@/lib/markets";
@@ -127,15 +124,6 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
   // Партнёр категории показывается только при выбранной категории и не участвует в сортировке
   // списка — органический порядок компаний остаётся нетронутым.
   const categoryAd = activeCategory !== "all" ? categoryAds?.[activeCategory] ?? null : null;
-  const categoryPartnerPlaceholder =
-    activeCategory !== "all" && !categoryAd
-      ? buildSlotPlaceholder({
-          placement: "rating.category_partner",
-          format: getAdFormat("category-partner") ?? null,
-          label: `Генеральный партнёр · ${categories.find((c) => c.id === activeCategory)?.name ?? activeCategory}`,
-          categoryIds: [activeCategory],
-        })
-      : null;
 
   // Платные размещения выходят из органического списка в спонсорскую полку сверху:
   // как в ProPanel и на посадочных — спонсор на первом экране, но без ранга #1.
@@ -208,13 +196,7 @@ function RatingView({ companies, categories, categoryAds, searchParams }: Rating
         />
 
         <section className="container py-8 sm:py-12">
-          {categoryAd ? (
-            <AdCreative key={categoryAd.campaignId} ad={categoryAd} className="mb-6" />
-          ) : (
-            categoryPartnerPlaceholder && (
-              <AdSlotPlaceholder meta={categoryPartnerPlaceholder} variant="strip" className="mb-6" />
-            )
-          )}
+          {categoryAd && <AdCreative key={categoryAd.campaignId} ad={categoryAd} className="mb-6" />}
 
           {filtered.length === 0 ? (
             <RatingEmptyState

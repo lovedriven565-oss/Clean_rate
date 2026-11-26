@@ -9,17 +9,16 @@ import { ShareButton } from "@/components/ShareButton";
 import { CompanyTable } from "@/components/CompanyTable";
 import { SolutionCard } from "@/components/solution/SolutionCard";
 import { AdCreative } from "@/components/ads/AdCreative";
-import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
 import { getEligibleAd } from "@/lib/ads/queries";
-import { getAdFormat } from "@/lib/ads/media-kit";
-import { buildSlotPlaceholder } from "@/lib/ads/presentation";
 import { getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
 import { getCityBySlug } from "@/lib/markets";
 import { CATEGORIES, getCategorySlug } from "@/lib/categories";
 import { getIndexableLandingCitySlugs, landingStaticParams, pickLandingCompanies, resolveLandingParams } from "@/lib/landing";
 import { getCategoryGuide } from "@/lib/landings/category-guides";
 import { formatMarketCurrency, pluralize } from "@/lib/format";
-import { absoluteUrl, cityAlternates, SITE_NAME } from "@/lib/site";
+import { absoluteUrl, cityAlternates, pageSocialMeta, SITE_NAME } from "@/lib/site";
+import { serializeJsonLd } from "@/lib/solutions/structured-data";
+
 import type { PriceEstimate } from "@/lib/types";
 
 /**
@@ -48,10 +47,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const indexableSlugs = getIndexableLandingCitySlugs(companies, resolved.category.id);
   const indexable = indexableSlugs.has(resolved.city.slug);
   const title = `${resolved.category.name} в ${resolved.city.nameIn}: цены и компании`;
+  const description = `${resolved.category.name} в ${resolved.city.nameIn}: проверенные компании с прямыми контактами, ориентир цены и открытый источник оценки. ${SITE_NAME}.`;
   return {
     title,
-    description: `${resolved.category.name} в ${resolved.city.nameIn}: проверенные компании с прямыми контактами, ориентир цены и открытый источник оценки. ${SITE_NAME}.`,
+    description,
     alternates: cityAlternates(city, category, { includeCitySlugs: indexableSlugs }),
+    ...pageSocialMeta(`/${city}/${category}`, title, description),
     robots: indexable ? undefined : { index: false, follow: true },
   };
 }
@@ -91,13 +92,6 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
   const { organic, sponsors } = pickLandingCompanies(companies, city.name, category.id, {
     countryCode: market.countryCode,
   });
-  // Свободный слот «генеральный партнёр категории» — заглушка для брендов.
-  const categoryPartnerPlaceholder = buildSlotPlaceholder({
-    placement: "rating.category_partner",
-    format: getAdFormat("category-partner") ?? null,
-    label: `Генеральный партнёр · ${category.name}`,
-    categoryIds: [category.id],
-  });
   const indexableSlugs = getIndexableLandingCitySlugs(companies, category.id);
   // Один проход по всем категориям — для ссылок на смежные услуги этого города.
   const indexableByCategory = new Map(
@@ -106,14 +100,13 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
   const related = solutions.filter((s) => s.relatedCategory === category.id).slice(0, 3);
   const estimate = estimates.find((e) => e.city === city.name) ?? estimates[0];
   const guide = getCategoryGuide(category.id);
-  const faq = [
-    ...categoryFaq(city.nameIn, category.name, estimate),
-    ...(guide?.faq ?? []).map((item) => ({
-      question: item.question,
-      answer: item.answer.replaceAll("{city}", city.nameIn),
-    })),
-  ];
   const url = absoluteUrl(`/${city.slug}/${raw.category}`);
+  const guideFaq = (guide?.faq ?? []).map((item) => ({
+    question: item.question,
+    answer: item.answer.replaceAll("{city}", city.nameIn),
+  }));
+  const categoryQuestions = categoryFaq(city.nameIn, category.name, estimate);
+  const faq = [...categoryQuestions, ...guideFaq];
 
   const minPrice = organic
     .map((c) => c.priceFrom)
@@ -159,7 +152,7 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
       <main id="content" className="flex-1">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
 
         <section className="bg-fresh relative overflow-hidden border-b border-border">
@@ -198,13 +191,7 @@ export default async function CategoryCityPage({ params }: { params: Promise<Par
         </section>
 
         <section className="container py-10 sm:py-14">
-          {categoryAd ? (
-            <AdCreative ad={categoryAd} className="mb-6" />
-          ) : (
-            categoryPartnerPlaceholder && (
-              <AdSlotPlaceholder meta={categoryPartnerPlaceholder} variant="strip" className="mb-6" />
-            )
-          )}
+          {categoryAd && <AdCreative ad={categoryAd} className="mb-6" />}
 
           {/* Спонсорская полка — первой строкой над органикой (как в ProPanel решений),
               но без ранга: место #1 остаётся честным органическим лидером */}

@@ -3,12 +3,14 @@ import { ConsentGatedAnalytics } from "@/components/analytics/ConsentGatedAnalyt
 /**
  * Серверная обёртка: читает env на воркере (wrangler vars / .env) и передаёт
  * токены в клиентский островок. NEXT_PUBLIC_YM_ID — счётчик Яндекс Метрики,
- * NEXT_PUBLIC_CF_BEACON_TOKEN — Cloudflare Web Analytics.
+ * NEXT_PUBLIC_CF_BEACON_TOKEN — Cloudflare Web Analytics, NEXT_PUBLIC_GTM_ID —
+ * контейнер Google Tag Manager (GTM-XXXX).
  * Скрипты монтируются только после согласия пользователя (ch_consent = "all").
  */
 export function ExternalAnalytics() {
   const ymId = process.env.NEXT_PUBLIC_YM_ID ? Number(process.env.NEXT_PUBLIC_YM_ID) : undefined;
   const cfToken = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN || undefined;
-  if (!ymId && !cfToken) return null;
-  return <ConsentGatedAnalytics ymId={ymId} cfToken={cfToken} />;
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID || undefined;
+  if (!ymId && !cfToken && !gtmId) return null;
+  return <ConsentGatedAnalytics ymId={ymId} cfToken={cfToken} gtmId={gtmId} />;
 }

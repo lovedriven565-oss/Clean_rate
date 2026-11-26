@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
 import { ArrowRight, ArrowUpRight, Loader2, Menu, Search, Sparkles, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NavSearch } from "@/components/NavSearch";
@@ -155,11 +154,9 @@ export function Navbar({ promoAds }: { promoAds?: Partial<Record<CountryCode, El
                 )}
               >
                 {hovered === link.href && !active && (
-                  <motion.span
-                    layoutId="nav-hover-pill"
+                  <span
                     aria-hidden
-                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                    className="absolute inset-0 -z-10 rounded-control bg-muted"
+                    className="absolute inset-0 -z-10 animate-[navpill_0.18s_ease-out] rounded-control bg-muted"
                   />
                 )}
                 {link.label}

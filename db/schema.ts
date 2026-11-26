@@ -110,6 +110,12 @@ export const products = sqliteTable(
     compatibleSurfaces: text("compatible_surfaces"),
     /** JSON-массив запрещённых поверхностей: string[] */
     prohibitedSurfaces: text("prohibited_surfaces"),
+    /** JSON-массив подтверждённых материалов (точное совпадение с solution.material): string[] */
+    compatibleMaterials: text("compatible_materials"),
+    /** 1 = совместимость подтверждена официальной техкартой производителя */
+    compatibilityVerified: integer("compatibility_verified"),
+    /** URL/название техкарты производителя — источник подтверждения */
+    compatibilitySource: text("compatibility_source"),
     status: text("status", { enum: ["draft", "published", "archived"] }).notNull().default("draft"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
@@ -402,3 +408,15 @@ export const priceEstimates = sqliteTable(
     index("price_estimates_location_idx").on(table.countryCode, table.city),
   ]
 );
+
+/**
+ * Дневной бюджет AI-вызовов (фото-триаж): одна строка на UTC-день,
+ * атомарный счётчик попыток — резервируется в D1 ДО вызова модели,
+ * чтобы параллельные запросы не пробили лимит.
+ */
+export const aiUsageDaily = sqliteTable("ai_usage_daily", {
+  /** UTC-день в формате YYYY-MM-DD */
+  day: text("day").primaryKey(),
+  photoAttempts: integer("photo_attempts").notNull().default(0),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});

@@ -25,6 +25,7 @@ export interface ShelfProduct {
   slug: string;
   brandId: string;
   brandName?: string;
+  brandWebsiteUrl?: string;
   name: string;
   /** Ориентировочная цена в BYN из аффилиат-витрины (пересчёт — displayPrice) */
   price?: number;
@@ -62,7 +63,6 @@ const KITCHEN_RE = /жир|нагар|дезинфекц|anti-?fat|кух/i;
 const EXTRA_ZONES: Record<string, HomeZoneId[]> = {
   "bosch-gas-18v": ["renovation"], // строительный пылесос
   "karcher-puzzi-10-1": ["furniture"], // моющий экстрактор для обивки и ковров
-  "ecolab-oasis-pro": ["kitchen"], // дезинфекция и гипоаллергенный состав
 };
 
 /** Родительный падеж для тегов «Не для …». */
@@ -161,9 +161,10 @@ export function buildShelfProducts(
   affiliate: readonly AffiliateProduct[],
   seed: readonly SeedProduct[],
   links: readonly SeedSolutionProduct[],
-  brands: readonly Pick<Brand, "id" | "name">[] = [],
+  brands: readonly Pick<Brand, "id" | "name" | "websiteUrl">[] = [],
 ): ShelfProduct[] {
   const brandName = new Map(brands.map((b) => [b.id, b.name]));
+  const brandSite = new Map(brands.map((b) => [b.id, b.websiteUrl]));
   const bySlug = new Map<string, ShelfProduct>();
 
   for (const p of seed) {
@@ -173,6 +174,7 @@ export function buildShelfProducts(
       slug: p.slug,
       brandId: p.brandId,
       brandName: brandName.get(p.brandId),
+      brandWebsiteUrl: brandSite.get(p.brandId),
       name: p.name,
       pros: [],
       affiliateUrl: undefined,
@@ -191,6 +193,7 @@ export function buildShelfProducts(
       slug: p.slug,
       brandId: p.brandId,
       brandName: brandName.get(p.brandId),
+      brandWebsiteUrl: brandSite.get(p.brandId),
       name: p.name,
       price: p.price,
       rating: p.rating,
@@ -212,6 +215,23 @@ export function buildShelfProducts(
 
 export function productsInZone(products: readonly ShelfProduct[], zone: HomeZoneId): ShelfProduct[] {
   return products.filter((p) => p.zones.includes(zone));
+}
+
+function urlHost(url?: string): string | null {
+  if (!url) return null;
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return host.startsWith("www.") ? host.slice(4) : host;
+  } catch {
+    return null;
+  }
+}
+
+/** true, если партнёрская ссылка ведёт на тот же домен, что и официальный сайт бренда. */
+export function isBrandSiteLink(affiliateUrl: string | undefined, brandWebsiteUrl: string | undefined): boolean {
+  const offer = urlHost(affiliateUrl);
+  const site = urlHost(brandWebsiteUrl);
+  return Boolean(offer && site && offer === site);
 }
 
 /**

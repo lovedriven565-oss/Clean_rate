@@ -113,14 +113,29 @@ describe("Блок 3 — презентационный слой рекламы"
     });
     after(() => restore());
 
-    it("не показывает товарную рекламу без подтверждённого источника для материала", async () => {
+    it("показывает товарную рекламу при подтверждённой совместимости материала по техкарте", async () => {
+      // vino-na-divane: материал «шенилл / рогожка» входит в compatibleMaterials Stain Pro,
+      // верифицированных по Prochem TDS B144 — гейт пропускает.
       const ad = await getEligibleAd(
         "solution.sponsored_product",
         { solutionSlug: "vino-na-divane", surface: "upholstery", countryCode: "BY" },
         { now: NOW }
       );
 
-      assert.equal(ad, null);
+      assert.equal(ad?.productId, "prod-prochem-stainpro");
+    });
+
+    it("не показывает товарную рекламу для материала вне подтверждённого списка", async () => {
+      // Гейт проверяет точное совпадение материала протокола: для неподтверждённых
+      // материалов (кожа, шёлк и любые другие) слот остаётся пустым.
+      const { hasVerifiedCompatibility } = await import("../lib/ads/eligibility.js");
+      const { seedProducts } = await import("../db/seed-data.js");
+      const stainpro = seedProducts.find((p) => p.id === "prod-prochem-stainpro");
+      assert.ok(stainpro);
+
+      assert.equal(hasVerifiedCompatibility(stainpro, "upholstery", "велюр / рогожка / экокожа / натуральная кожа"), false);
+      assert.equal(hasVerifiedCompatibility(stainpro, "upholstery", "шенилл / рогожка"), true);
+      assert.equal(hasVerifiedCompatibility(stainpro, "upholstery", undefined), false);
     });
 
     it("пакетная выборка по категориям: партнёр только у таргетированной категории, остальным — null", async () => {

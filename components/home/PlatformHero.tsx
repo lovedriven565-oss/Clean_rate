@@ -1,15 +1,25 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { HeroStats, type HeroStatsData } from "@/components/home/HeroStats";
-import { SmartSearch } from "@/components/SmartSearch";
+import { HeroAnswerSlot, HeroAnswerStatus, HeroAssistantProvider, HeroPhotoAssist } from "@/components/home/HeroAssistant";
+import { HeroSearch } from "@/components/home/HeroSearch";
 
 /**
  * Первый экран — светлая карточка: H1, умный поиск (тот же, что в шапке на
  * других страницах — на главной шапочный поиск скрыт, поэтому здесь он обязателен)
- * и два быстрых пути. Серверный компонент: SmartSearch — единственный клиентский
- * островок, HeroStats получает урезанные DTO.
+ * и два быстрых пути. По Enter поиск уходит ИИ-технологу, ответ разворачивается
+ * в правой колонке (на мобильных — под полем) без ухода со страницы.
+ * Серверный компонент: SmartSearch — единственный клиентский островок, HeroStats получает урезанные DTO.
  */
 export function PlatformHero({ stats }: { stats: HeroStatsData }) {
+  return (
+    <HeroAssistantProvider>
+      <PlatformHeroContent stats={stats} />
+    </HeroAssistantProvider>
+  );
+}
+
+function PlatformHeroContent({ stats }: { stats: HeroStatsData }) {
   return (
     <section className="container pt-6 sm:pt-8">
       <div className="grid overflow-hidden rounded-panel border border-border bg-card lg:grid-cols-[1.02fr_0.98fr]">
@@ -23,12 +33,16 @@ export function PlatformHero({ stats }: { stats: HeroStatsData }) {
             <span className="text-teal">сами или с мастером</span>
           </h1>
           <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground">
-            Опишите, что и где испачкалось: подберём пошаговый протокол со средствами
-            или проверенного клинера в вашем городе.
+            Опишите, что и где испачкалось: технолог ответит по проверенным протоколам
+            со средствами или подберёт клинера в вашем городе.
           </p>
+          <HeroAnswerStatus />
 
           <div className="mt-7">
-            <SmartSearch bare />
+            <HeroSearch />
+            <div className="mt-4">
+              <HeroPhotoAssist />
+            </div>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -49,7 +63,7 @@ export function PlatformHero({ stats }: { stats: HeroStatsData }) {
           </div>
         </div>
 
-        <div className="relative hidden min-h-[340px] bg-muted lg:block">
+        <HeroAnswerSlot>
           <Image
             src="/lovable/hero.jpg"
             alt="Профессиональная химия ChistoLab"
@@ -58,7 +72,7 @@ export function PlatformHero({ stats }: { stats: HeroStatsData }) {
             sizes="(min-width: 1024px) 50vw, 100vw"
             className="object-cover"
           />
-        </div>
+        </HeroAnswerSlot>
       </div>
 
       <HeroStats stats={stats} />

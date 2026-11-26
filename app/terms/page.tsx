@@ -1,13 +1,17 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { pageAlternates, SITE_NAME } from "@/lib/site";
+import { pageAlternates, pageSocialMeta, SITE_NAME } from "@/lib/site";
 import type { Metadata } from "next";
 
+const title = "Пользовательское соглашение";
+const description =
+  `Пользовательское соглашение платформы ${SITE_NAME}: роль каталога, рейтинг и рекламные размещения, партнёрские ссылки, ограничение ответственности.`;
+
 export const metadata: Metadata = {
-  title: "Пользовательское соглашение",
-  description:
-    `Пользовательское соглашение платформы ${SITE_NAME}: роль каталога, рейтинг и рекламные размещения, партнёрские ссылки, ограничение ответственности.`,
+  title,
+  description,
   alternates: pageAlternates("/terms"),
+  ...pageSocialMeta("/terms", title, description),
 };
 
 export default function TermsPage() {
@@ -77,7 +81,20 @@ export default function TermsPage() {
               </p>
 
               <h2 className="font-display text-xl font-semibold text-foreground">
-                6. Изменение условий
+                6. Фото-подсказка (бета)
+              </h2>
+              <p>
+                Фото-разбор — вспомогательный сценарий: он лишь подбирает
+                ближайший проверенный протокол по типу загрязнения и не
+                определяет материал и точный состав пятна. Результат не
+                является экспертным заключением: перед применением средств
+                проверьте совместимость на скрытом участке и следуйте инструкции
+                производителя. Функция может быть ограничена дневным лимитом
+                или временно отключена.
+              </p>
+
+              <h2 className="font-display text-xl font-semibold text-foreground">
+                7. Изменение условий
               </h2>
               <p>
                 Соглашение может обновляться; актуальная версия всегда доступна

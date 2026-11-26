@@ -1,0 +1,11 @@
+-- Этап 7: реальные рейтинги Яндекс.Карт для компаний Москвы.
+-- Применение: npx wrangler d1 execute cleaning-rating-db --remote --file=migrations/seed-stage7.sql
+-- INSERT OR REPLACE безопасен: (company_id, source) — уникальный индекс.
+INSERT OR REPLACE INTO `rating_sources` (`id`, `company_id`, `source`, `source_url`, `rating`, `review_count`, `captured_at`) VALUES ('cleanon-rating', 'cleanon', 'yandex', 'https://yandex.ru/maps/org/cleanon/80475233880/', 4.9, 1426, 1794908045708);
+INSERT OR REPLACE INTO `rating_sources` (`id`, `company_id`, `source`, `source_url`, `rating`, `review_count`, `captured_at`) VALUES ('colibri-cleaning-rating', 'colibri-cleaning', 'yandex', 'https://yandex.ru/maps/org/kolibri_klining/94702332897/', 4.8, 487, 1794908045708);
+INSERT OR REPLACE INTO `rating_sources` (`id`, `company_id`, `source`, `source_url`, `rating`, `review_count`, `captured_at`) VALUES ('klining24-rating', 'klining24', 'yandex', 'https://yandex.ru/maps/org/klining24/96060614610/', 4.8, 226, 1794908045708);
+INSERT OR REPLACE INTO `rating_sources` (`id`, `company_id`, `source`, `source_url`, `rating`, `review_count`, `captured_at`) VALUES ('domovenok-rating', 'domovenok', 'yandex', 'https://yandex.ru/maps/org/domovyonok/138044901665/', 4.3, 1988, 1794908045708);
+INSERT OR REPLACE INTO `rating_sources` (`id`, `company_id`, `source`, `source_url`, `rating`, `review_count`, `captured_at`) VALUES ('qlean-rating', 'qlean', 'yandex', 'https://yandex.ru/maps/org/qlean/49428629026/', 4.3, 2211, 1794908045708);
+INSERT OR REPLACE INTO `rating_sources` (`id`, `company_id`, `source`, `source_url`, `rating`, `review_count`, `captured_at`) VALUES ('uborka24-rating', 'uborka24', 'yandex', 'https://yandex.ru/maps/org/uborka_24/126689930690/', 5, 227, 1794908045708);
+INSERT OR REPLACE INTO `rating_sources` (`id`, `company_id`, `source`, `source_url`, `rating`, `review_count`, `captured_at`) VALUES ('siriusclean-rating', 'siriusclean', 'yandex', 'https://yandex.ru/maps/org/sirius/87591219233/', 5, 363, 1794908045708);
+INSERT OR REPLACE INTO `rating_sources` (`id`, `company_id`, `source`, `source_url`, `rating`, `review_count`, `captured_at`) VALUES ('annushka-rating', 'annushka', 'yandex', 'https://yandex.ru/maps/org/annushka/54514778664/', 4.9, 1668, 1794908045708);

@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { formatMarketCurrency, pluralize } from "@/lib/format";
 import { pickCategoryEstimate } from "@/lib/home/cleaning-services";
+import { ENABLED_MARKETS, getCity } from "@/lib/markets";
 import {
   findProtocols,
   listAllProblems,
@@ -34,7 +35,7 @@ export function StainRescue({
   products: ShelfProduct[];
   estimates: PriceEstimate[];
 }) {
-  const { market, city } = useRegion();
+  const { market, city, resolved } = useRegion();
 
   const initial = useMemo(() => resolveSelection(solutions, {}), [solutions]);
   const [problem, setProblem] = useState<SolutionProblemType | null>(initial.problem);
@@ -66,6 +67,16 @@ export function StainRescue({
 
   const ctx = { countryCode: market.countryCode, city: city.name };
   const rescueEstimate = pickCategoryEstimate(estimates, "upholstery", ctx);
+  // Нейтральный SSR: «от X» по каждому открытому рынку через « / ».
+  const neutralEstimateText = ENABLED_MARKETS.map((m) => {
+    const e = pickCategoryEstimate(estimates, "upholstery", {
+      countryCode: m.countryCode,
+      city: getCity(m.countryCode).name,
+    });
+    return e ? `от ${formatMarketCurrency(e.priceMin, e.currency as "BYN" | "RUB" | "KZT")}` : null;
+  })
+    .filter((t): t is string => t !== null)
+    .join(" / ");
 
   function pickProblem(next: SolutionProblemType) {
     const options = listSurfaceAvailability(solutions, next).filter((s) => s.available);
@@ -246,8 +257,14 @@ export function StainRescue({
             <p className="text-[13px] leading-snug text-foreground">
               <b>Пятно уже въелось?</b>{" "}
               <span className="text-muted-foreground">
-                Проверенные мастера в {city.nameIn}
-                {rescueEstimate ? ` — выезд от ${formatMarketCurrency(rescueEstimate.priceMin, rescueEstimate.currency as "BYN" | "RUB" | "KZT")}` : ""}
+                Проверенные мастера {resolved ? `в ${city.nameIn}` : "в вашем городе"}
+                {resolved
+                  ? rescueEstimate
+                    ? ` — выезд от ${formatMarketCurrency(rescueEstimate.priceMin, rescueEstimate.currency as "BYN" | "RUB" | "KZT")}`
+                    : ""
+                  : neutralEstimateText
+                    ? ` — выезд ${neutralEstimateText}`
+                    : ""}
               </span>
             </p>
             <a

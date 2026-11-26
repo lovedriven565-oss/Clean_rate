@@ -61,6 +61,17 @@ export const SEGMENTS: { value: Segment; label: string; icon: typeof Home }[] = 
 
 export const QUICK_CHIPS = ["Диван", "Матрас", "После ремонта", "Окна", "Химия"];
 
+/** Примеры для чипов «Спросить ИИ» в hero (режим `bare` + `ask`). */
+export const ASSISTANT_EXAMPLE_CHIPS = [
+  "Вино на диване",
+  "Запах в холодильнике",
+  "Окна без разводов",
+  "Духовка от жира",
+];
+
+/** Режим hero: вместо перехода на /rating запрос уходит ИИ-технологу, ответ показывается на месте. */
+export type AskAssistant = (query: string) => void;
+
 export const TRIAGE_CHIPS: { value: AssistantTiming; label: string; defaultQuery: string }[] = [
   { value: "fresh", label: "Свежее пятно", defaultQuery: "Свежее пятно на диване" },
   { value: "dried", label: "Уже высохло", defaultQuery: "Засохшее пятно на обивке" },
@@ -90,7 +101,7 @@ export function assistantHrefFor(query: string, timing?: AssistantTiming): strin
 }
 
 /** Общая логика умного поиска — используется полноразмерным SmartSearch и компактным NavSearch */
-export function useSmartSearch() {
+export function useSmartSearch({ ask, setQuery: setQueryExternal }: { ask?: AskAssistant; setQuery?: (value: string) => void } = {}) {
   const router = useRouter();
   const { countryCode } = useRegion();
   const [query, setQuery] = useState("");
@@ -163,6 +174,7 @@ export function useSmartSearch() {
   ];
 
   function handleQueryChange(value: string) {
+    setQueryExternal?.(value);
     setQuery(value);
     if (!value.trim()) {
       setResult(null);
@@ -178,7 +190,13 @@ export function useSmartSearch() {
     const trimmed = query.trim();
     if (!trimmed) return;
     if (highlightedIndex >= 0 && flatItems[highlightedIndex]) {
-      navigate(flatItems[highlightedIndex].href);
+      const href = flatItems[highlightedIndex].href;
+      if (ask && href === assistantHref) ask(trimmed);
+      else navigate(href);
+      return;
+    }
+    if (ask) {
+      ask(trimmed);
       return;
     }
     navigate(routeForTarget(result?.target ?? null, effectiveIntent, trimmed));
@@ -222,11 +240,11 @@ export function useSmartSearch() {
   };
 }
 
-export function SmartSearch({ bare = false }: { bare?: boolean }) {
+export function SmartSearch({ bare = false, ask, setQuery: setQueryExternal }: { bare?: boolean; ask?: AskAssistant; setQuery?: (value: string) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [flash, setFlash] = useState(false);
-  const search = useSmartSearch();
+  const search = useSmartSearch({ ask, setQuery: setQueryExternal });
   const { query, segment, setSegment, loading, open, setOpen, handleQueryChange, handleSubmit, handleKeyDown } = search;
 
   useSearchHotkey(() => {
@@ -278,8 +296,8 @@ export function SmartSearch({ bare = false }: { bare?: boolean }) {
           onFocus={() => query.trim() && setOpen(true)}
           onKeyDown={handleKeyDown}
           type="search"
-          aria-label="Умный поиск по платформе"
-          placeholder="Опишите задачу: «вино на диване», «офис 500 м²», «Kiehl»"
+          aria-label="Умный поиск и ИИ-технолог по платформе"
+          placeholder="Опишите задачу или спросите: «вино на диване», «запах в холодильнике»"
           className="h-11 min-w-0 flex-1 border-transparent bg-transparent px-0 text-[15px] shadow-none focus:border-transparent"
         />
         {loading && <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />}
@@ -288,7 +306,7 @@ export function SmartSearch({ bare = false }: { bare?: boolean }) {
           type="submit"
           className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground transition-transform active:scale-[0.98]"
         >
-          Найти
+          {ask ? "Спросить ИИ" : "Найти"}
           <ArrowRight className="size-4" aria-hidden />
         </button>
       </form>
@@ -326,6 +344,28 @@ export function SmartSearch({ bare = false }: { bare?: boolean }) {
       </div>
       )}
 
+      {!bare && ask && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5 px-1">
+          <span className="mr-0.5 inline-flex items-center gap-1 font-data text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <Sparkles className="h-3 w-3" aria-hidden />
+            Примеры:
+          </span>
+          {ASSISTANT_EXAMPLE_CHIPS.map((chip) => (
+            <button
+              key={chip}
+              type="button"
+              onClick={() => {
+                setQueryExternal?.(chip);
+                ask(chip);
+              }}
+              className="h-9 rounded-full border border-primary/25 bg-primary/[0.06] px-3.5 text-xs font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-primary/10"
+            >
+              {chip}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Экспресс-триаж состояния пятна для ИИ-технолога в 1 клик */}
       {!bare && (
       <div className="mt-2 flex flex-wrap items-center gap-1.5 px-1">
@@ -355,13 +395,13 @@ export function SmartSearch({ bare = false }: { bare?: boolean }) {
       </div>
       )}
 
-      {open && query.trim() && <SearchSuggestions search={search} />}
+      {open && query.trim() && <SearchSuggestions search={search} ask={ask} />}
     </div>
   );
 }
 
 /** Общая выпадающая панель подсказок — переиспользуется полноразмерным и компактным поиском */
-export function SearchSuggestions({ search, className }: { search: ReturnType<typeof useSmartSearch>; className?: string }) {
+export function SearchSuggestions({ search, ask, className }: { search: ReturnType<typeof useSmartSearch>; ask?: AskAssistant; className?: string }) {
   const {
     result,
     loading,
@@ -458,7 +498,7 @@ export function SearchSuggestions({ search, className }: { search: ReturnType<ty
 
       <button
         type="button"
-        onClick={() => navigate(assistantHref)}
+        onClick={() => (ask ? ask(query.trim()) : navigate(assistantHref))}
         className={cn(
           "group mt-1 flex w-full items-center gap-3 rounded-control border border-primary/20 bg-primary/[0.05] px-3 py-2.5 text-left text-sm transition-colors hover:border-primary/35 hover:bg-primary/10",
           highlightedIndex === assistantIndex && "border-primary/35 bg-primary/10"

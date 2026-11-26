@@ -71,6 +71,20 @@
       "when": 1794692489663,
       "tag": "0009_flawless_silk_fever",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1795514603492,
+      "tag": "0010_worthless_puff_adder",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1795606929308,
+      "tag": "0011_common_silver_samurai",
+      "breakpoints": true
     }
   ]
 }

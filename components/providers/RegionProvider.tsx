@@ -25,6 +25,13 @@ interface RegionContextValue extends RegionState {
   market: Market;
   city: City;
   currency: CurrencyCode;
+  /**
+   * false во время SSR и для посетителей без подтверждённого региона: компоненты
+   * показывают нейтральный текст без города и валюты. true только когда регион
+   * реально известен — из cookie (автодетект CF-IPCountry для RU/BY) или после
+   * ручного выбора в шапке. Без cookie дефолт на Минск не применяется.
+   */
+  resolved: boolean;
   setRegion: (countryCode: CountryCode, citySlug?: string) => void;
 }
 
@@ -62,32 +69,34 @@ function parseRegionCookie(raw: string | undefined): RegionState | null {
  */
 export function RegionProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<RegionState>(DEFAULT_STATE);
+  const [resolved, setResolved] = useState(false);
 
   useEffect(() => {
-    const parsed = parseRegionCookie(readCookie(COOKIE_NAME));
-    if (parsed) {
-      queueMicrotask(() => {
-        setState((current) => {
-          if (current.countryCode === parsed.countryCode && current.citySlug === parsed.citySlug) {
-            return current;
-          }
-          return parsed;
-        });
+    queueMicrotask(() => {
+      const parsed = parseRegionCookie(readCookie(COOKIE_NAME));
+      if (!parsed) return; // нет cookie (не RU/BY) — остаёмся нейтральными, resolved не включаем
+      setState((current) => {
+        if (current.countryCode === parsed.countryCode && current.citySlug === parsed.citySlug) {
+          return current;
+        }
+        return parsed;
       });
-    }
+      setResolved(true);
+    });
   }, []);
 
   const setRegion = useCallback((countryCode: CountryCode, citySlug?: string) => {
     const next: RegionState = { countryCode, citySlug: getCity(countryCode, citySlug).slug };
     setState(next);
+    setResolved(true);
     writeCookie(COOKIE_NAME, `${next.countryCode}:${next.citySlug}`);
   }, []);
 
   const value = useMemo<RegionContextValue>(() => {
     const market = getMarket(state.countryCode);
     const city = getCity(state.countryCode, state.citySlug);
-    return { ...state, market, city, currency: market.currency, setRegion };
-  }, [state, setRegion]);
+    return { ...state, market, city, currency: market.currency, resolved, setRegion };
+  }, [state, resolved, setRegion]);
 
   return <RegionContext.Provider value={value}>{children}</RegionContext.Provider>;
 }

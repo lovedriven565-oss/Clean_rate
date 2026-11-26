@@ -10,6 +10,7 @@ import { getFallbackCompanies } from "../lib/db/fallback.js";
 import { SITE_DOMAIN, SITE_MONOGRAM, SITE_NAME, SITE_TLD, SITE_URL, absoluteUrl, pageAlternates } from "../lib/site.js";
 import { isValidPhone } from "../lib/telegram.js";
 import { verifyTurnstile } from "../lib/security/guard.js";
+import { sanitizeDemandSearchQuery } from "../lib/search/demand.js";
 
 const realFetch = globalThis.fetch;
 const envBackup = { ...process.env };
@@ -94,10 +95,10 @@ describe("turnstile verification", () => {
 });
 
 describe("market focus", () => {
-  it("opens Belarus, Russia (Moscow) and Kazakhstan (Almaty); unlaunched cities stay closed", () => {
+  it("opens Belarus and Russia (Moscow); KZ stays configured but closed until launch", () => {
     assert.deepEqual(
       ENABLED_MARKETS.map((m) => m.countryCode),
-      ["BY", "RU", "KZ"]
+      ["BY", "RU"]
     );
     assert.deepEqual(
       openCities(MARKETS.BY).map((c) => c.slug),
@@ -107,6 +108,8 @@ describe("market focus", () => {
       openCities(MARKETS.RU).map((c) => c.slug),
       ["moscow"]
     );
+    // Городской конфиг KZ цел: рынок закрывается одним флагом и вернётся без правок данных.
+    assert.equal(MARKETS.KZ.enabled, false);
     assert.deepEqual(
       openCities(MARKETS.KZ).map((c) => c.slug),
       ["almaty"]
@@ -115,7 +118,8 @@ describe("market focus", () => {
 
   it("resolves every enabled market from the region cookie", () => {
     assert.equal(getMarket("RU").countryCode, "RU");
-    assert.equal(getMarket("KZ").countryCode, "KZ");
+    // Cookie закрытого рынка откатывается на дефолт — устаревшая KZ не ломает регион.
+    assert.equal(getMarket("KZ").countryCode, "BY");
     assert.equal(getMarket("XX").countryCode, "BY");
   });
 
@@ -128,11 +132,12 @@ describe("market focus", () => {
     assert.equal(getCityBySlug("ekb"), undefined);
     assert.equal(getCityBySlug("astana"), undefined);
     assert.equal(getCityBySlug("moscow")?.market.countryCode, "RU");
-    assert.equal(getCityBySlug("almaty")?.market.countryCode, "KZ");
+    // Закрытый рынок не даёт ни одного города в посадочных и хабах.
+    assert.equal(getCityBySlug("almaty"), undefined);
     const cities = new Set(landingStaticParams().map((p) => p.city));
     assert.ok(cities.has("minsk"));
     assert.ok(cities.has("moscow"));
-    assert.ok(cities.has("almaty"));
+    assert.ok(!cities.has("almaty"));
     assert.ok(!cities.has("brest"));
     assert.ok(!cities.has("spb"));
     assert.ok(!cities.has("kazan"));
@@ -141,11 +146,9 @@ describe("market focus", () => {
 
   it("synchronously builds footer SEO links only for open cities and filters indexable landings", () => {
     const footerLinks = getFooterLandingLinks(3);
-    assert.equal(footerLinks.length, 9);
+    assert.equal(footerLinks.length, 6);
     assert.ok(
-      footerLinks.every(
-        (l) => l.href.startsWith("/minsk/") || l.href.startsWith("/moscow/") || l.href.startsWith("/almaty/")
-      )
+      footerLinks.every((l) => l.href.startsWith("/minsk/") || l.href.startsWith("/moscow/"))
     );
     assert.ok(
       footerLinks.every((l) => !l.href.startsWith("/brest/") && !l.href.startsWith("/spb/") && !l.href.startsWith("/astana/"))
@@ -153,7 +156,7 @@ describe("market focus", () => {
 
     const indexable = getIndexableLandings(getFallbackCompanies());
     assert.ok(indexable.length > 0);
-    assert.ok(indexable.every((p) => p.city === "minsk" || p.city === "moscow" || p.city === "almaty"));
+    assert.ok(indexable.every((p) => p.city === "minsk" || p.city === "moscow"));
     assert.deepEqual(getIndexableLandings([]), []);
   });
 
@@ -259,6 +262,16 @@ describe("input hardening", () => {
     assert.equal(res.status, 200);
     const body = (await res.json()) as { query: string };
     assert.ok(body.query.length <= 200);
+  });
+
+  it("strips phones, emails and links from demand-radar queries (Zero-PII)", () => {
+    assert.equal(sanitizeDemandSearchQuery("вино на диване"), "вино на диване");
+    assert.equal(sanitizeDemandSearchQuery("уборка позвонить +375 29 123-45-67"), "уборка позвонить");
+    assert.equal(sanitizeDemandSearchQuery("пятно anna@example.by срочно"), "пятно срочно");
+    assert.equal(sanitizeDemandSearchQuery("смотри https://spam.example/page?id=1"), "смотри");
+    assert.equal(sanitizeDemandSearchQuery("+375 29 123-45-67"), null);
+    assert.equal(sanitizeDemandSearchQuery("!!!"), null);
+    assert.ok((sanitizeDemandSearchQuery("слово ".repeat(50)) ?? "").length <= 80);
   });
 
   it("rejects an oversized assistant payload before parsing it", async () => {

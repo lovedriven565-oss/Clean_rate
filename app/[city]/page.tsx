@@ -20,7 +20,8 @@ import { CATEGORIES, getCategorySlug } from "@/lib/categories";
 import { pickCategoryEstimate } from "@/lib/home/cleaning-services";
 import { calculateRelevanceScore } from "@/lib/rating";
 import { formatMarketCurrency, pluralize } from "@/lib/format";
-import { absoluteUrl, cityAlternates, SITE_NAME } from "@/lib/site";
+import { serializeJsonLd } from "@/lib/solutions/structured-data";
+import { absoluteUrl, cityAlternates, pageSocialMeta, SITE_NAME } from "@/lib/site";
 import type { Company, PriceEstimate } from "@/lib/types";
 
 /**
@@ -75,12 +76,14 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const indexableCities = getIndexableCities(companies);
   const indexable = indexableCities.some((c) => c.city === city);
   const title = `Клининговые компании в ${resolved.city.nameIn}: рейтинг, цены и услуги`;
+  const description = `Рейтинг клининговых компаний в ${resolved.city.nameIn}: уборка квартир, офисов, химчистка мебели, мытьё окон и клининг после ремонта. Цены, контакты и открытая методология ${SITE_NAME}.`;
   return {
     title,
-    description: `Рейтинг клининговых компаний в ${resolved.city.nameIn}: уборка квартир, офисов, химчистка мебели, мытьё окон и клининг после ремонта. Цены, контакты и открытая методология ${SITE_NAME}.`,
+    description,
     alternates: cityAlternates(city, undefined, {
       includeCitySlugs: new Set(indexableCities.map((c) => c.city)),
     }),
+    ...pageSocialMeta(`/${city}`, title, description),
     robots: indexable ? undefined : { index: false, follow: true },
   };
 }
@@ -168,7 +171,7 @@ export default async function CityHubPage({ params }: { params: Promise<Params> 
       <main id="content" className="flex-1">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
 
         <section className="bg-fresh relative overflow-hidden border-b border-border">

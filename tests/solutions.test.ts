@@ -176,7 +176,7 @@ describe("solutions graph and data layer", () => {
     assert.equal(solution.problemType, "stain");
     assert.equal(solution.surface, "upholstery");
     assert.equal(solution.relatedCategory, "upholstery");
-    assert.ok(solution.recommendedProducts?.some((p) => p.brandId === "kiehl"));
+    assert.ok(solution.recommendedProducts?.some((p) => p.brandId === "prochem"));
   });
 
   it("returns unique solution slugs for SSG generateStaticParams", async () => {

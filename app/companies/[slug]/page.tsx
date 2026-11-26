@@ -18,7 +18,7 @@ import { formatCompanyPriceFrom, formatNumber, formatRating } from "@/lib/format
 import { getCityByName, getMarketByCity } from "@/lib/markets";
 import { categoryLandingHref } from "@/lib/categories";
 import { partnerClaimHref } from "@/lib/partners";
-import { absoluteUrl, pageAlternates, SITE_NAME } from "@/lib/site";
+import { absoluteUrl, pageAlternates, pageSocialMeta, SITE_NAME } from "@/lib/site";
 
 export async function generateStaticParams() {
   const slugs = await getCompanySlugs();
@@ -29,10 +29,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const company = await getCompanyBySlug(slug);
   if (!company) return {};
+  const title = `${company.name} — услуги, контакты и рейтинг`;
+  // Рынок города закрыт (например, Алматы до запуска KZ): профиль доступен по прямой
+  // ссылке, но не индексируется и не входит в sitemap — иначе тонкие страницы
+  // закрытого рынка размывают краул-бюджет.
+  const marketEnabled = getMarketByCity(company.city).enabled;
   return {
-    title: `${company.name} — услуги, контакты и рейтинг`,
+    title,
     description: company.description,
     alternates: pageAlternates(`/companies/${company.slug}`),
+    ...pageSocialMeta(`/companies/${company.slug}`, title, company.description),
+    // undefined-ключ robots затирал бы дефолт layout («index, follow»), поэтому
+    // ключ добавляем только когда рынок закрыт.
+    ...(marketEnabled ? {} : { robots: { index: false, follow: true } }),
   };
 }
 

@@ -7,7 +7,6 @@ import {
   getFooterCityLinks,
   getIndexableCities,
   getIndexableLandings,
-  getIndexableLandingCitySlugs,
   resolveCityParams,
   resolveLandingParams,
 } from "../lib/landing.js";
@@ -21,10 +20,12 @@ describe("regional SEO architecture", () => {
   it("exposes city hubs only for open cities", () => {
     assert.deepEqual(
       cityStaticParams().map((p) => p.city).sort(),
-      ["almaty", "minsk", "moscow"]
+      ["minsk", "moscow"]
     );
     assert.equal(resolveCityParams("minsk")?.city.slug, "minsk");
     assert.equal(resolveCityParams("spb"), undefined);
+    // Рынок KZ закрыт флагом — хаб Алматы не генерируется.
+    assert.equal(resolveCityParams("almaty"), undefined);
     assert.equal(resolveCityParams("companies"), undefined);
     assert.equal(resolveLandingParams("moscow", "uborka-kvartir")?.category.id, "apartments");
     assert.equal(resolveLandingParams("moscow", "ne-sushchestvuet"), undefined);
@@ -36,7 +37,8 @@ describe("regional SEO architecture", () => {
     const languages = moscow.languages ?? {};
     assert.equal(languages["ru-BY"], absoluteUrl("/minsk/uborka-kvartir"));
     assert.equal(languages["ru-RU"], absoluteUrl("/moscow/uborka-kvartir"));
-    assert.equal(languages["ru-KZ"], absoluteUrl("/almaty/uborka-kvartir"));
+    // Закрытый рынок не попадает в hreflang-кластер.
+    assert.equal(languages["ru-KZ"], undefined);
     // x-default стабилен внутри кластера: первый индексируемый рынок (BY → minsk),
     // а не canonical текущей страницы.
     assert.equal(languages["x-default"], absoluteUrl("/minsk/uborka-kvartir"));
@@ -47,13 +49,14 @@ describe("regional SEO architecture", () => {
   });
 
   it("drops hreflang alternates for thin regional pages", () => {
-    const companies = getFallbackCompanies();
-    const slugs = getIndexableLandingCitySlugs(companies, "post-renovation");
-    if (slugs.has("almaty")) return; // категория индексируема в Алматы — сценарий неприменим
-    const alternates = cityAlternates("almaty", "uborka-posle-remonta", { includeCitySlugs: slugs });
+    // В обоих открытых городах сейчас хватает компаний во всех категориях,
+    // поэтому тонкость моделируем явным includeCitySlugs.
+    const alternates = cityAlternates("moscow", "uborka-posle-remonta", { includeCitySlugs: new Set(["minsk"]) });
     const languages = alternates.languages ?? {};
-    // almaty не проходит порог для этой категории — её hreflang не должен отдаваться.
-    assert.equal(languages["ru-KZ"], undefined);
+    // Москва не входит в список индексируемых для категории — её hreflang не отдаётся.
+    assert.equal(languages["ru-RU"], undefined);
+    assert.equal(languages["ru-BY"], absoluteUrl("/minsk/uborka-posle-remonta"));
+    assert.equal(languages["x-default"], absoluteUrl("/minsk/uborka-posle-remonta"));
   });
 
   it("keeps indexable city hubs and landings consistent with the company threshold", () => {
@@ -61,6 +64,8 @@ describe("regional SEO architecture", () => {
     const cities = getIndexableCities(companies).map((c) => c.city);
     assert.ok(cities.includes("minsk"));
     assert.ok(cities.includes("moscow"));
+    // Закрытый рынок исключён из хабов даже при наличии компаний в данных.
+    assert.ok(!cities.includes("almaty"));
     assert.deepEqual(getIndexableCities([]), []);
 
     const landings = getIndexableLandings(companies);
@@ -68,10 +73,10 @@ describe("regional SEO architecture", () => {
     assert.ok(landings.every((l) => cities.includes(l.city)));
     assert.deepEqual(getIndexableLandings([]), []);
 
-    const footerCities = getFooterCityLinks();
+    const footerCities = getFooterCityLinks(companies);
     assert.deepEqual(
       footerCities.map((l) => l.href).sort(),
-      ["/almaty", "/minsk", "/moscow"]
+      ["/minsk", "/moscow"]
     );
   });
 });
@@ -83,7 +88,7 @@ describe("sitemap", () => {
     for (const path of ["/", "/solutions", "/rating", "/brands", "/terms", "/privacy"]) {
       assert.ok(urls.includes(absoluteUrl(path)), `missing ${path}`);
     }
-    for (const city of ["/minsk", "/moscow", "/almaty"]) {
+    for (const city of ["/minsk", "/moscow"]) {
       assert.ok(urls.includes(absoluteUrl(city)), `missing city hub ${city}`);
     }
     const companies = getFallbackCompanies();
@@ -91,12 +96,15 @@ describe("sitemap", () => {
     for (const { city, category } of landings) {
       assert.ok(urls.includes(absoluteUrl(`/${city}/${category}`)), `missing landing /${city}/${category}`);
     }
-    // Тонкие посадочные не должны попадать в sitemap.
-    const thin = resolveLandingParams("almaty", "uborka-posle-remonta");
-    if (thin) {
-      const indexable = getIndexableLandingCitySlugs(companies, thin.category.id);
-      if (!indexable.has("almaty")) {
-        assert.ok(!urls.includes(absoluteUrl("/almaty/uborka-posle-remonta")));
+    // Страниц закрытых рынков и скрытых городов в sitemap нет.
+    assert.ok(!urls.some((u) => u.includes("/almaty") || u.includes("/spb") || u.includes("/brest")));
+    // Обратная проверка: в sitemap только индексируемые посадочные, без «тонких».
+    const indexableSet = new Set(landings.map((l) => absoluteUrl(`/${l.city}/${l.category}`)));
+    const citySlugs = new Set(cityStaticParams().map((p) => p.city));
+    for (const url of urls) {
+      const match = url.match(/\/([^/]+)\/([^/]+)$/);
+      if (match && citySlugs.has(match[1])) {
+        assert.ok(indexableSet.has(url), `thin landing in sitemap: ${url}`);
       }
     }
   });
@@ -154,14 +162,19 @@ describe("category guides and footer linking", () => {
     }
   });
 
-  it("footer exposes every category for every open city", () => {
-    const byCity = getFooterLandingLinksByCity();
-    assert.ok(byCity.length >= 3, "expected at least 3 open cities");
+  it("footer links only indexable landings of open cities", () => {
+    const companies = getFallbackCompanies();
+    const byCity = getFooterLandingLinksByCity(companies);
+    const indexable = new Set(getIndexableLandings(companies).map((l) => `/${l.city}/${l.category}`));
+    assert.ok(byCity.length >= 2, "expected at least 2 indexable cities");
     for (const city of byCity) {
-      assert.equal(city.links.length, CATEGORIES.length, `city ${city.cityName}`);
+      assert.ok(city.links.length > 0, `city ${city.cityName} has no links`);
+      for (const link of city.links) {
+        assert.ok(indexable.has(link.href), `non-indexable link ${link.href}`);
+      }
     }
-    const total = byCity.reduce((n, city) => n + city.links.length, 0);
-    assert.equal(total, CATEGORIES.length * byCity.length);
+    // Без компаний посадочные «тонкие» — ссылок на noindex-страницы нет.
+    assert.deepEqual(getFooterLandingLinksByCity([]), []);
   });
 });
 

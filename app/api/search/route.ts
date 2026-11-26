@@ -13,6 +13,7 @@ import {
   recordAnalyticsEvent,
 } from "@/lib/db/queries";
 import { matchesQuery, mergeRanked, rankSolutions, rankSolutionsByTokens } from "@/lib/search/rank";
+import { sanitizeDemandSearchQuery } from "@/lib/search/demand";
 import { getEligibleAd } from "@/lib/ads/queries";
 import { getMarket, isCountryCode } from "@/lib/markets";
 import { checkRateLimit, tooManyRequests } from "@/lib/security/guard";
@@ -183,15 +184,19 @@ export async function GET(request: Request) {
 
   // Пропуски поиска — будущий «индекс спроса»: какие проблемы ищут и не находят.
   // Записываются в analytics_events (entity_id="search") и видны в /admin-отчётах.
+  // Запрос проходит Zero-PII очистку: отсекаются телефоны, email и адреса.
   if (classification.confidence < 0.5) {
-    await recordAnalyticsEvent({
-      entityType: "page",
-      entityId: "search",
-      eventType: "view",
-      path: "/api/search",
-      countryCode,
-      metadata: { query, confidence: classification.confidence, intent: classification.intent },
-    });
+    const safeQuery = sanitizeDemandSearchQuery(query);
+    if (safeQuery) {
+      await recordAnalyticsEvent({
+        entityType: "page",
+        entityId: "search",
+        eventType: "view",
+        path: "/api/search",
+        countryCode,
+        metadata: { query: safeQuery, confidence: classification.confidence, intent: classification.intent },
+      });
+    }
   }
 
   // При явном ?country= в URL ответ одинаков для всех пользователей региона и кешируется на Edge Cloudflare;

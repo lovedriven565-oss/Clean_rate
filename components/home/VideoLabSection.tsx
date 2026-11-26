@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ArrowUpRight, Play, Star } from "lucide-react";
-import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
 import { BrandMark } from "@/components/ads/BrandMark";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { formatMarketCurrency, pluralize } from "@/lib/format";
@@ -33,15 +32,6 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
   const active = items.find((s) => s.slug === openSlug) ?? null;
   const testedProduct = active ? products.find((p) => p.solutionSlug === active.slug) : undefined;
 
-  // Продаваемый слот видеохаба: спонсорский видео-разбор (предзаказ, только реальная съёмка).
-  const sponsoredSlot = {
-    audience: "brand" as const,
-    label: "Спонсорский видео-разбор протокола",
-    priceLabel: "600 BYN за ролик",
-    href: "/for-brands?format=sponsored-video#brand-lead-form",
-    ctaLabel: "Забронировать",
-  };
-
   if (items.length === 0) return null;
 
   return (
@@ -62,7 +52,7 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
         </Link>
       </div>
 
-      <ul className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <ul className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {items.map((solution) => {
           const product = products.find((p) => p.solutionSlug === solution.slug);
           const price = product?.price !== undefined ? displayPrice(product.price, market.currency) : null;
@@ -141,7 +131,6 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
             </li>
           );
         })}
-        <AdSlotPlaceholder meta={sponsoredSlot} variant="poster" />
       </ul>
 
       <StoryModal

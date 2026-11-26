@@ -5,25 +5,50 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SolutionsExplorer } from "@/components/solution/SolutionsExplorer";
 import { getAllSolutions } from "@/lib/db/queries";
-import { pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates, pageSocialMeta } from "@/lib/site";
+import { serializeJsonLd } from "@/lib/solutions/structured-data";
+
+const title = "Решения задач чистоты: пятна, запахи, налёт, после ремонта";
+const description =
+  "База решений «Два пути»: пошаговый протокол, чтобы справиться самому, и честная смета с компаниями вашего города, если нужен мастер. Пятна на диване и матрасе, налёт, жир, последствия ремонта.";
 
 export const metadata: Metadata = {
-  title: "Решения задач чистоты: пятна, запахи, налёт, после ремонта",
-  description:
-    "База решений «Два пути»: пошаговый протокол, чтобы справиться самому, и честная смета с компаниями вашего города, если нужен мастер. Пятна на диване и матрасе, налёт, жир, последствия ремонта.",
+  title,
+  description,
   alternates: pageAlternates("/solutions"),
+  ...pageSocialMeta("/solutions", title, description),
 };
 
 export default async function SolutionsPage() {
   const solutions = await getAllSolutions();
+  const published = solutions.filter((s) => s.status === "published");
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: title,
+    description,
+    url: absoluteUrl("/solutions"),
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: published.map((solution, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: absoluteUrl(`/solutions/${solution.slug}`),
+        name: solution.title,
+      })),
+    },
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
 
       <main id="content" className="flex-1">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-12 sm:py-16">
+
             <nav aria-label="Хлебные крошки" className="text-xs text-muted-foreground">
               <ol className="flex items-center gap-2">
                 <li>

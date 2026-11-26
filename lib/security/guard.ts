@@ -42,6 +42,27 @@ export function tooManyRequests() {
   );
 }
 
+/**
+ * Строгий лимит для дорогих операций (фото-ИИ): в отличие от checkRateLimit,
+ * отсутствие биндинга или сбой в production — это "unavailable", а не пропуск.
+ * В dev/тестах без Workers-контекста возвращаем "ok", чтобы локально работало.
+ */
+export type StrictLimitResult = "ok" | "limited" | "unavailable";
+
+export async function checkPhotoRateLimit(request: Request): Promise<StrictLimitResult> {
+  try {
+    const ctx = await getCloudflareContext({ async: true });
+    const binding = (ctx.env as Partial<Record<"PHOTO_LIMITER", RateLimit>>).PHOTO_LIMITER;
+    if (!binding) {
+      return process.env.NODE_ENV === "production" ? "unavailable" : "ok";
+    }
+    const { success } = await binding.limit({ key: `photo:${clientIp(request)}` });
+    return success ? "ok" : "limited";
+  } catch {
+    return process.env.NODE_ENV === "production" ? "unavailable" : "ok";
+  }
+}
+
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 /**
@@ -66,4 +87,20 @@ export async function verifyTurnstile(token: string | undefined, request: Reques
   } catch {
     return false;
   }
+}
+
+/**
+ * Строгая проверка Turnstile для платных AI-операций: в production без
+ * настроенного секрета — отказ (fail closed), в dev без секрета — пропуск,
+ * как у обычных форм.
+ */
+export async function verifyTurnstileRequired(
+  token: string | undefined,
+  request: Request
+): Promise<boolean> {
+  if (process.env.NODE_ENV === "production" && !process.env.TURNSTILE_SECRET_KEY) {
+    console.error("[guard] TURNSTILE_SECRET_KEY не задан — защищённый эндпоинт закрыт");
+    return false;
+  }
+  return verifyTurnstile(token, request);
 }

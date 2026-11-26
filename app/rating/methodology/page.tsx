@@ -4,12 +4,16 @@ import { ArrowLeft, BadgeCheck, BarChart3, CircleDollarSign, Database } from "lu
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { absoluteUrl, pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates, pageSocialMeta } from "@/lib/site";
+
+const title = "Методология рейтинга";
+const description = "Как рассчитывается органический рейтинг компаний и почему платное размещение не влияет на оценку.";
 
 export const metadata: Metadata = {
-  title: "Методология рейтинга",
-  description: "Как рассчитывается органический рейтинг компаний и почему платное размещение не влияет на оценку.",
+  title,
+  description,
   alternates: pageAlternates("/rating/methodology"),
+  ...pageSocialMeta("/rating/methodology", title, description),
 };
 
 const factors = [

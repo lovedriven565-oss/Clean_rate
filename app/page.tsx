@@ -15,15 +15,68 @@ import { seedAffiliateProducts, seedProducts, seedSolutionProducts } from "@/db/
 import { getAllBrands, getAllCompanies, getAllSolutions, getPriceEstimates } from "@/lib/db/queries";
 import { ENABLED_MARKETS } from "@/lib/markets";
 import { buildShelfProducts } from "@/lib/products/zone-shelf";
-import { SITE_NAME, ORGANIZATION_ID, absoluteUrl, buildOrganizationNode, pageAlternates } from "@/lib/site";
+import { SITE_NAME, ORGANIZATION_ID, absoluteUrl, buildOrganizationNode, pageAlternates, pageSocialMeta } from "@/lib/site";
 import type { HeroStatsData } from "@/components/home/HeroStats";
 import type { CurrencyCode } from "@/lib/markets";
+import type { Company, Solution } from "@/lib/types";
+
+/**
+ * Компактные проекции для клиентских островков главной: RSC-пayload сериализуется
+ * в HTML для каждого клиентского компонента отдельно, поэтому поля, которые секция
+ * не рендерит (ключевые слова поиска, источники, описания компаний), вырезаем —
+ * меньше HTML и быстрее гидратация. Обязательные по типу поля остаются пустыми.
+ */
+function toCardSolution(s: Solution): Solution {
+  return {
+    id: s.id,
+    slug: s.slug,
+    title: s.title,
+    problemType: s.problemType,
+    surface: s.surface,
+    material: s.material,
+    severity: s.severity,
+    audience: s.audience,
+    diySteps: s.diySteps,
+    warnings: s.warnings,
+    whenToCallPro: "",
+    searchKeywords: [],
+    relatedCategory: s.relatedCategory,
+    videoUrl: s.videoUrl,
+    status: s.status,
+  };
+}
+
+function toCardCompany(c: Company): Company {
+  return {
+    id: c.id,
+    slug: c.slug,
+    name: c.name,
+    categories: c.categories,
+    city: c.city,
+    verified: c.verified,
+    promoted: c.promoted,
+    baseRating: c.baseRating,
+    reviewCount: c.reviewCount,
+    ratingSource: c.ratingSource,
+    priceFrom: c.priceFrom,
+    priceUnit: c.priceUnit,
+    description: "",
+    tags: [],
+    phone: c.phone,
+    telegramUrl: c.telegramUrl,
+    experienceYears: c.experienceYears,
+  };
+}
+
+const title = `Убрать пятно самому или с мастером: протоколы и клинеры | ${SITE_NAME}`;
+const description =
+  "Опишите пятно — подберём пошаговый протокол со средствами или проверенного клинера в вашем городе. Пятновыводители, профессиональная техника и честный рейтинг клининговых компаний.";
 
 export const metadata: Metadata = {
-  title: `Убрать пятно самому или с мастером: протоколы и клинеры | ${SITE_NAME}`,
-  description:
-    "Опишите пятно — подберём пошаговый протокол со средствами или проверенного клинера в вашем городе. Пятновыводители, кратеры чистоты и честный рейтинг клининговых компаний.",
+  title,
+  description,
   alternates: pageAlternates("/"),
+  ...pageSocialMeta("/", title, description),
 };
 
 export default async function Home() {
@@ -45,6 +98,9 @@ export default async function Home() {
 
   const published = solutions.filter((s) => s.status === "published");
   const shelf = buildShelfProducts(seedAffiliateProducts, seedProducts, seedSolutionProducts, brands);
+  // Компактные проекции — для секций, которым не нужны полные протоколы/профили.
+  const cardSolutions = published.map(toCardSolution);
+  const cardCompanies = companies.map(toCardCompany);
 
   // Урезанные DTO для hero: только числа — вся интерактивность на клиенте.
   const stats: HeroStatsData = {
@@ -102,13 +158,13 @@ export default async function Home() {
           <PlatformHero stats={stats} />
 
           {/* Спасатель пятен: диагностика проблема → поверхность → протокол */}
-          <StainRescue solutions={published} products={shelf} estimates={estimates} />
+          <StainRescue solutions={cardSolutions} products={shelf} estimates={estimates} />
 
           {/* Разборы протоколов 9:16 */}
-          <VideoLabSection solutions={published} products={shelf} />
+          <VideoLabSection solutions={cardSolutions} products={shelf} />
 
           {/* Клинеры города по видам работ: цены, спонсор + органика */}
-          <CleanersByServiceSection companies={companies} estimates={estimates} />
+          <CleanersByServiceSection companies={cardCompanies} estimates={estimates} />
 
           {/* Спецпроект сезона: активная кампания региона, иначе слот-заглушка */}
           <div className="container">
@@ -116,7 +172,7 @@ export default async function Home() {
           </div>
 
           {/* Лента всех протоколов — каталог и SEO-вес внизу страницы */}
-          <TaskRibbon solutions={published} estimates={estimates} />
+          <TaskRibbon solutions={cardSolutions} estimates={estimates} />
 
           <div className="container space-y-16 py-14 sm:space-y-20 sm:py-20">
             {/* Строка доверия */}
@@ -144,13 +200,22 @@ export default async function Home() {
                       решения, клининговая компания — в рейтинг с прямым телефоном.
                     </p>
                   </div>
-                  <Link
-                    href="/for-partners"
-                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-ink px-6 text-sm font-semibold text-ink-foreground transition-transform active:scale-[0.98]"
-                  >
-                    Бизнесу
-                    <ArrowRight className="size-4" aria-hidden />
-                  </Link>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      href="/for-partners"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-full bg-ink px-6 text-sm font-semibold text-ink-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+                    >
+                      Клининговым компаниям
+                      <ArrowRight className="size-4" aria-hidden />
+                    </Link>
+                    <Link
+                      href="/for-brands"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-semibold text-foreground transition-colors hover:border-ink/40"
+                    >
+                      Брендам и дилерам
+                      <ArrowRight className="size-4" aria-hidden />
+                    </Link>
+                  </div>
                 </div>
               </section>
             </Reveal>

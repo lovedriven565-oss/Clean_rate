@@ -4,7 +4,6 @@ import { Golos_Text, JetBrains_Mono } from "next/font/google";
 import { ExternalAnalytics } from "@/components/analytics/ExternalAnalytics";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { ConsentBanner } from "@/components/legal/ConsentBanner";
-import { MotionProvider } from "@/components/providers/MotionProvider";
 import { RegionProvider } from "@/components/providers/RegionProvider";
 import { SpeculationRules } from "@/components/SpeculationRules";
 import { BRAND_COLORS, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -29,6 +28,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: SITE_NAME,
     locale: "ru_BY",
+    alternateLocale: ["ru_RU"],
     url: SITE_URL,
     title: `${SITE_NAME} — найдите решение любой задачи чистоты`,
     description,
@@ -36,6 +36,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: SITE_NAME, description },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large" } },
   formatDetection: { telephone: true, email: false, address: false },
+  verification: { google: "OGxpt6JBtgg1poRGE_1AQ_9jgo35A4Pdv0HjTen5R7s" },
 };
 
 export const viewport: Viewport = {
@@ -64,11 +65,9 @@ export default function RootLayout({
         >
           К содержимому
         </a>
-        <MotionProvider>
-          <RegionProvider>
-            <ViewTransition>{children}</ViewTransition>
-          </RegionProvider>
-        </MotionProvider>
+        <RegionProvider>
+          <ViewTransition>{children}</ViewTransition>
+        </RegionProvider>
         <PageViewTracker />
         <ExternalAnalytics />
         <ConsentBanner />

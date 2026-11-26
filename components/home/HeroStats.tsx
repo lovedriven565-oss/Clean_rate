@@ -3,7 +3,7 @@
 import { Building2, FlaskConical, MapPinned, Sparkles } from "lucide-react";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { formatMarketCurrency, pluralize } from "@/lib/format";
-import type { CurrencyCode } from "@/lib/markets";
+import { ENABLED_MARKETS, type CurrencyCode } from "@/lib/markets";
 
 export interface HeroStatsData {
   protocolCount: number;
@@ -16,9 +16,14 @@ export interface HeroStatsData {
 
 /** Четыре реальные цифры под hero — клиентский островок, выбирает цифры по региону. */
 export function HeroStats({ stats }: { stats: HeroStatsData }) {
-  const { market, city } = useRegion();
+  const { market, city, resolved } = useRegion();
   const cityCompanies = stats.companiesByCity[city.name] ?? 0;
   const minPrice = stats.minPriceByCountry[market.countryCode];
+  const totalCompanies = Object.values(stats.companiesByCity).reduce((sum, n) => sum + n, 0);
+  // Нейтральный SSR: минимумы по всем открытым рынкам через «/» вместо одного города.
+  const neutralPrices = ENABLED_MARKETS.map((m) => stats.minPriceByCountry[m.countryCode])
+    .filter((p): p is { value: number; currency: CurrencyCode } => p !== null && p !== undefined)
+    .map((p) => `от ${formatMarketCurrency(p.value, p.currency)}`);
 
   const items = [
     {
@@ -31,14 +36,26 @@ export function HeroStats({ stats }: { stats: HeroStatsData }) {
       value: String(stats.productCount),
       label: pluralize(stats.productCount, ["средство", "средства", "средств"]) + " и техника",
     },
-    {
-      icon: Building2,
-      value: String(cityCompanies),
-      label: `${pluralize(cityCompanies, ["компания", "компании", "компаний"])} · ${city.name}`,
-    },
+    resolved
+      ? {
+          icon: Building2,
+          value: String(cityCompanies),
+          label: `${pluralize(cityCompanies, ["компания", "компании", "компаний"])} · ${city.name}`,
+        }
+      : {
+          icon: Building2,
+          value: String(totalCompanies),
+          label: pluralize(totalCompanies, ["компания", "компании", "компаний"]) + " в каталоге",
+        },
     {
       icon: MapPinned,
-      value: minPrice ? `от ${formatMarketCurrency(minPrice.value, minPrice.currency)}` : "—",
+      value: resolved
+        ? minPrice
+          ? `от ${formatMarketCurrency(minPrice.value, minPrice.currency)}`
+          : "—"
+        : neutralPrices.length > 0
+          ? neutralPrices.join(" / ")
+          : "—",
       label: "выезд мастера",
     },
   ];

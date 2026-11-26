@@ -33,7 +33,16 @@
     // Внешняя аналитика (грузится только после ch_consent="all" — см. ConsentBanner).
     // Пустые значения = счётчики выключены; задать реальные перед запуском рекламы.
     "NEXT_PUBLIC_CF_BEACON_TOKEN": "",
-    "NEXT_PUBLIC_YM_ID": ""
+    "NEXT_PUBLIC_YM_ID": "",
+    // Контейнер Google Tag Manager (Google-тег формата 2025+, без gtag('config')).
+    "NEXT_PUBLIC_GTM_ID": "GTM-5N84R54Q",
+    // Фото-триаж (открытая бета): "" = выключено. Включение — отдельное
+    // решение после проверок приватности/бюджета; лимит попыток в день —
+    // PHOTO_DAILY_BUDGET (атомарный счётчик D1 ai_usage_daily).
+    "PHOTO_ASSIST_ENABLED": "",
+    "PHOTO_DAILY_BUDGET": "40",
+    // Публичный флаг видимости UI-секции (только с PHOTO_ASSIST_ENABLED="1").
+    "NEXT_PUBLIC_PHOTO_BETA": ""
   },
   // Публичный домен: Workers Builds при деплое привяжет его к воркеру
   // (зона chistolab.pro должна быть активна на этом Cloudflare-аккаунте).
@@ -52,7 +61,9 @@
     { "name": "LEAD_LIMITER", "namespace_id": "2101", "simple": { "limit": 5, "period": 60 } },
     { "name": "EVENT_LIMITER", "namespace_id": "2102", "simple": { "limit": 120, "period": 60 } },
     { "name": "SEARCH_LIMITER", "namespace_id": "2103", "simple": { "limit": 60, "period": 60 } },
-    { "name": "ASSISTANT_LIMITER", "namespace_id": "2104", "simple": { "limit": 20, "period": 60 } }
+    { "name": "ASSISTANT_LIMITER", "namespace_id": "2104", "simple": { "limit": 20, "period": 60 } },
+    // Фото-триаж: отдельный дешёвый лимит поверх дневного бюджета D1.
+    { "name": "PHOTO_LIMITER", "namespace_id": "2105", "simple": { "limit": 10, "period": 60 } }
   ],
   "observability": {
     "enabled": true,

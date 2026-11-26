@@ -54,7 +54,7 @@ import {
   initScoreInputs,
 } from "./fallback";
 import { mapBrandRow, mapCompanyRow, parseJsonArray, parseJsonGeneric, type CompanyRow } from "./mappers";
-import { SOLUTION_DEFAULT_SOURCES, SOLUTION_REVIEWER } from "@/lib/solutions/editorial";
+import { SOLUTION_DEFAULT_SOURCES, SOLUTION_REVIEWER, SOLUTION_SEED_DATE } from "@/lib/solutions/editorial";
 
 /** E-E-A-T поля решения: проверяющий и источники с честными дефолтами редакции. */
 function mapSolutionEditorial(row: {
@@ -437,6 +437,61 @@ export async function getSolutionBySlug(slug: string): Promise<Solution | null> 
     reportDbError("[db:solution_by_slug_error]", err);
     const fallback = getFallbackSolutions();
     return fallback.find((s) => s.slug === slug) ?? null;
+  }
+}
+
+export interface EntityTimestamps {
+  solutions: Map<string, Date>;
+  companies: Map<string, Date>;
+  brands: Map<string, Date>;
+}
+
+function timestampsFromSeed(date: Date): EntityTimestamps {
+  return {
+    solutions: new Map(getFallbackSolutions().map((s) => [s.slug, date])),
+    companies: new Map(getFallbackCompanies().map((c) => [c.slug, date])),
+    brands: new Map(getFallbackBrands().map((b) => [b.slug, date])),
+  };
+}
+
+/**
+ * Даты последней правки контента для sitemap lastmod: реальный updatedAt
+ * записи в D1, а не момент генерации sitemap — иначе lastmod становится шумом
+ * для роботов. Без D1 (dev/сборка) — фиксированная дата seed-среза.
+ */
+export async function getEntityTimestamps(): Promise<EntityTimestamps> {
+  const seedDate = new Date(SOLUTION_SEED_DATE);
+  const db = await getDb();
+  if (!db) return timestampsFromSeed(seedDate);
+
+  try {
+    const drizzleDb = drizzle(db);
+    const [solutionRows, companyRows, brandRows] = await Promise.all([
+      drizzleDb
+        .select({ slug: solutions.slug, updatedAt: solutions.updatedAt })
+        .from(solutions)
+        .where(eq(solutions.status, "published")),
+      drizzleDb
+        .select({ slug: cleaningCompanies.slug, updatedAt: cleaningCompanies.updatedAt })
+        .from(cleaningCompanies)
+        .where(eq(cleaningCompanies.status, "published")),
+      drizzleDb
+        .select({ slug: brands.slug, updatedAt: brands.updatedAt })
+        .from(brands)
+        .where(eq(brands.status, "published")),
+    ]);
+
+    if (solutionRows.length === 0 && companyRows.length === 0 && brandRows.length === 0) {
+      return timestampsFromSeed(seedDate);
+    }
+    return {
+      solutions: new Map(solutionRows.map((r) => [r.slug, r.updatedAt])),
+      companies: new Map(companyRows.map((r) => [r.slug, r.updatedAt])),
+      brands: new Map(brandRows.map((r) => [r.slug, r.updatedAt])),
+    };
+  } catch (err) {
+    reportDbError("[db:entity_timestamps_error]", err);
+    return timestampsFromSeed(seedDate);
   }
 }
 

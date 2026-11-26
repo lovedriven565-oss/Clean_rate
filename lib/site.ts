@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { ENABLED_MARKETS, openCities } from "@/lib/markets";
 
 /**
@@ -79,8 +78,12 @@ export function buildOrganizationNode(): Record<string, unknown> {
   };
 }
 
-/**
- * canonical + hreflang для глобальных страниц (решения, бренды, сервисные разделы).
+export interface SiteAlternates {
+  canonical: string;
+  languages: Record<string, string>;
+}
+
+/** canonical + hreflang для глобальных страниц (решения, бренды, сервисные разделы).
  * Региональных URL у этих страниц нет — все рынки читают один канонический адрес,
  * поэтому дублирующие ru-BY/ru-RU/ru-KZ на один URL не выводим: для Google это
  * сигнал «страницы идентичны», а не региональное разделение.
@@ -88,7 +91,7 @@ export function buildOrganizationNode(): Record<string, unknown> {
  * Next.js не мерджит вложенный `alternates` из layout и page — поэтому хелпер обязателен
  * везде, где страница задаёт собственный canonical.
  */
-export function pageAlternates(path = "/"): NonNullable<Metadata["alternates"]> {
+export function pageAlternates(path = "/"): SiteAlternates {
   const url = absoluteUrl(path);
   return {
     canonical: url,
@@ -96,6 +99,23 @@ export function pageAlternates(path = "/"): NonNullable<Metadata["alternates"]> 
       ru: url,
       "x-default": url,
     },
+  };
+}
+
+/**
+ * OpenGraph + Twitter-карточка страницы с canonical URL.
+ * Без этого дочерние страницы наследуют openGraph главной из root layout
+ * (og:url = SITE_URL), и шаринг подстраниц показывает главную.
+ */
+export function pageSocialMeta(
+  path: string,
+  title: string,
+  description: string,
+  type: "website" | "article" = "website"
+) {
+  return {
+    openGraph: { title, description, url: absoluteUrl(path), type },
+    twitter: { card: "summary_large_image" as const, title, description },
   };
 }
 
@@ -109,7 +129,7 @@ export function cityAlternates(
   citySlug: string,
   categorySlug?: string,
   options?: { includeCitySlugs?: ReadonlySet<string> }
-): NonNullable<Metadata["alternates"]> {
+): SiteAlternates {
   const pathFor = (slug: string) => (categorySlug ? `/${slug}/${categorySlug}` : `/${slug}`);
   const canonical = absoluteUrl(pathFor(citySlug));
   const languages: Record<string, string> = {};

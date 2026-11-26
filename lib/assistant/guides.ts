@@ -51,7 +51,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Остекление балкона на высоком этаже с глухими створками, панорамные окна в пол, труднодоступные фрамуги или на рамах прикипела строительная плёнка и цемент после ремонта.",
-    diyCostNote: "10 – 30 BYN (резиновый склидж, стеклоочиститель, гладкая микрофибра)",
+    diyCostNote: "10 – 30 BYN / ≈250 – 800 ₽ (резиновый склидж, стеклоочиститель, гладкая микрофибра)",
     proTimeNote: "1.5 – 3 часа на квартиру",
     searchKeywords: [
       "как помыть окно",
@@ -73,7 +73,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "karcher",
         brandName: "Kärcher",
         role: "recommended",
-        note: "Kärcher Glass Cleaner + оконный пылесос WV / склидж (сбор воды без разводов)",
+        note: "Kärcher RM 519 / WV 1 — оконный пылесос для мойки окон и зеркал без разводов",
       },
       {
         id: "gsp-win-2",
@@ -126,7 +126,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "В холодильнике протухло мясо или рыба при отключении электричества, трупный запах впитался в теплоизоляцию под пластиком и в лоток над мотором. Требуется разбор дренажа и профессиональное озонирование камеры.",
-    diyCostNote: "3 – 15 BYN (пищевая сода, хлоргексидин, микрофибра, поглотитель запаха)",
+    diyCostNote: "3 – 15 BYN / ≈100 – 400 ₽ (пищевая сода, хлоргексидин, микрофибра, поглотитель запаха)",
     proTimeNote: "1 – 2 часа (с чисткой дренажа и озонированием)",
     searchKeywords: [
       "запах в холодильнике",
@@ -146,7 +146,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "kiehl",
         brandName: "Kiehl",
         role: "recommended",
-        note: "Kiehl (нейтральный очиститель для пищевых зон без отдушек, pH 7)",
+        note: "Kiehl Torvan Concentrate — нейтральный клинер для регулярной мойки (в растворе ~pH 7.5)",
       },
       {
         id: "gsp-fridge-2",
@@ -154,7 +154,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "ecolab",
         brandName: "Ecolab",
         role: "alternative",
-        note: "Ecolab Kitchen Pro (безопасная гигиена холодильных камер)",
+        note: "Ecolab Diversol — дезинфекционный клинер для пищевых зон",
       },
     ],
   },
@@ -197,7 +197,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Двойное или тройное стекло дверцы духовки затекло жиром изнутри (требуется безопасный разбор дверцы со снятием с петель), либо нужен комплексный клининг всей кухни и техники.",
-    diyCostNote: "10 – 25 BYN (щелочной гель для духовок, скребок, нитриловые перчатки)",
+    diyCostNote: "10 – 25 BYN / ≈250 – 700 ₽ (щелочной гель для духовок, скребок, нитриловые перчатки)",
     proTimeNote: "1 – 2 часа (с разбором дверцы духовки)",
     searchKeywords: [
       "как отмыть духовку",
@@ -218,7 +218,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "grass",
         brandName: "Grass",
         role: "recommended",
-        note: "Grass Azelit Gel (густой щелочной гель против нагара для жаропрочной эмали)",
+        note: "Grass Azelit-Gel (густой щелочной гель против нагара для жаропрочной эмали)",
       },
       {
         id: "gsp-oven-2",
@@ -265,7 +265,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "После ремонта на полу остался белесый цементный или эпоксидный туман, клей в порах рельефной плитки, либо требуется глубокая роторная размывка и нанесение защитного полимера.",
-    diyCostNote: "10 – 25 BYN (нейтральный концентрат для пола pH 7, микрофибровый моп)",
+    diyCostNote: "10 – 25 BYN / ≈250 – 700 ₽ (нейтральный концентрат для пола pH 7, микрофибровый моп)",
     proTimeNote: "2 – 4 часа (в составе уборки квартиры)",
     searchKeywords: [
       "как помыть пол",
@@ -287,7 +287,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "kiehl",
         brandName: "Kiehl",
         role: "recommended",
-        note: "Kiehl Veriprop / Torvan (нейтральный концентрат pH 7 без разводов и липкого слоя)",
+        note: "Kiehl Torvan Concentrate — нейтральный клинер для пола (в растворе ~pH 7.5)",
       },
       {
         id: "gsp-floor-2",
@@ -339,7 +339,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Диван не чистился более 1–2 лет, на сиденьях и подлокотниках плотный серый засаленный слой, есть старые пятна и запахи, либо обивка из вискозы, флока, шенилла или светлого велюра. Нужна глубокая экстракционная промывка.",
-    diyCostNote: "10 – 25 BYN (пенный шампунь для обивки, белая микрофибра)",
+    diyCostNote: "10 – 25 BYN / ≈250 – 700 ₽ (пенный шампунь для обивки, белая микрофибра)",
     proTimeNote: "1 – 1.5 часа (выездная экстракционная химчистка)",
     searchKeywords: [
       "как почистить диван",
@@ -360,7 +360,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "prochem",
         brandName: "Prochem",
         role: "recommended",
-        note: "Prochem Fibre Shampoo (нейтральный пенный шампунь для деликатной обивки, pH 7)",
+        note: "Prochem Fibre Shampoo (пенный шампунь для деликатной обивки, в растворе ~pH 7)",
       },
       {
         id: "gsp-sofa-2",
@@ -368,7 +368,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "karcher",
         brandName: "Kärcher",
         role: "alternative",
-        note: "Kärcher RM 519 / Puzzi (средство и экстрактор для глубокой промывки мебели)",
+        note: "Kärcher Puzzi 10/1 — экстрактор для глубокой промывки мебели",
       },
     ],
   },
@@ -406,7 +406,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Ковёр с длинным ворсом (шегги), натуральная шерсть/вискоза, сильная затоптанность проходных зон или в ковре накопилась пыль и аллергены. Нужна глубокая аквачистка экстрактором или вывоз в цех.",
-    diyCostNote: "10 – 25 BYN (сухая пена-шампунь для ковров, щётка с мягким ворсом)",
+    diyCostNote: "10 – 25 BYN / ≈250 – 700 ₽ (сухая пена-шампунь для ковров, щётка с мягким ворсом)",
     proTimeNote: "40 – 90 минут",
     searchKeywords: [
       "как почистить ковер",
@@ -470,7 +470,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "На матрасе застарелые жёлтые контуры пота, пятна крови или мочи, аллергия на пылевых клещей или матрас не проходил глубокую химчистку более 1 года.",
-    diyCostNote: "10 – 25 BYN (энзимный спрей, пищевая сода, микрофибра)",
+    diyCostNote: "10 – 25 BYN / ≈250 – 700 ₽ (энзимный спрей, пищевая сода, микрофибра)",
     proTimeNote: "40 – 60 минут на дому",
     searchKeywords: [
       "как почистить матрас",
@@ -489,7 +489,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "prochem",
         brandName: "Prochem",
         role: "recommended",
-        note: "Prochem Prespray Gold (низкопенный состав для деликатного текстиля и матрасов)",
+        note: "Prochem Neutral Pro-Spotter (предварительная обработка пятен перед экстракцией)",
       },
       {
         id: "gsp-mat-2",
@@ -497,7 +497,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "ecolab",
         brandName: "Ecolab",
         role: "alternative",
-        note: "Ecolab OdoGone (нейтрализатор органических запахов)",
+        note: "Ecolab Bio-Enzymatic Odor Eliminator — нейтрализатор органических запахов",
       },
     ],
   },
@@ -535,7 +535,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Въевшийся мочевой камень и ржавые подтёки не берутся бытовыми гелями, требуется комплексная дезинфекция и отмывка санузла под ключ (плитка, швы, потолок, сантехника).",
-    diyCostNote: "10 – 25 BYN (гель для санфаянса + бережный спрей для акрила/эмали)",
+    diyCostNote: "10 – 25 BYN / ≈250 – 700 ₽ (гель для санфаянса + бережный спрей для акрила/эмали)",
     proTimeNote: "1.5 – 2.5 часа (генеральная уборка санузла)",
     searchKeywords: [
       "как отмыть ванну",
@@ -556,7 +556,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "kiehl",
         brandName: "Kiehl",
         role: "recommended",
-        note: "Kiehl Sanikal-eco (бережная очистка ванн, акрила и кранов без повреждения хрома)",
+        note: "Kiehl Sanikal-eco — слабощелочный очиститель (концентрат pH 9) от известкового налёта",
       },
       {
         id: "gsp-bath-2",
@@ -564,7 +564,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
         brandId: "grass",
         brandName: "Grass",
         role: "alternative",
-        note: "Grass Gloss Gel (удаление известкового налёта и ржавчины на санфаянсе)",
+        note: "Grass Gloss Gel — лимонная кислота (pH 2–3) от налёта и ржавчины на санфаянсе",
       },
     ],
   },
@@ -606,7 +606,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Чёрная плесень въелась глубоко в структуру резиновой манжеты (требуется замена манжеты мастером) или вода перестала сливаться / греться.",
-    diyCostNote: "5 – 20 BYN (очиститель для стиральных машин / лимонная кислота, антисептик)",
+    diyCostNote: "5 – 20 BYN / ≈150 – 550 ₽ (очиститель для стиральных машин / лимонная кислота, антисептик)",
     proTimeNote: "1 – 1.5 часа",
     searchKeywords: [
       "запах из стиральной машины",
@@ -657,7 +657,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Требуется генеральная уборка всей квартиры после переезда, сдачи в аренду или ремонта, мытьё окон на высоте и химчистка мягкой мебели за один день силами бригады со своим оборудованием.",
-    diyCostNote: "20 – 45 BYN (набор микрофибр 4 цветов, нейтральный клинер, антижир, гель для санузла)",
+    diyCostNote: "20 – 45 BYN / ≈550 – 1200 ₽ (набор микрофибр 4 цветов, нейтральный клинер, антижир, гель для санузла)",
     proTimeNote: "4 – 7 часов (бригада из 2–3 клинеров)",
     searchKeywords: [
       "как правильно убирать квартиру",
@@ -709,7 +709,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Суперклей пролит большой лужей на дорогой натуральный шпон, кожаную обивку дивана или каменную столешницу — требуется деликатная реставрация и переполировка.",
-    diyCostNote: "5 – 12 BYN (тюбик «Антиклей» или флакон «Димексида» в аптеке, перчатки)",
+    diyCostNote: "5 – 12 BYN / ≈150 – 300 ₽ (тюбик «Антиклей» или флакон «Димексида» в аптеке, перчатки)",
     proTimeNote: "40 – 90 минут (локальная чистка / полировка)",
     searchKeywords: [
       "чем оттереть суперклей со стола",
@@ -763,7 +763,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Потолок покрыт плотным липким кухонным нагаром, копотью или строительной пылью на большой площади либо находится на высоте более 3 метров.",
-    diyCostNote: "8 – 20 BYN (2 мягкие микрофибры без ворса, спиртовой стеклоочиститель)",
+    diyCostNote: "8 – 20 BYN / ≈200 – 550 ₽ (2 мягкие микрофибры без ворса, спиртовой стеклоочиститель)",
     proTimeNote: "1 – 2 часа",
     searchKeywords: [
       "как помыть натяжной потолок",
@@ -809,7 +809,7 @@ export const ASSISTANT_GUIDES: Solution[] = [
     ],
     whenToCallPro:
       "Пригоревшая синтетика или пятно находится на дорогом шерстяном пальто, шёлковой блузе или костюме с маркировкой «Только сухая чистка (Dry Clean Only)».",
-    diyCostNote: "4 – 12 BYN (карандаш для чистки утюга или кислородный пятновыводитель)",
+    diyCostNote: "4 – 12 BYN / ≈100 – 300 ₽ (карандаш для чистки утюга или кислородный пятновыводитель)",
     proTimeNote: "30 – 60 минут",
     searchKeywords: [
       "чем отмыть утюг от пригоревшей ткани",

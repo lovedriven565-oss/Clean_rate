@@ -6,11 +6,9 @@ import { ArrowRight, ArrowUpRight, Star } from "lucide-react";
 import { AdBadge } from "@/components/ads/AdBadge";
 import { AdCta } from "@/components/ads/AdCta";
 import { AdImpression } from "@/components/ads/AdImpression";
-import { AdSlotPlaceholder } from "@/components/ads/AdSlotPlaceholder";
 import { BrandMark } from "@/components/ads/BrandMark";
 import { useRegion } from "@/components/providers/RegionProvider";
-import { isAdVisibleInCountry, buildSlotPlaceholder } from "@/lib/ads/presentation";
-import { getAdFormat } from "@/lib/ads/media-kit";
+import { isAdVisibleInCountry } from "@/lib/ads/presentation";
 import { HOME_ZONES, displayPrice, type ShelfProduct } from "@/lib/products/zone-shelf";
 import { formatMarketCurrency } from "@/lib/format";
 import type { CountryCode } from "@/lib/markets";
@@ -39,19 +37,7 @@ export function SeasonalBrandBanner({
   const ad = ads[countryCode] ?? null;
   const visible = ad && isAdVisibleInCountry(ad, countryCode);
 
-  if (!visible) {
-    const meta = buildSlotPlaceholder({
-      placement: "home.editorial_partner",
-      format: getAdFormat("editorial-partner") ?? null,
-      label: "Спецпроект сезона на главной",
-    });
-    if (!meta) return null;
-    return (
-      <section id="special" aria-label="Свободный рекламный слот" className="my-4">
-        <AdSlotPlaceholder meta={meta} variant="strip" className="w-full" />
-      </section>
-    );
-  }
+  if (!visible) return null;
 
   const ad_ = ad!;
   const brandName = ad_.brandName;

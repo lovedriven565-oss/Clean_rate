@@ -48,11 +48,17 @@ export function parseAssistantTiming(raw: string | null | undefined): AssistantT
 }
 
 /** Строит ссылку на страницу ИИ-технолога `/assistant` с запросом `q` и состоянием пятна `timing`. */
-export function buildAssistantHref(query: string, timing?: AssistantTiming): string {
+export function buildAssistantHref(
+  query: string,
+  timing?: AssistantTiming,
+  context?: Pick<AssistantContext, "material">
+): string {
   const trimmed = query.trim();
   const params = new URLSearchParams();
   if (trimmed) params.set("q", trimmed);
   if (timing) params.set("timing", timing);
+  const material = context?.material?.trim();
+  if (material) params.set("material", material);
   const qs = params.toString();
   return qs ? `/assistant?${qs}` : "/assistant";
 }
@@ -127,6 +133,32 @@ export interface AssistantAnswer {
   materialOptions: string[];
   followUpQuestions: string[];
   confidence: number;
+  /** true — ответ собран фото-триажем из проверенной базы (не свободный LLM-текст). */
+  viaPhoto?: boolean;
+}
+
+/** Ответ-заглушка при сбое сети или API: одинаков для полной панели и компактной карточки в hero. */
+export function buildAssistantErrorAnswer(): AssistantAnswer {
+  return {
+    mode: "empty",
+    text: "Не удалось получить ответ. Проверьте соединение и попробуйте ещё раз.",
+    verdict: {
+      recommendation: "caution",
+      badge: "Временная ошибка связи",
+      summary: "Попробуйте отправить запрос повторно или выберите один из готовых сценариев ниже.",
+    },
+    steps: [],
+    products: [],
+    warnings: [],
+    alternatives: [],
+    materialOptions: [],
+    followUpQuestions: [
+      "Как помыть окна без разводов",
+      "Пятно красного вина или сока на диване",
+      "Запах в холодильнике — чем помыть внутри",
+    ],
+    confidence: 0,
+  };
 }
 
 const RETRIEVAL_TOP_K = 3;

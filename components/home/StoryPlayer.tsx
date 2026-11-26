@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { formatMarketCurrency } from "@/lib/format";
-import { displayPrice, type ShelfProduct } from "@/lib/products/zone-shelf";
+import { displayPrice, isBrandSiteLink, type ShelfProduct } from "@/lib/products/zone-shelf";
 import { solutionCover } from "@/lib/solutions/covers";
 import { howToTitle } from "@/lib/solutions/meta";
 import { parseVideoSource } from "@/lib/solutions/video";
@@ -160,6 +160,7 @@ function StoryBody({
   }, [videoSource, safeIndex, paused, reduce, slides.length]);
 
   const price = product?.price !== undefined ? displayPrice(product.price, currency) : null;
+  const brandSite = product ? isBrandSiteLink(product.affiliateUrl, product.brandWebsiteUrl) : false;
 
   return (
     <>
@@ -307,7 +308,7 @@ function StoryBody({
                           }
                           className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-ink px-4 text-xs font-semibold text-ink-foreground"
                         >
-                          Где купить
+                          {product.promoCode || !brandSite ? "Где купить" : "Сайт бренда"}
                           <ArrowUpRight className="size-3.5" aria-hidden />
                         </a>
                         {product.promoCode ? (
@@ -319,8 +320,10 @@ function StoryBody({
                               партнёрский дилер{product.dealerName ? ` ${product.dealerName}` : ""}
                             </span>
                           </>
-                        ) : (
+                        ) : brandSite ? (
                           <span className="text-[10px] leading-3 text-muted-foreground/80">сайт бренда</span>
+                        ) : (
+                          <span className="text-[10px] leading-3 text-muted-foreground/80">ритейлер или маркетплейс</span>
                         )}
                       </span>
                     )}

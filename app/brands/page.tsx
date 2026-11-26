@@ -9,6 +9,8 @@ import { ProductZoneShelf } from "@/components/home/ProductZoneShelf";
 import { seedAffiliateProducts, seedProducts, seedSolutionProducts } from "@/db/seed-data";
 import { getBrandsByScore, getPriceEstimates } from "@/lib/db/queries";
 import { buildShelfProducts } from "@/lib/products/zone-shelf";
+import { absoluteUrl } from "@/lib/site";
+import { serializeJsonLd } from "@/lib/solutions/structured-data";
 
 export default async function BrandsPage() {
   const [brands, estimates] = await Promise.all([getBrandsByScore(), getPriceEstimates()]);
@@ -16,11 +18,28 @@ export default async function BrandsPage() {
   const verifiedLinks = brands.reduce((acc, b) => acc + b.metrics.verifiedCompanyCount, 0);
   const protocolLinks = brands.reduce((acc, b) => acc + b.metrics.recommendedCount + b.metrics.alternativeCount, 0);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Бренды техники и химии для клининга",
+    url: absoluteUrl("/brands"),
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: brands.map((brand, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: absoluteUrl(`/brands/${brand.slug}`),
+        name: brand.name,
+      })),
+    },
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
 
       <main id="content" className="flex-1">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
         <section className="bg-fresh relative overflow-hidden border-b border-border">
           <div className="container relative py-12 sm:py-18">
             <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Бренды" }]} />
@@ -49,7 +68,7 @@ export default async function BrandsPage() {
 
         <section className="container py-10 sm:py-14">
           <BrandLeaderboard brands={brands} />
-          <AdPlacement placement="products.sponsored_slot" context={{}} className="mt-8" />
+          <AdPlacement placement="products.sponsored_slot" context={{}} placeholder={false} className="mt-8" />
         </section>
 
         {/* Витрина средств и техники по зонам дома — переехала с главной */}

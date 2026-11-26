@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { useRegion } from "@/components/providers/RegionProvider";
 import { formatMarketCurrency } from "@/lib/format";
 import { CLEANING_SERVICES, pickCategoryEstimate } from "@/lib/home/cleaning-services";
+import { ENABLED_MARKETS, getCity } from "@/lib/markets";
 import { HOME_ZONES, productsInZone, type HomeZoneId, type ShelfProduct } from "@/lib/products/zone-shelf";
 import { cn } from "@/lib/utils";
 import type { PriceEstimate } from "@/lib/types";
@@ -17,13 +18,23 @@ import type { PriceEstimate } from "@/lib/types";
  * лента со snap, карточки ≈75% ширины; со смолы — сетка.
  */
 export function ProductZoneShelf({ products, estimates }: { products: ShelfProduct[]; estimates: PriceEstimate[] }) {
-  const { market, city } = useRegion();
+  const { market, city, resolved } = useRegion();
   const [zone, setZone] = useState<HomeZoneId>(HOME_ZONES[0].id);
   const zoneInfo = HOME_ZONES.find((z) => z.id === zone)!;
   const items = useMemo(() => productsInZone(products, zone), [products, zone]);
 
   const ctx = { countryCode: market.countryCode, city: city.name };
   const rescueEstimate = pickCategoryEstimate(estimates, CLEANING_SERVICES[0].id, ctx);
+  // Нейтральный SSR: «от X» по каждому открытому рынку через « / ».
+  const neutralEstimateText = ENABLED_MARKETS.map((m) => {
+    const e = pickCategoryEstimate(estimates, CLEANING_SERVICES[0].id, {
+      countryCode: m.countryCode,
+      city: getCity(m.countryCode).name,
+    });
+    return e ? `от ${formatMarketCurrency(e.priceMin, e.currency as "BYN" | "RUB" | "KZT")}` : null;
+  })
+    .filter((t): t is string => t !== null)
+    .join(" / ");
 
   return (
     <section id="shelf" aria-labelledby="zone-shelf-title" className="container scroll-mt-24 py-12 sm:py-16">
@@ -74,8 +85,14 @@ export function ProductZoneShelf({ products, estimates }: { products: ShelfProdu
         <p className="text-sm leading-6 text-foreground">
           <b>Пятно уже въелось?</b>{" "}
           <span className="text-muted-foreground">
-            Проверенные мастера в {city.nameIn}
-            {rescueEstimate ? ` — выезд от ${formatMarketCurrency(rescueEstimate.priceMin, rescueEstimate.currency as "BYN" | "RUB" | "KZT")}` : ""}
+            Проверенные мастера {resolved ? `в ${city.nameIn}` : "в вашем городе"}
+            {resolved
+              ? rescueEstimate
+                ? ` — выезд от ${formatMarketCurrency(rescueEstimate.priceMin, rescueEstimate.currency as "BYN" | "RUB" | "KZT")}`
+                : ""
+              : neutralEstimateText
+                ? ` — выезд ${neutralEstimateText}`
+                : ""}
           </span>
         </p>
         <div className="flex flex-wrap items-center gap-2.5">

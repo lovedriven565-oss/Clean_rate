@@ -10,13 +10,17 @@ import {
   getAllSolutions,
   getPriceEstimates,
 } from "@/lib/db/queries";
-import { absoluteUrl, pageAlternates } from "@/lib/site";
+import { absoluteUrl, pageAlternates, pageSocialMeta } from "@/lib/site";
+
+const title = "ИИ-технолог и консультант по чистке";
+const description =
+  "Опишите пятно, поверхность или запах — технолог ChistoLab подберёт проверенный протокол: что сделать в первые минуты, чего делать нельзя, безопасная химия с pH и смета мастеров вашего города.";
 
 export const metadata: Metadata = {
-  title: "ИИ-технолог и консультант по чистке",
-  description:
-    "Опишите пятно, поверхность или запах — технолог ChistoLab подберёт проверенный протокол: что сделать в первые минуты, чего делать нельзя, безопасная химия с pH и смета мастеров вашего города.",
+  title,
+  description,
   alternates: pageAlternates("/assistant"),
+  ...pageSocialMeta("/assistant", title, description),
 };
 
 export default async function AssistantPage() {
