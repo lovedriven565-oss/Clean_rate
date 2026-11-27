@@ -10,7 +10,7 @@
 - Хостинг — **Cloudflare Workers через OpenNext**, не Cloudflare Pages: `@opennextjs/cloudflare` 1.20.3, `wrangler` 4.126.0, воркер `cleaning-rating`, домены `chistolab.pro` и `www.chistolab.pro` — `wrangler.jsonc`.
 - `proxy.ts` делает 301 `www → apex` и региональную cookie-логику.
 - D1 + **Drizzle ORM 0.45.2**; при production build D1 намеренно отключена, контент SSG строится из `db/seed-data.ts` — `lib/db/client.ts`. Это критичная архитектурная грабля: seed обязан быть зеркалом прод-D1.
-- Кэш: собственный OpenNext incremental cache поверх Cloudflare Cache API, ключ включает `NEXT_BUILD_ID` — `lib/opennext/cache-api-incremental-cache.ts`. Статика `/_next/static/*` immutable через `public/_headers`.
+- Кэш: собственный OpenNext incremental cache поверх Cloudflare Cache API, ключ включает `CF_VERSION_METADATA.id` с fallback на `OPEN_NEXT_BUILD_ID` — `lib/opennext/cache-api-incremental-cache.ts`. Статика `/_next/static/*` immutable через `public/_headers`.
 - R2: бакет `chisyolab`, биндинг `MEDIA`; раздача только через воркер `app/media/[...key]/route.ts`, не через публичный bucket domain. Роут force-dynamic, whitelist расширений, поддержка Range, ETag/304, `cache-control: public, max-age=31536000, immutable`; svg/html запрещены как XSS-риск.
 - AI: биндинг `AI`, фото-триаж выключен флагами `PHOTO_ASSIST_ENABLED`/`NEXT_PUBLIC_PHOTO_BETA`; дневной бюджет в `ai_usage_daily`.
 - Внешние счётчики: Яндекс.Метрика, Cloudflare Web Analytics и **GTM** монтируются только после `ch_consent="all"` — `components/analytics/ConsentGatedAnalytics.tsx`. Plausible нет. Токены YM/CF пустые, GTM ID есть (`GTM-5N84R54Q`) — `wrangler.jsonc`.

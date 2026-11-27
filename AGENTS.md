@@ -53,7 +53,7 @@
 - **CSS-слои:** глобальные правила — в `@layer base/components`; `.container`/`.glass` вне слоёв → `!`-утилиты
 - **`dynamicParams` НЕ отключать** на `[city]`/`[city]/[category]` — NoFallbackError даёт закешированный 404 в воркере
 - **OG-шрифты** (`ogFonts`): fs → `env.ASSETS` → fetch `SITE_URL/fonts/*` (fs нет в воркере)
-- **Incremental cache** ключуется `NEXT_BUILD_ID`; `set()` пропускает status≥400
+- **Incremental cache** ключуется `CF_VERSION_METADATA.id` (fallback `OPEN_NEXT_BUILD_ID`); `set()` пропускает status≥400. Без `version_metadata` воркер может отдавать HTML прошлого деплоя
 - **cf:typegen** пишет литералы vars → env-переменные читать как `string | undefined`
 - **`motion.create` в рендере запрещён** (линт static-components) — только модульные карты
 - **Рекламная политика:** ≤1 блока/экран, не в hero/таблицах/поп-апах, «Реклама» обязательно, erid для RU, promoted не влияет на органический порядок

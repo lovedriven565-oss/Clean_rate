@@ -1,3 +1,4 @@
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { IncrementalCache } from "@opennextjs/aws/types/overrides.js";
 
 /**
@@ -8,8 +9,10 @@ import type { IncrementalCache } from "@opennextjs/aws/types/overrides.js";
  * медленные ответы и превышения CPU-лимита (error 1102) на холодном старте.
  *
  * Cache API не требует отдельных ресурсов (KV/R2): записи живут в кеше
- * дата-центра Cloudflare и вымываются по LRU. Ключ включает OPEN_NEXT_BUILD_ID —
- * записи прошлых деплоев недостижимы и не отдаются.
+ * дата-центра Cloudflare и вымываются по LRU. Ключ включает ID версии воркера
+ * (CF_VERSION_METADATA) — записи прошлых деплоев недостижимы и не отдаются.
+ * process.env.OPEN_NEXT_BUILD_ID оставлен только как fallback: в workerd он
+ * не всегда доступен в момент обращения к кешу.
  *
  * Вне workerd (next dev, unit-тесты, node) `caches.default` отсутствует —
  * реализация деградирует в no-op, как и dummy-кеш.
@@ -20,13 +23,19 @@ type StoredEntry = { value: CacheEntryValue; lastModified: number };
 
 const CACHE_HOST = "https://opennext-incache.chistolab.internal";
 
+function cacheNamespace(): string {
+  try {
+    const metadata = (getCloudflareContext().env as { CF_VERSION_METADATA?: { id?: string } }).CF_VERSION_METADATA;
+    if (metadata?.id) return metadata.id;
+  } catch {
+    // Вне workerd контекста нет — используем build/fallback namespace.
+  }
+  return process.env.OPEN_NEXT_BUILD_ID ?? process.env.NEXT_BUILD_ID ?? "local";
+}
+
 function entryUrl(key: string, cacheType?: string): string {
-  // NEXT_BUILD_ID зашивается в серверный бандл при сборке (патч OpenNext);
-  // без него ключ был бы константным и устаревшие/отравленные записи
-  // жили бы между деплоями бесконечно.
-  const buildId = process.env.NEXT_BUILD_ID ?? process.env.OPEN_NEXT_BUILD_ID ?? "local";
   const safeKey = key.split("/").map(encodeURIComponent).join("/");
-  return `${CACHE_HOST}/${encodeURIComponent(buildId)}/${cacheType ?? "cache"}/${safeKey}`;
+  return `${CACHE_HOST}/${encodeURIComponent(cacheNamespace())}/${cacheType ?? "cache"}/${safeKey}`;
 }
 
 /** Ответы с ошибкой (404/5xx) не кладём в кеш: иначе одна неудачная отрисовка становится постоянным ответом для всех. */
