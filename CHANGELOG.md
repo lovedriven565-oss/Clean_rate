@@ -12,7 +12,8 @@
 - **R2 video:** `vino-na-divane-9x16.mp4` пережат 13 048 446 → 2 438 080 байт (−81.3%), 720×1280 H.264, 24 fps, 12.042 сек, без аудио, faststart (`moov` offset 36). Контроль качества: SSIM All 0.990402 после нормализации исходника к 720×1280; визуальная контактная проверка кадров без артефактов. Объект перезалит в `chisyolab` с `video/mp4`; прод `/media/vino-na-divane-9x16.mp4` отдаёт 200 и `content-length: 2438080`. Исходник сохранён вне репозитория в `/home/ubuntu/backups/chistolab/`.
 - **Analytics review:** `ConsentGatedAnalytics` монтирует YM/CF/GTM только после `ch_consent="all"`; в `wrangler.jsonc` YM/CF tokens пустые, `NEXT_PUBLIC_GTM_ID=GTM-5N84R54Q`. В исходном HTML прода внешних счётчиков нет. Пункт 3 исходной задачи оборван после двоеточия — отдельная приёмка не менялась.
 - **OpenNext cache hotfix:** после деплоя прод продолжал отдавать HTML прошлой версии (`x-opennext-cache: HIT`). Namespace incremental-кеша переведён с нестабильного `process.env.NEXT_BUILD_ID` на `CF_VERSION_METADATA.id`; в `wrangler.jsonc` добавлен `version_metadata` binding. Fallback — `OPEN_NEXT_BUILD_ID`/`NEXT_BUILD_ID`/`local`.
-- Проверки: typecheck 0, lint 0, тесты 252/252.
+- Проверки: typecheck 0, lint 0, тесты 252/252. Build 174/174.
+- Деплой: `a747449d-e99b-4b7d-a79d-73d81e630f5a`, затем cache-hotfix `cf9e2efe-4797-44c1-825f-d0f1846b78b3`; IndexNow 83 URL → 200/200. Прод-D1 не менялся, поэтому runtime-страницы до утверждения stage10 всё ещё могут показывать legacy-связки из D1.
 
 ---
 
