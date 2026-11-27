@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-11-27 — Спринт 0: химический граф, идемпотентный stage10 и сжатие видео
+
+- **`db/seed-data.ts`:** исправлены 4 химические нестыковки в `solution_products`. Для `vino-na-divane` и `chay-na-obivke` основным стал `Prochem Neutral Pro-Spotter` (pH 7.5), а `Prochem Stain Pro` переведён в `alternative` с обязательным тестом и кислотным ополаскиванием. Для `vodny-kamen-dushevaya` основным стал кислотный `Grass Gloss Gel` (pH 2–3), `Kiehl Sanikal-eco` оставлен для лёгкого мыльного налёта. Для `mel-flomaster-na-oboyah` `Grass Antigraffiti` убран из связки для обоев; деликатный вариант — `Prochem Ink Solv` точечно после теста, `Kiehl Tablefit` ограничен твёрдыми моющимися поверхностями.
+- **`db/manual-seeds/seed-stage10.sql` / `docs/cloudflare-inventory.md`:** draft пересобран как идемпотентный SQLite UPSERT (`ON CONFLICT DO UPDATE`) — 72 UPSERT, 29 UPDATE, 1 защитный `DELETE` только в `solution_products` по legacy-названиям Arenas/OdoGone/Taxat/Into Free/Omniclean. Лиды, claims и analytics_events не затрагиваются. Проверка на минимальной SQLite-схеме: двойной прогон без ошибок/дублей, `solution_products` = 50 строк и 0 legacy-совпадений. Прод-D1 НЕ применялся.
+- **R2 video:** `vino-na-divane-9x16.mp4` пережат 13 048 446 → 2 438 080 байт (−81.3%), 720×1280 H.264, 24 fps, 12.042 сек, без аудио, faststart (`moov` offset 36). Контроль качества: SSIM All 0.990402 после нормализации исходника к 720×1280; визуальная контактная проверка кадров без артефактов. Объект перезалит в `chisyolab` с `video/mp4`; прод `/media/vino-na-divane-9x16.mp4` отдаёт 200 и `content-length: 2438080`. Исходник сохранён вне репозитория в `/home/ubuntu/backups/chistolab/`.
+- **Analytics review:** `ConsentGatedAnalytics` монтирует YM/CF/GTM только после `ch_consent="all"`; в `wrangler.jsonc` YM/CF tokens пустые, `NEXT_PUBLIC_GTM_ID=GTM-5N84R54Q`. В исходном HTML прода внешних счётчиков нет. Пункт 3 исходной задачи оборван после двоеточия — отдельная приёмка не менялась.
+- Проверки: typecheck 0, lint 0, тесты 252/252.
+
+---
+
 ## 2026-11-27 — Технический и продуктовый аудит репозитория
 
 - **`docs/chistolab-tech-product-audit.md`:** добавлен структурированный аудит для руководителя проекта по 8 блокам: стек/инфраструктура и таблицы D1, карта маршрутов и мультирынок, страница решения, поиск/интенты, лидген/реклама, контент/медиа, SEO/производительность, техдолг.

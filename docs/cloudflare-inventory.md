@@ -80,22 +80,28 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
 
 ## Draft `db/manual-seeds/seed-stage10.sql`
 
-Файл подготовлен, но **не применён**. Ограничения соблюдены: только `INSERT OR IGNORE` и `UPDATE`; нет `DELETE`, `DROP`, `ALTER`; `analytics_events`, `brand_leads`, `partner_leads`, `profile_claims` не затрагиваются.
+Файл обновлён после ревизии химического графа, но **не применён**. Идемпотентность обеспечена SQLite UPSERT (`INSERT ... ON CONFLICT(id) DO UPDATE`) и точечными `UPDATE`. `DELETE` есть только в `solution_products` для устаревших артикулов Arenas/OdoGone/Taxat/Into Free/Omniclean; `analytics_events`, `brand_leads`, `partner_leads`, `profile_claims` не затрагиваются.
 
 Состав draft:
 
 | блок | операции |
 |---|---:|
-| missing products | 13 `INSERT OR IGNORE` |
-| все seed-products | 21 `UPDATE` для полной идемпотентной синхронизации |
+| все seed-products | 21 UPSERT; `created_at` существующих строк сохраняется |
 | legacy products | 3 `UPDATE status='archived'` |
-| `camp-prochem-stainpro` | 1 `INSERT OR IGNORE` + 1 `UPDATE` |
-| legacy `camp-kiehl-upholstery` | 1 `UPDATE status='archived'` |
+| `camp-prochem-stainpro` | 1 UPSERT; повторный запуск не перезаписывает counters |
+| legacy `camp-kiehl-upholstery` | 1 `UPDATE status='completed'` (`archived` отсутствует в enum campaigns.status) |
 | solution cost notes | 25 `UPDATE` |
-| solution product graph | 50 `UPDATE` |
-| **итого** | **14 `INSERT OR IGNORE`, 101 `UPDATE`** |
+| legacy solution_products | 1 защитный `DELETE` только по legacy-названиям в `note` |
+| solution product graph | 50 UPSERT |
+| **итого** | **72 UPSERT, 29 UPDATE, 1 DELETE** |
 
-Синтаксис проверен локально через SQLite `executescript` на минимальной схеме.
+Проверка локально через SQLite `executescript` на минимальной схеме: файл выполняется дважды без ошибок и дублей; после обоих прогонов `solution_products` содержит 50 строк и 0 совпадений по `Arenas`, `OdoGone`, `Taxat`, `Into Free`, `Omniclean`.
+
+Химические исправления в графе:
+
+- `vino-na-divane` и `chay-na-obivke`: `Prochem Neutral Pro-Spotter` — `recommended`; `Prochem Stain Pro` — `alternative` с обязательным тестом и кислотным ополаскиванием.
+- `vodny-kamen-dushevaya`: `Grass Gloss Gel` — `recommended` по кислотному шагу pH 2–3; `Kiehl Sanikal-eco` — `alternative` только для лёгкого мыльного налёта.
+- `mel-flomaster-na-oboyah`: `Grass Antigraffiti` удалён из связки для обоев; основной деликатный вариант — `Prochem Ink Solv` только точечно после теста на моющемся виниле/краске, `Kiehl Tablefit` ограничен твёрдыми моющимися поверхностями.
 
 ## План применения после явного подтверждения владельца
 
@@ -121,13 +127,13 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
 
 4. Verify read-only:
    - `products`: 24 строки total, из них 21 `published` и 3 `archived` legacy;
-   - `camp-prochem-stainpro` существует, `camp-kiehl-upholstery.status='archived'`;
+   - `camp-prochem-stainpro` существует, `camp-kiehl-upholstery.status='completed'`;
    - `solution_products` не содержит `Arenas`, `OdoGone`, `Taxat Clean`, `Into Free`, `Omniclean`;
    - все 25 `solutions.diy_cost_note` содержат двойную валюту `BYN / ≈RUB`;
    - `SELECT name FROM d1_migrations WHERE name='seed-stage10.sql'` возвращает одну строку после регистрации.
 
 ## Решения, которые нужно подтвердить перед применением
 
-- Архивировать, а не удалять legacy `prod-kiehl-arenas`, `prod-prochem-coffee`, `prod-ecolab-odogone` и `camp-kiehl-upholstery`.
+- Архивировать, а не удалять legacy-products `prod-kiehl-arenas`, `prod-prochem-coffee`, `prod-ecolab-odogone`; legacy `camp-kiehl-upholstery` перевести в `completed`, потому что `archived` нет в enum `campaigns.status`.
 - Принять каталог seed как источник исправлений веб-аудита для products/solution_products, несмотря на общее правило «прод-D1 — источник истины»: в данном случае прод отстаёт от уже подтверждённого аудита.
 - Оставить перенос `current_impressions=120/current_clicks=14` в новую `camp-prochem-stainpro` как в seed или обнулить счётчики при вставке.

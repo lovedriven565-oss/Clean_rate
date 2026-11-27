@@ -1773,8 +1773,8 @@ export const seedSolutions: SeedSolution[] = [
 ];
 
 export const seedSolutionProducts: SeedSolutionProduct[] = [
-  { id: "sp-1", solutionId: "vino-na-divane", brandId: "prochem", role: "recommended", note: "Prochem Stain Pro — щелочной пятновыводитель для вина и пищевых пятен (pH 10.5)" },
-  { id: "sp-2", solutionId: "vino-na-divane", brandId: "prochem", role: "alternative", note: "Prochem Neutral Pro-Spotter — нейтральный универсальный spotter (pH 7.5)" },
+  { id: "sp-1", solutionId: "vino-na-divane", brandId: "prochem", role: "alternative", note: "Prochem Stain Pro — только после обязательного теста на незаметном участке; после щелочного состава обязательно кислотное ополаскивание (pH 10.5)" },
+  { id: "sp-2", solutionId: "vino-na-divane", brandId: "prochem", role: "recommended", note: "Prochem Neutral Pro-Spotter — основной деликатный вариант для танинов вина (pH 7.5)" },
   { id: "sp-3", solutionId: "kofe-na-tekstile", brandId: "prochem", role: "recommended", note: "Prochem Neutral Pro-Spotter — кофе и чай, пищевые пятна (pH 7.5)" },
   { id: "sp-4", solutionId: "kofe-na-tekstile", brandId: "prochem", role: "alternative", note: "Prochem Stain Pro — щелочной комплекс для свежих пятен (pH 10.5)" },
   { id: "sp-5", solutionId: "krov-na-matrase", brandId: "prochem", role: "recommended", note: "Prochem Stain Pro — белковые пятна: кровь и рвота (pH 10.5)" },
@@ -1787,8 +1787,8 @@ export const seedSolutionProducts: SeedSolutionProduct[] = [
   { id: "sp-12", solutionId: "poslestroy-okna-skotch", brandId: "kiehl", role: "alternative", note: "Kiehl Tablefit — пятновыводитель для маркера и клея на твёрдых поверхностях (pH 9.5)" },
   { id: "sp-13", solutionId: "zhir-vytyazhka-kuhnya", brandId: "grass", role: "recommended", note: "Grass Azelit-Gel — щелочной гель против нагара и жира (pH 11–12)" },
   { id: "sp-14", solutionId: "zhir-vytyazhka-kuhnya", brandId: "kiehl", role: "alternative", note: "Kiehl Grasset-plus — обезжириватель для пищевых зон (pH 11)" },
-  { id: "sp-15", solutionId: "vodny-kamen-dushevaya", brandId: "kiehl", role: "recommended", note: "Kiehl Sanikal-eco — слабощелочной очиститель известкового налёта (концентрат pH 9, раствор ~pH 7)" },
-  { id: "sp-16", solutionId: "vodny-kamen-dushevaya", brandId: "grass", role: "alternative", note: "Grass Gloss Gel — лимонная кислота для сантехники (pH 2–3)" },
+  { id: "sp-15", solutionId: "vodny-kamen-dushevaya", brandId: "kiehl", role: "alternative", note: "Kiehl Sanikal-eco — альтернатива только для лёгкого мыльного налёта (концентрат pH 9, раствор ~pH 7)" },
+  { id: "sp-16", solutionId: "vodny-kamen-dushevaya", brandId: "grass", role: "recommended", note: "Grass Gloss Gel — основной кислотный гель против водного камня по шагу 1 (pH 2–3)" },
   { id: "sp-17", solutionId: "uborka-ofisa-posle-korporativa", brandId: "vileda-pro", role: "recommended", note: "Vileda UltraSpeed Pro — быстрая система отжима для больших площадей" },
   { id: "sp-18", solutionId: "uborka-ofisa-posle-korporativa", brandId: "bosch", role: "alternative", note: "Bosch GAS 18V-10 L — аккумуляторный пылесос для пыли и мусора" },
   { id: "sp-19", solutionId: "zapah-syrosti-posle-potopa", brandId: "karcher", role: "recommended", note: "Kärcher NT 30/1 — водосос для удаления влаги и ила" },
@@ -1807,8 +1807,8 @@ export const seedSolutionProducts: SeedSolutionProduct[] = [
   { id: "sp-32", solutionId: "sledy-reziny-kleya-laminat", brandId: "kiehl", role: "alternative", note: "Kiehl Tablefit — пятновыводитель для клея и маркера (pH 9.5)" },
   { id: "sp-33", solutionId: "zheltyy-nalet-unitaz", brandId: "kiehl", role: "recommended", note: "Kiehl Powerfix-Gel — сильнокислотный гель для унитазов и писсуаров (pH 0.5)" },
   { id: "sp-34", solutionId: "zheltyy-nalet-unitaz", brandId: "grass", role: "alternative", note: "Grass Gloss Gel — лимонная кислота для фаянса и хрома (pH 2–3)" },
-  { id: "sp-35", solutionId: "chay-na-obivke", brandId: "prochem", role: "recommended", note: "Prochem Stain Pro — щелочной вывод танинных пятен чая и кофе (pH 10.5)" },
-  { id: "sp-36", solutionId: "chay-na-obivke", brandId: "prochem", role: "alternative", note: "Prochem Neutral Pro-Spotter — универсальный пятновыводитель (pH 7.5)" },
+  { id: "sp-35", solutionId: "chay-na-obivke", brandId: "prochem", role: "alternative", note: "Prochem Stain Pro — только после обязательного теста на незаметном участке; после щелочного состава обязательно кислотное ополаскивание (pH 10.5)" },
+  { id: "sp-36", solutionId: "chay-na-obivke", brandId: "prochem", role: "recommended", note: "Prochem Neutral Pro-Spotter — основной деликатный вариант для танинов чая и кофе (pH 7.5)" },
   { id: "sp-37", solutionId: "sok-na-kovre", brandId: "prochem", role: "recommended", note: "Prochem Stain Pro — пятновыводитель для пищевых и соковых пятен" },
   { id: "sp-38", solutionId: "sok-na-kovre", brandId: "prochem", role: "alternative", note: "Prochem Neutral Pro-Spotter — нейтральный универсальный spotter (pH 7.5)" },
   { id: "sp-39", solutionId: "shokolad-na-kovre", brandId: "prochem", role: "recommended", note: "Prochem Stain Pro — масляно-белковые пищевые пятна (pH 10.5)" },
@@ -1821,8 +1821,8 @@ export const seedSolutionProducts: SeedSolutionProduct[] = [
   { id: "sp-46", solutionId: "zhir-na-kuhonnyh-fasadah", brandId: "kiehl", role: "alternative", note: "Kiehl Grasset-plus — обезжиривание поверхностей (pH 11)" },
   { id: "sp-47", solutionId: "pota-na-obivke", brandId: "prochem", role: "recommended", note: "Prochem Neutral Pro-Spotter — деликатная обработка пота на обивке (pH 7.5; кожу — только спецсредством)" },
   { id: "sp-48", solutionId: "pota-na-obivke", brandId: "kiehl", role: "alternative", note: "Kiehl Omni-fresh — микробиологический нейтрализатор запаха пота для текстиля" },
-  { id: "sp-49", solutionId: "mel-flomaster-na-oboyah", brandId: "grass", role: "recommended", note: "Grass Antigraffiti — проверенный растворитель для маркера (тест на незаметном участке)" },
-  { id: "sp-50", solutionId: "mel-flomaster-na-oboyah", brandId: "kiehl", role: "alternative", note: "Kiehl Tablefit — пятновыводитель для твёрдых поверхностей (pH 9.5)" },
+  { id: "sp-49", solutionId: "mel-flomaster-na-oboyah", brandId: "prochem", role: "recommended", note: "Prochem Ink Solv — деликатная водная микроэмульсия для чернил (pH 7.5); на моющихся виниловых обоях и краске только точечно после теста" },
+  { id: "sp-50", solutionId: "mel-flomaster-na-oboyah", brandId: "kiehl", role: "alternative", note: "Kiehl Tablefit — только для твёрдых моющихся поверхностей после теста; не для бумажных и флизелиновых обоев (pH 9.5)" },
 ];
 
 export const seedIntentKeywords: SeedIntentKeyword[] = [
