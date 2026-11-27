@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-11-27 — Вертикальное видео `vodny-kamen-dushevaya` проверено и задеплоено
+
+- **R2/`chisyolab`:** объект `vodny-kamen-dushevaya-9x16.mp4` уже соответствовал целевому профилю, поэтому перекодирование и повторная заливка не потребовались: 720×1280, H.264, 24 fps, 10 сек, без аудиодорожки, faststart (`moov` в начале файла), 1 579 919 байт (~1.58 MB / 1.51 MiB), `contentType: video/mp4`. SHA-256 объекта в R2 совпадает с файлом, отдаваемым через `/media/`.
+- **Временный исходник не удалялся:** в бакете нет отдельного temp-исходника для этой задачи, а ссылка в запросе была placeholder'ом. Есть только целевой mp4, старый `vino-na-divane-9x16.mp4` и пустой marker `1/`.
+- **Подключение:** `db/seed-data.ts` уже содержит `videoUrl` для `vodny-kamen-dushevaya`; прод `https://chistolab.pro/solutions/vodny-kamen-dushevaya` отдаёт `<video>` и VideoObject JSON-LD с этим mp4.
+- Проверки: typecheck 0, `npm run build` — 174/174 страниц.
+- **Деплой:** `npm run deploy` — Version `deb3917d-62e2-47c0-a329-b885a7a18898`; `/media/vodny-kamen-dushevaya-9x16.mp4` отвечает 200, `content-length: 1579919`. `npm run indexnow`: 83 URL, api.indexnow.org 200, yandex.com 202.
+
+---
+
 ## 2026-11-27 — Этап 10 inventory: read-only сверка прод-D1 и draft точечной синхронизации
 
 - **Прод-D1 не изменялся.** Проверен доступ Cloudflare/D1: UUID базы в API совпадает с `database_id` из `wrangler.jsonc`; команды работают через имя `cleaning-rating-db` из конфига, хотя в `d1 list` база отображается как `cleaning-rating`.
