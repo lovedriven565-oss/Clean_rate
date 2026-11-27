@@ -9,6 +9,7 @@
 
 - **`components/home/VideoLabSection.tsx`:** выбор 5 карточек больше не зависит только от исходного порядка протоколов — сначала показываются опубликованные протоколы с реальным `videoUrl` (стабильный исходный порядок внутри групп), затем пошаговые разборы без видео. Благодаря этому `vodny-kamen-dushevaya` выходит на главную второй видеокарточкой после `vino-na-divane` без hardcode по slug.
 - Проверки: typecheck 0, lint 0, тесты 252/252.
+- **Деплой:** `npm run deploy` — Version `c02c2527-610b-45a7-bcdc-c297163d8032`. Прод `/` верифицирован: в `VideoLabSection` 5 карточек, `vodny-kamen-dushevaya` — вторая после `vino-na-divane`. `npm run indexnow`: 83 URL, api.indexnow.org 200, yandex.com 200.
 
 ---
 
