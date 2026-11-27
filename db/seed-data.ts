@@ -1131,6 +1131,7 @@ export const seedSolutions: SeedSolution[] = [
     proTimeNote: "40 – 60 минут",
     searchKeywords: ["водный камень", "известковый налет", "душевая кабина", "налет на стекле", "помыть душевую"],
     relatedCategory: "deep-cleaning",
+    videoUrl: "https://chistolab.pro/media/vodny-kamen-dushevaya-9x16.mp4",
     status: "published",
   },
   {

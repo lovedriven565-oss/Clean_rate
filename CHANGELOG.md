@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-11-27 — Этап 10 inventory: read-only сверка прод-D1 и draft точечной синхронизации
+
+- **Прод-D1 не изменялся.** Проверен доступ Cloudflare/D1: UUID базы в API совпадает с `database_id` из `wrangler.jsonc`; команды работают через имя `cleaning-rating-db` из конфига, хотя в `d1 list` база отображается как `cleaning-rating`.
+- **Миграции:** в `d1_migrations` зарегистрированы `0000`–`0011_common_silver_samurai`, `all_in_one_init`, `seed.sql`, `seed-stage5`–`seed-stage9`. Удалён временный duplicate `migrations/0011-apply.sql` — он делал `0011` pending для wrangler, хотя колонки уже применены и зарегистрированы. После чистки pending только draft `seed-stage10.sql`.
+- **Inventory (`docs/cloudflare-inventory.md`):** counts прод/seed — products 11/21, cleaning_companies 28/28, campaigns 3/3, solutions 25/25. Компании, intent keywords, price estimates, rating sources и company categories совпадают. Найден критический дрейф: 13 актуальных продуктов отсутствуют в проде, 3 legacy продукта лишние; campaign `camp-kiehl-upholstery` ссылается на ошибочный Arenas вместо `camp-prochem-stainpro`; все 25 `diy_cost_note` без RUB-эквивалента; все 50 `solution_products` ещё соответствуют старому каталогу до веб-аудита.
+- **Draft `migrations/seed-stage10.sql`:** только `INSERT OR IGNORE`/`UPDATE` (14 + 101), без DELETE/ALTER и без затрагивания analytics/leads/claims. План: добавить 13 продуктов и Prochem-кампанию, синхронизировать 21 продукт, архивировать 3 legacy-товара и legacy campaign, обновить 25 смет и 50 связок solution_products. НЕ применён — нужно явное подтверждение владельца.
+- **Seed-зеркало:** в `db/seed-data.ts` добавлен `videoUrl` для `vodny-kamen-dushevaya` — прод уже отдаёт существующий `200 video/mp4`, поэтому зеркало догнано без изменения прода.
+- Проверки: typecheck 0, lint 0, тесты 252/252. SQL draft проверен локально через SQLite `executescript`: ошибок синтаксиса нет.
+
+---
+
 ## 2026-11-26 — Подключение Google Tag Manager (GTM-5N84R54Q)
 
 - **`ConsentGatedAnalytics`:** контейнер GTM монтируется по тому же consent-гейту,
