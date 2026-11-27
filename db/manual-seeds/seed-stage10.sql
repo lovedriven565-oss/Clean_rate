@@ -1,7 +1,7 @@
 -- Этап 10 (DRAFT, НЕ ПРИМЕНЁН): точечная синхронизация прод-D1 с db/seed-data.ts после инвентаризации 2026-11-27.
 -- Только INSERT OR IGNORE / UPDATE. DELETE отсутствуют; analytics_events, leads и claims не затрагиваются.
 -- Применять ТОЛЬКО после явного подтверждения владельца:
---   npx wrangler d1 execute cleaning-rating-db --remote --file=migrations/seed-stage10.sql
+--   npx wrangler d1 execute cleaning-rating-db --remote --file=db/manual-seeds/seed-stage10.sql
 -- После успешного execute вручную зарегистрировать:
 --   INSERT OR IGNORE INTO d1_migrations (name) VALUES ('seed-stage10.sql');
 

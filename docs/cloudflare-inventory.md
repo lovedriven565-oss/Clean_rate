@@ -17,7 +17,7 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
 |---|---|
 | `0011-apply.sql` | временный duplicate `0011_common_silver_samurai.sql` без `--> statement-breakpoint`; колонки уже есть в проде, сама миграция `0011_common_silver_samurai.sql` зарегистрирована. Файл удалён из репозитория, чтобы `migrations apply` не пытался повторно выполнить duplicate ALTER. |
 
-В `d1_migrations` зарегистрированы 19 записей: `0000`–`0011_common_silver_samurai`, `all_in_one_init`, `seed.sql`, `seed-stage5`–`seed-stage9`. Остальные ранее существовавшие файлы в `migrations/` соответствуют реестру. После удаления duplicate `0011-apply.sql` повторный `migrations list` показывает только ожидаемый draft `seed-stage10.sql`; он не применён и не зарегистрирован.
+В `d1_migrations` зарегистрированы 19 записей: `0000`–`0011_common_silver_samurai`, `all_in_one_init`, `seed.sql`, `seed-stage5`–`seed-stage9`. Остальные ранее существовавшие файлы в `migrations/` соответствуют реестру. После удаления duplicate `0011-apply.sql` повторный `migrations list` не показывает pending-файлов. Draft `seed-stage10.sql` намеренно лежит в `db/manual-seeds/`, а не в `migrations/`, чтобы wrangler не считал операционный seed schema migration.
 
 ## Сверка counts: прод-D1 vs `db/seed-data.ts`
 
@@ -78,7 +78,7 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
 - `video_url` в проде есть у `vino-na-divane` и `vodny-kamen-dushevaya`; оба URL отвечают `200 video/mp4`. Seed раньше знал только про первое видео; теперь `db/seed-data.ts` дополнен вторым URL, то есть этот пункт приведён к зеркалу без изменения прода.
 - Все 50 строк `solution_products` в проде отражают старый каталог до веб-аудита: встречаются Arenas, OdoGone, Taxat Clean, Into Free, Omniclean и другие удалённые/неподтверждённые артикулы. Это критичнее самого count-дрейфа `products`, потому что именно эти note/brand связи видны в протоколах.
 
-## Draft `migrations/seed-stage10.sql`
+## Draft `db/manual-seeds/seed-stage10.sql`
 
 Файл подготовлен, но **не применён**. Ограничения соблюдены: только `INSERT OR IGNORE` и `UPDATE`; нет `DELETE`, `DROP`, `ALTER`; `analytics_events`, `brand_leads`, `partner_leads`, `profile_claims` не затрагиваются.
 
@@ -110,7 +110,7 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
 2. Применить draft:
 
    ```bash
-   npx wrangler d1 execute cleaning-rating-db --remote --file=migrations/seed-stage10.sql
+   npx wrangler d1 execute cleaning-rating-db --remote --file=db/manual-seeds/seed-stage10.sql
    ```
 
 3. Вручную зарегистрировать seed-файл, как уже сделано для stage5–stage9:
@@ -124,7 +124,7 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
    - `camp-prochem-stainpro` существует, `camp-kiehl-upholstery.status='archived'`;
    - `solution_products` не содержит `Arenas`, `OdoGone`, `Taxat Clean`, `Into Free`, `Omniclean`;
    - все 25 `solutions.diy_cost_note` содержат двойную валюту `BYN / ≈RUB`;
-   - `wrangler d1 migrations list cleaning-rating-db --remote` не показывает `seed-stage10.sql` после регистрации.
+   - `SELECT name FROM d1_migrations WHERE name='seed-stage10.sql'` возвращает одну строку после регистрации.
 
 ## Решения, которые нужно подтвердить перед применением
 
