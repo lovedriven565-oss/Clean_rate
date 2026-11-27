@@ -28,7 +28,12 @@ export function VideoLabSection({ solutions, products }: { solutions: Solution[]
   const { market } = useRegion();
   const [openSlug, setOpenSlug] = useState<string | null>(null);
 
-  const items = useMemo(() => solutions.filter((s) => s.status === "published").slice(0, CARD_LIMIT), [solutions]);
+  const items = useMemo(() => {
+    const published = solutions.filter((s) => s.status === "published");
+    const withVideo = published.filter((s) => s.videoUrl);
+    const withoutVideo = published.filter((s) => !s.videoUrl);
+    return [...withVideo, ...withoutVideo].slice(0, CARD_LIMIT);
+  }, [solutions]);
   const active = items.find((s) => s.slug === openSlug) ?? null;
   const testedProduct = active ? products.find((p) => p.solutionSlug === active.slug) : undefined;
 
