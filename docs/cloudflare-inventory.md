@@ -1,6 +1,6 @@
 # Cloudflare/D1 inventory — 2026-11-27
 
-Read-only инвентаризация прод-D1 для `chistolab.pro`. Изменений в продовых данных не выполнялось.
+Первичная инвентаризация прод-D1 для `chistolab.pro` выполнялась read-only. После подтверждения владельца `seed-stage10.sql` применён к prod-D1 2026-11-27; факт применения и verify зафиксированы ниже.
 
 ## Доступ и идентификация базы
 
@@ -17,9 +17,9 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
 |---|---|
 | `0011-apply.sql` | временный duplicate `0011_common_silver_samurai.sql` без `--> statement-breakpoint`; колонки уже есть в проде, сама миграция `0011_common_silver_samurai.sql` зарегистрирована. Файл удалён из репозитория, чтобы `migrations apply` не пытался повторно выполнить duplicate ALTER. |
 
-В `d1_migrations` зарегистрированы 19 записей: `0000`–`0011_common_silver_samurai`, `all_in_one_init`, `seed.sql`, `seed-stage5`–`seed-stage9`. Остальные ранее существовавшие файлы в `migrations/` соответствуют реестру. После удаления duplicate `0011-apply.sql` повторный `migrations list` не показывает pending-файлов. Draft `seed-stage10.sql` намеренно лежит в `db/manual-seeds/`, а не в `migrations/`, чтобы wrangler не считал операционный seed schema migration.
+В `d1_migrations` теперь зарегистрированы 20 записей: `0000`–`0011_common_silver_samurai`, `all_in_one_init`, `seed.sql`, `seed-stage5`–`seed-stage10`. Остальные ранее существовавшие файлы в `migrations/` соответствуют реестру. После удаления duplicate `0011-apply.sql` повторный `migrations list` не показывает pending-файлов. Draft `seed-stage10.sql` намеренно лежит в `db/manual-seeds/`, а не в `migrations/`, чтобы wrangler не считал операционный seed schema migration.
 
-## Сверка counts: прод-D1 vs `db/seed-data.ts`
+## Сверка counts до stage10: прод-D1 vs `db/seed-data.ts`
 
 | таблица | прод-D1 | seed | итог |
 |---|---:|---:|---|
@@ -74,13 +74,13 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
 ### Solutions и solution_products
 
 - ID и основные поля 25 решений совпадают.
-- Во всех 25 решениях `diy_cost_note` в проде остался старым BYN-only текстом; seed содержит двойную валюту `BYN / ≈RUB`.
+- До применения stage10 во всех 25 решениях `diy_cost_note` в проде оставался старым BYN-only текстом; seed содержит двойную валюту `BYN / ≈…₽`.
 - `video_url` в проде есть у `vino-na-divane` и `vodny-kamen-dushevaya`; оба URL отвечают `200 video/mp4`. Seed раньше знал только про первое видео; теперь `db/seed-data.ts` дополнен вторым URL, то есть этот пункт приведён к зеркалу без изменения прода.
 - Все 50 строк `solution_products` в проде отражают старый каталог до веб-аудита: встречаются Arenas, OdoGone, Taxat Clean, Into Free, Omniclean и другие удалённые/неподтверждённые артикулы. Это критичнее самого count-дрейфа `products`, потому что именно эти note/brand связи видны в протоколах.
 
 ## Draft `db/manual-seeds/seed-stage10.sql`
 
-Файл обновлён после ревизии химического графа, но **не применён**. Идемпотентность обеспечена SQLite UPSERT (`INSERT ... ON CONFLICT(id) DO UPDATE`) и точечными `UPDATE`. `DELETE` есть только в `solution_products` для устаревших артикулов Arenas/OdoGone/Taxat/Into Free/Omniclean; `analytics_events`, `brand_leads`, `partner_leads`, `profile_claims` не затрагиваются.
+Файл обновлён после ревизии химического графа и **применён к prod-D1 2026-11-27**. Идемпотентность обеспечена SQLite UPSERT (`INSERT ... ON CONFLICT(id) DO UPDATE`) и точечными `UPDATE`. `DELETE` есть только в `solution_products` для устаревших артикулов Arenas/OdoGone/Taxat/Into Free/Omniclean; `analytics_events`, `brand_leads`, `partner_leads`, `profile_claims` не затрагиваются.
 
 Состав draft:
 
@@ -103,9 +103,9 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
 - `vodny-kamen-dushevaya`: `Grass Gloss Gel` — `recommended` по кислотному шагу pH 2–3; `Kiehl Sanikal-eco` — `alternative` только для лёгкого мыльного налёта.
 - `mel-flomaster-na-oboyah`: `Grass Antigraffiti` удалён из связки для обоев; основной деликатный вариант — `Prochem Ink Solv` только точечно после теста на моющемся виниле/краске, `Kiehl Tablefit` ограничен твёрдыми моющимися поверхностями.
 
-## План применения после явного подтверждения владельца
+## Факт применения после подтверждения владельца
 
-1. Снять backup только затрагиваемых таблиц:
+1. Backup затрагиваемых таблиц снят вне репозитория: `/home/ubuntu/backups/chistolab/prod-d1-stage10-backup-20261127-140911.sql` (98 KB). Команда плана:
 
    ```bash
    npx wrangler d1 export cleaning-rating-db --remote \
@@ -113,27 +113,28 @@ Read-only инвентаризация прод-D1 для `chistolab.pro`. Из�
      --output backups/d1-before-stage10-$(date +%Y%m%d-%H%M%S).sql
    ```
 
-2. Применить draft:
+2. Draft применён: 102 queries, 287 rows written, success. Команда:
 
    ```bash
    npx wrangler d1 execute cleaning-rating-db --remote --file=db/manual-seeds/seed-stage10.sql
    ```
 
-3. Вручную зарегистрировать seed-файл, как уже сделано для stage5–stage9:
+3. Seed-файл вручную зарегистрирован, как уже сделано для stage5–stage9:
 
    ```sql
    INSERT OR IGNORE INTO d1_migrations (name) VALUES ('seed-stage10.sql');
    ```
 
-4. Verify read-only:
-   - `products`: 24 строки total, из них 21 `published` и 3 `archived` legacy;
-   - `camp-prochem-stainpro` существует, `camp-kiehl-upholstery.status='completed'`;
-   - `solution_products` не содержит `Arenas`, `OdoGone`, `Taxat Clean`, `Into Free`, `Omniclean`;
-   - все 25 `solutions.diy_cost_note` содержат двойную валюту `BYN / ≈RUB`;
-   - `SELECT name FROM d1_migrations WHERE name='seed-stage10.sql'` возвращает одну строку после регистрации.
+4. Verify read-only после apply:
+   - `products`: 24 строки total, из них 21 `published` и 3 `archived` legacy — подтверждено;
+   - `camp-prochem-stainpro` существует со счётчиками `0/0`, `camp-kiehl-upholstery.status='completed'` — подтверждено;
+   - `solution_products`: 50 строк, 0 совпадений по `Arenas`, `OdoGone`, `Taxat`, `Into Free`, `Omniclean` — подтверждено;
+   - все 25 `solutions.diy_cost_note` содержат двойную валюту `BYN / ≈…₽` — подтверждено;
+   - `analytics_events`: 351 строка, `brand_leads`/`partner_leads`/`profile_claims`: 0 — не затронуты;
+   - `d1_migrations` содержит `seed-stage10.sql` ровно один раз — подтверждено.
 
-## Решения, которые нужно подтвердить перед применением
+## Решения, подтверждённые перед применением
 
 - Архивировать, а не удалять legacy-products `prod-kiehl-arenas`, `prod-prochem-coffee`, `prod-ecolab-odogone`; legacy `camp-kiehl-upholstery` перевести в `completed`, потому что `archived` нет в enum `campaigns.status`.
 - Принять каталог seed как источник исправлений веб-аудита для products/solution_products, несмотря на общее правило «прод-D1 — источник истины»: в данном случае прод отстаёт от уже подтверждённого аудита.
-- Оставить перенос `current_impressions=120/current_clicks=14` в новую `camp-prochem-stainpro` как в seed или обнулить счётчики при вставке.
+- Решено: в новую `camp-prochem-stainpro` вставлять честные `current_impressions=0/current_clicks=0`; в prod `analytics_events` нет событий legacy draft-кампаний, а seedовские 120/14 были демонстрационным шаблоном. Существующие счётчики legacy `camp-kiehl-upholstery` вне scope stage10 не изменяются.
